@@ -19,8 +19,6 @@ function main() {
     }
 
     function resizeCanvas() {
-      $('#map').width('75%');
-      $('#map').height('75%');
       updateAndDraw($('#map').width(), $('#map').height());
     }
 
