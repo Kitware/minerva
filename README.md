@@ -3,8 +3,9 @@ Introduction
 
 Minerva is a web-based application that combines the power of Tangelo, Girder, GeoJS, PyGeo.
 
-# Dependencies
-=============
+Dependencies
+========
 
-GeoJS: Branch Name => master
-Tangelo: Branch Name => pre-gutting
+* GeoJS (master)  
+* Tangelo (pre-gutting)  
+
