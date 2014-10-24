@@ -115,8 +115,20 @@ function main() {
         if (tweetFeature) {
           tweetLayer.deleteFeature(tweetFeature);
         }
-        tweetFeature = tweetLayer.createFeature("point")
+        tweetFeature = tweetLayer.createFeature("point", {selectionAPI: true})
           .data(visdata)
+          .geoOn(geo.event.pointFeature.mouseover, function (d) {
+            $('#popup').css({
+              top: d.mouse.page.y,
+              left: d.mouse.page.x,
+              position: "absolute",
+              display: ""
+            })
+            $('#popup a').html(d.data.text);
+          })
+          .geoOn(geo.event.pointFeature.mouseout, function (d) {
+            $('#popup').css({display: "none"});
+          })
           .position(function (d) { return { x: d.location.coordinates[1],
                                             y: d.location.coordinates[0],
                                             z: 0
