@@ -27,20 +27,21 @@ function main() {
   var countries;
 
   // start getting the country border data
-  d3.json('/countries.geo.json', function (error, data) {
+  d3.json('/countries.topo.json', function (error, data) {
     if (error) {
       console.log(error);
       countries = null;
       return;
     }
 
-    countries = data;
+    countries = topojson.feature(data, data.objects.countries);
   });
 
   // save the current map state
   var mapState = null,
       featureLayer = myMap.createLayer('feature', {'renderer': 'd3Renderer'}),
-      svg = featureLayer.canvas(); // this is a d3 object wrapping an svg group element
+      svg = featureLayer.canvas(), // this is a d3 object wrapping an svg group element
+      renderer = featureLayer.renderer();
 
   var target = 'Sierra Leone';
   // Remove all features
@@ -67,24 +68,18 @@ function main() {
       }
     });
 
-    feature.path = [];
-    // georefence the coordinates TODO support holes
-    feature.geometry.coordinates[0].forEach(function (pt) {
-      feature.path.push(featureLayer.renderer().worldToDisplay({
-        x: pt[0],
-        y: pt[1]
-      }));
+    // draw the border
+    var line = d3.geo.path().projection(function (c) {
+      var d = renderer.worldToDisplay({
+        x: c[0],
+        y: c[1]
+      });
+      return [d.x, d.y];
     });
 
-    // draw the border
-    var line = d3.svg.line()
-      .x(function (d) { return d.x; })
-      .y(function (d) { return d.y; });
-
-    svg.selectAll('path')
-      .data([feature.path])
-      .enter().append('path')
-        .attr('d', function (d) { return line(d) + 'Z'; })
+    svg.append('path')
+      .datum(feature)
+        .attr('d', line)
         .attr('class', 'border')
         .style('fill', 'yellow')
         .style('fill-opacity', 0.25);

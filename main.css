@@ -37,6 +37,5 @@ html, body {
 }
 
 path.border {
-    fill: none;
     stroke: black;
 }
