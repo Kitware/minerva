@@ -1,5 +1,5 @@
 // Globals
-var visdata = [];
+var key = null, visdata = [];
 
 function main() {
   var mapOptions =
@@ -107,7 +107,6 @@ function main() {
   createChoropleth();
 
   // Test streams
-  var key = null;
   tangelo.stream.start("example", function(d) { key = d; console.log(key);
     tangelo.stream.run(key, function(data) {
       data = eval(data);
@@ -126,4 +125,10 @@ function main() {
       }
     });
   });
+}
+
+function exit() {
+  if (key !== null) {
+    tangelo.stream.delete(key);
+  }
 }
