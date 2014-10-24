@@ -98,4 +98,10 @@ function main() {
 
   //$('#choropleth').click(createChoropleth);
   createChoropleth();
+
+  // Test streams
+  var key = null;
+  tangelo.stream.start("example", function(d) { key = d; console.log(key);
+    tangelo.stream.run(key, function(data) { console.log(data); });
+  });
 }
