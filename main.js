@@ -43,13 +43,12 @@ function main() {
       svg = featureLayer.canvas(), // this is a d3 object wrapping an svg group element
       renderer = featureLayer.renderer();
 
-  var target = 'Sierra Leone';
   // Remove all features
   function resetMap() {
     svg.selectAll('*').remove();
   }
 
-  function createChoropleth() {
+  function createChoroplethForTarget(target) {
     if (countries === undefined) {
       window.setTimeout(createChoropleth, 100);
       return;
@@ -57,8 +56,6 @@ function main() {
       console.log('Could not load country data');
       return;
     }
-
-    resetMap();
 
     // find the country data for `target`
     var feature;
@@ -89,6 +86,12 @@ function main() {
       svg.selectAll('.border')
         .style('stroke-width', 1/arg.scale);
     });
+  }
+
+  function createChoropleth() {
+      resetMap();
+      var targets = ['Guinea', 'Liberia', 'Sierra Leone', 'Nigeria', 'Senegal'];
+      targets.forEach(createChoroplethForTarget);
   }
 
   //$('#choropleth').click(createChoropleth);
