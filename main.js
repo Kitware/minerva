@@ -1,10 +1,16 @@
+// Globals
+var visdata = [];
+
 function main() {
   var mapOptions =
     {
       node: '#map',
       zoom : 4,
       center : {x: -12, y: 8}
-    }, myMap = null, layer = null;
+    }, myMap = null,
+       layer = null,
+       tweetLayer = null,
+       tweetFeature = null;
 
   /// Resize the canvas to fill browser window dynamically
   window.addEventListener('resize', resizeCanvas, false);
@@ -12,7 +18,8 @@ function main() {
   function updateAndDraw(width, height) {
     if (!myMap) {
       myMap = geo.map(mapOptions);
-      layer = myMap.createLayer('osm');
+      layer = myMap.createLayer('osm'),
+      tweetLayer = myMap.createLayer('feature');
     }
     myMap.resize(0, 0, width, height);
     myMap.draw();
@@ -96,4 +103,25 @@ function main() {
 
   //$('#choropleth').click(createChoropleth);
   createChoropleth();
+
+  // Test streams
+  var key = null;
+  tangelo.stream.start("example", function(d) { key = d; console.log(key);
+    tangelo.stream.run(key, function(data) {
+      data = eval(data);
+      if (data && data.length !== 0) {
+        visdata.push(data[0]);
+        if (tweetFeature) {
+          tweetLayer.deleteFeature(tweetFeature);
+        }
+        tweetFeature = tweetLayer.createFeature("point")
+          .data(visdata)
+          .position(function (d) { return { x: d.coordinates[1],
+                                            y: d.coordinates[0],
+                                            z: 0
+                                          }})
+        myMap.draw();
+      }
+    });
+  });
 }
