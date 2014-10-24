@@ -118,8 +118,8 @@ function main() {
         }
         tweetFeature = tweetLayer.createFeature("point")
           .data(visdata)
-          .position(function (d) { return { x: d.coordinates[1],
-                                            y: d.coordinates[0],
+          .position(function (d) { return { x: d.location.coordinates[1],
+                                            y: d.location.coordinates[0],
                                             z: 0
                                           }})
         myMap.draw();
