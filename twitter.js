@@ -18,6 +18,7 @@
   });
 
   function createTwitter(myMap, tweetLayer) {
+    var nMouseOver = 0;
     map = myMap;
     layer = tweetLayer;
     tweetFeature = tweetLayer.createFeature("point", {selectionAPI: true})
@@ -30,16 +31,23 @@
         };
       })
       .geoOn(geo.event.pointFeature.mouseover, function (d) {
+        nMouseOver += 1;
         $('#popup').css({
           top: d.mouse.page.y,
           left: d.mouse.page.x,
           position: "absolute",
           display: ""
         });
-        $('#popup a').html(d.data.text);
+        var linode = '<li id=tweet' + d.index + '></li>';
+        var anode = '<a href="#fixme" target="twitter">' + '</a>';
+        $('#popup ul').append(linode).find('#tweet' + d.index).append(anode).find('a').text(d.data.text);
       })
       .geoOn(geo.event.pointFeature.mouseout, function (d) {
-        $('#popup').css({display: "none"});
+        nMouseOver -= 1;
+        $('#popup #tweet' + d.index).remove();
+        if (nMouseOver === 0) {
+          $('#popup').css({display: "none"});
+        }
       });
 
     map.draw();
