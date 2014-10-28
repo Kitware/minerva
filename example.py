@@ -28,7 +28,11 @@ class StdOutListener(StreamListener):
         import json
         json_data = json.loads(data)
         if json_data['geo'] is not None:
-            list_of_tweets.append(json_data['geo'])
+            list_of_tweets.append(dict({
+                "location": json_data['geo'],
+                "text": json_data['text'],
+                "created_at": json_data['created_at']
+            }))
         #tangelo.log("example tweets", str(json_data['geo']))
         return True
 

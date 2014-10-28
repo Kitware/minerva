@@ -7,7 +7,7 @@
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
   </head>
-  <body onload="main()">
+  <body onload="main()" onunload="exit()">
     <script src="lib/geo.ext.min.js"></script>
     <script src="lib/geo.min.js"></script>
     <script src="lib/topojson.min.js"></script>
@@ -43,7 +43,7 @@
     <div id="map"></div>
     <div class="container-fluid app-tab-column">
       <div class="btn-group-vertical app-map-buttons" data-toggle="buttons">
-        <button type="button" class="app-tab-label btn btn-primary" id="tweets">
+        <button type="button" class="app-tab-label btn btn-primary" id="twitter">
           <input type="radio"> Tweets
         </button>
         <button type="button" class="app-tab-label btn btn-primary" id="paths">
@@ -53,6 +53,10 @@
           <input type="radio"> Choropleth
         </button>
       </div>
+    </div>
+
+    <div id="popup">
+      <a href="#"></a>
     </div>
   </body>
 </html>

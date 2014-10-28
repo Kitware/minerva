@@ -20,7 +20,6 @@ class StdOutListener(StreamListener):
     def on_data(self, data):
         import json
         json_data = json.loads(data)
-        print json_data['geo']
         return True
 
     def on_error(self, status):

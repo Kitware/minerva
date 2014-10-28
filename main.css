@@ -19,3 +19,15 @@ html, body {
 path.border {
     stroke: black;
 }
+
+#popup {
+  opacity: 0.8;
+  background-color: #FFFFFF;
+  border:1px solid #999999;
+  margin-top: 15px;
+  position:absolute;
+  text-align:left;
+  width: 200px;
+  z-index:50;
+  padding: 5px 5px 5px 5px;
+}
