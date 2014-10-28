@@ -27,7 +27,7 @@ path.border {
   margin-top: 15px;
   position:absolute;
   text-align:left;
-  width: 200px;
+  width: 300px;
   z-index:50;
   padding: 5px 5px 5px 5px;
 }
