@@ -5,6 +5,7 @@ from tweepy import Stream
 import sys
 import time
 import json
+import atexit
 
 # Go to http://dev.twitter.com and create an app.
 # The consumer key and secret will be generated for you after
@@ -49,6 +50,15 @@ class EbolaListener(StreamListener):
         self._buffer = []
         return arr
 
+_exit = False
+
+
+def exitHandler():
+    global _exit
+    _exit = True
+
+atexit.register(exitHandler)
+
 
 def stream():
     listn = EbolaListener()
@@ -57,7 +67,7 @@ def stream():
     stream = Stream(auth, listn)
     stream.filter(track=['ebola'], async=True)
 
-    while True:
+    while not _exit:
         yield listn.getNewTweets()
 
     stream.disconnect()
