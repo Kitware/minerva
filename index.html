@@ -38,20 +38,16 @@
 
     <div id="map"></div>
     <div class="container-fluid app-tab-column">
-      <div class="row">
-        <div class="col-md-12 app-tab">
-          <p class="app-tab-label">Tweets</p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 app-tab">
-          <p class="app-tab-label">Paths</p>
-        </div>
-      </div>
-      <div class="row">
-        <div id="choropleth" class="col-md-12 app-tab">
-          <p class="app-tab-label">Choropleth</p>
-        </div>
+      <div class="btn-group-vertical" data-toggle="buttons">
+        <button type="button" class="app-tab-label btn btn-primary">
+          <input type="radio" id="tweets"> Tweets
+        </button>
+        <button type="button" class="app-tab-label btn btn-primary">
+          <input type="radio" id="paths"> Paths
+        </button>
+        <button type="button" class="app-tab-label btn btn-primary active"> <!-- Default -->
+          <input type="radio" id="choropleth"> Choropleth
+        </button>
       </div>
     </div>
   </body>

@@ -5,32 +5,12 @@ html, body {
 }
 
 .app-tab-column {
-    width: 25%;
-    height: calc(100% - 50px);
     position: absolute;
-    top: 50px;
-    left: 75%;
+    top: 60px;
+    right: 10px;
 }
-
-.app-tab {
-    height: 100px;
-    width: calc(100% - 20px);
-    border: 1px solid black;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-.app-tab-label {
-    text-align: center;
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
 #map {
-    width: 75%;
+    width: 100%;
     height: calc(100% - 50px);
     position: absolute;
     top: 50px;
