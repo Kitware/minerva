@@ -20,6 +20,10 @@
     if (countries === undefined) {
       window.setTimeout(function () {
         createChoropleth(myMap, featureLayer);
+        featureLayer.geoOn(geo.event.d3Rescale, function (arg) {
+          svg.selectAll('.border')
+            .style('stroke-width', 1/arg.scale);
+        });
       },
         100
       );
@@ -55,11 +59,6 @@
           .style('fill', 'yellow')
           .style('fill-opacity', 0.25);
 
-      featureLayer.geoOn(geo.event.d3Rescale, function (arg) {
-        // TODO need to unbind on exit
-        svg.selectAll('.border')
-          .style('stroke-width', 1/arg.scale);
-      });
     }
 
     var targets = ['Guinea', 'Liberia', 'Sierra Leone', 'Nigeria', 'Senegal'];
