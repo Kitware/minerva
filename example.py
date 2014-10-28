@@ -34,7 +34,6 @@ class EbolaListener(StreamListener):
                 "text": json_data['text'],
                 "created_at": json_data['created_at']
             }))
-        #tangelo.log("example tweets", str(json_data['geo']))
         return True
 
     def on_error(self, status):
@@ -52,8 +51,6 @@ class EbolaListener(StreamListener):
 
 
 def stream():
-    global stream
-    global new_tweets
     listn = EbolaListener()
     auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
