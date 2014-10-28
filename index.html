@@ -13,6 +13,10 @@
     <script src="lib/topojson.min.js"></script>
     <script src="lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="/js/tangelo.js"></script>
+    <script src="init.js"></script>
+    <script src="map.js"></script>
+    <script src="twitter.js"></script>
+    <script src="choropleth.js"></script>
     <script src="main.js"></script>
 
      <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -38,20 +42,16 @@
 
     <div id="map"></div>
     <div class="container-fluid app-tab-column">
-      <div class="row">
-        <div class="col-md-12 app-tab">
-          <p class="app-tab-label">Tweets</p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 app-tab">
-          <p class="app-tab-label">Paths</p>
-        </div>
-      </div>
-      <div class="row">
-        <div id="choropleth" class="col-md-12 app-tab">
-          <p class="app-tab-label">Choropleth</p>
-        </div>
+      <div class="btn-group-vertical app-map-buttons" data-toggle="buttons">
+        <button type="button" class="app-tab-label btn btn-primary" id="tweets">
+          <input type="radio"> Tweets
+        </button>
+        <button type="button" class="app-tab-label btn btn-primary" id="paths">
+          <input type="radio"> Paths
+        </button>
+        <button type="button" class="app-tab-label btn btn-primary active" id="choropleth"> <!-- Default -->
+          <input type="radio"> Choropleth
+        </button>
       </div>
     </div>
   </body>
