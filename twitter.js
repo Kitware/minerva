@@ -36,7 +36,8 @@
           top: d.mouse.page.y,
           left: d.mouse.page.x,
           position: "absolute",
-          display: ""
+          visibility: "visible",
+          opacity: 0.8
         });
         var linode = '<li id=tweet' + d.index + '></li>';
         var anode = '<a href="#fixme" target="twitter">' + '</a>';
@@ -46,7 +47,7 @@
         nMouseOver -= 1;
         $('#popup #tweet' + d.index).remove();
         if (nMouseOver === 0) {
-          $('#popup').css({display: "none"});
+          $('#popup').css({opacity: 0, visibility: "hidden"});
         }
       });
 
