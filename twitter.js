@@ -4,7 +4,7 @@
       key = null,
       map, layer;
 
-  tangelo.stream.start("example", function(d) { key = d; console.log(key);
+  tangelo.stream.start("minerva", function(d) { key = d; console.log(key);
     tangelo.stream.run(key, function(data) {
       data = JSON.parse(data);
       if (data && data.length !== 0) {
