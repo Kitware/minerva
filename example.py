@@ -7,16 +7,8 @@ import time
 import json
 import atexit
 
-# Go to http://dev.twitter.com and create an app.
-# The consumer key and secret will be generated for you after
-CONSUMER_KEY = ""
-CONSUMER_SECRET = ""
-
-# After the step above, you will be redirected to your app's page.
-# Create an access token under the the "Your access token" section
-ACCESS_KEY = ""
-ACCESS_SECRET = ""
-
+# Load config
+minerva_ebola_config = json.load(open("minerva.json"))
 
 class EbolaListener(StreamListener):
     """ A listener handles tweets are the received from the stream.
@@ -62,8 +54,10 @@ atexit.register(exitHandler)
 
 def stream():
     listn = EbolaListener()
-    auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+    auth = OAuthHandler(minerva_ebola_config["twitter"]["CONSUMER_KEY"],
+                        minerva_ebola_config["twitter"]["CONSUMER_SECRET"])
+    auth.set_access_token(minerva_ebola_config["twitter"]["ACCESS_KEY"],
+                          minerva_ebola_config["twitter"]["ACCESS_SECRET"])
     stream = Stream(auth, listn)
     stream.filter(track=['ebola'], async=True)
 
