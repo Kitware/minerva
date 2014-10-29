@@ -1,5 +1,7 @@
 (function () {
-  function createPathView() {
+  function createPathView(myMap, featureLayer) {
+    window.app.util.load(function (myMap, featureLayer) {
+    });
   }
 
   function destroyPathView() {
