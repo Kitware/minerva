@@ -9,6 +9,7 @@ html, body {
     top: 60px;
     right: 10px;
 }
+
 #map {
     width: 100%;
     height: calc(100% - 50px);
@@ -21,13 +22,20 @@ path.border {
 }
 
 #popup {
-  opacity: 0.8;
   background-color: #FFFFFF;
-  border:1px solid #999999;
   margin-top: 15px;
-  position:absolute;
-  text-align:left;
+  position: absolute;
+  text-align: left;
   width: 300px;
-  z-index:50;
+  opacity: 0;
+  visibility: hidden;
   padding: 5px 5px 5px 5px;
+  border-radius: 5px;
+  box-shadow: 3px 3px 4px rgba(0,0,0,.5);
+  z-index: 1000000;
+  font: 12px/1.5 Verdana, Arial, Helvetica, sans-serif;
+  color: black;
+  -webkit-transition: opacity 400ms ease-in, visibility 0s 0s;
+  -moz-transition: opacity 400ms ease-in, visibility 0s 0s;
+  transition: opacity 400ms ease-in, visibility 0s 0s;
 }
