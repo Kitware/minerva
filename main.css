@@ -39,3 +39,14 @@ path.border {
   -moz-transition: opacity 400ms ease-in, visibility 0s 0s;
   transition: opacity 400ms ease-in, visibility 0s 0s;
 }
+
+.twitter-pause-container {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+}
+
+.twitter-pause {
+  position: relative;
+  left: -50%;
+}

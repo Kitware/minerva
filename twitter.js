@@ -2,10 +2,10 @@
   var tweetFeature = null,
       visdata = [],
       key = null,
-      map, layer;
+      map, layer, paused = 1;
 
-  tangelo.stream.start("minerva", function(d) { key = d; console.log(key);
-    tangelo.stream.run(key, function(data) {
+  function updateTweets(data) {
+    if (data) {
       data = JSON.parse(data);
       if (data && data.length !== 0) {
         Array.prototype.push.apply(visdata, data);
@@ -14,11 +14,55 @@
           map.draw();
         }
       }
-    });
+    }
+    return !paused;
+  }
+
+  function startStream() {
+    if (key === null) {
+      // wait for key to load
+      window.setTimeout(startStream, 1000);
+      return;
+    }
+    tangelo.stream.run(key, updateTweets);
+  }
+
+  tangelo.stream.start("minerva", function(d) { key = d; console.log(key);
+    startStream();
   });
 
   function createTwitter(myMap, tweetLayer) {
     var nMouseOver = 0;
+
+    // auto start on first call
+    if (paused === 1) {
+      paused = false;
+      startStream();
+    }
+
+    // Add a pause button
+    d3.select('body')
+      .append('div')
+        .attr('class', 'twitter-pause-container')
+      .append('div')
+        .attr('class', 'btn btn-default twitter-pause')
+        .classed('btn-danger', !paused)
+        .classed('btn-success', paused)
+        .text(paused ? 'start' : 'stop')
+        .on('click', function () {
+          paused = !paused;
+          if (paused) {
+            d3.select(this).text('start')
+              .classed('btn-danger', false)
+              .classed('btn-success', true);
+          } else {
+            d3.select(this).text('stop')
+              .classed('btn-danger', true)
+              .classed('btn-success', false);
+          }
+          startStream();
+        });
+
     map = myMap;
     layer = tweetLayer;
     tweetFeature = tweetLayer.createFeature("point", {selectionAPI: true})
@@ -60,6 +104,7 @@
       tweetFeature = null;
       map.draw();
     }
+    d3.select('.twitter-pause').remove();
   }
 
   window.app.twitter = {
