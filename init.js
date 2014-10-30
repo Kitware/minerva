@@ -55,18 +55,21 @@ var app = {};
 
     var width = 1;// The stroke width can't be set from css...
 
-    var selection = svg.selectAll('path')
-      .data(selectedCountries)
+    var selection = svg.selectAll('path.border')
+      .data(selectedCountries);
+
+    selection.exit().remove();
+    selection
       .enter()
         .append('path')
           .attr('d', line)
           .classed('border', true)
-          .style('stroke-width', width);
+          .style('stroke-width', width/renderer.scaleFactor());
 
     renderer.layer().geoOn(geo.event.d3Rescale, function (arg) {
       arg = arg || {};
       arg.scale = arg.scale || 1;
-      selection.style('stroke-width', width/arg.scale);
+      d3.select('path.border').style('stroke-width', width/arg.scale);
     });
     return selection;
   };
