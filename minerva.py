@@ -2,13 +2,17 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+import os
 import sys
 import time
 import json
 import atexit
 
 # Load config
-minerva_ebola_config = json.load(open("minerva.json"))
+minerva_ebola_config = json.load(open(
+    os.path.join(os.path.dirname(__file__), "minerva.json")
+))
+
 
 class EbolaListener(StreamListener):
     """ A listener handles tweets are the received from the stream.
