@@ -14,6 +14,10 @@ function main() {
       layer: mapObj.d3,
       visObj: window.app.choropleth
     },
+    paths: {
+      layer: mapObj.d3,
+      visObj: window.app.path
+    },
     unknown: { // Used for unimplemented components
       layer: null,
       visObj: {
