@@ -8,15 +8,17 @@
 
     group.append('path')
       .attr('d', airplanePath)
-      .attr('transform', 'scale(.1) translate(-250,-250)');
+      .attr('transform', 'scale(.05) translate(-250,-250)');
 
     return group;
   }
 
   var currentTime = null;
   var playing = false;
+  var animating = false;
   var transitioning = false;
   var transitionNext = false;
+  var now, nData;
 
   // draw animation icons
   function loadIcons() {
@@ -32,8 +34,6 @@
       .append('span').attr('class', 'glyphicon glyphicon-fast-backward');
     buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-back')
       .append('div').attr('class', 'glyphicon glyphicon-step-backward');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-pause')
-      .append('div').attr('class', 'glyphicon glyphicon-pause');
     buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-play')
       .append('div').attr('class', 'glyphicon glyphicon-play');
     buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-step')
@@ -93,6 +93,7 @@
       date: new Date('July 20, 2014'),
       country: 'Nigeria',
       city: 'Lagos',
+      source: 'Liberia',
       link: 'http://www.who.int/csr/don/2014_07_27_ebola/en/',
       lon: 3.396,
       lat: 6.453,
@@ -240,64 +241,173 @@
 
       extent.duration = _duration;
       transitioning = true;
-      myMap.transition(extent);
+      if (_duration > 0) {
+        d3.select('.path-buttons').selectAll('.btn').classed('disabled', true);
+        myMap.transition(extent);
+      }
 
       window.setTimeout(function () {
-        var pt;
 
+        modifyButtonState(now, nData);
         transitioning = false;
         var selection = app.util.drawBorders(filtered, borders, renderer);
-        selection.style('fill', function (d) {
-          return color(d.name);
-        })
+        selection
+          .attr('display', function (d) {
+            if (d.name === filtered[filtered.length - 1]) {
+              return 'none';
+            } else {
+              return null;
+            }
+          })
+          .style('fill', function (d) {
+            return color(d.name);
+          })
           .style('fill-opacity', 0.5);
 
-        pt = renderer.worldToDisplay({
-          x: data[filtered.length - 1].lon,
-          y: data[filtered.length - 1].lat
-        });
-        var a = airplane(svg);
-        function scaleAirplane() {
+        var current = data[filtered.length - 1];
+        var sourceName = current.source;
+        var source, interp;
+        var pt0, pt1, pt2, airplaneIcon;
+
+        function getTransform(t) {
           var scl = renderer.scaleFactor();
-          a.attr(
+          var pt;
+          if (t === undefined) {
+            pt = pt0;
+          } else {
+            pt = interp(t);
+          }
+          pt = renderer.worldToDisplay({
+            x: pt[0],
+            y: pt[1]
+          });
+          return 'translate(' + pt.x + ',' + pt.y + ') scale(' + 1/scl + ')';
+        }
+
+        function scaleAirplane() {
+          airplaneIcon.attr(
             'transform',
-            'translate(' + pt.x + ',' + pt.y + ') scale(' + 1/scl + ')'
+            getTransform()
           );
         }
-        scaleAirplane(a);
-        featureLayer.geoOn(geo.event.d3Rescale, scaleAirplane);
+
+        if (sourceName) {
+
+          data.forEach(function (d) {
+            if (d.country === sourceName) {
+              source = d;
+            }
+          });
+          pt1 = [source.lon, source.lat];
+          pt2 = [current.lon, current.lat];
+          pt0 = pt1.slice();
+          interp = d3.interpolate(pt1, pt2);
+          /*
+            renderer.worldToDisplay({
+            x: data[filtered.length - 1].lon,
+            y: data[filtered.length - 1].lat
+          });
+          */
+          airplaneIcon = airplane(svg);
+          scaleAirplane();
+
+          airplaneIcon.transition()
+            .ease('linear')
+            .duration(3000)
+            .attrTween('transform', function () { return getTransform; })
+            .each('end', function () {
+              svg.selectAll('path.border').attr('display', null);
+            }).remove();
+          featureLayer.geoOn(geo.event.d3Rescale, scaleAirplane);
+
+        } else {
+          svg.selectAll('path.border').attr('display', null);
+        }
+
       }, _duration * 1.1
       );
     }
+
+    function modifyButtonState(i, n) {
+      if (playing) {
+        d3.selectAll('.path-buttons .btn').classed({'disabled': true});
+        d3.select('.path-play').classed({
+          'btn-success': false,
+          'btn-danger': true,
+          'disabled': false
+        })
+        .select('div').classed({
+          'glyphicon-play': false,
+          'glyphicon-pause': true
+        });
+      } else {
+        d3.selectAll('.path-buttons .btn').classed({'disabled': false});
+        d3.select('.path-play').classed({
+          'btn-success': true,
+          'btn-danger': false
+        })
+        .select('div').classed({
+          'glyphicon-play': true,
+          'glyphicon-pause': false
+        });
+      }
+      if (i <= 0) {
+        d3.select('.path-first').classed({'disabled': true});
+        d3.select('.path-back').classed({'disabled': true});
+      } else if (i >= n - 1) {
+        d3.select('.path-end').classed({'disabled': true});
+        d3.select('.path-step').classed({'disabled': true});
+      }
+    }
+
     window.app.util.load(function () {
       // for times...
-      var now = 0;
+      now = 0;
+      nData = data.length;
+      var n = nData;
       drawTime(data[now].date);
+
+      function run() {
+        if (playing) {
+          now = (now + 1) % n;
+          modifyButtonState(now, n);
+          drawTime(data[now].date);
+          window.setTimeout(run, 15000);
+        }
+        modifyButtonState(now, n);
+      }
 
       d3.select('.path-first').on('click', function () {
         if (now !== 0) {
           now = 0;
+          modifyButtonState(now, n);
           drawTime(data[now].date);
         }
       });
       d3.select('.path-back').on('click', function () {
-        now = (data.length + now - 1) % data.length;
+        now -= 1;
+        modifyButtonState(now, n);
         drawTime(data[now].date);
       });
-      d3.select('.path-pause').on('click', function () {
-      });
       d3.select('.path-play').on('click', function () {
+        playing = !playing;
+        modifyButtonState(now, n);
+        run();
       });
       d3.select('.path-step').on('click', function () {
-        now = (now + 1) % data.length;
+        now += 1;
+        modifyButtonState(now, n);
         drawTime(data[now].date);
       });
       d3.select('.path-end').on('click', function () {
         if (now !== data.length - 1) {
           now = data.length - 1;
+          modifyButtonState(now, n);
           drawTime(data[now].date);
         }
       });
+      //d3.selectAll('.path-buttons').on('click'
+      modifyButtonState(now, n);
     });
   }
 
@@ -308,6 +418,9 @@
     d3.selectAll('.path-buttons').remove();
     d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
+    transitioning = false;
+    playing = false;
+    transitionNext = false;
   }
 
   window.app.path = {
