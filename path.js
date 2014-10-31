@@ -1,5 +1,18 @@
 (function () {
 
+  // a simple airplane shape on a 500x500 canvas
+  var airplanePath = 'M250.2,59.002c11.001,0,20.176,9.165,20.176,20.777v122.24l171.12,95.954v42.779l-171.12-49.501v89.227l40.337,29.946v35.446l-60.52-20.18-60.502,20.166v-35.45l40.341-29.946v-89.227l-171.14,49.51v-42.779l171.14-95.954v-122.24c0-11.612,9.15-20.777,20.16-20.777z';
+
+  function airplane(node) {
+    var group = node.append('g').classed('path-airplane', true);
+
+    group.append('path')
+      .attr('d', airplanePath)
+      .attr('transform', 'scale(.1) translate(-250,-250)');
+
+    return group;
+  }
+
   var currentTime = null;
   var playing = false;
   var transitioning = false;
@@ -230,12 +243,29 @@
       myMap.transition(extent);
 
       window.setTimeout(function () {
+        var pt;
+
         transitioning = false;
         var selection = app.util.drawBorders(filtered, borders, renderer);
         selection.style('fill', function (d) {
           return color(d.name);
         })
           .style('fill-opacity', 0.5);
+
+        pt = renderer.worldToDisplay({
+          x: data[filtered.length - 1].lon,
+          y: data[filtered.length - 1].lat
+        });
+        var a = airplane(svg);
+        function scaleAirplane() {
+          var scl = renderer.scaleFactor();
+          a.attr(
+            'transform',
+            'translate(' + pt.x + ',' + pt.y + ') scale(' + 1/scl + ')'
+          );
+        }
+        scaleAirplane(a);
+        featureLayer.geoOn(geo.event.d3Rescale, scaleAirplane);
       }, _duration * 1.1
       );
     }
@@ -275,8 +305,9 @@
     if (svg) {
       svg.selectAll('*').remove();
     }
-    d3.select('.path-buttons').remove();
-    d3.select('.path-date').remove();
+    d3.selectAll('.path-buttons').remove();
+    d3.selectAll('.path-date').remove();
+    d3.selectAll('.path-airplane').remove();
   }
 
   window.app.path = {
