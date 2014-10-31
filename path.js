@@ -47,6 +47,12 @@
 
     // draw a date box
     body.append('div').attr('class', 'path-date');
+
+    // draw an info box
+    body.append('div').attr('class', 'path-description')
+      .on('click', function () {
+        d3.event.stopPropagation();
+      });
   }
 
   // Data for when the outbreak spread to each country (estimated)
@@ -56,16 +62,24 @@
   var duration = 500;
   var data = [
     {
-      date: new Date('January 1, 2014'),
+      date: new Date('December 6, 2013'),
       country: 'Guinea',
-      link: 'http://www.who.int/csr/don/2014_03_23_ebola/en/',
+      link: 'http://edition.cnn.com/2014/10/28/health/ebola-patient-zero/index.html',
       lon: -9.180,
       lat: 9.344,
       extent: {
         duration: duration,
         center: {x: -12.5, y: 8.4},
         zoom: 3.64
-      }
+      },
+      description: [
+        'The ongoing Ebola outbreak in West Africa is believed to have ',
+        '<a href="http://edition.cnn.com/2014/10/28/health/ebola-patient-zero/index.html" ',
+        'target="path">started</a> ',
+        'on December 6, 2013 in southern Guinea when a 2-year-old boy died of ',
+        'the disease.  A short time later, several members of his family as ',
+        'well as the doctor treating him also fell ill.'
+      ].join('')
     },
     {
       date: new Date('March 1, 2014'),
@@ -78,10 +92,17 @@
         duration: 0,
         center: {x: -12.5, y: 8.4},
         zoom: 3.64
-      }
+      },
+      description: [
+        'By late April of 2014, the outbreak had spread into Liberia from ',
+        'Guinea.  A ',
+        '<a href="http://www.who.int/csr/don/2014_03_27_ebola/en/" ',
+        'target="path">WHO report</a> on March 1st reported that outbreak ',
+        'in Guinea had increased to 103 including 66 deaths.'
+      ].join('')
     },
     {
-      date: new Date('March 15, 2014'),
+      date: new Date('May 15, 2014'),
       country: 'Sierra Leone',
       source: 'Guinea',
       link: 'http://www.who.int/csr/don/2014_03_27_ebola/en/',
@@ -91,7 +112,16 @@
         duration: 0,
         center: {x: -12.5, y: 8.4},
         zoom: 3.64
-      }
+      },
+      description: [
+        'Around the same time, the WHO reported that the epidemic had also ',
+        'spread into Sierra Leone; however, the government of Sierra Leone  ',
+        '<a href="http://news.sl/drwebsite/publish/article_200525069.shtml" ',
+        'target="path">reported</a> no cases had yet been found.  By late May, ',
+        'the outbreak in Sierra Leone was confirmed when ',
+        '<a href="http://www.reuters.com/article/2014/05/26/us-ebola-leone-idUSKBN0E614G20140526" ',
+        'target="path">5 deaths</a> were reported.'
+      ].join('')
     },
     {
       date: new Date('July 20, 2014'),
@@ -105,7 +135,14 @@
         duration: duration,
         center: {x: -1.85, y: 7.8},
         zoom: 2.66
-      }
+      },
+      description: [
+        'On <a href="http://www.who.int/csr/don/2014_07_27_ebola/en/" target="path">July 20th',
+        '</a>, an infected man flew from Liberia to Lagos, Nigeria ',
+        'and died a few days later.  By September 22nd, the ',
+        '<a href="http://apps.who.int/iris/bitstream/10665/134449/1/roadmapupdate22sept14_eng.pdf" ',
+        'target="path">WHO reported</a> 20 confirmed cases in Nigeria.'
+      ].join('')
     },
     {
       date: new Date('August 11, 2014'),
@@ -118,7 +155,13 @@
         duration: duration,
         center: {x: 6.23, y: 1.02},
         zoom: 2.18
-      }
+      },
+      description: [
+        'The WHO reported that on <a href="http://www.who.int/csr/don/2014_08_27_ebola/en/" target="path">',
+        'August 11, 2014</a> a woman in the Democratic Republic of Congo had died of Ebola.  It ',
+        'is believed that she had contracted the illness from an animal and it was unrelated to the ',
+        'outbreak in Guinea.'
+      ].join('')
     },
     {
       date: new Date('August 29, 2014'),
@@ -132,7 +175,33 @@
         duration: duration,
         center: {x: -11.6, y: 9.89},
         zoom: 3.53
-      }
+      },
+      description: [
+        'On <a src="http://www.who.int/csr/don/2014_08_30_ebola/en/" target="path">',
+        'August 29th</a>, a resident of Guinea arrived in Dakar, Senegal.  Several ',
+        'days later, he began showing signs of Ebola and sought medical care.  The ',
+        'man eventually recovered and no further incidents have occured.'
+      ].join('')
+    },
+    {
+      date: new Date('September 25, 2014'),
+      country: 'Spain',
+      city: 'Madrid',
+      source: 'Sierra Leone',
+      link: 'http://www.bbc.com/news/world-europe-29516882',
+      lon: -3.683,
+      lat: 40.400,
+      extent: {
+        duration: duration,
+        center: {x: -43.5, y: 26.4},
+        zoom: 0.435
+      },
+      description: [
+        'In <a href="http://www.bbc.com/news/world-europe-29516882" target="path">',
+        'September 2014</a>, a spanish missionary who had been evacuated from Sierra ',
+        'Leone died in a Madrid hospital.  A nurse who had treated him was confirmed ',
+        'to have contracted the disease on October 7.'
+      ].join('')
     },
     {
       date: new Date('September 30, 2014'),
@@ -146,21 +215,14 @@
         duration: duration,
         center: {x: -43.5, y: 26.4},
         zoom: 0.435
-      }
-    },
-    {
-      date: new Date('October 6, 2014'),
-      country: 'Spain',
-      city: 'Madrid',
-      source: 'Sierra Leone',
-      link: 'http://www.bbc.com/news/world-europe-29516882',
-      lon: -3.683,
-      lat: 40.400,
-      extent: {
-        duration: duration,
-        center: {x: -43.5, y: 26.4},
-        zoom: 0.435
-      }
+      },
+      description: [
+        'On <a href="http://www.nytimes.com/interactive/2014/10/01/us/retracing-the-steps-of-the-dallas-ebola-patient.html" target="path">',
+        'September 19, 2014</a> a man arrived in Dallas from Monrovia, Liberia.  His initial screening prior to bording the ',
+        'flight showed no signs of illness.  On September 24, he fell ill and sought care at a nearby ',
+        'hospital, but was sent home.  After his conditioned worsened, he returned to the hospital several ',
+        'days later.  On September 30th, blood tests confirmed that he had contracted Ebola.'
+      ].join('')
     },
     {
       date: new Date('October 23, 2014'),
@@ -174,7 +236,12 @@
         duration: duration,
         center: {x: -43.5, y: 26.4},
         zoom: 0.435
-      }
+      },
+      description: [
+        'On <a href="http://www.nbcnews.com/storyline/ebola-virus-outbreak/new-york-doctor-just-back-africa-has-ebola-n232561" ',
+        'target="path">October 23</a>, a doctor from Doctors without Borders tested positive for Ebola in ',
+        'New York City after returning from Guinea several days prior.'
+      ].join('')
     },
     {
       date: new Date('October 24, 2014'),
@@ -188,7 +255,12 @@
         duration: duration,
         center: {x: -4.72, y: 14.56},
         zoom: 2.66
-      }
+      },
+      description: [
+        'On <a href="http://abcnews.go.com/Health/wireStory/threat-break-isolation-liberia-food-26399022" ',
+        'target="path">October 23</a> an official from Mali confirmed that a 2-year-old girl from Guinea ',
+        'had tested positive for Ebola in the Malian town of Keyes.'
+      ].join('')
     }
     // + medical evacuations:
     // http://en.wikipedia.org/wiki/Ebola_virus_epidemic_in_West_Africa#Countries_with_medically_evacuated_cases
@@ -233,6 +305,7 @@
         return;
       }
       d3.select('.path-date').text(t.toDateString());
+      d3.select('.path-description').style('display', 'none');
       var filtered = data.filter(function (d) { return d.date <= t; })
         .map(function (d) { return d.country; });
 
@@ -247,6 +320,10 @@
         var i = filtered.indexOf(d.country);
         if (d.trail && (i < 0 || j === filtered.length - 1)) {
           d.trail.remove();
+        }
+        if (j === filtered.length - 1 && data[j].description) {
+          d3.select('.path-description').style('display', null)
+            .html(data[j].description);
         }
       });
       d3.selectAll('line.trail').style('stroke-opacity', 0.5);
@@ -331,12 +408,7 @@
           pt2 = [current.lon, current.lat];
           pt0 = pt1.slice();
           interp = d3.interpolate(pt1, pt2);
-          /*
-            renderer.worldToDisplay({
-            x: data[filtered.length - 1].lon,
-            y: data[filtered.length - 1].lat
-          });
-          */
+
           var v0, v1;
           v0 = renderer.worldToDisplay({
             x: pt1[0],
@@ -351,7 +423,6 @@
           scaleAirplane();
 
           airplaneIcon.transition()
-            //.ease()
             .duration(3000)
             .attrTween('transform', function () { return getTransform; })
             .each('end', function () {
@@ -446,7 +517,6 @@
           drawTime(data[now].date);
         }
       });
-      //d3.selectAll('.path-buttons').on('click'
       modifyButtonState(now, n);
     });
   }
@@ -458,6 +528,7 @@
     d3.selectAll('.path-buttons').remove();
     d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
+    d3.selectAll('.path-description').remove();
     transitioning = false;
     playing = false;
     transitionNext = false;
