@@ -7,6 +7,9 @@
 
   function updateTweets(data) {
     if (data) {
+      if (typeof data === 'string') {
+        data = JSON.parse(data);
+      }
       if (data && data.length !== 0) {
         Array.prototype.push.apply(visdata, data);
         if (tweetFeature) {
@@ -28,8 +31,18 @@
     tangelo.stream.run(key, updateTweets);
   }
 
-  tangelo.stream.start("minerva", function(d) { key = d; console.log(key);
-    startStream();
+  $(function () {
+    d3.select('#twitter').classed('disabled', true);
+    if (window.tangelo) {
+      tangelo.stream.start("minerva", function(d) {
+        key = d;
+        console.log(key);
+        if (key) {
+          startStream();
+          d3.select('#twitter').classed('disabled', false);
+        }
+      });
+    }
   });
 
   function createTwitter(myMap, tweetLayer) {
