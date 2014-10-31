@@ -91,15 +91,15 @@
     },
     {
       date: new Date('August 11, 2014'),
-      country: 'Democratic Republic of Congo',
+      country: "Dem. Rep. Congo",
       city: 'Boende',
       link: 'http://www.who.int/csr/don/2014_08_27_ebola/en/',
       lon: 20.876,
       lat: -0.281,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
-        zoom: 2.66
+        center: {x: 6.23, y: 1.02},
+        zoom: 2.18
       }
     },
     {
@@ -112,8 +112,8 @@
       lat: 14.693,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
-        zoom: 2.66
+        center: {x: -11.6, y: 9.89},
+        zoom: 3.53
       }
     },
     {
@@ -126,8 +126,8 @@
       lat: 32.776,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
-        zoom: 2.66
+        center: {x: -43.5, y: 26.4},
+        zoom: 0.435
       }
     },
     {
@@ -140,13 +140,13 @@
       lat: 40.400,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
-        zoom: 2.66
+        center: {x: -43.5, y: 26.4},
+        zoom: 0.435
       }
     },
     {
       date: new Date('October 23, 2014'),
-      country: 'United States',
+      country: 'United States (no match)',
       city: 'New York City',
       source: 'Guinea',
       link: 'http://www.nbcnews.com/storyline/ebola-virus-outbreak/new-york-doctor-just-back-africa-has-ebola-n232561',
@@ -154,12 +154,12 @@
       lat: 40.713,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
-        zoom: 2.66,
+        center: {x: -43.5, y: 26.4},
+        zoom: 0.435
       }
     },
     {
-      date: new Date('October 23, 2014'),
+      date: new Date('October 24, 2014'),
       country: 'Mali',
       city: 'Kayes',
       source: 'Guinea',
@@ -168,7 +168,7 @@
       lat: 14.450,
       extent: {
         duration: duration,
-        center: {x: -1.85, y: 7.8},
+        center: {x: -4.72, y: 14.56},
         zoom: 2.66
       }
     }
@@ -193,7 +193,7 @@
       dy = (myMap.center().y - e.center.y);
       dz = 10 * (myMap.zoom() - e.zoom);
 
-      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+      return Math.sqrt((dx * dx + dy * dy) * Math.pow(2, myMap.zoom()) + dz * dz);
     }
 
     var _duration;
@@ -209,7 +209,7 @@
           transitionNext = true;
           window.setTimeout(function () {
             transitionNext = false;
-            drawTime(t, direction);
+            drawTime(t);
           }, 100);
         }
         return;
@@ -242,17 +242,17 @@
     window.app.util.load(function () {
       // for times...
       var now = 0;
-      drawTime(data[now].date, -1000);
+      drawTime(data[now].date);
 
       d3.select('.path-first').on('click', function () {
         if (now !== 0) {
           now = 0;
-          drawTime(data[now].date, -1000);
+          drawTime(data[now].date);
         }
       });
       d3.select('.path-back').on('click', function () {
         now = (data.length + now - 1) % data.length;
-        drawTime(data[now].date, -1);
+        drawTime(data[now].date);
       });
       d3.select('.path-pause').on('click', function () {
       });
