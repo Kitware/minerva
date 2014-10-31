@@ -29,6 +29,7 @@ class EbolaListener(StreamListener):
             self._buffer.append(dict({
                 "location": json_data['geo'],
                 "text": json_data['text'],
+                "timestamp_ms": json_data['timestamp_ms'],
                 "created_at": json_data['created_at']
             }))
         return True

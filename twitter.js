@@ -2,14 +2,15 @@
   var tweetFeature = null,
       visdata = [],
       key = null,
-      map, layer, paused = 1;
+      map, layer, paused = 1, currTime = null,
+      deltaTime = null;
 
   function updateTweets(data) {
     if (data) {
-      data = JSON.parse(data);
       if (data && data.length !== 0) {
         Array.prototype.push.apply(visdata, data);
         if (tweetFeature) {
+          currTime = new Date().getTime();
           tweetFeature.data(visdata);
           map.draw();
         }
@@ -67,6 +68,22 @@
     layer = tweetLayer;
     tweetFeature = tweetLayer.createFeature("point", {selectionAPI: true})
       .data(visdata)
+      .style('fillColor', function(d) {
+        // Time delta in seconds
+        deltaTime = (currTime - d.timestamp_ms) / 1000.0;
+        if (deltaTime > 60) {
+          return { r: 128/255, g: 128/255, b: 128/255 }
+        }
+        return { r: 36/255, g: 74/255, b: 162/255 }
+      })
+      .style('strokeColor', function(d) {
+        // Time delta in seconds
+        deltaTime = (currTime - d.timestamp_ms) / 1000.0;
+        if (deltaTime > 60) {
+          return { r: 185/255, g: 128/255, b: 128/255 };
+        }
+        return { r: 255/255, g: 180/255, b: 115/255 };
+      })
       .position(function (d) {
         return {
           x: d.location.coordinates[1],
