@@ -229,12 +229,11 @@
       transitioning = true;
       myMap.transition(extent);
 
-      console.log(_duration);
       window.setTimeout(function () {
         transitioning = false;
         var selection = app.util.drawBorders(filtered, borders, renderer);
         selection.style('fill', function (d) {
-          return color(d.properties.name);
+          return color(d.name);
         })
           .style('fill-opacity', 0.5);
       }, _duration * 1.1
