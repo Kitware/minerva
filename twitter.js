@@ -80,7 +80,7 @@
         // Time delta in seconds
         deltaTime = (currTime - d.timestamp_ms) / 1000.0;
         if (deltaTime > 60) {
-          return { r: 185/255, g: 128/255, b: 128/255 };
+          return { r: 100/255, g: 100/255, b: 100/255 };
         }
         return { r: 255/255, g: 180/255, b: 115/255 };
       })
