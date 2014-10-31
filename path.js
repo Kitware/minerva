@@ -3,12 +3,16 @@
   // a simple airplane shape on a 500x500 canvas
   var airplanePath = 'M250.2,59.002c11.001,0,20.176,9.165,20.176,20.777v122.24l171.12,95.954v42.779l-171.12-49.501v89.227l40.337,29.946v35.446l-60.52-20.18-60.502,20.166v-35.45l40.341-29.946v-89.227l-171.14,49.51v-42.779l171.14-95.954v-122.24c0-11.612,9.15-20.777,20.16-20.777z';
 
-  function airplane(node) {
+  function airplane(node, ang) {
     var group = node.append('g').classed('path-airplane', true);
 
-    group.append('path')
-      .attr('d', airplanePath)
-      .attr('transform', 'scale(.05) translate(-250,-250)');
+    ang = ang || 0;
+    ang = 180 - ang * 180 / Math.PI;
+    group.append('g')
+        .attr('transform', 'rotate(' + ang + ')')
+      .append('path')
+        .attr('d', airplanePath)
+        .attr('transform', 'scale(.05) translate(-250,-250)');
 
     return group;
   }
@@ -186,7 +190,7 @@
         zoom: 2.66
       }
     }
-    // + medical evacuations: 
+    // + medical evacuations:
     // http://en.wikipedia.org/wiki/Ebola_virus_epidemic_in_West_Africa#Countries_with_medically_evacuated_cases
   ];
 
@@ -200,7 +204,7 @@
   var renderer = null;
 
   function createPathView(myMap, featureLayer) {
- 
+
     function extentNorm(e) {
       var dx, dy, dz;
       dx = (myMap.center().x - e.center.x);
@@ -239,6 +243,14 @@
         _duration = duration;
       }
 
+      data.forEach(function (d, j) {
+        var i = filtered.indexOf(d.country);
+        if (d.trail && (i < 0 || j === filtered.length - 1)) {
+          d.trail.remove();
+        }
+      });
+      d3.selectAll('line.trail').style('stroke-opacity', 0.5);
+
       extent.duration = _duration;
       transitioning = true;
       if (_duration > 0) {
@@ -262,26 +274,43 @@
           .style('fill', function (d) {
             return color(d.name);
           })
-          .style('fill-opacity', 0.5);
+          .style('fill-opacity', 0.7);
 
         var current = data[filtered.length - 1];
         var sourceName = current.source;
         var source, interp;
-        var pt0, pt1, pt2, airplaneIcon;
+        var pt0, pt1, pt2, airplaneIcon, trail, t_saved = 0;
+
+        trail = svg.append('line')
+          .attr('class', 'trail')
+          .attr('stroke', d3.rgb(color(sourceName)).darker())
+          .style('stroke-linecap', 'round')
+          .style('stroke-opacity', 1);
+        current.trail = trail;
 
         function getTransform(t) {
           var scl = renderer.scaleFactor();
-          var pt;
-          if (t === undefined) {
-            pt = pt0;
-          } else {
-            pt = interp(t);
+          var pt, origin;
+          var angle;
+          if (t !== undefined) {
+            t_saved = t;
+            pt0 = interp(t);
           }
           pt = renderer.worldToDisplay({
-            x: pt[0],
-            y: pt[1]
+            x: pt0[0],
+            y: pt0[1]
           });
-          return 'translate(' + pt.x + ',' + pt.y + ') scale(' + 1/scl + ')';
+          origin = renderer.worldToDisplay({
+            x: pt1[0],
+            y: pt1[1]
+          });
+          trail.attr('x1', origin.x)
+            .attr('y1', origin.y)
+            .attr('x2', pt.x)
+            .attr('y2', pt.y)
+            .style('stroke-width', 5/scl);
+
+          return 'translate(' + pt.x + ',' + pt.y + ') scale(' + (1 - 4 * t_saved * (t_saved - 1))/scl + ')';
         }
 
         function scaleAirplane() {
@@ -308,11 +337,21 @@
             y: data[filtered.length - 1].lat
           });
           */
-          airplaneIcon = airplane(svg);
+          var v0, v1;
+          v0 = renderer.worldToDisplay({
+            x: pt1[0],
+            y: pt1[1]
+          });
+          v1 = renderer.worldToDisplay({
+            x: pt2[0],
+            y: pt2[1]
+          });
+          angle = Math.atan2(v1.x - v0.x, v1.y - v0.y);
+          airplaneIcon = airplane(svg, angle);
           scaleAirplane();
 
           airplaneIcon.transition()
-            .ease('linear')
+            //.ease()
             .duration(3000)
             .attrTween('transform', function () { return getTransform; })
             .each('end', function () {
@@ -322,6 +361,7 @@
 
         } else {
           svg.selectAll('path.border').attr('display', null);
+          trail.remove();
         }
 
       }, _duration * 1.1
@@ -372,7 +412,7 @@
           now = (now + 1) % n;
           modifyButtonState(now, n);
           drawTime(data[now].date);
-          window.setTimeout(run, 15000);
+          window.setTimeout(run, 10000);
         }
         modifyButtonState(now, n);
       }
