@@ -1,7 +1,7 @@
 var app = {};
 
 (function () {
-  var countries;
+  var countries, names;
 
   // start getting the country border data
   d3.json('countries.topo.json', function (error, data) {
@@ -11,7 +11,8 @@ var app = {};
       return;
     }
 
-    countries = topojson.feature(data, data.objects.countries);
+    countries = topojson.feature(data, data.objects.countries).features;
+    names = countries.map(function (c) { return c.properties.name; });
   });
 
 
@@ -49,24 +50,34 @@ var app = {};
       return [d.x, d.y];
     });
 
-    var selectedCountries = countries.features.filter(function (c) {
-      return countryList.indexOf(c.properties.name) >= 0;
+    var selectedCountries = countryList.map(function (c) {
+      return names.indexOf(c);
+    }).filter(function (i) { return i >= 0; })
+      .map(function (i) {
+        return {
+          index: i,
+          name: names[i],
+          border: countries[i]
+        };
     });
 
     var width = 1;// The stroke width can't be set from css...
 
-    var selection = svg.selectAll('path')
-      .data(selectedCountries)
+    var selection = svg.selectAll('path.border')
+      .data(selectedCountries);
+
+    selection.exit().remove();
+    selection
       .enter()
         .append('path')
-          .attr('d', line)
+          .attr('d', function (d) { return line(d.border); })
           .classed('border', true)
-          .style('stroke-width', width);
+          .style('stroke-width', width/renderer.scaleFactor());
 
     renderer.layer().geoOn(geo.event.d3Rescale, function (arg) {
       arg = arg || {};
       arg.scale = arg.scale || 1;
-      selection.style('stroke-width', width/arg.scale);
+      d3.selectAll('path.border').style('stroke-width', width/arg.scale);
     });
     return selection;
   };

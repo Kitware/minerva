@@ -50,3 +50,40 @@ path.border {
   position: relative;
   left: -50%;
 }
+
+.path-buttons {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+}
+
+.path-buttons > div {
+  position: relative;
+  left: -50%;
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+}
+
+.path-buttons .btn {
+  margin: 10px;
+}
+
+.path-date {
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  pointer-events: none;
+  background: rgba(255,255,255,0.75);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.path-description {
+  position: absolute;
+  left: 30px;
+  bottom: 30px;
+  background: rgba(255,255,255,0.75);
+  border-radius: 10px;
+  padding: 10px;
+  width: 25%;
+}

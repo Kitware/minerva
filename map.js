@@ -2,8 +2,8 @@
 function createMap() {
   var m = geo.map({
     node: '#map',
-    zoom: 2,
-    center: {x: 3.25, y: 16.5}
+    zoom: 0,
+    center: {x: 0, y: 0}
   });
 
   m.createLayer('osm');
