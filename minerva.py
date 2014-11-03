@@ -25,7 +25,7 @@ class EbolaListener(StreamListener):
 
     def on_data(self, data):
         json_data = json.loads(data)
-        print 'json_data', json_data
+        #print 'json_data', json_data
         if json_data['geo'] is not None:
             retweet_cont = 0
             if 'retweet_cont' in json_data.keys():
