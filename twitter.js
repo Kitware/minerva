@@ -3,7 +3,8 @@
       visdata = [],
       key = null,
       map, layer, paused = 1, currTime = null,
-      deltaTime = null;
+      deltaTime = null, popupXOffset = -10,
+      popupYOffset = -20;
 
   function updateTweets(data) {
     if (data) {
@@ -116,8 +117,8 @@
       .geoOn(geo.event.pointFeature.mouseover, function (d) {
         nMouseOver += 1;
         $('#popup').css({
-          top: d.mouse.page.y,
-          left: d.mouse.page.x,
+          top: d.mouse.page.y + popupYOffset,
+          left: d.mouse.page.x + popupXOffset,
           position: "absolute",
           visibility: "visible",
           opacity: 0.8
