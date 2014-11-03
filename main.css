@@ -27,6 +27,7 @@ path.border {
   position: absolute;
   text-align: left;
   width: 300px;
+  height: 200px;
   opacity: 0;
   visibility: hidden;
   padding: 5px 5px 5px 5px;
@@ -35,6 +36,7 @@ path.border {
   z-index: 1000000;
   font: 12px/1.5 Verdana, Arial, Helvetica, sans-serif;
   color: black;
+  overflow-y: scroll;
   -webkit-transition: opacity 400ms ease-in, visibility 0s 0s;
   -moz-transition: opacity 400ms ease-in, visibility 0s 0s;
   transition: opacity 400ms ease-in, visibility 0s 0s;

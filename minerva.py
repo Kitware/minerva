@@ -25,12 +25,19 @@ class EbolaListener(StreamListener):
 
     def on_data(self, data):
         json_data = json.loads(data)
+        #print 'json_data', json_data
         if json_data['geo'] is not None:
+            retweet_cont = 0
+            if 'retweet_cont' in json_data.keys():
+                retweet_cont = json_data['retweet_cont']
             self._buffer.append(dict({
+                "id": json_data['id_str'],
                 "location": json_data['geo'],
                 "text": json_data['text'],
                 "timestamp_ms": json_data['timestamp_ms'],
-                "created_at": json_data['created_at']
+                "created_at": json_data['created_at'],
+                "retweeted" : json_data['retweeted'],
+                "retweet_cont" : retweet_cont
             }))
         return True
 

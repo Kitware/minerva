@@ -3,7 +3,8 @@
       visdata = [],
       key = null,
       map, layer, paused = 1, currTime = null,
-      deltaTime = null;
+      deltaTime = null, popupXOffset = -10,
+      popupYOffset = -20;
 
   function updateTweets(data) {
     if (data) {
@@ -81,6 +82,15 @@
     layer = tweetLayer;
     tweetFeature = tweetLayer.createFeature("point", {selectionAPI: true})
       .data(visdata)
+      .style('radius', function(d) {
+        if (d.retweeted) {
+          if (d.retweet_cont > 0) {
+            return Math.min(10.0 * Math.log2(d.retweet_cont), 1000.0);
+          }
+          return 10.0;
+        }
+        return 5.0;
+      })
       .style('fillColor', function(d) {
         // Time delta in seconds
         deltaTime = (currTime - d.timestamp_ms) / 1000.0;
@@ -107,15 +117,22 @@
       .geoOn(geo.event.pointFeature.mouseover, function (d) {
         nMouseOver += 1;
         $('#popup').css({
-          top: d.mouse.page.y,
-          left: d.mouse.page.x,
+          top: d.mouse.page.y + popupYOffset,
+          left: d.mouse.page.x + popupXOffset,
           position: "absolute",
           visibility: "visible",
           opacity: 0.8
         });
-        var linode = '<li id=tweet' + d.index + '></li>';
-        var anode = '<a href="#fixme" target="twitter">' + '</a>';
-        $('#popup ul').append(linode).find('#tweet' + d.index).append(anode).find('a').text(d.data.text);
+
+        var linode = '<div id=tweet' + d.index + '></div>';
+        $('#popup').append(linode);
+
+        twttr.widgets.createTweet(
+          d.data.id,
+          document.getElementById('tweet'+d.index), {
+            theme: 'dark'
+          }
+        );
       })
       .geoOn(geo.event.pointFeature.mouseout, function (d) {
         nMouseOver -= 1;
