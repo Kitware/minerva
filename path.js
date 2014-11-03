@@ -53,6 +53,11 @@
       .on('click', function () {
         d3.event.stopPropagation();
       });
+
+    // draw a legend box
+    body.append('div')
+        .attr('class', 'path-legend')
+        .style('pointer-events', 'none');
   }
 
   // Data for when the outbreak spread to each country (estimated)
@@ -288,6 +293,18 @@
 
     var _duration;
     loadIcons();
+
+    // create the legend
+    var legend = d3.select('.path-legend').append('table');
+    data.forEach(function (d) {
+      var row;
+      if (!d.country.match(/no match/)) {
+        row = legend.append('tr');
+        row.append('td').append('div').attr('class', 'path-legend-color').style('background-color', color(d.country));
+        row.append('td').append('div').attr('class', 'path-levend-label').text(d.country);
+      }
+    });
+
     window.myMap = myMap;
     svg = featureLayer.canvas();
     renderer = featureLayer.renderer();
@@ -529,6 +546,7 @@
     d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
     d3.selectAll('.path-description').remove();
+    d3.selectAll('.path-legend').remove();
     transitioning = false;
     playing = false;
     transitionNext = false;
