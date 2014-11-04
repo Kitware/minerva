@@ -56,18 +56,21 @@ path.border {
 .path-buttons {
   position: absolute;
   bottom: 30px;
-  left: 50%;
+  right: 30px;
+  display: none;
 }
 
 .path-buttons > div {
-  position: relative;
-  left: -50%;
   background: rgba(0,0,0,0.25);
   border-radius: 10px;
 }
 
-.path-buttons .btn {
-  margin: 10px;
+.path-timeline {
+  position: absolute;
+  left: 30px;
+  bottom: 30px;
+  width: calc(100% - 60px);
+  height: 40px;
 }
 
 .path-date {
@@ -82,12 +85,11 @@ path.border {
 
 .path-description {
   position: absolute;
-  left: 30px;
-  bottom: 30px;
+  bottom: 80px;
   background: rgba(255,255,255,0.75);
   border-radius: 10px;
   padding: 10px;
-  width: 25%;
+  width: 300px;
 }
 
 .path-legend {
@@ -104,4 +106,14 @@ path.border {
   height: 1em;
   border-radius: 5px;
   margin-right: 10px;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
 }

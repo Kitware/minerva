@@ -24,6 +24,47 @@
   var transitionNext = false;
   var now, nData;
 
+  function createTimeline(data) {
+    var scl, dates, axis;
+
+    dates = data.map(function (d) { return d.date; });
+    scl = d3.time.scale()
+      .domain([dates[0], dates[dates.length - 1]])
+      .range([10, $('.path-timeline-svg').width() - 10]);
+
+    d3.select('.path-timeline-svg').append('rect')
+      .attr('width', Number($('.path-timeline-svg').width()) - 10)
+      .attr('height', 10)
+      .attr('x', 5)
+      .attr('y', 5)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .style({
+        'fill': 'none',
+        'stroke-width': 2,
+        'stroke': 'black'
+      });
+
+    axis = d3.svg.axis()
+      .scale(scl)
+      .orient('bottom');
+
+    d3.select('.path-timeline-svg')
+      .append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0, 15)')
+        .call(axis);
+
+    d3.select('body').selectAll('.path-description').data(data).enter()
+      .append('div')
+        .attr('class', 'path-description')
+        .style('left', function (d) {
+          return (scl(d.date) - 160) + 'px';
+        }, "important")
+        .html(function (d) { return d.description; });
+
+  }
+
   // draw animation icons
   function loadIcons() {
     var body = d3.select('body');
@@ -34,19 +75,11 @@
       d3.event.stopPropagation();
     });
 
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-first')
-      .append('span').attr('class', 'glyphicon glyphicon-fast-backward');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-back')
-      .append('div').attr('class', 'glyphicon glyphicon-step-backward');
     buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-play')
       .append('div').attr('class', 'glyphicon glyphicon-play');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-step')
-      .append('div').attr('class', 'glyphicon glyphicon-step-forward');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-end')
-      .append('div').attr('class', 'glyphicon glyphicon-fast-forward');
 
     // draw a date box
-    body.append('div').attr('class', 'path-date');
+    //body.append('div').attr('class', 'path-date');
 
     // draw an info box
     body.append('div').attr('class', 'path-description')
@@ -55,9 +88,18 @@
       });
 
     // draw a legend box
+    //body.append('div')
+    //    .attr('class', 'path-legend')
+    //    .style('pointer-events', 'none');
+
+
+    // draw a timeline
     body.append('div')
-        .attr('class', 'path-legend')
-        .style('pointer-events', 'none');
+        .attr('class', 'path-timeline')
+      .append('svg')
+        .attr('class', 'path-timeline-svg')
+        .attr('width', '100%')
+        .attr('height', '100%');
   }
 
   // Data for when the outbreak spread to each country (estimated)
@@ -310,6 +352,8 @@
     renderer = featureLayer.renderer();
     var borders = svg.append('g');
 
+    createTimeline(data);
+
     function drawTime(t) {
       if (transitioning) {
         if (!transitionNext) {
@@ -321,7 +365,7 @@
         }
         return;
       }
-      d3.select('.path-date').text(t.toDateString());
+      //d3.select('.path-date').text(t.toDateString());
       d3.select('.path-description').style('display', 'none');
       var filtered = data.filter(function (d) { return d.date <= t; })
         .map(function (d) { return d.country; });
@@ -543,10 +587,11 @@
       svg.selectAll('*').remove();
     }
     d3.selectAll('.path-buttons').remove();
-    d3.selectAll('.path-date').remove();
+    //d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
     d3.selectAll('.path-description').remove();
     d3.selectAll('.path-legend').remove();
+    d3.selectAll('.path-timeline').remove();
     transitioning = false;
     playing = false;
     transitionNext = false;
