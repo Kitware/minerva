@@ -83,13 +83,42 @@ path.border {
   padding: 10px;
 }
 
-.path-description {
+.path-description-container .path-description {
   position: absolute;
-  bottom: 80px;
+  bottom: 50px;
   background: rgba(255,255,255,0.75);
   border-radius: 10px;
   padding: 10px;
   width: 300px;
+  transform-origin: center bottom;
+  transform: scale(0.01);
+  opacity: 0;
+  transition: all 1s ease, opacity 1ms;
+}
+
+.path-description-container .path-icon {
+  position: absolute;
+  bottom: 65px;
+  transform: scale(1.5);
+  transform-origin: center bottom;
+  transition: transform linear 75ms;
+  cursor: pointer;
+}
+
+.path-description-container .path-icon:hover {
+  transform: scale(2);
+}
+
+.path-description-container.active .path-description {
+  position: absolute;
+  opacity: 1;
+  transform: scale(1);
+  bottom: 100px;
+  left: calc(50% - 150px) !important;
+}
+
+.path-description-container.active .path-icon {
+  color: steelblue;
 }
 
 .path-legend {
@@ -116,4 +145,17 @@ path.border {
 
 .axis text {
   font: 10px sans-serif;
+}
+
+path.border {
+  fill-opacity: 0.65;
+  transition: fill-opacity ease 75ms;
+}
+
+path.border:hover {
+  fill-opacity: 0.9;
+}
+
+path.border.hovered {
+  fill-opacity: 0.9;
 }
