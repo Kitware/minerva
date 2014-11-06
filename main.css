@@ -57,7 +57,6 @@ path.border {
   position: absolute;
   bottom: 30px;
   right: 30px;
-  display: none;
 }
 
 .path-buttons > div {
@@ -68,8 +67,8 @@ path.border {
 .path-timeline {
   position: absolute;
   left: 30px;
-  bottom: 30px;
-  width: calc(100% - 60px);
+  bottom: 25px;
+  width: calc(100% - 140px);
   height: 40px;
 }
 
@@ -98,7 +97,7 @@ path.border {
 
 .path-description-container .path-icon {
   position: absolute;
-  bottom: 65px;
+  bottom: 55px;
   transform: scale(1.5);
   transform-origin: center bottom;
   transition: transform linear 75ms;
@@ -113,7 +112,7 @@ path.border {
   position: absolute;
   opacity: 1;
   transform: scale(1);
-  bottom: 100px;
+  bottom: 90px;
   left: calc(50% - 150px) !important;
 }
 

@@ -25,12 +25,24 @@
   var now, nData, drawTime;
 
   function createTimeline(data) {
-    var scl, dates, axis;
+    var scl, dates, axis, timeline_bar;
 
     dates = data.map(function (d) { return d.date; });
     scl = d3.time.scale()
       .domain([new Date('November 15, 2013'), new Date('November 15, 2014')])
       .range([10, $('.path-timeline-svg').width() - 10]);
+
+    timeline_bar = d3.select('.path-timeline-svg').append('rect')
+      .attr('width', 0)
+      .attr('height', 10)
+      .attr('x', 5)
+      .attr('y', 5)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .style({
+        'fill': 'yellow',
+        'stroke': 'none',
+      });
 
     d3.select('.path-timeline-svg').append('rect')
       .attr('width', Number($('.path-timeline-svg').width()) - 10)
@@ -56,6 +68,7 @@
         .attr('transform', 'translate(0, 15)')
         .call(axis);
 
+    var showDescription = {};
 
     d3.select('body').selectAll('.path-description-container').data(data).enter()
       .append('div')
@@ -65,11 +78,19 @@
           .attr('class', 'path-description')
           .style('left', (scl(d.date) - 140) + 'px')
           .html(function (d) { return d.description; });
+
+        showDescription[d.date] = function () {
+          d3.selectAll('.path-description-container').classed('active', false);
+          d3.select(desc.node().parentElement).classed('active', true);
+        };
+
         d3.select(this).append('div')
           .attr('class', 'path-icon')
           .on('click', function () {
-            d3.selectAll('.path-description-container').classed('active', false);
-            d3.select(desc.node().parentElement).classed('active', true);
+            if (playing) {
+              return;
+            }
+            showDescription[d.date]();
             drawTime(d.date);
             d3.event.stopPropagation();
           })
@@ -97,6 +118,13 @@
           }
         });
       });
+
+    return function (d) {
+      timeline_bar.transition()
+        .duration(500)
+        .attr('width', scl(d));
+      showDescription[d]();
+    };
   }
 
   // draw animation icons
@@ -388,7 +416,7 @@
     renderer = featureLayer.renderer();
     var borders = svg.append('g');
 
-    createTimeline(data);
+    var tbar = createTimeline(data);
 
     drawTime = function (t) {
       if (transitioning) {
@@ -401,6 +429,8 @@
         }
         return;
       }
+
+      tbar(t);
       d3.selectAll('.trail').remove();
       d3.selectAll('.path-airplane').remove();
       //d3.select('.path-date').text(t.toDateString());
@@ -408,6 +438,7 @@
       var filtered = data.filter(function (d) { return d.date <= t; })
         .map(function (d) { return d.country; });
 
+      now = filtered.length - 1;
       var extent = $.extend({}, data[filtered.length - 1]).extent;
 
       _duration = 0;
@@ -589,7 +620,7 @@
           now = (now + 1) % n;
           modifyButtonState(now, n);
           drawTime(data[now].date);
-          window.setTimeout(run, 10000);
+          window.setTimeout(run, 5000);
         }
         modifyButtonState(now, n);
       }
@@ -634,7 +665,7 @@
     d3.selectAll('.path-buttons').remove();
     //d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
-    d3.selectAll('.path-description').remove();
+    d3.selectAll('.path-description-container').remove();
     d3.selectAll('.path-legend').remove();
     d3.selectAll('.path-timeline').remove();
     transitioning = false;
