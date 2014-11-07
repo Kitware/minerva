@@ -74,14 +74,25 @@
       .append('div')
         .attr('class', 'path-description-container')
       .each(function (d) {
+        var delta, x, w, off;
+
+        w = $('body').width();
+        x = scl(d.date) - 120;
+        off = Math.max(10, Math.min(w - 160, x));
+        delta = x - off;
+
+        console.log(delta);
         var desc= d3.select(this).append('div')
           .attr('class', 'path-description')
-          .style('left', (scl(d.date) - 140) + 'px')
+          .style('left', off + 'px')
+          .style('transform-origin', (150 + delta) + 'px bottom')
           .html(function (d) { return d.description; });
 
         showDescription[d.date] = function () {
-          d3.selectAll('.path-description-container').classed('active', false);
-          d3.select(desc.node().parentElement).classed('active', true);
+          d3.selectAll('.path-description-container')
+            .classed('active', false);
+          d3.select(desc.node().parentElement)
+            .classed('active', true);
         };
 
         d3.select(this).append('div')
@@ -618,10 +629,14 @@
 
       function run() {
         if (playing) {
-          now = (now + 1) % n;
-          modifyButtonState(now, n);
-          drawTime(data[now].date);
-          window.setTimeout(run, 5000);
+          if (now < n - 1) {
+            now = now + 1;
+            modifyButtonState(now, n);
+            drawTime(data[now].date);
+            window.setTimeout(run, 5000);
+          } else {
+            playing = false;
+          }
         }
         modifyButtonState(now, n);
       }

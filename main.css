@@ -89,7 +89,6 @@ path.border {
   border-radius: 10px;
   padding: 10px;
   width: 300px;
-  transform-origin: center bottom;
   transform: scale(0.01);
   opacity: 0;
   transition: all 1s ease, opacity 1ms;
@@ -113,7 +112,6 @@ path.border {
   opacity: 1;
   transform: scale(1);
   bottom: 90px;
-  left: calc(50% - 150px) !important;
 }
 
 .path-description-container.active .path-icon {
