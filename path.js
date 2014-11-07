@@ -170,7 +170,7 @@
   // obtained from:
   //   http://en.wikipedia.org/wiki/Ebola_virus_epidemic_in_West_Africa
   // and references therein.
-  var duration = 500;
+  var duration = 1000;
   var data = [
     {
       date: new Date('December 6, 2013'),
@@ -461,6 +461,7 @@
       //d3.selectAll('line.trail').style('stroke-opacity', 0.5);
 
       extent.duration = _duration;
+      extent.interp = d3.interpolateZoom;
       transitioning = true;
       if (_duration > 0) {
         d3.select('.path-buttons').selectAll('.btn').classed('disabled', true);

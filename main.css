@@ -122,8 +122,8 @@ path.border {
 
 .path-legend {
   position: absolute;
-  left: 30px;
-  top: 80px;
+  left: 100px;
+  top: 60px;
   background: rgba(255,255,255,0.75);
   border-radius: 10px;
   padding: 10px;
