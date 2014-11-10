@@ -22,7 +22,121 @@
   var animating = false;
   var transitioning = false;
   var transitionNext = false;
-  var now, nData;
+  var now, nData, drawTime;
+
+  function createTimeline(data) {
+    var scl, dates, axis, timeline_bar;
+
+    dates = data.map(function (d) { return d.date; });
+    scl = d3.time.scale()
+      .domain([new Date('November 15, 2013'), new Date('November 15, 2014')])
+      .range([10, $('.path-timeline-svg').width() - 10]);
+
+    timeline_bar = d3.select('.path-timeline-svg').append('rect')
+      .attr('width', 0)
+      .attr('height', 10)
+      .attr('x', 5)
+      .attr('y', 5)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .style({
+        'fill': 'yellow',
+        'stroke': 'none',
+      });
+
+    d3.select('.path-timeline-svg').append('rect')
+      .attr('width', Number($('.path-timeline-svg').width()) - 10)
+      .attr('height', 10)
+      .attr('x', 5)
+      .attr('y', 5)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .style({
+        'fill': 'white',
+        'stroke-width': 2,
+        'stroke': 'black',
+        'fill-opacity': 1e-6
+      });
+
+    axis = d3.svg.axis()
+      .scale(scl)
+      .orient('bottom');
+
+    d3.select('.path-timeline-svg')
+      .append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0, 15)')
+        .call(axis);
+
+    var showDescription = {};
+
+    d3.select('body').selectAll('.path-description-container').data(data).enter()
+      .append('div')
+        .attr('class', 'path-description-container')
+      .each(function (d) {
+        var delta, x, w, off;
+
+        w = $('body').width();
+        x = scl(d.date) - 120;
+        off = Math.max(10, Math.min(w - 160, x));
+        delta = x - off;
+
+        console.log(delta);
+        var desc= d3.select(this).append('div')
+          .attr('class', 'path-description')
+          .style('left', off + 'px')
+          .style('transform-origin', (150 + delta) + 'px bottom')
+          .html(function (d) { return d.description; });
+
+        showDescription[d.date] = function () {
+          d3.selectAll('.path-description-container')
+            .classed('active', false);
+          d3.select(desc.node().parentElement)
+            .classed('active', true);
+        };
+
+        d3.select(this).append('div')
+          .attr('class', 'path-icon')
+          .on('click', function () {
+            if (playing) {
+              return;
+            }
+            showDescription[d.date]();
+            drawTime(d.date);
+            d3.event.stopPropagation();
+          })
+          .style('left', (scl(d.date) + 30) + 'px')
+          .append('span')
+          .attr('class', 'glyphicon glyphicon-comment');
+      })
+      .on('mouseover', function (d) {
+        d3.selectAll('path.border').each(function (e) {
+          if (e.name === d.country ||
+              (d.country === 'United States (no match)' &&
+               e.name === 'United States')
+            ) {
+            d3.select(this).classed('hovered', true);
+          }
+        });
+      })
+      .on('mouseout', function (d) {
+        d3.selectAll('path.border').each(function (e) {
+          if (e.name === d.country ||
+              (d.country === 'United States (no match)' &&
+               e.name === 'United States')
+            ) {
+            d3.select(this).classed('hovered', false);
+          }
+        });
+      });
+
+    return function (d) {
+      timeline_bar.transition()
+        .duration(500)
+        .attr('width', scl(d));
+      showDescription[d]();
+    };
+  }
 
   // draw animation icons
   function loadIcons() {
@@ -34,37 +148,40 @@
       d3.event.stopPropagation();
     });
 
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-first')
-      .append('span').attr('class', 'glyphicon glyphicon-fast-backward');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-back')
-      .append('div').attr('class', 'glyphicon glyphicon-step-backward');
     buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-play')
       .append('div').attr('class', 'glyphicon glyphicon-play');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-step')
-      .append('div').attr('class', 'glyphicon glyphicon-step-forward');
-    buttonBox.append('div').attr('class', 'btn btn-default btn-lg path-end')
-      .append('div').attr('class', 'glyphicon glyphicon-fast-forward');
 
     // draw a date box
-    body.append('div').attr('class', 'path-date');
+    //body.append('div').attr('class', 'path-date');
 
     // draw an info box
+    /*
     body.append('div').attr('class', 'path-description')
       .on('click', function () {
         d3.event.stopPropagation();
       });
+    */
 
     // draw a legend box
     body.append('div')
         .attr('class', 'path-legend')
         .style('pointer-events', 'none');
+
+
+    // draw a timeline
+    body.append('div')
+        .attr('class', 'path-timeline')
+      .append('svg')
+        .attr('class', 'path-timeline-svg')
+        .attr('width', '100%')
+        .attr('height', '100%');
   }
 
   // Data for when the outbreak spread to each country (estimated)
   // obtained from:
   //   http://en.wikipedia.org/wiki/Ebola_virus_epidemic_in_West_Africa
   // and references therein.
-  var duration = 500;
+  var duration = 1000;
   var data = [
     {
       date: new Date('December 6, 2013'),
@@ -189,7 +306,7 @@
       ].join('')
     },
     {
-      date: new Date('September 25, 2014'),
+      date: new Date('September 22, 2014'),
       country: 'Spain',
       city: 'Madrid',
       source: 'Sierra Leone',
@@ -209,7 +326,7 @@
       ].join('')
     },
     {
-      date: new Date('September 30, 2014'),
+      date: new Date('October 2, 2014'),
       country: 'United States',
       city: 'Dallas',
       source: 'Liberia',
@@ -230,7 +347,7 @@
       ].join('')
     },
     {
-      date: new Date('October 23, 2014'),
+      date: new Date('October 20, 2014'),
       country: 'United States (no match)',
       city: 'New York City',
       source: 'Guinea',
@@ -249,7 +366,7 @@
       ].join('')
     },
     {
-      date: new Date('October 24, 2014'),
+      date: new Date('October 28, 2014'),
       country: 'Mali',
       city: 'Kayes',
       source: 'Guinea',
@@ -310,7 +427,9 @@
     renderer = featureLayer.renderer();
     var borders = svg.append('g');
 
-    function drawTime(t) {
+    var tbar = createTimeline(data);
+
+    drawTime = function (t) {
       if (transitioning) {
         if (!transitionNext) {
           transitionNext = true;
@@ -321,11 +440,16 @@
         }
         return;
       }
-      d3.select('.path-date').text(t.toDateString());
-      d3.select('.path-description').style('display', 'none');
+
+      tbar(t);
+      d3.selectAll('.trail').remove();
+      d3.selectAll('.path-airplane').remove();
+      //d3.select('.path-date').text(t.toDateString());
+      //d3.select('.path-description').style('display', 'none');
       var filtered = data.filter(function (d) { return d.date <= t; })
         .map(function (d) { return d.country; });
 
+      now = filtered.length - 1;
       var extent = $.extend({}, data[filtered.length - 1]).extent;
 
       _duration = 0;
@@ -338,14 +462,17 @@
         if (d.trail && (i < 0 || j === filtered.length - 1)) {
           d.trail.remove();
         }
+        /*
         if (j === filtered.length - 1 && data[j].description) {
           d3.select('.path-description').style('display', null)
             .html(data[j].description);
         }
+        */
       });
-      d3.selectAll('line.trail').style('stroke-opacity', 0.5);
+      //d3.selectAll('line.trail').style('stroke-opacity', 0.5);
 
       extent.duration = _duration;
+      extent.interp = d3.interpolateZoom;
       transitioning = true;
       if (_duration > 0) {
         d3.select('.path-buttons').selectAll('.btn').classed('disabled', true);
@@ -356,19 +483,25 @@
 
         modifyButtonState(now, nData);
         transitioning = false;
-        var selection = app.util.drawBorders(filtered, borders, renderer);
+        var selection = app.util.drawBorders(filtered, borders, renderer, true);
         selection
-          .attr('display', function (d) {
+          .style('fill', function (d) {
+            return color(d.name);
+          })
+          .style('stroke-opacity', function (d) {
             if (d.name === filtered[filtered.length - 1]) {
-              return 'none';
+              return 1e-6;
             } else {
               return null;
             }
           })
-          .style('fill', function (d) {
-            return color(d.name);
-          })
-          .style('fill-opacity', 0.7);
+          .style('fill-opacity', function (d) {
+            if (d.name === filtered[filtered.length - 1]) {
+              return 1e-6;
+            } else {
+              return null;
+            }
+          });
 
         var current = data[filtered.length - 1];
         var sourceName = current.source;
@@ -380,7 +513,6 @@
           .attr('stroke', d3.rgb(color(sourceName)).darker())
           .style('stroke-linecap', 'round')
           .style('stroke-opacity', 1);
-        current.trail = trail;
 
         function getTransform(t) {
           var scl = renderer.scaleFactor();
@@ -443,18 +575,18 @@
             .duration(3000)
             .attrTween('transform', function () { return getTransform; })
             .each('end', function () {
-              svg.selectAll('path.border').attr('display', null);
+              svg.selectAll('path.border').style('fill-opacity', null).style('stroke-opacity', null);
             }).remove();
           featureLayer.geoOn(geo.event.d3Rescale, scaleAirplane);
 
         } else {
-          svg.selectAll('path.border').attr('display', null);
           trail.remove();
+          svg.selectAll('path.border').style('fill-opacity', null).style('stroke-opacity', null);
         }
 
       }, _duration * 1.1
       );
-    }
+    };
 
     function modifyButtonState(i, n) {
       if (playing) {
@@ -497,10 +629,14 @@
 
       function run() {
         if (playing) {
-          now = (now + 1) % n;
-          modifyButtonState(now, n);
-          drawTime(data[now].date);
-          window.setTimeout(run, 10000);
+          if (now < n - 1) {
+            now = now + 1;
+            modifyButtonState(now, n);
+            drawTime(data[now].date);
+            window.setTimeout(run, 5000);
+          } else {
+            playing = false;
+          }
         }
         modifyButtonState(now, n);
       }
@@ -543,10 +679,11 @@
       svg.selectAll('*').remove();
     }
     d3.selectAll('.path-buttons').remove();
-    d3.selectAll('.path-date').remove();
+    //d3.selectAll('.path-date').remove();
     d3.selectAll('.path-airplane').remove();
-    d3.selectAll('.path-description').remove();
+    d3.selectAll('.path-description-container').remove();
     d3.selectAll('.path-legend').remove();
+    d3.selectAll('.path-timeline').remove();
     transitioning = false;
     playing = false;
     transitionNext = false;
