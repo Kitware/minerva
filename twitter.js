@@ -29,7 +29,7 @@
       window.setTimeout(startStream, 1000);
       return;
     }
-    tangelo.stream.run(key, updateTweets, 1000);
+    tangelo.stream.run(key, updateTweets, 5000);
   }
 
   $(function () {
