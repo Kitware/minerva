@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ebola outbreak timeline</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"> -->
+<style>
+/*body {
+  padding-top: 50px;
+}*/
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 0.5px;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+}
+
+.inset {
+    padding-top: 0px;
+    padding-bottom: 60px;
+    padding-left: 60px;
+    padding-right: 60px;
+}
+
+.inset-right {
+    padding-right: 150px;
+}
+
+.carousel {
+    background: #e7e7e7;
+    color: #222;
+    /*margin-top: 10px;*/
+    /*border: 1px solid #aaa;*/
+}
+
+.carousel-control {
+    width: 60px;
+}
+
+.carousel-control.left {
+    background-image: none;
+}
+
+.carousel-control.right {
+    background-image: none;
+}
+
+.carousel-indicators li {
+  background-color: #999;
+  background-color: rgba(70,70,70,.25);
+}
+
+.carousel-indicators .active {
+  background-color: #444;
+}
+
+/*.form-inline {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}*/
+
+.btn-group {
+    margin-top: 10px;
+}
+
+.black {
+    color: #000;
+}
+
+.gray {
+    color: #555;
+}
+
+.icon-control {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.navbar {
+    margin-bottom: 0px;
+    border: none;
+}
+
+.navbar-brand {
+    color: #ccc;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
+    background-color: #e7e7e7;
+    color: #555;
+}
+
+</style>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6042509-23', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</head>
+<body>
+
+
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Ebola Explorer</a>
+            <ul class="nav navbar-nav" title="Show or hide information box">
+                <li class="active"><a href="/ebola/timeline/">Timeline</a></li>
+<!--
+                <li><a href="/ebola/minerva/">Map</a></li>
+                <li><a href="/ebola/twitter/">Twitter</a></li>
+-->
+            </ul>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right info" title="Show or hide information box">
+                <li class="active"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+    <!-- <div class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <div class="navbar-brand">Ebola outbreak timeline</div>
+            </div>
+
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="active"><a href="./">Default</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </div> -->
+    <!-- </div> -->
+
+    <div class="container">
+        <div id="main-carousel" class="carousel slide">
+            <!-- Indicators -->
+            <ol class="carousel-indicators">
+                <li data-target="#main-carousel" data-slide-to="0" class="active"></li>
+                <li data-target="#main-carousel" data-slide-to="1"></li>
+                <li data-target="#main-carousel" data-slide-to="2"></li>
+                <li data-target="#main-carousel" data-slide-to="3"></li>
+                <li data-target="#main-carousel" data-slide-to="4"></li>
+                <li data-target="#main-carousel" data-slide-to="5"></li>
+                <li data-target="#main-carousel" data-slide-to="6"></li>
+            </ol>
+
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner">
+<!--
+                <a class="pull-right icon-control" href="#">
+                    <span class="glyphicon glyphicon-remove gray inset-right close-info" title="Hide information box"></span>
+                </a>
+ -->
+                <div class="item active" id="slide-overview">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Overview</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        Below is a representation of the 2014 Ebola outbreak in western Africa.
+                                        The lines infer disease transmission from one individual to another.
+                                        Each small icon represents one case of the disease.
+                                        As the outbreak spreads to many people, we represent multiple infections
+                                        with larger icons.
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>
+                                        The transmission links are only random
+                                        estimates. True tracing of individual transmission is one of the great challenges
+                                        for controlling the outbreak and may not be possible.
+                                        Click the arrows at the left and right to learn more about the outbreak
+                                        of the disease, or use the buttons below to filter and explore the data.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" id="slide-origin">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Origin</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        The outbreak was discovered upon <a href="http://healthmap.org/site/diseasedaily/article/first-recorded-cases-ebola-guinea-32314" target="_blank">first reports</a> on March 23, 2014 in Guinea,
+                                        where around 50 cases were suspected to exist and the outbreak was well underway.
+                                        It is now known that a Guinean 2-year-old is the <a href="http://bigstory.ap.org/article/fbba1a4729c7482c993a9734b9f8c8a9/patient-zero-ebola-outbreak-was-guinean-toddler" target="_blank">first known victim</a>
+                                        of Ebola who became sick in December 2013.
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>
+                                        According to <a href="http://currents.plos.org/outbreaks/article/obk-14-0036-early-epidemic-dynamics-of-the-west-african-2014-ebola-outbreak-estimates-derived-with-a-simple-two-parameter-model/" target="_blank">research models</a> accounting for rate of disease transmission,
+                                        this matches estimates that the initial case may have been 60 to 90 days prior to the first reports.
+                                        It is thought that the most likely cause was transmission of the disease from bats to
+                                        humans through consuming bat meat or contact with bat excrement.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" id="slide-middle">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Ebola spreads through Africa</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        From it's start in Guinea, Ebola began appearing in neighboring Sierra Leone and Liberia
+                                        in May and June.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" id="slide-middle-counts">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>The pace quickens</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        We are now plotting cases across time in a cumulative case count.
+                                        In this time period, we see that cases in Guinea did not grow rapidly, but outbreaks in Sierra Leone
+                                        and Liberia contributed to a renewal of Ebola's rapid expansion.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" id="slide-recent">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Dire conditions</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        Back in the outbreak connections view, we see that
+                                        August and September saw explosive growth of the disease in Guinea, Sierra Leone,
+                                        and Liberia as health care facilities were stretched past their limits.
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>
+                                        Nigeria (green) also saw a small outbreak, but it has since been contained, and
+                                        later it was confirmed that the outbreak was over in that country after a 21-day waiting period with
+                                        no new Ebola cases appearing.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <h3></h3>
+                        <p>
+                        </p>
+                    </div>
+                </div>
+                <div class="item" id="slide-recent-counts">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Liberia becomes the main concern</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        Plotting these cumulative cases shows that
+                                        though the outbreak began in Guinea, Liberia quickly outpaced all other countries
+                                        and became the most dangerous place for Ebola.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" id="slide-travel">
+                    <div class="inset">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Ebola travels</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        A small number of travel-related cases have been reported in Senegal, Spain, and the US,
+                                        with the only known transmission occuring in the US, where two health care workers were
+                                        infected.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <a class="left carousel-control" href="#main-carousel" role="button" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left black"></span>
+            </a>
+            <a class="right carousel-control" href="#main-carousel" role="button" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right black"></span>
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-inline" style="background-color:#f5f5f5">
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-link active">
+                    <input type="radio" name="options" id="date-all" checked="checked"> All
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="date-early"> Origin
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="date-middle"> Middle
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="date-recent"> Recent
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-inline time" style="padding-top:18px;padding-bottom:18px;background-color:#f5f5f5">
+        <!-- <div class="row" style="padding-top:18px;padding-bottom:18px;background-color:#f5f5f5"> -->
+        </div>
+    </div>
+
+    <div class="container news" style="margin-top:18px;"></div>
+
+    <div class="container">
+        <div class="form-inline">
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-link active">
+                    <input type="radio" name="options" id="tree" checked="checked"> Hypothetical tree
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="total"> Case count
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="country"> By country
+                </label>
+            </div>
+        </div>
+        <div class="form-inline">
+            <div class="btn-group" data-toggle="buttons" id="countries">
+                <label class="btn btn-link active">
+                    <input type="radio" name="options" id="show-all" checked="checked"> All
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-guinea"> Guinea
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-liberia"> Liberia
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-nigeria"> Nigeria
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-sierraleone"> Sierra Leone
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-senegal"> Senegal
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-us"> US
+                </label>
+                <label class="btn btn-link">
+                    <input type="radio" name="options" id="show-spain"> Spain
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main" style="margin-top:18px;"></div>
+
+    <div class="container">
+        <hr>
+
+        <p class="text-center">
+            Brought to you by <a href="http://www.kitware.com">Kitware</a>'s <a href="http://www.kitware.com/solutions/dataanalytics/dataanalytics.html">data and analytics</a> team.
+            News data from <a href="http://healthmap.org/ebola#timeline">HealthMap</a>.
+            Follow us on Twitter <a href="https://twitter.com/Kitware">@kitware</a> <a href="https://twitter.com/jeffbaumes">@jeffbaumes</a> <a href="https://twitter.com/healthmap">@healthmap</a>.<br>
+            Work sponsored by the Air Force Research Laboratory and DARPA XDATA program.
+        </p>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="index.js"></script>
+</body>
+</html>
