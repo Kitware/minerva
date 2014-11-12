@@ -357,7 +357,7 @@
       },
       description: [
         'On <a href="http://www.nytimes.com/interactive/2014/10/01/us/retracing-the-steps-of-the-dallas-ebola-patient.html" target="path">',
-        'September 19, 2014,</a> a man arrived in Dallas from Monrovia, Liberia.  His initial screening prior to bording the ',
+        'September 19, 2014,</a> a man arrived in Dallas from Monrovia, Liberia.  His initial screening prior to boarding the ',
         'flight showed no signs of illness.  On September 24, he fell ill and sought care at a nearby ',
         'hospital, but was sent home.  After his conditioned worsened, he returned to the hospital several ',
         'days later.  On September 30th, blood tests confirmed that he had contracted Ebola.'
@@ -379,7 +379,7 @@
       },
       description: [
         'On <a href="http://www.nbcnews.com/storyline/ebola-virus-outbreak/new-york-doctor-just-back-africa-has-ebola-n232561" ',
-        'target="path">October 23,</a>, a doctor from Doctors without Borders tested positive for Ebola in ',
+        'target="path">October 23</a>, a doctor from Doctors without Borders tested positive for Ebola in ',
         'New York City after returning from Guinea several days prior.'
       ].join('')
     },
@@ -399,7 +399,7 @@
       },
       description: [
         'On <a href="http://abcnews.go.com/Health/wireStory/threat-break-isolation-liberia-food-26399022" ',
-        'target="path">October 23</a> an official from Mali confirmed that a 2-year-old girl from Guinea ',
+        'target="path">October 23</a>, an official from Mali confirmed that a 2-year-old girl from Guinea ',
         'had tested positive for Ebola in the Malian town of Keyes.'
       ].join('')
     }
