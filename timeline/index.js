@@ -799,6 +799,7 @@ $(function () {
             reports.forEach(function (d, i) {
                 d.y = Math.random();
                 d.index = i;
+                d.formatted_date = new Date(d.date).toDateString();
             });
             drawChart();
         });
