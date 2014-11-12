@@ -198,9 +198,9 @@
         'The ongoing Ebola outbreak in West Africa is believed to have ',
         '<a href="http://edition.cnn.com/2014/10/28/health/ebola-patient-zero/index.html" ',
         'target="path">started</a> ',
-        'on December 6, 2013 in southern Guinea when a 2-year-old boy died of ',
-        'the disease.  A short time later, several members of his family as ',
-        'well as the doctor treating him also fell ill.'
+        'on December 6, 2013, in southern Guinea when a 2-year-old boy died of ',
+        'the disease.  A short time later, several members of his family, as ',
+        'well as the doctor treating him, also fell ill.'
       ].join('')
     },
     {
@@ -219,7 +219,7 @@
         'By late April of 2014, the outbreak had spread into Liberia from ',
         'Guinea.  A ',
         '<a href="http://www.who.int/csr/don/2014_03_27_ebola/en/" ',
-        'target="path">WHO report</a> on March 1st reported that outbreak ',
+        'target="path">WHO report</a> on March 1st stated that the outbreak ',
         'in Guinea had increased to 103 including 66 deaths.'
       ].join('')
     },
@@ -260,7 +260,7 @@
       },
       description: [
         'On <a href="http://www.who.int/csr/don/2014_07_27_ebola/en/" target="path">July 20th',
-        '</a>, an infected man flew from Liberia to Lagos, Nigeria ',
+        '</a>, an infected man flew from Liberia to Lagos, Nigeria, ',
         'and died a few days later.  By September 22nd, the ',
         '<a href="http://apps.who.int/iris/bitstream/10665/134449/1/roadmapupdate22sept14_eng.pdf" ',
         'target="path">WHO reported</a> 20 confirmed cases in Nigeria.'
@@ -280,8 +280,8 @@
       },
       description: [
         'The WHO reported that on <a href="http://www.who.int/csr/don/2014_08_27_ebola/en/" target="path">',
-        'August 11, 2014</a> a woman in the Democratic Republic of Congo had died of Ebola.  It ',
-        'is believed that she had contracted the illness from an animal and it was unrelated to the ',
+        'August 11, 2014,</a> a woman in the Democratic Republic of Congo had died of Ebola.  It ',
+        'is believed that she had contracted the illness from an animal, and it was unrelated to the ',
         'outbreak in Guinea.'
       ].join('')
     },
@@ -340,7 +340,7 @@
       },
       description: [
         'On <a href="http://www.nytimes.com/interactive/2014/10/01/us/retracing-the-steps-of-the-dallas-ebola-patient.html" target="path">',
-        'September 19, 2014</a> a man arrived in Dallas from Monrovia, Liberia.  His initial screening prior to bording the ',
+        'September 19, 2014,</a> a man arrived in Dallas from Monrovia, Liberia.  His initial screening prior to bording the ',
         'flight showed no signs of illness.  On September 24, he fell ill and sought care at a nearby ',
         'hospital, but was sent home.  After his conditioned worsened, he returned to the hospital several ',
         'days later.  On September 30th, blood tests confirmed that he had contracted Ebola.'
@@ -361,7 +361,7 @@
       },
       description: [
         'On <a href="http://www.nbcnews.com/storyline/ebola-virus-outbreak/new-york-doctor-just-back-africa-has-ebola-n232561" ',
-        'target="path">October 23</a>, a doctor from Doctors without Borders tested positive for Ebola in ',
+        'target="path">October 23,</a>, a doctor from Doctors without Borders tested positive for Ebola in ',
         'New York City after returning from Guinea several days prior.'
       ].join('')
     },
