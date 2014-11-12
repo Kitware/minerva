@@ -7,6 +7,7 @@ import sys
 import time
 import json
 import atexit
+import pymongo
 
 # Load config
 minerva_ebola_config = json.load(open(
@@ -22,6 +23,8 @@ class EbolaListener(StreamListener):
     def __init__(self):
         StreamListener.__init__(self)
         self._buffer = []
+        self.mongo = pymongo.MongoClient().ebola.minerva
+        print "self.mongo ", self.mongo
 
     def on_data(self, data):
         json_data = json.loads(data)
@@ -30,7 +33,17 @@ class EbolaListener(StreamListener):
             retweet_cont = 0
             if 'retweet_cont' in json_data.keys():
                 retweet_cont = json_data['retweet_cont']
-            self._buffer.append(dict({
+
+            # self._buffer.append(dict({
+            #     "id": json_data['id_str'],
+            #     "location": json_data['geo'],
+            #     "text": json_data['text'],
+            #     "timestamp_ms": json_data['timestamp_ms'],
+            #     "created_at": json_data['created_at'],
+            #     "retweeted" : json_data['retweeted'],
+            #     "retweet_cont" : retweet_cont
+            # }))
+            rec = {
                 "id": json_data['id_str'],
                 "location": json_data['geo'],
                 "text": json_data['text'],
@@ -38,7 +51,10 @@ class EbolaListener(StreamListener):
                 "created_at": json_data['created_at'],
                 "retweeted" : json_data['retweeted'],
                 "retweet_cont" : retweet_cont
-            }))
+            }
+            # Insert data in mongodb
+            self.mongo.insert(rec)
+
         return True
 
     def on_error(self, status):
@@ -65,15 +81,22 @@ atexit.register(exitHandler)
 
 
 def stream():
+    print "stream 1"
     listn = EbolaListener()
     auth = OAuthHandler(minerva_ebola_config["twitter"]["CONSUMER_KEY"],
                         minerva_ebola_config["twitter"]["CONSUMER_SECRET"])
     auth.set_access_token(minerva_ebola_config["twitter"]["ACCESS_KEY"],
                           minerva_ebola_config["twitter"]["ACCESS_SECRET"])
     stream = Stream(auth, listn)
-    stream.filter(track=['ebola'], async=True)
+    stream.filter(track=['ebola'], async=False)
+    print "stream 2"
 
-    while not _exit:
-        yield listn.getNewTweets()
+    # while not _exit:
+    #     yield listn.getNewTweets()
 
-    stream.disconnect()
+    #stream.disconnect()
+
+if __name__ == '__main__':
+    print "main"
+    stream()
+

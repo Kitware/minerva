@@ -156,3 +156,108 @@ path.border:hover {
 path.border.hovered {
   fill-opacity: 0.9;
 }
+
+/*body {
+  padding-top: 50px;
+}*/
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 0.5px;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+}
+
+.inset {
+    padding-top: 0px;
+    padding-bottom: 60px;
+    padding-left: 60px;
+    padding-right: 60px;
+}
+
+.inset-right {
+    padding-right: 150px;
+}
+
+.carousel {
+    background: #e7e7e7;
+    color: #222;
+    /*margin-top: 10px;*/
+    /*border: 1px solid #aaa;*/
+}
+
+.carousel-control {
+    width: 60px;
+}
+
+.carousel-control.left {
+    background-image: none;
+}
+
+.carousel-control.right {
+    background-image: none;
+}
+
+.carousel-indicators li {
+  background-color: #999;
+  background-color: rgba(70,70,70,.25);
+}
+
+.carousel-indicators .active {
+  background-color: #444;
+}
+
+/*.form-inline {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}*/
+
+.btn-group {
+    margin-top: 10px;
+}
+
+.black {
+    color: #000;
+}
+
+.gray {
+    color: #555;
+}
+
+.icon-control {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.navbar {
+    margin-bottom: 0px;
+    border: none;
+}
+
+.navbar-brand {
+    color: #ccc;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
+    background-color: #e7e7e7;
+    color: #555;
+}

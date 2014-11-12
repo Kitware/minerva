@@ -29,13 +29,13 @@
       window.setTimeout(startStream, 1000);
       return;
     }
-    tangelo.stream.run(key, updateTweets);
+    tangelo.stream.run(key, updateTweets, 5000);
   }
 
   $(function () {
     d3.select('#twitter').classed('disabled', true);
     if (window.tangelo) {
-      tangelo.stream.start("minerva", function(d) {
+      tangelo.stream.start("ebola", function(d) {
         key = d;
         console.log(key);
         if (key) {
