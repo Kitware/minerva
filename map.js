@@ -14,9 +14,11 @@ function createMap() {
   $(window).resize(resize);
 
   resize();
+
   return {
     map: m,
     gl: m.createLayer('feature'),
-    d3: m.createLayer('feature', {'renderer': 'd3Renderer'})
+    d3: m.createLayer('feature', {'renderer': 'd3Renderer'}),
+    ui: m.createLayer('ui').createWidget('slider')
   };
 }

@@ -56,18 +56,20 @@ path.border {
 .path-buttons {
   position: absolute;
   bottom: 30px;
-  left: 50%;
+  right: 30px;
 }
 
 .path-buttons > div {
-  position: relative;
-  left: -50%;
   background: rgba(0,0,0,0.25);
   border-radius: 10px;
 }
 
-.path-buttons .btn {
-  margin: 10px;
+.path-timeline {
+  position: absolute;
+  left: 30px;
+  bottom: 25px;
+  width: calc(100% - 140px);
+  height: 40px;
 }
 
 .path-date {
@@ -80,20 +82,46 @@ path.border {
   padding: 10px;
 }
 
-.path-description {
+.path-description-container .path-description {
   position: absolute;
-  left: 30px;
-  bottom: 30px;
+  bottom: 50px;
   background: rgba(255,255,255,0.75);
   border-radius: 10px;
   padding: 10px;
-  width: 25%;
+  width: 300px;
+  transform: scale(0.01);
+  opacity: 0;
+  transition: all 1s ease, opacity 1ms;
+}
+
+.path-description-container .path-icon {
+  position: absolute;
+  bottom: 55px;
+  transform: scale(1.5);
+  transform-origin: center bottom;
+  transition: transform linear 75ms;
+  cursor: pointer;
+}
+
+.path-description-container .path-icon:hover {
+  transform: scale(2);
+}
+
+.path-description-container.active .path-description {
+  position: absolute;
+  opacity: 1;
+  transform: scale(1);
+  bottom: 90px;
+}
+
+.path-description-container.active .path-icon {
+  color: steelblue;
 }
 
 .path-legend {
   position: absolute;
-  left: 30px;
-  top: 80px;
+  left: 100px;
+  top: 60px;
   background: rgba(255,255,255,0.75);
   border-radius: 10px;
   padding: 10px;
@@ -104,4 +132,27 @@ path.border {
   height: 1em;
   border-radius: 5px;
   margin-right: 10px;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+path.border {
+  fill-opacity: 0.65;
+  transition: fill-opacity ease 75ms;
+}
+
+path.border:hover {
+  fill-opacity: 0.9;
+}
+
+path.border.hovered {
+  fill-opacity: 0.9;
 }

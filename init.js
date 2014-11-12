@@ -37,7 +37,7 @@ var app = {};
 
   // Draw a list of countries into the context, svg,
   // returning a d3 selection of paths.
-  var drawBorders = function (countryList, svg, renderer) {
+  var drawBorders = function (countryList, svg, renderer, enterOnly) {
     if (!Array.isArray(countryList)) {
       countryList = [countryList];
     }
@@ -67,7 +67,7 @@ var app = {};
       .data(selectedCountries);
 
     selection.exit().remove();
-    selection
+    var enter = selection
       .enter()
         .append('path')
           .attr('d', function (d) { return line(d.border); })
@@ -79,6 +79,9 @@ var app = {};
       arg.scale = arg.scale || 1;
       d3.selectAll('path.border').style('stroke-width', width/arg.scale);
     });
+    if (enterOnly) {
+      selection = enter;
+    }
     return selection;
   };
 
