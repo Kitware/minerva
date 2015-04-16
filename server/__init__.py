@@ -29,6 +29,7 @@ from girder.constants import AccessType
 
 import girder_client
 
+
 class CustomAppRoot(object):
     """
     The webroot endpoint simply serves the main index HTML file of minerva.
@@ -125,7 +126,8 @@ class Shapefile(Resource):
         from gaia.pandas import GeopandasReader, GeopandasWriter
         reader = GeopandasReader()
         reader.file_name = os.path.join(tmpdir, item['name'])
-        geojsonFile = os.path.join(tmpdir, item['name'] + Shapefile.geojsonExtension)
+        geojsonFile = os.path.join(tmpdir, item['name'] +
+                                   Shapefile.geojsonExtension)
         writer = GeopandasWriter()
         writer.file_name = geojsonFile
         writer.format = 'GeoJSON'
@@ -152,7 +154,7 @@ class Shapefile(Resource):
     @loadmodel(model='item', level=AccessType.WRITE)
     def createGeoJson(self, item, params):
         # TODO need to figure out convention here
-        # for now, assuming a shapefile is stored as a single item with a certain name
+        # assumes a shapefile is stored as a single item with a certain name
         # and all of the shapefiles as files within that item with
         # the same name.
         #
@@ -194,4 +196,5 @@ def load(info):
     info['serverRoot'].api = info['serverRoot'].girder.api
 
     shapefile = Shapefile()
-    info['apiRoot'].item.route('POST', (':id', 'geojson'), shapefile.createGeoJson)
+    info['apiRoot'].item.route('POST', (':id', 'geojson'),
+                               shapefile.createGeoJson)
