@@ -1,1 +1,2 @@
 -e git+https://github.com/OpenGeoscience/gaia.git#egg=gaia[pandas,esgf]
+girder-client==0.1.0

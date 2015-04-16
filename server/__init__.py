@@ -19,13 +19,15 @@
 
 import mako
 import os
+import shutil
 import time
 
 from girder.api import access
 from girder.api.rest import Resource, loadmodel
 from girder.api.describe import Description
 from girder.constants import AccessType
-from girder.utility import assetstore_utilities
+
+import girder_client
 
 class CustomAppRoot(object):
     """
@@ -92,71 +94,91 @@ class CustomAppRoot(object):
 
 class Shapefile(Resource):
 
+    geojsonExtension = '.geojson'
 
+    def __init__(self):
+        self.client = None
 
-    def _createWorkDir(self, item):
+    def _initClient(self):
+        if self.client is None:
+            self.client = girder_client.GirderClient()
+            user, token = self.getCurrentUser(returnToken=True)
+            self.client.token = token['_id']
+
+    def _createWorkDir(self, itemId):
         tmpdir = os.path.join(os.getcwd(), 'tmp')
         if not os.path.exists(tmpdir):
             os.makedirs(tmpdir)
         # TODO clean up tmpdir if exception
         # TODO deal with tmpdir name collision
-        tmpdir = os.path.join(tmpdir, str(time.time()) + str(item['_id']))
-        if not os.path.exists(tmpdir):
-            os.makedirs(tmpdir)
-        tmpdir = os.path.join(tmpdir, item['name'])
+        tmpdir = os.path.join(tmpdir, str(time.time()) + itemId)
         if not os.path.exists(tmpdir):
             os.makedirs(tmpdir)
         return tmpdir
 
-    def _downloadItemFiles(self, item, tmpdir):
-        # TODO this will break if S3 assetstore
-        # need to catch exception, get the redirect, then
-        # download from the redirect
-        # possibly easier to use the girder python client
-        print tmpdir
-        for file in list(self.model('item').childFiles(item)):
-            print file
-            if file.get('assetstoreId'):
-                assetstore = self.model('assetstore').load(file['assetstoreId'])
-                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-                filestream = adapter.downloadFile(file, headers=False)
-                print filestream
-                outfile = os.path.join(tmpdir, file['name'])
-                print outfile
-                with open(outfile, 'w') as writer:
-                    for x in filestream():
-                        writer.write(x)
+    def _downloadItemFiles(self, itemId, tmpdir):
+        self._initClient()
+        self.client.downloadItem(itemId, tmpdir)
+        # TODO worry about stale authentication
 
     def _convertToGeoJson(self, item, tmpdir):
         from gaia.pandas import GeopandasReader, GeopandasWriter
         reader = GeopandasReader()
-        reader.file_name = tmpdir
-        outname = os.path.join(tmpdir, item['name'] + '.geojson')
+        reader.file_name = os.path.join(tmpdir, item['name'])
+        geojsonFile = os.path.join(tmpdir, item['name'] + Shapefile.geojsonExtension)
         writer = GeopandasWriter()
-        writer.file_name = outname
+        writer.file_name = geojsonFile
         writer.format = 'GeoJSON'
         writer.set_input(port=reader.get_output())
         writer.run()
+        return geojsonFile
 
-    def _addGeoJsonFileToItem(self):
-        pass
+    def _addGeoJsonFileToItem(self, itemId, geojsonFile):
+        self._initClient()
+        self.client.uploadFileToItem(itemId, geojsonFile)
+        # TODO worry about stale authentication
 
     def _cleanWorkDir(self, tmpdir):
-        pass
+        shutil.rmtree(tmpdir)
+
+    def _findFileId(self, item):
+        itemGeoJson = item['name'] + Shapefile.geojsonExtension
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemGeoJson:
+                return str(file['_id'])
+        return None
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
     def createGeoJson(self, item, params):
-        # grab all the files
+        # TODO need to figure out convention here
+        # for now, assuming a shapefile is stored as a single item with a certain name
+        # and all of the shapefiles as files within that item with
+        # the same name.
+        #
+        # ex: item['name'] = myshapefile
+        #     # abuse of notation for item.files
+        #     item.files[0]['name'] =  myshapefile.cpg
+        #     item.files[1]['name'] =  myshapefile.dbf
+        #     item.files[2]['name'] =  myshapefile.prj
+        #     item.files[3]['name'] =  myshapefile.shp
+        #     item.files[4]['name'] =  myshapefile.shx
+
+        # output is a file id for a geojson file in the item
+        fileId = self._findFileId(item)
+        if fileId is not None:
+            return fileId
+        # grab all the files in the shapefile
         # write them out to a temp dir
-        # convert them with gaia
-        print "createGeoJson"
-        tmpdir = self._createWorkDir(item)
-        self._downloadItemFiles(item, tmpdir)
-        self._convertToGeoJson(item, tmpdir)
-        self._addGeoJsonFileToItem()
+        # convert shapefile to geojson with gaia
+        # upload geojson as a file in the shapefile item
+        itemId = str(item['_id'])
+        tmpdir = self._createWorkDir(itemId)
+        self._downloadItemFiles(itemId, tmpdir)
+        geojsonFile = self._convertToGeoJson(item, tmpdir)
+        self._addGeoJsonFileToItem(itemId, geojsonFile)
         self._cleanWorkDir(tmpdir)
-        return "OK"
+        return self._findFileId(item)
 
     createGeoJson.description = (
         Description('Convert an item holding a shapefile into geojson.')
@@ -173,4 +195,3 @@ def load(info):
 
     shapefile = Shapefile()
     info['apiRoot'].item.route('POST', (':id', 'geojson'), shapefile.createGeoJson)
-
