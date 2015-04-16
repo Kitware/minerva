@@ -3,7 +3,18 @@
 ### Running Minerva
 
 - clone Minerva into the Girder plugins dir
-- grunt to rebuild Girder
+- pip install the `minerva/requirements.txt`
+
+    pip install -r requirements.txt
+
+- run npm install in the `minerva` directory to get Minerva's JS dependencies
+
+    npm install
+
+- grunt at the top level in the `girder` directory to build Minerva
+
+    grunt
+
 - enable the Minerva plugin through the Girder Admin console
 - restart Girder through the Girder Admin console
 

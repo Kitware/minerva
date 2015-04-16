@@ -66,6 +66,8 @@ module.exports = function (grunt) {
         }
 
         var jsDir = pluginDir + '/' + sourceDir + '/js';
+        // depends on npm install being run locally in this plugin dir
+        var geojsDistDir = pluginDir + '/node_modules/geojs/dist/built';
         if (fs.existsSync(jsDir)) {
             var files = {};
             // name this minerva.min.js instead of plugin.min.js
@@ -87,8 +89,8 @@ module.exports = function (grunt) {
                 jsDir + '/main.js'
             ];
             files[staticDir + '/minerva.libs.min.js'] = [
-                jsDir + '/lib/geo.ext.min.js',
-                jsDir + '/lib/geo.min.js'
+                geojsDistDir + '/geo.ext.min.js',
+                geojsDistDir + '/geo.min.js',
             ];
             grunt.config.set('uglify.' + pluginName, {
                 files: files

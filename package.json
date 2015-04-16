@@ -1,0 +1,9 @@
+{
+  "name": "minerva",
+  "version": "0.1.0",
+  "description": "An application for geospatial analytics.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "geojs": "0.4.1"
+  }
+}
