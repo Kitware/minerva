@@ -6,17 +6,22 @@ minerva.views.FrontPageView = girder.views.FrontPageView.extend({
     },
 
     renderMap: function () {
-        var map = geo.map({
+        var map,
+            layer,
+            reader,
+            data;
+
+        map = geo.map({
             node: '#m-map',
             center: { x: -125, y: 36.5}
         });
         map.createLayer('osm');
 
-        var layer = map.createLayer('feature');
+        layer = map.createLayer('feature');
         map.draw();
 
         //
-        var reader = geo.createFileReader('jsonReader', {'layer': layer});
+        reader = geo.createFileReader('jsonReader', {'layer': layer});
         // read a geojson file from a hardcoded server path
         $.ajax({
             url: 'http://localhost:8083/api/v1/file/552ecb6c0640fd0c790abb98/download',
