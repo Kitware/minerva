@@ -2,17 +2,18 @@ minerva.views.FrontPageView = girder.views.FrontPageView.extend({
 
     initialize: function () {
         girder.cancelRestRequests('fetch');
+        girder.events.on('m:renderMap', this.renderMap);
         this.render();
     },
 
-    renderMap: function () {
+    renderMap: function (geojsonFile) {
         var map,
             layer,
             reader,
             data;
 
         map = geo.map({
-            node: '#m-map',
+            node: '.m-map',
             center: { x: -125, y: 36.5}
         });
         map.createLayer('osm');
@@ -20,28 +21,22 @@ minerva.views.FrontPageView = girder.views.FrontPageView.extend({
         layer = map.createLayer('feature');
         map.draw();
 
-        //
-        reader = geo.createFileReader('jsonReader', {'layer': layer});
-        // read a geojson file from a hardcoded server path
+        reader = geo.createFileReader('jsonReader', {layer: layer});
+        // load a geojson file on top of the map
         $.ajax({
-            url: 'http://localhost:8083/api/v1/file/552ecb6c0640fd0c790abb98/download',
+            url: girder.apiRoot + '/file/' + geojsonFile._id + '/download',
             contentType: 'application/json',
             success: function (_data) {
                 data = _data;
-                console.log('success');
-                console.log(data);
             },
             complete: function () {
-                console.log('complete');
                 layer.clear();
-                reader.read(data, function() { map.draw(); });
+                reader.read(data, function () { map.draw(); });
             }
         });
     },
 
     render: function () {
-        this.$el.addClass('m-body-nopad');
-
         this.$el.html(minerva.templates.frontPage({
             apiRoot: girder.apiRoot,
             staticRoot: girder.staticRoot,
@@ -49,7 +44,10 @@ minerva.views.FrontPageView = girder.views.FrontPageView.extend({
             versionInfo: girder.versionInfo
         }));
 
-        this.renderMap();
+        new minerva.views.UploadShapefileView({
+            el: this.$('.m-upload-shapefile'),
+            parentView: this
+        }).render();
 
         return this;
     }

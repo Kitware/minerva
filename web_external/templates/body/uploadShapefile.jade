@@ -1,0 +1,19 @@
+.m-upload-shapefile-title Upload a Shapefile
+
+.m-upload-shapefile-description
+  p
+    | Upload all of the files associated with a single 
+    a(target="_blank", href="http://en.wikipedia.org/wiki/Shapefile") Shapefile 
+    | here.  At a minimum, this should include the 
+    b .shp 
+    | , 
+    b .shx 
+    | , and 
+    b .dbf 
+    | files.
+
+.m-upload-shapefile-container
+  label Enter a name for this Shapefile
+  input.m-shapefile-item-name.form-control(type="text", maxlength="#{maxNameLength}")
+  .m-upload-shapefile-error
+  .m-upload-shapefile-widget
