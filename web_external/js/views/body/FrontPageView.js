@@ -1,4 +1,4 @@
-minerva.views.FrontPageView = girder.views.FrontPageView.extend({
+minerva.views.FrontPageView = minerva.View.extend({
 
     initialize: function () {
         girder.cancelRestRequests('fetch');
