@@ -94,6 +94,10 @@ class CustomAppRoot(object):
 
 
 class Shapefile(Resource):
+# TODO may want to move this to romanesco
+# or else some system that allows ease of development on local or
+# romanesco
+# probably at least move it to separate module
 
     geojsonExtension = '.geojson'
 
@@ -169,7 +173,7 @@ class Shapefile(Resource):
         # output is a file id for a geojson file in the item
         fileId = self._findFileId(item)
         if fileId is not None:
-            return fileId
+            return {'_id': fileId}
         # grab all the files in the shapefile
         # write them out to a temp dir
         # convert shapefile to geojson with gaia
@@ -180,13 +184,46 @@ class Shapefile(Resource):
         geojsonFile = self._convertToGeoJson(item, tmpdir)
         self._addGeoJsonFileToItem(itemId, geojsonFile)
         self._cleanWorkDir(tmpdir)
-        return self._findFileId(item)
-
+        fileId = self._findFileId(item)
+        return {'_id': fileId}
     createGeoJson.description = (
         Description('Convert an item holding a shapefile into geojson.')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
+
+
+class MinervaFolder(Resource):
+
+    minervaFolder = 'minerva'
+
+    def findMinervaFolder(self, user):
+        # TODO could be improved with search by name to the db
+        for folder in self.model('folder').childFolders(parent=user,
+                                                        parentType='user',
+                                                        user=user):
+            if folder['name'] == MinervaFolder.minervaFolder:
+                return folder
+        return None
+
+    @access.public
+    @loadmodel(model='user', level=AccessType.WRITE)
+    def createMinervaFolder(self, user, params):
+        # TODO time for some docstrings
+        # create a minerva folder under the user if one doesn't exist
+        folder = self.findMinervaFolder(user)
+        if folder is None:
+            folder = self.model('folder').createFolder(
+                parent=user,
+                name=MinervaFolder.minervaFolder,
+                parentType='user')
+        return folder
+    createMinervaFolder.description = (
+        Description('Create a minerva folder under a user.')
+        .param('id', 'The ID of the user to gain a minerva folder.',
+               paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Write permission denied on the User.', 403))
 
 
 def load(info):
@@ -198,3 +235,7 @@ def load(info):
     shapefile = Shapefile()
     info['apiRoot'].item.route('POST', (':id', 'geojson'),
                                shapefile.createGeoJson)
+
+    minervaFolder = MinervaFolder()
+    info['apiRoot'].user.route('POST', (':id', 'minervafolder'),
+                               minervaFolder.createMinervaFolder)

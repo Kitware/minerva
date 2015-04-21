@@ -17,4 +17,6 @@
 add_python_style_test(pep8_style_minerva
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server")
 add_javascript_style_test(
-    minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js")
+    minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
+    JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+)
