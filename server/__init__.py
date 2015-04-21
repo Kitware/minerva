@@ -58,6 +58,8 @@ class CustomAppRoot(object):
         <link rel="stylesheet"
               href="${staticRoot}/lib/fontello/css/animation.css">
         <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
+        <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/minerva.min.css">
@@ -75,6 +77,8 @@ class CustomAppRoot(object):
         <script src="${staticRoot}/built/app.min.js"></script>
         <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
         <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.libs.min.js">
         </script>
