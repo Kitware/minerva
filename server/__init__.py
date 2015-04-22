@@ -26,6 +26,7 @@ from girder.api import access
 from girder.api.rest import Resource, loadmodel
 from girder.api.describe import Description
 from girder.constants import AccessType
+from .rest import dataset
 
 import girder_client
 
@@ -197,63 +198,63 @@ class Shapefile(Resource):
         .errorResponse('Write permission denied on the Item.', 403))
 
 
-class MinervaFolder(Resource):
+#class MinervaFolder(Resource):
 
-    minervaFolder = 'minerva'
+    #minervaFolder = 'minerva'
 
-    def findMinervaFolder(self, user):
-        # TODO could be improved with search by name to the db
-        for folder in self.model('folder').childFolders(parent=user,
-                                                        parentType='user',
-                                                        user=user):
-            if folder['name'] == MinervaFolder.minervaFolder:
-                return folder
-        return None
+    #def findMinervaFolder(self, user):
+        ## TODO could be improved with search by name to the db
+        #for folder in self.model('folder').childFolders(parent=user,
+                                                        #parentType='user',
+                                                        #user=user):
+            #if folder['name'] == MinervaFolder.minervaFolder:
+                #return folder
+        #return None
 
-    @access.public
-    @loadmodel(model='user', level=AccessType.WRITE)
-    def createMinervaFolder(self, user, params):
-        # TODO time for some docstrings
-        # create a minerva folder under the user if one doesn't exist
-        folder = self.findMinervaFolder(user)
-        if folder is None:
-            folder = self.model('folder').createFolder(
-                parent=user,
-                name=MinervaFolder.minervaFolder,
-                parentType='user')
-        return folder
-    createMinervaFolder.description = (
-        Description('Create a minerva folder under a user.')
-        .param('id', 'The ID of the user to gain a minerva folder.',
-               paramType='path')
-        .errorResponse('ID was invalid.')
-        .errorResponse('Write permission denied on the User.', 403))
+    #@access.public
+    #@loadmodel(model='user', level=AccessType.WRITE)
+    #def createMinervaFolder(self, user, params):
+        ## TODO time for some docstrings
+        ## create a minerva folder under the user if one doesn't exist
+        #folder = self.findMinervaFolder(user)
+        #if folder is None:
+            #folder = self.model('folder').createFolder(
+                #parent=user,
+                #name=MinervaFolder.minervaFolder,
+                #parentType='user')
+        #return folder
+    #createMinervaFolder.description = (
+        #Description('Create a minerva folder under a user.')
+        #.param('id', 'The ID of the user to gain a minerva folder.',
+               #paramType='path')
+        #.errorResponse('ID was invalid.')
+        #.errorResponse('Write permission denied on the User.', 403))
 
-    @access.public
-    @loadmodel(model='user', level=AccessType.READ)
-    def loadMinervaDatasets(self, user, params):
-        datasets = {}
-        folder = self.findMinervaFolder(user)
-        if folder is not None:
-            # TODO will want to either paginate responses or
-            # set metadata and do a metadata based query
-            for item in self.model('folder').childItems(folder):
-                # metadata is also nice b/c we don't have to look for
-                # a file with a geojson extension
-                print item
-                itemGeoJson = item['name'] + Shapefile.geojsonExtension
-                for file in self.model('item').childFiles(item):
-                    if file['name'] == itemGeoJson:
-                        datasets[item['name']] = item['_id']
-        return {'datasets': datasets}
+    #@access.public
+    #@loadmodel(model='user', level=AccessType.READ)
+    #def loadMinervaDatasets(self, user, params):
+        #datasets = []
+        #folder = self.findMinervaFolder(user)
+        #if folder is not None:
+            ## TODO will want to either paginate responses or
+            ## set metadata and do a metadata based query
+            #for item in self.model('folder').childItems(folder):
+                ## metadata is also nice b/c we don't have to look for
+                ## a file with a geojson extension
+                #print item
+                #itemGeoJson = item['name'] + Shapefile.geojsonExtension
+                #for file in self.model('item').childFiles(item):
+                    #if file['name'] == itemGeoJson:
+                        #datasets.append(item)#[item['name']] = item['_id']
+        #return datasets # {'datasets': datasets}
 
 
-    loadMinervaDatasets.description = (
-        Description('Load all of the datasets in minerva folder for a user.')
-        .param('id', 'The ID of the user to gain a minerva folder.',
-               paramType='path')
-        .errorResponse('ID was invalid.')
-        .errorResponse('Write permission denied on the User.', 403))
+    #loadMinervaDatasets.description = (
+        #Description('Load all of the datasets in minerva folder for a user.')
+        #.param('id', 'The ID of the user to gain a minerva folder.',
+               #paramType='path')
+        #.errorResponse('ID was invalid.')
+        #.errorResponse('Write permission denied on the User.', 403))
 
 
 def load(info):
@@ -266,8 +267,11 @@ def load(info):
     info['apiRoot'].item.route('POST', (':id', 'geojson'),
                                shapefile.createGeoJson)
 
-    minervaFolder = MinervaFolder()
-    info['apiRoot'].user.route('POST', (':id', 'minervafolder'),
-                               minervaFolder.createMinervaFolder)
-    info['apiRoot'].user.route('GET', (':id', 'minervadatasets'),
-                               minervaFolder.loadMinervaDatasets)
+    info['apiRoot'].minerva_dataset = dataset.Dataset()
+
+
+    #minervaFolder = MinervaFolder()
+    #info['apiRoot'].user.route('POST', (':id', 'minervafolder'),
+                               #minervaFolder.createMinervaFolder)
+    #info['apiRoot'].user.route('GET', (':id', 'minervadatasets'),
+                               #minervaFolder.loadMinervaDatasets)

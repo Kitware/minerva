@@ -12,7 +12,7 @@ minerva.views.GridsterView = minerva.View.extend({
         new minerva.views.DataPanel({
             el: this.$('.dataPanel'),
             parentView: this
-        }).render();
+        });
 
         new minerva.views.LayersPanel({
             el: this.$('.layersPanel'),
