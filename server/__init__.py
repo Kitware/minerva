@@ -162,6 +162,10 @@ class Shapefile(Resource):
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
     def createGeoJson(self, item, params):
+        # TODO there is probably a problem when
+        # we look for a name in an item as a duplicate
+        # i.e. looking for filex, but the item name is filex (1)
+
         # TODO need to figure out convention here
         # assumes a shapefile is stored as a single item with a certain name
         # and all of the shapefiles as files within that item with
@@ -197,6 +201,23 @@ class Shapefile(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
 
+    @access.public
+    @loadmodel(model='item', level=AccessType.READ)
+    def findGeoJson(self, item, params):
+        # TODO there is probably a problem when
+        # we look for a name in an item as a duplicate
+        # i.e. looking for filex, but the item name is filex (1)
+        itemGeoJson = item['name'] + Shapefile.geojsonExtension
+        # TODO if not found try pagination
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemGeoJson:
+                return file
+        return {}
+    findGeoJson.description = (
+        Description('Get geojson file with same name as item.')
+        .param('id', 'The Item ID', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the Item.', 403))
 
 #class MinervaFolder(Resource):
 
@@ -266,6 +287,8 @@ def load(info):
     shapefile = Shapefile()
     info['apiRoot'].item.route('POST', (':id', 'geojson'),
                                shapefile.createGeoJson)
+    info['apiRoot'].item.route('GET', (':id', 'geojson'),
+                               shapefile.findGeoJson)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
 

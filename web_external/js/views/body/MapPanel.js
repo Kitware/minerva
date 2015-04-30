@@ -1,37 +1,56 @@
 minerva.views.MapPanel = minerva.View.extend({
 
+    addDataset: function (dataset) {
+        var datasetId = dataset.get('id');
+        if (!_.contains(this.datasets, datasetId)) {
+            var layer,
+                reader,
+                data;
+            layer = this.map.createLayer('feature');
+            this.datasets[datasetId] = layer;
+            reader = geo.createFileReader('jsonReader', {layer: layer});
+            // load a geojson file on top of the map
+            $.ajax({
+                url: girder.apiRoot + '/file/' + dataset.geojsonFileId + '/download',
+                contentType: 'application/json',
+                success: function (_data) {
+                    data = _data;
+                },
+                complete: _.bind(function () {
+                    layer.clear();
+                    reader.read(data, _.bind(function () {
+                        this.map.draw();
+                    }, this));
+                }, this)
+            });
+        }
+    },
+
+    removeDataset: function (dataset) {
+        var datasetId = dataset.get('id');
+        layer = this.datasets[datasetId];
+        layer.clear();
+        layer.draw();
+        delete this.datasets[datasetId];
+    },
+
+
     initialize: function () {
-        console.log('mappanel init');//
+        girder.events.on('m:layerDatasetLoaded', _.bind(this.addDataset, this));
+        girder.events.on('m:layerDatasetRemoved', _.bind(this.removeDataset, this));
+        this.datasets = {};
     },
 
     renderMap: function (geojsonFile) {
-        var map,
-            layer,
-            reader,
-            data;
+        if (!this.map) {
+            this.map = geo.map({
+                node: '.mapPanelMap',
+                center: { x: -100, y: 36.5},
 
-        map = geo.map({
-            node: '.m-map',
-            center: { x: -125, y: 36.5}
-        });
-        map.createLayer('osm');
-
-        layer = map.createLayer('feature');
-        map.draw();
-
-        /*reader = geo.createFileReader('jsonReader', {layer: layer});
-        // load a geojson file on top of the map
-        $.ajax({
-            url: girder.apiRoot + '/file/' + geojsonFile._id + '/download',
-            contentType: 'application/json',
-            success: function (_data) {
-                data = _data;
-            },
-            complete: function () {
-                layer.clear();
-                reader.read(data, function () { map.draw(); });
-            }
-        });*/
+            });
+            this.map.createLayer('osm');
+            this.map.draw();
+        }
     },
 
     render: function () {

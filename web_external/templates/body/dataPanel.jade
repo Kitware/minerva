@@ -7,8 +7,8 @@
          | add dataset 
   .savedDatasets
     .savedDatasetsTitle
-      | Saved datasets
     .savedDataList
       ul.datasets
         each dataset in datasets
           li.dataset= dataset.get('name')
+            i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})

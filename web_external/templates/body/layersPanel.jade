@@ -1,4 +1,8 @@
 .layersPanelContainer
   .panelTitle
-    | Layers Panel
+    | Active Layers
   .layersList
+    ul.datasets
+      each dataset in datasets
+        li.dataset= dataset.get('name')
+          i.icon-cancel-circled.remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
