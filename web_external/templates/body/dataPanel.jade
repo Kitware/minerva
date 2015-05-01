@@ -1,0 +1,14 @@
+.dataPanelContainer
+  .panelTitle
+    | Datasets
+  .loadData
+     button.btn.btn-default.m-add-dataset-button(title="Upload dataset")
+       .icon-plus-squared
+         | add dataset 
+  .savedDatasets
+    .savedDatasetsTitle
+    .savedDataList
+      ul.datasets
+        each dataset in datasets
+          li.dataset= dataset.get('name')
+            i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
