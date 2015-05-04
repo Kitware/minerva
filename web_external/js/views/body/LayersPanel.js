@@ -22,7 +22,7 @@ minerva.views.LayersPanel = minerva.View.extend({
 
     initialize: function (settings) {
         this.layersDatasets = {};
-        girder.events.on('m:addDatasetToLayer', _.bind(this.addDataset, this));
+        girder.events.on('m:addDatasetToLayer', this.addDataset, this);
     },
 
     render: function () {

@@ -36,8 +36,8 @@ minerva.views.MapPanel = minerva.View.extend({
 
 
     initialize: function () {
-        girder.events.on('m:layerDatasetLoaded', _.bind(this.addDataset, this));
-        girder.events.on('m:layerDatasetRemoved', _.bind(this.removeDataset, this));
+        girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
+        girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
         this.datasets = {};
     },
 

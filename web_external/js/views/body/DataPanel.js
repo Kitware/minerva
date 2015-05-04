@@ -18,7 +18,7 @@ minerva.views.DataPanel = minerva.View.extend({
         }
     },
 
-    removeDataset: function (dataset) {
+    removeDatasetFromLayers: function (dataset) {
         var datasetId = dataset.get('id');
         var element = $("i.dataset-in-layers[m-dataset-id='"+datasetId+"']");
         element.removeClass('dataset-in-layers');
@@ -35,7 +35,7 @@ minerva.views.DataPanel = minerva.View.extend({
         this.collection.on('g:changed', function () {
             this.render();
         }, this).fetch();
-        girder.events.on('m:layerDatasetRemoved', _.bind(this.removeDataset, this));
+        girder.events.on('m:layerDatasetRemoved', this.removeDatasetFromLayers, this);
     },
 
     render: function () {
@@ -139,11 +139,11 @@ minerva.views.DataPanel = minerva.View.extend({
         this.newDataset = new minerva.models.DatasetModel({
             name: this.newItemName,
             folderId: this.collection.datasetFolderId,
-        }).on('g:saved', _.bind(function () {
+        }).on('g:saved', function () {
             this.uploadWidget.parentType = 'item';
             this.uploadWidget.parent = this.newDataset;
             this.uploadWidget.uploadNextFile();
-        }, this)).on('g:error', function (err) {
+        }, this).on('g:error', function (err) {
             console.error(err);
         }).save();
     },
