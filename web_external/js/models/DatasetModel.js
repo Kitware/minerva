@@ -49,6 +49,5 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 timeout: 4000
             });
         }, this));
-
-    },
+    }
 });

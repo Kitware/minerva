@@ -10,6 +10,3 @@ minerva.views.GeometryPanel = minerva.View.extend({
         return this;
     }
 });
-
-
-

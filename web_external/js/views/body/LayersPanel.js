@@ -31,6 +31,3 @@ minerva.views.LayersPanel = minerva.View.extend({
         return this;
     }
 });
-
-
-

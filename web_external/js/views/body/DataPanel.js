@@ -20,7 +20,7 @@ minerva.views.DataPanel = minerva.View.extend({
 
     removeDatasetFromLayers: function (dataset) {
         var datasetId = dataset.id;
-        var element = $("i.dataset-in-layers[m-dataset-id='"+datasetId+"']");
+        var element = $('i.dataset-in-layers[m-dataset-id=\'' + datasetId + '\']');
         element.removeClass('dataset-in-layers');
         element.addClass('add-dataset-to-layers');
         delete this.datasetsInLayers[datasetId];
@@ -57,7 +57,6 @@ minerva.views.DataPanel = minerva.View.extend({
         if (this.upload) {
             this.uploadDialog();
         }
-
 
         return this;
     },
@@ -145,7 +144,7 @@ minerva.views.DataPanel = minerva.View.extend({
         // need to create a new item in the dataset folder, then upload there
         this.newDataset = new minerva.models.DatasetModel({
             name: this.newItemName,
-            folderId: this.collection.datasetFolderId,
+            folderId: this.collection.datasetFolderId
         }).on('g:saved', function () {
             this.uploadWidget.parentType = 'item';
             this.uploadWidget.parent = this.newDataset;
@@ -155,12 +154,9 @@ minerva.views.DataPanel = minerva.View.extend({
         }).save();
     },
 
-
     uploadFinished: function () {
         this.newDataset.createGeoJson(_.bind(function (dataset) {
             this.collection.add(dataset);
         }, this));
     }
 });
-
-
