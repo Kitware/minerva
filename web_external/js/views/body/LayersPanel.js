@@ -13,7 +13,7 @@ minerva.views.LayersPanel = minerva.View.extend({
     },
 
     addDataset: function (dataset) {
-        this.layersDatasets[dataset.get('id')] = dataset;
+        this.layersDatasets[dataset.id] = dataset;
         dataset.off('m:geojsonLoaded').on('m:geojsonLoaded', function () {
             girder.events.trigger('m:layerDatasetLoaded', this);
         }).getGeoJson();

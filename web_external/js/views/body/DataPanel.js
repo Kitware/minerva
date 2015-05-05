@@ -19,7 +19,7 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     removeDatasetFromLayers: function (dataset) {
-        var datasetId = dataset.get('id');
+        var datasetId = dataset.id;
         var element = $("i.dataset-in-layers[m-dataset-id='"+datasetId+"']");
         element.removeClass('dataset-in-layers');
         element.addClass('add-dataset-to-layers');
@@ -34,11 +34,20 @@ minerva.views.DataPanel = minerva.View.extend({
         this.collection = new minerva.collections.DatasetCollection();
         this.collection.on('g:changed', function () {
             this.render();
-        }, this).fetch();
+        }, this).on('changed', function () {
+            console.log('dataset collection changed');
+        }, this).on('add', function (dataset) {
+            this.render();
+        }, this).on('remove', function () {
+            console.log('dataset collection remove');
+        }).fetch();
         girder.events.on('m:layerDatasetRemoved', this.removeDatasetFromLayers, this);
     },
 
     render: function () {
+        this.collection.forEach(function (dataset) {
+            dataset.set('inLayers', _.contains(this.datasetsInLayers, dataset.id));
+        }, this);
         this.$el.html(minerva.templates.dataPanel({
             datasets: this.collection.models
         }));
@@ -65,8 +74,6 @@ minerva.views.DataPanel = minerva.View.extend({
         }).on('g:uploadFinished', function () {
             girder.dialogs.handleClose('upload');
             this.upload = false;
-            // TODO get update when new dataset added through upload
-            this.render();
         }, this).render();
 
         this.$('input.m-shapefile-item-name').focus();
@@ -150,9 +157,9 @@ minerva.views.DataPanel = minerva.View.extend({
 
 
     uploadFinished: function () {
-        // TODO seems weird to pass in the collection
-        // maybe should send in the view and have it be updated?
-        this.newDataset.createGeoJson(this.collection);
+        this.newDataset.createGeoJson(_.bind(function (dataset) {
+            this.collection.add(dataset);
+        }, this));
     }
 });
 

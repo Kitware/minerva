@@ -11,4 +11,8 @@
       ul.datasets
         each dataset in datasets
           li.dataset= dataset.get('name')
-            i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
+            | #{dataset.get('inLayers')}
+            if (dataset.get('inLayers'))
+                i.icon-right-circled.dataset-in-layers&attributes({'m-dataset-id': dataset.get('_id')})
+            else
+                i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
