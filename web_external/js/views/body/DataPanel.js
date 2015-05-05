@@ -2,27 +2,44 @@ minerva.views.DataPanel = minerva.View.extend({
 
     events: {
         'click .m-add-dataset-button': 'uploadDialog',
-        'click .add-dataset-to-layers': 'addDatasetToLayers'
+        'click .add-dataset-to-layers': 'addDatasetToLayers',
+        'click .delete-dataset': 'deleteDataset'
     },
 
     addDatasetToLayers: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        if (_.contains(this.datasetsInLayers, datasetId)) {
+        if ($(event.currentTarget).hasClass('icon-disabled')) {
+        //if (_.contains(this.datasetsInLayers, datasetId)) {
             return;
         } else {
+            var datasetId = $(event.currentTarget).attr('m-dataset-id');
             this.datasetsInLayers[datasetId] = datasetId;
             var dataset = this.collection.get(datasetId);
             girder.events.trigger('m:addDatasetToLayer', dataset);
-            $(event.currentTarget).addClass('dataset-in-layers');
-            $(event.currentTarget).removeClass('add-dataset-to-layers');
+            $(event.currentTarget)
+                .addClass('dataset-in-layers')
+                .removeClass('add-dataset-to-layers');
+            $(event.currentTarget).parent().children('i')
+                .addClass('icon-disabled');
+        }
+    },
+
+    deleteDataset: function (event) {
+        if ($(event.currentTarget).hasClass('icon-disabled')) {
+            return;
+        } else {
+            console.log('delete of dataset');
+            var datasetId = $(event.currentTarget).attr('m-dataset-id');
+            console.log(datasetId);
         }
     },
 
     removeDatasetFromLayers: function (dataset) {
         var datasetId = dataset.id;
         var element = $('i.dataset-in-layers[m-dataset-id=\'' + datasetId + '\']');
-        element.removeClass('dataset-in-layers');
-        element.addClass('add-dataset-to-layers');
+        element.removeClass('dataset-in-layers')
+               .addClass('add-dataset-to-layers');
+        element.parent().children('i')
+               .removeClass('icon-disabled');
         delete this.datasetsInLayers[datasetId];
     },
 
