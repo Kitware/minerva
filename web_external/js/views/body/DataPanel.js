@@ -27,9 +27,10 @@ minerva.views.DataPanel = minerva.View.extend({
         if ($(event.currentTarget).hasClass('icon-disabled')) {
             return;
         } else {
-            console.log('delete of dataset');
             var datasetId = $(event.currentTarget).attr('m-dataset-id');
-            console.log(datasetId);
+            var dataset = this.collection.get(datasetId);
+            dataset.destroy();
+            this.collection.remove(dataset);
         }
     },
 
@@ -56,8 +57,8 @@ minerva.views.DataPanel = minerva.View.extend({
         }, this).on('add', function (dataset) {
             this.render();
         }, this).on('remove', function () {
-            console.log('dataset collection remove');
-        }).fetch();
+            this.render();
+        }, this).fetch();
         girder.events.on('m:layerDatasetRemoved', this.removeDatasetFromLayers, this);
     },
 
