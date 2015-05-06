@@ -4,11 +4,16 @@
   .loadData
      button.btn.btn-default.m-add-dataset-button(title="Upload dataset")
        .icon-plus-squared
-         | add dataset 
+         | add dataset
   .savedDatasets
     .savedDatasetsTitle
     .savedDataList
       ul.datasets
         each dataset in datasets
           li.dataset= dataset.get('name')
-            i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
+            if (dataset.get('inLayers'))
+                i.icon-right-circled.dataset-in-layers&attributes({'m-dataset-id': dataset.get('_id')})
+                i.icon-trash.delete-dataset.dataset-in-layers&attributes({'m-dataset-id': dataset.get('_id')})
+            else
+                i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
+                i.icon-trash.delete-dataset&attributes({'m-dataset-id': dataset.get('_id')})

@@ -2,27 +2,45 @@ minerva.views.DataPanel = minerva.View.extend({
 
     events: {
         'click .m-add-dataset-button': 'uploadDialog',
-        'click .add-dataset-to-layers': 'addDatasetToLayers'
+        'click .add-dataset-to-layers': 'addDatasetToLayers',
+        'click .delete-dataset': 'deleteDataset'
     },
 
     addDatasetToLayers: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        if (_.contains(this.datasetsInLayers, datasetId)) {
+        if ($(event.currentTarget).hasClass('icon-disabled')) {
+        //if (_.contains(this.datasetsInLayers, datasetId)) {
             return;
         } else {
+            var datasetId = $(event.currentTarget).attr('m-dataset-id');
             this.datasetsInLayers[datasetId] = datasetId;
             var dataset = this.collection.get(datasetId);
             girder.events.trigger('m:addDatasetToLayer', dataset);
-            $(event.currentTarget).addClass('dataset-in-layers');
-            $(event.currentTarget).removeClass('add-dataset-to-layers');
+            $(event.currentTarget)
+                .addClass('dataset-in-layers')
+                .removeClass('add-dataset-to-layers');
+            $(event.currentTarget).parent().children('i')
+                .addClass('icon-disabled');
         }
     },
 
-    removeDataset: function (dataset) {
-        var datasetId = dataset.get('id');
-        var element = $("i.dataset-in-layers[m-dataset-id='"+datasetId+"']");
-        element.removeClass('dataset-in-layers');
-        element.addClass('add-dataset-to-layers');
+    deleteDataset: function (event) {
+        if ($(event.currentTarget).hasClass('icon-disabled')) {
+            return;
+        } else {
+            var datasetId = $(event.currentTarget).attr('m-dataset-id');
+            var dataset = this.collection.get(datasetId);
+            dataset.destroy();
+            this.collection.remove(dataset);
+        }
+    },
+
+    removeDatasetFromLayers: function (dataset) {
+        var datasetId = dataset.id;
+        var element = $('i.dataset-in-layers[m-dataset-id=\'' + datasetId + '\']');
+        element.removeClass('dataset-in-layers')
+               .addClass('add-dataset-to-layers');
+        element.parent().children('i')
+               .removeClass('icon-disabled');
         delete this.datasetsInLayers[datasetId];
     },
 
@@ -34,11 +52,20 @@ minerva.views.DataPanel = minerva.View.extend({
         this.collection = new minerva.collections.DatasetCollection();
         this.collection.on('g:changed', function () {
             this.render();
+        }, this).on('changed', function () {
+            console.log('dataset collection changed');
+        }, this).on('add', function (dataset) {
+            this.render();
+        }, this).on('remove', function () {
+            this.render();
         }, this).fetch();
-        girder.events.on('m:layerDatasetRemoved', _.bind(this.removeDataset, this));
+        girder.events.on('m:layerDatasetRemoved', this.removeDatasetFromLayers, this);
     },
 
     render: function () {
+        this.collection.forEach(function (dataset) {
+            dataset.set('inLayers', _.contains(this.datasetsInLayers, dataset.id));
+        }, this);
         this.$el.html(minerva.templates.dataPanel({
             datasets: this.collection.models
         }));
@@ -48,7 +75,6 @@ minerva.views.DataPanel = minerva.View.extend({
         if (this.upload) {
             this.uploadDialog();
         }
-
 
         return this;
     },
@@ -65,8 +91,6 @@ minerva.views.DataPanel = minerva.View.extend({
         }).on('g:uploadFinished', function () {
             girder.dialogs.handleClose('upload');
             this.upload = false;
-            // TODO get update when new dataset added through upload
-            this.render();
         }, this).render();
 
         this.$('input.m-shapefile-item-name').focus();
@@ -138,22 +162,19 @@ minerva.views.DataPanel = minerva.View.extend({
         // need to create a new item in the dataset folder, then upload there
         this.newDataset = new minerva.models.DatasetModel({
             name: this.newItemName,
-            folderId: this.collection.datasetFolderId,
-        }).on('g:saved', _.bind(function () {
+            folderId: this.collection.datasetFolderId
+        }).on('g:saved', function () {
             this.uploadWidget.parentType = 'item';
             this.uploadWidget.parent = this.newDataset;
             this.uploadWidget.uploadNextFile();
-        }, this)).on('g:error', function (err) {
+        }, this).on('g:error', function (err) {
             console.error(err);
         }).save();
     },
 
-
     uploadFinished: function () {
-        // TODO seems weird to pass in the collection
-        // maybe should send in the view and have it be updated?
-        this.newDataset.createGeoJson(this.collection);
+        this.newDataset.createGeoJson(_.bind(function (dataset) {
+            this.collection.add(dataset);
+        }, this));
     }
 });
-
-

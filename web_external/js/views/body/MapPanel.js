@@ -1,7 +1,7 @@
 minerva.views.MapPanel = minerva.View.extend({
 
     addDataset: function (dataset) {
-        var datasetId = dataset.get('id');
+        var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             var layer,
                 reader,
@@ -27,17 +27,16 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     removeDataset: function (dataset) {
-        var datasetId = dataset.get('id');
-        layer = this.datasets[datasetId];
+        var datasetId = dataset.id;
+        var layer = this.datasets[datasetId];
         layer.clear();
         layer.draw();
         delete this.datasets[datasetId];
     },
 
-
     initialize: function () {
-        girder.events.on('m:layerDatasetLoaded', _.bind(this.addDataset, this));
-        girder.events.on('m:layerDatasetRemoved', _.bind(this.removeDataset, this));
+        girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
+        girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
         this.datasets = {};
     },
 
@@ -45,8 +44,7 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: { x: -100, y: 36.5},
-
+                center: { x: -100, y: 36.5}
             });
             this.map.createLayer('osm');
             this.map.draw();

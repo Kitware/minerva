@@ -34,19 +34,13 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         }
     },
 
-    createGeoJson: function (collection) {
-        console.log('DatasetModel.createGeoJson, no implementation');
-        console.log(this.get('_id'));
+    createGeoJson: function (callback) {
         girder.restRequest({
             path: 'item/' + this.get('_id') + '/geojson',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            console.log('finished processing');
-            console.log(resp);
             this.geojsonFileId = resp._id;
-            // TODO seems weird to do it this way
-            // and it will probably blow away the geojsonFileId we just set
-            collection.fetch({}, true);
+            callback(this);
         }, this)).error(_.bind(function (err) {
             girder.events.trigger('g:alert', {
                 icon: 'cancel',
@@ -55,6 +49,5 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 timeout: 4000
             });
         }, this));
-
-    },
+    }
 });

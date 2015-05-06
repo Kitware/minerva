@@ -13,7 +13,7 @@ minerva.views.LayersPanel = minerva.View.extend({
     },
 
     addDataset: function (dataset) {
-        this.layersDatasets[dataset.get('id')] = dataset;
+        this.layersDatasets[dataset.id] = dataset;
         dataset.off('m:geojsonLoaded').on('m:geojsonLoaded', function () {
             girder.events.trigger('m:layerDatasetLoaded', this);
         }).getGeoJson();
@@ -22,7 +22,7 @@ minerva.views.LayersPanel = minerva.View.extend({
 
     initialize: function (settings) {
         this.layersDatasets = {};
-        girder.events.on('m:addDatasetToLayer', _.bind(this.addDataset, this));
+        girder.events.on('m:addDatasetToLayer', this.addDataset, this);
     },
 
     render: function () {
@@ -31,6 +31,3 @@ minerva.views.LayersPanel = minerva.View.extend({
         return this;
     }
 });
-
-
-

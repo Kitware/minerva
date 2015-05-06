@@ -9,35 +9,35 @@ minerva.views.GridsterView = minerva.View.extend({
     render: function () {
         this.$el.html(minerva.templates.gridsterPage({}));
 
-        new minerva.views.DataPanel({
+        this.dataPanel = new minerva.views.DataPanel({
             el: this.$('.dataPanel'),
             parentView: this
         });
 
-        new minerva.views.LayersPanel({
+        this.layersPanel = new minerva.views.LayersPanel({
             el: this.$('.layersPanel'),
             parentView: this
         }).render();
 
-        new minerva.views.MapPanel({
+        this.mapPanel = new minerva.views.MapPanel({
             el: this.$('.mapPanel'),
             parentView: this
         }).render();
 
-        new minerva.views.GeometryPanel({
+        this.geometryPanel = new minerva.views.GeometryPanel({
             el: this.$('.geometryPanel'),
             parentView: this
         }).render();
 
-        new minerva.views.AnalysisPanel({
+        this.analysisPanel = new minerva.views.AnalysisPanel({
             el: this.$('.analysisPanel'),
             parentView: this
         }).render();
 
-        this.$(".gridster ul").gridster({
-                    widget_margins: [10, 10],
-                    widget_base_dimensions: [210, 210]
-                });
+        this.$('.gridster ul').gridster({
+            widget_margins: [10, 10],
+            widget_base_dimensions: [210, 210]
+        });
 
         return this;
     }

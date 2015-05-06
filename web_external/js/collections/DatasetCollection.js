@@ -40,7 +40,7 @@ minerva.collections.DatasetCollection = girder.Collection.extend({
                             minervaFolder.on('g:saved', function () {
                                 boundFetch(minervaFolder.get('_id'));
                             }, this).on('g:error', function (err) {
-                                console.error('error creating Minerva folder')
+                                console.error('error creating Minerva folder');
                                 console.error(err);
                                 girder.events.trigger('g:alert', {
                                     icon: 'cancel',
@@ -61,7 +61,5 @@ minerva.collections.DatasetCollection = girder.Collection.extend({
                 }
             });
     }
-
-
 
 });

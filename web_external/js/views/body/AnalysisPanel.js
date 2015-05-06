@@ -10,6 +10,3 @@ minerva.views.AnalysisPanel = minerva.View.extend({
         return this;
     }
 });
-
-
-
