@@ -19,21 +19,21 @@ minerva.views.LayersPanel = minerva.View.extend({
     initialize: function (settings) {
         settings = settings || {};
         this.collection = settings.collection;
-        this.collection.on('g:changed', function () {
+        this.listenTo(this.collection, 'g:changed', function () {
             this.render();
-        }, this).on('change:displayed', function (dataset) {
+        }, this).listenTo(this.collection, 'change:displayed', function (dataset) {
             if (dataset.get('displayed')) {
                 this.addDatasetToLayers(dataset);
             } else {
                 girder.events.trigger('m:layerDatasetRemoved', dataset);
             }
             this.render();
-        }, this).on('add', function (dataset) {
+        }, this).listenTo(this.collection, 'add', function (dataset) {
             if (dataset.get('displayed')) {
                 this.addDatasetToLayers(dataset);
             }
             this.render();
-        }, this).on('remove', function (dataset) {
+        }, this).listenTo(this.collection, 'remove', function (dataset) {
             // TODO the event trigger shouldn't be necessary because the dataset would already be
             // removed from the layers before it is deleted; keeping this here as a
             // reminder that the panels should possibly be more independent
