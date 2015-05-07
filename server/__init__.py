@@ -81,7 +81,9 @@ class CustomAppRoot(object):
         </script>
         <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
         </script>
-        <script src="${staticRoot}/built/plugins/minerva/minerva.libs.min.js">
+        <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/geo.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>

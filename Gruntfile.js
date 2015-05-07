@@ -88,10 +88,6 @@ module.exports = function (grunt) {
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
             ];
-            files[staticDir + '/minerva.libs.min.js'] = [
-                geojsDistDir + '/geo.ext.min.js',
-                geojsDistDir + '/geo.min.js'
-            ];
             grunt.config.set('uglify.' + pluginName, {
                 files: files
             });
@@ -104,14 +100,13 @@ module.exports = function (grunt) {
 
         var extraDir = pluginDir + '/' + sourceDir + '/extra';
         if (fs.existsSync(extraDir)) {
-            grunt.config.set('copy.' + pluginName, {
-                expand: true,
-                cwd: extraDir,
-                src: ['**'],
-                dest: staticDir
-            });
+            var files = [
+                { expand: true, cwd: extraDir, src: ['**'], dest: staticDir },
+                { expand: true, cwd: geojsDistDir, src: ['geo.ext.min.js', 'geo.min.js'], dest: staticDir }
+            ];
+            grunt.config.set('copy.' + pluginName, { files: files});
             grunt.config.set('watch.copy_' + pluginName, {
-                files: [extraDir + '/** / *'],
+                files: [extraDir + '/**/*', geojsDistDir + '/geo.ext.min.js', geojsDistDir + '/geo.min.js'],
                 tasks: ['copy:' + pluginName]
             });
             defaultTasks.push('copy:' + pluginName);

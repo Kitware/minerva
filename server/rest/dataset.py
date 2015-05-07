@@ -49,7 +49,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def listDatasets(self, user, params):
-        print 'listDatasets', user
+        print('listDatasets', user)
         folder = self.findMinervaFolder(user)
         if folder is None:
             return []

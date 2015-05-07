@@ -1,29 +1,23 @@
 minerva.views.DataPanel = minerva.View.extend({
 
     events: {
-        'click .m-add-dataset-button': 'uploadDialog',
-        'click .add-dataset-to-layers': 'addDatasetToLayers',
-        'click .delete-dataset': 'deleteDataset'
+        'click .m-add-dataset-button': 'uploadDialogEvent',
+        'click .add-dataset-to-layers': 'addDatasetToLayersEvent',
+        'click .delete-dataset': 'deleteDatasetEvent'
     },
 
-    addDatasetToLayers: function (event) {
-        if ($(event.currentTarget).hasClass('icon-disabled')) {
-        //if (_.contains(this.datasetsInLayers, datasetId)) {
-            return;
-        } else {
-            var datasetId = $(event.currentTarget).attr('m-dataset-id');
-            this.datasetsInLayers[datasetId] = datasetId;
-            var dataset = this.collection.get(datasetId);
-            girder.events.trigger('m:addDatasetToLayer', dataset);
-            $(event.currentTarget)
-                .addClass('dataset-in-layers')
-                .removeClass('add-dataset-to-layers');
-            $(event.currentTarget).parent().children('i')
-                .addClass('icon-disabled');
+    addDatasetToLayersEvent: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        // TODO maybe this check is unnecessary, how can we get into this state?
+        if (!dataset.get('displayed')) {
+            dataset.set('displayed', true);
         }
     },
 
-    deleteDataset: function (event) {
+    deleteDatasetEvent: function (event) {
+        // TODO wrap icons inside buttons and disable there
+        // TODO remove depedence on DOM
         if ($(event.currentTarget).hasClass('icon-disabled')) {
             return;
         } else {
@@ -34,38 +28,23 @@ minerva.views.DataPanel = minerva.View.extend({
         }
     },
 
-    removeDatasetFromLayers: function (dataset) {
-        var datasetId = dataset.id;
-        var element = $('i.dataset-in-layers[m-dataset-id=\'' + datasetId + '\']');
-        element.removeClass('dataset-in-layers')
-               .addClass('add-dataset-to-layers');
-        element.parent().children('i')
-               .removeClass('icon-disabled');
-        delete this.datasetsInLayers[datasetId];
-    },
-
     initialize: function (settings) {
         settings = settings || {};
         this.upload = settings.upload;
-        this.datasetsInLayers = {};
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
-        this.collection = new minerva.collections.DatasetCollection();
-        this.collection.on('g:changed', function () {
+        this.collection = settings.collection;
+        this.listenTo(this.collection, 'g:changed', function () {
             this.render();
-        }, this).on('changed', function () {
-            console.log('dataset collection changed');
-        }, this).on('add', function (dataset) {
+        }, this).listenTo(this.collection, 'change:displayed', function () {
             this.render();
-        }, this).on('remove', function () {
+        }, this).listenTo(this.collection, 'add', function (dataset) {
             this.render();
-        }, this).fetch();
-        girder.events.on('m:layerDatasetRemoved', this.removeDatasetFromLayers, this);
+        }, this).listenTo(this.collection, 'remove', function () {
+            this.render();
+        }, this);
     },
 
     render: function () {
-        this.collection.forEach(function (dataset) {
-            dataset.set('inLayers', _.contains(this.datasetsInLayers, dataset.id));
-        }, this);
         this.$el.html(minerva.templates.dataPanel({
             datasets: this.collection.models
         }));
@@ -79,7 +58,8 @@ minerva.views.DataPanel = minerva.View.extend({
         return this;
     },
 
-    uploadDialog: function () {
+    // TODO should this uploader be broken out?
+    uploadDialogEvent: function () {
         var container = $('#g-dialog-container');
 
         this.uploadWidget = new girder.views.UploadWidget({

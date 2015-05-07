@@ -1,11 +1,17 @@
 minerva.models.DatasetModel = girder.models.ItemModel.extend({
 
+    defaults: {
+        geojsonFileId: null,
+        displayed: false
+    },
+
+    // TODO put in a toJson method ignoring displayed and other state
+
     initialize: function () {
-        this.geojsonFileId = null;
     },
 
     getFullDataset: function () {
-        // TODO
+        // TODO maybe this isn't needed
         // get the full item
         console.log('DatasetModel.getFullDataset, no implementation');
     },
