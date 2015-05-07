@@ -29,9 +29,11 @@ minerva.views.MapPanel = minerva.View.extend({
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
         var layer = this.datasets[datasetId];
-        layer.clear();
-        layer.draw();
-        delete this.datasets[datasetId];
+        if (layer) {
+            layer.clear();
+            layer.draw();
+            delete this.datasets[datasetId];
+        }
     },
 
     initialize: function () {

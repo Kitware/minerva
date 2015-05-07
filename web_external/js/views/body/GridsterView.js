@@ -2,7 +2,8 @@ minerva.views.GridsterView = minerva.View.extend({
 
     initialize: function () {
         girder.cancelRestRequests('fetch');
-        console.log('init');//
+        this.collection = new minerva.collections.DatasetCollection();
+        this.collection.fetch();
         this.render();
     },
 
@@ -11,16 +12,19 @@ minerva.views.GridsterView = minerva.View.extend({
 
         this.dataPanel = new minerva.views.DataPanel({
             el: this.$('.dataPanel'),
+            collection: this.collection,
             parentView: this
         });
 
         this.layersPanel = new minerva.views.LayersPanel({
             el: this.$('.layersPanel'),
+            collection: this.collection,
             parentView: this
         }).render();
 
         this.mapPanel = new minerva.views.MapPanel({
             el: this.$('.mapPanel'),
+            collection: this.collection,
             parentView: this
         }).render();
 
