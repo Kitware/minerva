@@ -30,10 +30,8 @@ import girder_client
 
 
 class Shapefile(Resource):
-# TODO may want to move this to romanesco
-# or else some system that allows ease of development on local or
-# romanesco
-# probably at least move it to separate module
+    # TODO may want to move this to romanesco
+    # or else some system that allows ease of development on local or romanesco
 
     geojsonExtension = '.geojson'
 

@@ -90,6 +90,7 @@ class CustomAppRoot(object):
 
         return self.indexHtml
 
+
 def load(info):
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),

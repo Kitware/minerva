@@ -19,7 +19,6 @@
 
 import pymongo
 
-from ..constants import PluginSettings
 from ..utility import findMinervaFolder
 from girder.api import access
 from girder.api.describe import Description
@@ -40,12 +39,17 @@ class Dataset(Resource):
         if folder is None:
             return []
         else:
-            limit, offset, sort = self.getPagingParameters(params, defaultSortDir=pymongo.DESCENDING)
-            items = [self.model('item').filter(item, user) for item in self.model('folder').childItems(folder, limit=limit, offset=offset, sort=sort)]
+            limit, offset, sort = \
+                self.getPagingParameters(params,
+                                         defaultSortDir=pymongo.DESCENDING)
+            items = [self.model('item').filter(item, user) for item in
+                     self.model('folder').childItems(folder, limit=limit,
+                                                     offset=offset, sort=sort)]
             return items
     listDatasets.description = (
         Description('List minerva datasets owned by a user.')
-        .param('userId', 'User is the owner of minerva datasets.', required=True)
+        .param('userId', 'User is the owner of minerva datasets.',
+               required=True)
         .param('limit', "Result set size limit (default=50).", required=False,
                dataType='int')
         .param('offset', "Offset into result set (default=0).", required=False,

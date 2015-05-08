@@ -20,9 +20,13 @@
 from constants import PluginSettings
 from girder.utility.model_importer import ModelImporter
 
+
 def findMinervaFolder(user):
-    folders = [ModelImporter.model('folder').filter(folder, user) for folder in ModelImporter.model('folder').childFolders(parent=user, parentType='user', user=user,
-        filters={'name': PluginSettings.MINERVA_FOLDER})]
+    folders = [
+        ModelImporter.model('folder').filter(folder, user) for folder in
+        ModelImporter.model('folder').childFolders(
+            parent=user, parentType='user', user=user,
+            filters={'name': PluginSettings.MINERVA_FOLDER})]
     # folders should have len of 0 or 1, since we are looking in a
     # user folder for a folder with a certain name
     if len(folders) == 0:
