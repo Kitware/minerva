@@ -21,15 +21,42 @@ from constants import PluginSettings
 from girder.utility.model_importer import ModelImporter
 
 
-def findMinervaFolder(user):
+def findNamedFolder(user, parent, parentType, name, create=False):
     folders = [
         ModelImporter.model('folder').filter(folder, user) for folder in
         ModelImporter.model('folder').childFolders(
-            parent=user, parentType='user', user=user,
-            filters={'name': PluginSettings.MINERVA_FOLDER})]
+            parent=parent, parentType=parentType, user=user,
+            filters={'name': name})]
     # folders should have len of 0 or 1, since we are looking in a
     # user folder for a folder with a certain name
     if len(folders) == 0:
-        return None
+        if create:
+            return ModelImporter.model('folder').createFolder(
+                parent, name, parentType=parentType)
+        else:
+            return None
     else:
         return folders[0]
+
+
+def findMinervaFolder(user, create=False):
+    return findNamedFolder(user, user, 'user', PluginSettings.MINERVA_FOLDER,
+                           create)
+
+
+def findDatasetFolder(user, create=False):
+    minervaFolder = findMinervaFolder(user, create)
+    if minervaFolder is None:
+        return minervaFolder
+    else:
+        return findNamedFolder(user, minervaFolder, 'folder',
+                               PluginSettings.DATASET_FOLDER, create)
+
+
+def findSessionFolder(user, create=False):
+    minervaFolder = findMinervaFolder(user, create)
+    if minervaFolder is None:
+        return minervaFolder
+    else:
+        return findNamedFolder(user, minervaFolder, 'folder',
+                               PluginSettings.SESSION_FOLDER, create)

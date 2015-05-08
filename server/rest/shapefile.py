@@ -21,6 +21,8 @@ import os
 import shutil
 import time
 
+from ..constants import PluginSettings
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
@@ -32,8 +34,6 @@ import girder_client
 class Shapefile(Resource):
     # TODO may want to move this to romanesco
     # or else some system that allows ease of development on local or romanesco
-
-    geojsonExtension = '.geojson'
 
     def __init__(self):
         self.client = None
@@ -65,7 +65,7 @@ class Shapefile(Resource):
         reader = GeopandasReader()
         reader.file_name = os.path.join(tmpdir, item['name'])
         geojsonFile = os.path.join(tmpdir, item['name'] +
-                                   Shapefile.geojsonExtension)
+                                   PluginSettings.GEOJSON_EXTENSION)
         writer = GeopandasWriter()
         writer.file_name = geojsonFile
         writer.format = 'GeoJSON'
@@ -82,7 +82,7 @@ class Shapefile(Resource):
         shutil.rmtree(tmpdir)
 
     def _findFileId(self, item):
-        itemGeoJson = item['name'] + Shapefile.geojsonExtension
+        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
         for file in self.model('item').childFiles(item):
             if file['name'] == itemGeoJson:
                 return str(file['_id'])
@@ -136,7 +136,7 @@ class Shapefile(Resource):
         # TODO there is probably a problem when
         # we look for a name in an item as a duplicate
         # i.e. looking for filex, but the item name is filex (1)
-        itemGeoJson = item['name'] + Shapefile.geojsonExtension
+        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
         # TODO if not found try pagination
         for file in self.model('item').childFiles(item):
             if file['name'] == itemGeoJson:

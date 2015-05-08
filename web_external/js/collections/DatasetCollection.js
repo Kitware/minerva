@@ -21,38 +21,24 @@ minerva.collections.DatasetCollection = girder.Collection.extend({
 
                 if (!this.datasetFolderId) {
                     girder.restRequest({
-                        path: 'folder',
+                        path: 'minerva_dataset/folder',
                         type: 'GET',
                         data: {
-                            parentType: 'user',
-                            parentId: girder.currentUser.get('_id'),
-                            text: 'minerva'
+                            userId: girder.currentUser.get('_id')
                         }
                     }).done(_.bind(function (resp) {
-                        var minervaFolder = _.findWhere(resp, {name: 'minerva'});
-                        if (!minervaFolder) {
-                            // create minervaFolder
-                            minervaFolder = new girder.models.FolderModel({
-                                name: 'minerva',
-                                parentType: 'user',
-                                parentId: girder.currentUser.get('_id')
-                            });
-                            minervaFolder.on('g:saved', function () {
-                                boundFetch(minervaFolder.get('_id'));
-                            }, this).on('g:error', function (err) {
-                                console.error('error creating Minerva folder');
-                                console.error(err);
-                                girder.events.trigger('g:alert', {
-                                    icon: 'cancel',
-                                    text: 'Could not create minerva folder.',
-                                    type: 'error',
-                                    timeout: 4000
-                                });
-                            }, this).save();
-
+                        if (!resp.folder) {
+                            girder.restRequest({
+                                path: 'minerva_dataset/folder',
+                                type: 'POST',
+                                data: {
+                                    userId: girder.currentUser.get('_id')
+                                }
+                            }).done(_.bind(function (resp) {
+                                boundFetch(resp.folder._id);
+                            }, this));
                         } else {
-                            // minervaFolder exists
-                            boundFetch(minervaFolder._id);
+                            boundFetch(resp.folder._id);
                         }
                     }));
                 } else {

@@ -19,7 +19,7 @@
 
 import pymongo
 
-from ..utility import findMinervaFolder
+from ..utility import findDatasetFolder
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
@@ -30,12 +30,13 @@ class Dataset(Resource):
     def __init__(self):
         self.resourceName = 'minerva_dataset'
         self.route('GET', (), self.listDatasets)
+        self.route('GET', ('folder',), self.getDatasetFolder)
+        self.route('POST', ('folder',), self.createDatasetFolder)
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def listDatasets(self, user, params):
-        print('listDatasets', user)
-        folder = findMinervaFolder(user)
+        folder = findDatasetFolder(user)
         if folder is None:
             return []
         else:
@@ -58,3 +59,23 @@ class Dataset(Resource):
                'default=name)', required=False)
         .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
                required=False, dataType='int'))
+
+    @access.public
+    @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
+    def getDatasetFolder(self, user, params):
+        folder = findDatasetFolder(user)
+        return {'folder': folder}
+    getDatasetFolder.description = (
+        Description('Get the minerva dataset folder owned by a user.')
+        .param('userId', 'User is the owner of minerva datasets.',
+               required=True))
+
+    @access.public
+    @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
+    def createDatasetFolder(self, user, params):
+        folder = findDatasetFolder(user, create=True)
+        return {'folder': folder}
+    createDatasetFolder.description = (
+        Description('Create the minerva dataset folder owned by a user.')
+        .param('userId', 'User is the owner of minerva datasets.',
+               required=True))

@@ -20,4 +20,6 @@
 
 class PluginSettings():
     MINERVA_FOLDER = 'minerva'
+    DATASET_FOLDER = 'dataset'
+    SESSION_FOLDER = 'session'
     GEOJSON_EXTENSION = '.geojson'
