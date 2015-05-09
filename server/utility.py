@@ -21,42 +21,42 @@ from constants import PluginSettings
 from girder.utility.model_importer import ModelImporter
 
 
-def findNamedFolder(user, parent, parentType, name, create=False):
+def findNamedFolder(currentUser, user, parent, parentType, name, create=False):
     folders = [
-        ModelImporter.model('folder').filter(folder, user) for folder in
+        ModelImporter.model('folder').filter(folder, currentUser) for folder in
         ModelImporter.model('folder').childFolders(
-            parent=parent, parentType=parentType, user=user,
+            parent=parent, parentType=parentType, user=currentUser,
             filters={'name': name})]
     # folders should have len of 0 or 1, since we are looking in a
     # user folder for a folder with a certain name
     if len(folders) == 0:
         if create:
             return ModelImporter.model('folder').createFolder(
-                parent, name, parentType=parentType)
+                parent, name, parentType=parentType, public=False)
         else:
             return None
     else:
         return folders[0]
 
 
-def findMinervaFolder(user, create=False):
-    return findNamedFolder(user, user, 'user', PluginSettings.MINERVA_FOLDER,
-                           create)
+def findMinervaFolder(currentUser, user, create=False):
+    return findNamedFolder(currentUser, user, user, 'user',
+                           PluginSettings.MINERVA_FOLDER, create)
 
 
-def findDatasetFolder(user, create=False):
-    minervaFolder = findMinervaFolder(user, create)
+def findDatasetFolder(currentUser, user, create=False):
+    minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
         return minervaFolder
     else:
-        return findNamedFolder(user, minervaFolder, 'folder',
+        return findNamedFolder(currentUser, user, minervaFolder, 'folder',
                                PluginSettings.DATASET_FOLDER, create)
 
 
-def findSessionFolder(user, create=False):
-    minervaFolder = findMinervaFolder(user, create)
+def findSessionFolder(currentUser, user, create=False):
+    minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
         return minervaFolder
     else:
-        return findNamedFolder(user, minervaFolder, 'folder',
+        return findNamedFolder(currentUser, user, minervaFolder, 'folder',
                                PluginSettings.SESSION_FOLDER, create)

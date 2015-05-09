@@ -43,9 +43,9 @@ class Dataset(Resource):
             limit, offset, sort = \
                 self.getPagingParameters(params,
                                          defaultSortDir=pymongo.DESCENDING)
-            items = [self.model('item').filter(item, user) for item in
-                     self.model('folder').childItems(folder, limit=limit,
-                                                     offset=offset, sort=sort)]
+            items = [self.model('item').filter(item, self.getCurrentUser()) for
+                     item in self.model('folder').childItems(folder,
+                     limit=limit, offset=offset, sort=sort)]
             return items
     listDatasets.description = (
         Description('List minerva datasets owned by a user.')
@@ -63,7 +63,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getDatasetFolder(self, user, params):
-        folder = findDatasetFolder(user)
+        folder = findDatasetFolder(self.getCurrentUser(), user)
         return {'folder': folder}
     getDatasetFolder.description = (
         Description('Get the minerva dataset folder owned by a user.')
@@ -73,7 +73,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
     def createDatasetFolder(self, user, params):
-        folder = findDatasetFolder(user, create=True)
+        folder = findDatasetFolder(self.getCurrentUser(), user, create=True)
         return {'folder': folder}
     createDatasetFolder.description = (
         Description('Create the minerva dataset folder owned by a user.')
