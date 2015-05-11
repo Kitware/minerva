@@ -36,7 +36,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def listDatasets(self, user, params):
-        folder = findDatasetFolder(user)
+        folder = findDatasetFolder(self.getCurrentUser(), user)
         if folder is None:
             return []
         else:
