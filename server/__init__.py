@@ -19,7 +19,7 @@
 
 import mako
 
-from .rest import dataset, shapefile
+from .rest import dataset, session, shapefile
 
 
 class CustomAppRoot(object):
@@ -104,3 +104,4 @@ def load(info):
                                shapefileREST.findGeoJson)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
+    info['apiRoot'].minerva_session = session.Session()
