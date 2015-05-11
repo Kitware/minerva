@@ -100,4 +100,46 @@ class DatasetTestCase(base.TestCase):
         self.assertEquals(folder['baseParentType'], 'user')
         self.assertEquals(folder['baseParentId'], str(self._user['_id']))
 
-        # TODO test listing datasets
+        # create some items in the dataset folder, even though these aren't real datasets
+        # this exercises the endpoint to return datasets
+
+        params = {
+            'name': 'item1',
+            'folderId': folder['_id']
+        }
+        response = self.request(path='/item', method='POST', params=params,
+                                            user=self._user)
+        item1Id = response.json['_id']
+        params = {
+            'name': 'item2',
+            'folderId': folder['_id']
+        }
+        response = self.request(path='/item', method='POST', params=params,
+                                            user=self._user)
+        item2Id = response.json['_id']
+
+        path = '/minerva_dataset'
+        params = {
+            'userId': self._user['_id'],
+        }
+
+        # need to check with user and without
+
+        response = self.request(path=path, method='GET', params=params)
+        # should have no responses because we didn't pass in a user
+        self.assertStatusOk(response)
+        self.assertEquals(len(response.json), 0)
+
+        response = self.request(path=path, method='GET', params=params, user=self._user)
+        self.assertStatusOk(response)
+        self.assertEquals(len(response.json), 2)
+        datasetIds = [d['_id'] for d in response.json]
+        self.assertTrue(item1Id in datasetIds, "expected item1Id in datasets")
+        self.assertTrue(item2Id in datasetIds, "expected item2Id in datasets")
+
+        # TODO
+        # will want some test data , a shapefile and a geojson
+        # upload the geojson, then process it, then list it as
+        # a dataset
+
+        # probably change this to an overall minerva test
