@@ -39,17 +39,20 @@ minerva.views.MapPanel = minerva.View.extend({
     initialize: function (settings) {
         girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
         girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
-        this.session = settings.session;
+        // specifying the properties needed to initialize the geojs map
+        // in an effort to separate what geojs needs from the structure of the
+        // saved session.
+        this.mapSettings = settings.mapSettings;
         this.datasets = {};
     },
 
-    renderMap: function (geojsonFile) {
+    renderMap: function () {
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: this.session.sessionJsonContents.center
+                center: this.mapSettings.center
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer(this.mapSettings.basemap);
             this.map.draw();
         }
     },

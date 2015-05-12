@@ -19,6 +19,11 @@ minerva.views.LayersPanel = minerva.View.extend({
     initialize: function (settings) {
         settings = settings || {};
         this.collection = settings.collection;
+        _.each(this.collection.models, function (dataset) {
+            if (dataset.get('displayed')) {
+                this.addDatasetToLayers(dataset);
+            }
+        }, this);
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function (dataset) {
@@ -42,6 +47,7 @@ minerva.views.LayersPanel = minerva.View.extend({
             girder.events.trigger('m:layerDatasetRemoved', dataset);
             this.render();
         }, this);
+        this.render();
     },
 
     render: function () {

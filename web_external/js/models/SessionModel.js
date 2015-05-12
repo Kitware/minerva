@@ -7,12 +7,49 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
 
     initialize: function () { },
 
+    _featureFromDataset: function (dataset) {
+        var feature = {
+            datasetId: dataset.id
+        };
+        return feature;
+    },
+
+    _featureIdentityPredicate: function (feature) {
+        return function (otherFeature) {
+            return otherFeature.datasetId === feature.datasetId;
+        };
+    },
+
+    datasetInFeatures: function (dataset) {
+        var datasetFinder = this._featureIdentityPredicate(this._featureFromDataset(dataset));
+        return _.some(this.sessionJsonContents.features, datasetFinder);
+    },
+
+    addDataset: function (dataset) {
+        // for now just add them to a list
+        // may want to unify caching of geojson file id
+        // TODO may need to be smarter about finding
+        // especially if we copy the file into our session item and the ids change
+        var feature = this._featureFromDataset(dataset);
+        if (!_.find(this.sessionJsonContents.features, this._featureIdentityPredicate(feature))) {
+            this.sessionJsonContents.features.push(feature);
+        }
+        // TODO may need to set this to changed because not using setX
+    },
+
+    removeDataset: function (dataset) {
+        var feature = this._featureFromDataset(dataset);
+        var featureIdentifier = this._featureIdentityPredicate(feature);
+        this.sessionJsonContents.features = _.reject(this.sessionJsonContents.features, featureIdentifier);
+        // TODO may need to set this to changed because not using setX
+    },
+
     createSessionJson: function (callback) {
         // TODO do this on the server side and just call it
         // when we create the session item, want to create a session.json file in it
         var sessionJsonContents = {};
         sessionJsonContents.basemap = 'osm';
-        sessionJsonContents.center = {x: -10, y: 36.5};
+        sessionJsonContents.center = {x: -100, y: 36.5};
         sessionJsonContents.features = [];
         // now save this as session.json as a file in the item
         this.sessionJsonFile = new girder.models.FileModel();
@@ -58,9 +95,29 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
             minerva.router.navigate('sessions', {trigger: true});
         }, this);
         girder.models.ItemModel.prototype.fetch.call(this);
-    }
+    },
     // when we load the session item, want to load the session.json file in it
     // will also make a file for each geojson dataset we want to add in
     // this will be a pointer in girder
 
+
+    // the standard save for this model will save this item
+    // here we save the session.json and any files that should be a part of the item
+    saveSession: function () {
+        // TODO will want more info on features, possibly layer or transparency or mapping or ??
+        // for now just save the fileid
+                // update the json, save it
+        this.sessionJsonFile.on('g:upload.complete', function () {
+            this.trigger('m:saved');
+            // TODO some work here
+            // may want to add or remove any files needed into the item
+            // hold off for now
+            // will need to get the complete list of files for the item
+            // dealing with pagination
+            // then compare that to the list of files as features
+            // delete any in files and not in features
+            // add any in features and not in files
+        }, this).updateContents(JSON.stringify(this.sessionJsonContents));
+
+    }
 });

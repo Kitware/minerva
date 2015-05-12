@@ -1,6 +1,6 @@
 .dataPanelContainer
   .panelTitle
-    | Datasets
+    | Available Datasets
   .loadData
      button.btn.btn-default.m-add-dataset-button(title="Upload dataset")
        .icon-plus-squared
@@ -8,12 +8,12 @@
   .savedDatasets
     .savedDatasetsTitle
     .savedDataList
-      ul.datasets
-        each dataset in datasets
-          li.dataset= dataset.get('name')
-            if (dataset.get('displayed'))
-                i.icon-right-circled.icon-disabled.dataset-in-layers&attributes({'m-dataset-id': dataset.get('_id')})
-                i.icon-trash.icon-disabled.delete-dataset.dataset-in-layers&attributes({'m-dataset-id': dataset.get('_id')})
-            else
-                i.icon-right-circled.add-dataset-to-layers&attributes({'m-dataset-id': dataset.get('_id')})
-                i.icon-trash.delete-dataset&attributes({'m-dataset-id': dataset.get('_id')})
+        .datasets
+            each dataset in datasets
+                .dataset= dataset.get('name')
+                    if (dataset.get('displayed'))
+                        i.icon-right-circled.icon-disabled.dataset-in-session&attributes({'m-dataset-id': dataset.get('_id')})
+                        i.icon-trash.icon-disabled.delete-dataset.dataset-in-session&attributes({'m-dataset-id': dataset.get('_id')})
+                    else
+                        i.icon-right-circled.add-dataset-to-session&attributes({'m-dataset-id': dataset.get('_id')})
+                        i.icon-trash.delete-dataset&attributes({'m-dataset-id': dataset.get('_id')})
