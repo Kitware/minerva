@@ -23,3 +23,4 @@ class PluginSettings():
     DATASET_FOLDER = 'dataset'
     SESSION_FOLDER = 'session'
     GEOJSON_EXTENSION = '.geojson'
+    SESSION_FILENAME = 'session.json'

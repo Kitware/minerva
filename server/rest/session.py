@@ -19,7 +19,9 @@
 
 import pymongo
 
+from ..constants import PluginSettings
 from ..utility import findSessionFolder
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
@@ -32,6 +34,7 @@ class Session(Resource):
         self.route('GET', (), self.listSessions)
         self.route('GET', ('folder',), self.getSessionFolder)
         self.route('POST', ('folder',), self.createSessionFolder)
+        self.route('GET', (':id', 'session'), self.getSessionJson)
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
@@ -79,3 +82,18 @@ class Session(Resource):
         Description('Create the minerva session folder owned by a user.')
         .param('userId', 'User is the owner of minerva sessions.',
                required=True))
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.READ)
+    def getSessionJson(self, item, params):
+        itemSessionJson = PluginSettings.SESSION_FILENAME
+        # TODO if not found try pagination
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemSessionJson:
+                return file
+        return {}
+    getSessionJson.description = (
+        Description('Get session json file from a minerva session item.')
+        .param('id', 'The Item ID', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the Item.', 403))
