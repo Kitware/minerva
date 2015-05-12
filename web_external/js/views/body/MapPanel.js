@@ -36,9 +36,10 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
-    initialize: function () {
+    initialize: function (settings) {
         girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
         girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
+        this.session = settings.session;
         this.datasets = {};
     },
 
@@ -46,9 +47,9 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: { x: -100, y: 36.5}
+                center: this.session.sessionJsonContents.center
             });
-            this.map.createLayer('osm');
+            this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.map.draw();
         }
     },
