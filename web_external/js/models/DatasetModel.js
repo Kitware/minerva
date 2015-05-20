@@ -28,6 +28,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 this.geojsonFileId = resp._id;
                 this.trigger('m:geojsonLoaded', this);
             }, this)).error(_.bind(function (err) {
+                console.error(err);
                 girder.events.trigger('g:alert', {
                     icon: 'cancel',
                     text: 'Could not load geojson from shapefile item.',
@@ -48,6 +49,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             this.geojsonFileId = resp._id;
             callback(this);
         }, this)).error(_.bind(function (err) {
+            console.error(err);
             girder.events.trigger('g:alert', {
                 icon: 'cancel',
                 text: 'Could not create geojson in shapefile item.',

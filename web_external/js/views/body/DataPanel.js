@@ -29,8 +29,7 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        settings = settings || {};
-        this.session = settings.session,
+        this.session = settings.session;
         this.upload = settings.upload;
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
@@ -38,7 +37,7 @@ minerva.views.DataPanel = minerva.View.extend({
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function () {
             this.render();
-        }, this).listenTo(this.collection, 'add', function (dataset) {
+        }, this).listenTo(this.collection, 'add', function () {
             this.render();
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();

@@ -76,6 +76,7 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
                     this.sessionJsonContents = resp;
                     this.trigger('m:fetched');
                 }, this)).error(_.bind(function (err) {
+                    console.error(err);
                     girder.events.trigger('g:alert', {
                         icon: 'cancel',
                         text: 'Could not download session json contents.',
@@ -84,6 +85,7 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
                     });
                 }, this));
             }, this)).error(_.bind(function (err) {
+                console.error(err);
                 girder.events.trigger('g:alert', {
                     icon: 'cancel',
                     text: 'Could not load session item.',
@@ -99,7 +101,6 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
     // when we load the session item, want to load the session.json file in it
     // will also make a file for each geojson dataset we want to add in
     // this will be a pointer in girder
-
 
     // the standard save for this model will save this item
     // here we save the session.json and any files that should be a part of the item
