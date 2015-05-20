@@ -1,6 +1,6 @@
 $(function () {
     minerva.events.trigger('g:appload.before');
-    var app = new minerva.App({
+    minerva.mainApp = new minerva.App({
         el: 'body',
         parentView: null
     });

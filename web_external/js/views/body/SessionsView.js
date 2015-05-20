@@ -9,7 +9,7 @@ minerva.views.SessionsView = minerva.View.extend({
         'click .m-session-create-button': 'createDialog'
     },
 
-    initialize: function (settings) {
+    initialize: function () {
         girder.cancelRestRequests('fetch');
 
         this.collection = new minerva.collections.SessionCollection();
@@ -74,6 +74,6 @@ minerva.views.SessionsView = minerva.View.extend({
 minerva.router.route('', 'index', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
 });
-minerva.router.route('sessions', 'sessions', function (params) {
+minerva.router.route('sessions', 'sessions', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
 });

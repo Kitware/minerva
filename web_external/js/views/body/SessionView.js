@@ -124,7 +124,7 @@ minerva.router.route('maps', 'maps', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionView);
 });
 
-minerva.router.route('session/:id', 'session', function (id, params) {
+minerva.router.route('session/:id', 'session', function (id) {
     // fetch the session and render it
     var session = new minerva.models.SessionModel();
     session.set({
