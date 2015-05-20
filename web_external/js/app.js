@@ -9,10 +9,6 @@ minerva.App = girder.App.extend({
         }).render();
 
         return this;
-    },
-
-    navigateTo: function (view, settings) {
-        this.$('#g-app-body-container').removeClass('m-body-nopad');
-        return girder.App.prototype.navigateTo.apply(this, arguments);
     }
+
 });
