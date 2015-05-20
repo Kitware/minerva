@@ -1,5 +1,7 @@
 ## Minerva: A Girder plugin for geospatial visualization
 
+Assumes you have a running version of Girder.
+
 ### Running Minerva
 
 - clone Minerva into the Girder plugins dir
