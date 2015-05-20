@@ -2,11 +2,11 @@ minerva.views.DataPanel = minerva.View.extend({
 
     events: {
         'click .m-add-dataset-button': 'uploadDialogEvent',
-        'click .add-dataset-to-layers': 'addDatasetToLayersEvent',
+        'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent'
     },
 
-    addDatasetToLayersEvent: function (event) {
+    addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         // TODO maybe this check is unnecessary, how can we get into this state?
@@ -30,6 +30,7 @@ minerva.views.DataPanel = minerva.View.extend({
 
     initialize: function (settings) {
         settings = settings || {};
+        this.session = settings.session,
         this.upload = settings.upload;
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
@@ -42,6 +43,7 @@ minerva.views.DataPanel = minerva.View.extend({
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();
         }, this);
+        this.render();
     },
 
     render: function () {

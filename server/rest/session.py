@@ -19,24 +19,27 @@
 
 import pymongo
 
-from ..utility import findDatasetFolder
+from ..constants import PluginSettings
+from ..utility import findSessionFolder
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
 
 
-class Dataset(Resource):
+class Session(Resource):
     def __init__(self):
-        self.resourceName = 'minerva_dataset'
-        self.route('GET', (), self.listDatasets)
-        self.route('GET', ('folder',), self.getDatasetFolder)
-        self.route('POST', ('folder',), self.createDatasetFolder)
+        self.resourceName = 'minerva_session'
+        self.route('GET', (), self.listSessions)
+        self.route('GET', ('folder',), self.getSessionFolder)
+        self.route('POST', ('folder',), self.createSessionFolder)
+        self.route('GET', (':id', 'session'), self.getSessionJson)
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
-    def listDatasets(self, user, params):
-        folder = findDatasetFolder(self.getCurrentUser(), user)
+    def listSessions(self, user, params):
+        folder = findSessionFolder(self.getCurrentUser(), user)
         if folder is None:
             return []
         else:
@@ -47,9 +50,9 @@ class Dataset(Resource):
                      item in self.model('folder').childItems(folder,
                      limit=limit, offset=offset, sort=sort)]
             return items
-    listDatasets.description = (
-        Description('List minerva datasets owned by a user.')
-        .param('userId', 'User is the owner of minerva datasets.',
+    listSessions.description = (
+        Description('List minerva sessions owned by a user.')
+        .param('userId', 'User is the owner of minerva sessions.',
                required=True)
         .param('limit', "Result set size limit (default=50).", required=False,
                dataType='int')
@@ -62,20 +65,35 @@ class Dataset(Resource):
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
-    def getDatasetFolder(self, user, params):
-        folder = findDatasetFolder(self.getCurrentUser(), user)
+    def getSessionFolder(self, user, params):
+        folder = findSessionFolder(self.getCurrentUser(), user)
         return {'folder': folder}
-    getDatasetFolder.description = (
-        Description('Get the minerva dataset folder owned by a user.')
-        .param('userId', 'User is the owner of minerva datasets.',
+    getSessionFolder.description = (
+        Description('Get the minerva session folder owned by a user.')
+        .param('userId', 'User is the owner of minerva sessions.',
                required=True))
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
-    def createDatasetFolder(self, user, params):
-        folder = findDatasetFolder(self.getCurrentUser(), user, create=True)
+    def createSessionFolder(self, user, params):
+        folder = findSessionFolder(self.getCurrentUser(), user, create=True)
         return {'folder': folder}
-    createDatasetFolder.description = (
-        Description('Create the minerva dataset folder owned by a user.')
-        .param('userId', 'User is the owner of minerva datasets.',
+    createSessionFolder.description = (
+        Description('Create the minerva session folder owned by a user.')
+        .param('userId', 'User is the owner of minerva sessions.',
                required=True))
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.READ)
+    def getSessionJson(self, item, params):
+        itemSessionJson = PluginSettings.SESSION_FILENAME
+        # TODO if not found try pagination
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemSessionJson:
+                return file
+        return {}
+    getSessionJson.description = (
+        Description('Get session json file from a minerva session item.')
+        .param('id', 'The Item ID', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the Item.', 403))

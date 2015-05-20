@@ -14,6 +14,8 @@
 #  limitations under the License.
 ###############################################################################
 
+add_python_test(dataset PLUGIN minerva)
+add_python_test(session PLUGIN minerva)
 add_python_style_test(pep8_style_minerva
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server")
 add_javascript_style_test(
