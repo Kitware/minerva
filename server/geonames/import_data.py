@@ -194,18 +194,20 @@ def read_geonames(file_name, collection=None):
     )
 
     alldata = pandas.DataFrame()
+    n = 10200000
     for i, chunk in enumerate(reader):
 
+        i = i * 1000
         alldata = alldata.append(chunk)
         export_chunk_to_girder(chunk, collection)
 
         progress_report(
-            0, 10200, 'Reading {}'.format(file_name), 'lines'
+            0, n, 'Reading {}'.format(file_name), 'lines'
         )
         if len(alldata) >= 1000:
             # there are about 10.1 million rows now
             progress_report(
-                i, max(i, 10200), 'Reading {}'.format(file_name), 'lines'
+                i, max(i, n), 'Reading {}'.format(file_name), 'lines'
             )
 
     done_report()
