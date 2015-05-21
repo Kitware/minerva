@@ -35,21 +35,15 @@ _columns = [
 
 
 # Actual types, but need NaN
-#    'geonameid': np.uint32,
-#    'latitude': np.float64,
-#    'longitude': np.float64,
-#    'population': np.uint64,
-#    'elevation': np.int32,
-#    'dem': np.int32,
 
 #: Data types for the columns to optimize import
 _types = {
-    'geonameid': np.float64,
+    'geonameid': np.uint32,
     'latitude': np.float64,
     'longitude': np.float64,
-    'population': np.float64,
-    'elevation': np.float64,
-    'dem': np.float64,
+    'population': np.object_,
+    'elevation': np.object_,
+    'dem': np.object_,
     'name': np.unicode_,
     'asciiname': np.str_,
     'alternatenames': np.str_,  # ascii comma seperated list
@@ -61,6 +55,25 @@ _types = {
     'admin2 code': np.str_,
     'admin3 code': np.str_,
     'admin4 code': np.str_
+}
+
+
+def _type_or_default(default, typeclass):
+    """Return a converter with the given default value."""
+    def conv(val):
+        try:
+            val = float(val)
+            if val < np.infty:
+                return typeclass(val)
+        except Exception:
+            return default
+    return conv
+
+#: conversion methods for dealing with nullable ints
+_converters = {
+    'population': _type_or_default(None, np.uint64),
+    'elevation': _type_or_default(None, np.int32),
+    'dem': _type_or_default(None, np.int32)
 }
 
 # Set up default paths
@@ -96,8 +109,8 @@ def progress_report(count, total, message,
         stream.write('%s: Unknown size\n')
         return
 
-    percent = 100 * float(count) / total
-    percent = max(min(percent, 100), 0)
+    percent = 100.0 * float(count) / total
+    percent = max(min(percent, 100.9), 0.0)
 
     tock = time.time()
     if _tick is None:
@@ -107,13 +120,13 @@ def progress_report(count, total, message,
         speed = float(count) / (tock - _tick)
 
     if unit:
-        msg = '\r%s: %3d%% (%s/s)' % (
+        msg = '\r%s: %4.1f%% (%s/s)' % (
             message,
             percent,
             speed_fmt(speed, unit)
         )
     else:
-        msg = '\r%s: %3d%%' % (message, percent)
+        msg = '\r%s: %4.1f%%' % (message, percent)
 
     stream.write(msg)
     stream.flush()
@@ -148,7 +161,7 @@ def download_all_countries(dest=_allZip, url=_allUrl):
     return dest
 
 
-def read_geonames(file_name):
+def read_geonames(file_name, collection=None):
     """Read a geonames dump and return a pandas Dataframe."""
     import pandas
 
@@ -162,23 +175,48 @@ def read_geonames(file_name):
         encoding='utf-8',
         parse_dates=[18],
         skip_blank_lines=True,
-        index_col=0,
+        index_col=None,
         chunksize=10000,
-        dtype=_types
+        dtype=_types,
+        engine='c',
+        converters=_converters
     )
 
-    data = pandas.DataFrame()
+    alldata = pandas.DataFrame()
     for i, chunk in enumerate(reader):
-        sys.stderr.flush()
-        data = data.append(chunk)
 
-        # there are about 10.1 million rows now
-        progress_report(
-            i, max(i, 1010), 'Reading {}'.format(file_name), 'lines'
-        )
+        alldata = alldata.append(chunk)
+        if collection:
+            export_to_mongo(chunk, collection)
+
+        if len(alldata) >= 10000:
+            # there are about 10.1 million rows now
+            progress_report(
+                i, max(i, 1010), 'Reading {}'.format(file_name), 'lines'
+            )
 
     done_report()
-    return data
+    return alldata
+
+
+def export_to_mongo(data, collection):
+    """Export the geonames data to mongo."""
+    records = data.to_dict(orient='records')
+    # move index to _id for mongo
+    for d in records:
+        for k in _types.keys():
+            val = d[k]
+            if val is np.nan or val is None:
+                d.pop(k)
+            elif val <= 0 and k in ('population', 'dem'):
+                d.pop(k)
+
+        d['_id'] = d.pop('geonameid')
+
+    if hasattr(collection, 'insert_many'):
+        collection.insert_many(records)
+    else:
+        collection.insert(records)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -188,4 +226,14 @@ if __name__ == '__main__':
     if not os.path.exists(_allZip):
         data_file = download_all_countries()
 
-    data = read_geonames(data_file)
+    collection = MongoClient()['minerva']['geonames']
+    collection.drop()
+    try:
+        from pymongo import write_concern
+        collection = collection.with_options(
+            write_concern=write_concern.WriteConcern(w=0)
+        )
+    except ImportError:
+        pass
+
+    data = read_geonames(data_file, collection)
