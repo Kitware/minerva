@@ -80,11 +80,23 @@ def _type_or_default(default, typeclass):
             return default
     return conv
 
+
+def _make_tuple(v):
+    """Make a tuple out of CSV."""
+    v = v.strip()
+    if v:
+        return tuple(v.split(','))
+    else:
+        return ()
+
+
 #: conversion methods for dealing with nullable ints
 _converters = {
     'population': _type_or_default(None, np.uint64),
     'elevation': _type_or_default(None, np.int32),
-    'dem': _type_or_default(None, np.int32)
+    'dem': _type_or_default(None, np.int32),
+    'alternatenames': _make_tuple,
+    'cc2': _make_tuple
 }
 
 # Set up default paths
@@ -250,10 +262,8 @@ def export_to_girder(data):
     folder = geonames_folder()
     user = get_user()
 
-    name = d.get('asciiname', d['name'])
-    desc = d['name'] + ', ' + ', '.join(
-        d.get('alternatenames', '').split(',')
-    )
+    name = d['name']
+    desc = ', '.join(d['alternatenames'])
     i = item.createItem(
         name=name,
         creator=user,
