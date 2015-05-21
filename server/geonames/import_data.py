@@ -8,7 +8,18 @@ import tempfile
 import zipfile
 
 import numpy as np
-from pymongo import MongoClient
+# from pymongo import MongoClient
+try:
+    from girder.utility.model_importer import ModelImporter
+except ImportError:
+    pass
+
+#: Put this in settings
+_collection_name = 'minerva'
+_collection = None
+_folder_name = 'geonames'
+_folder = None
+_user = None
 
 #: Columns in the TSV file for geonames
 _columns = [
@@ -176,7 +187,7 @@ def read_geonames(file_name, collection=None):
         parse_dates=[18],
         skip_blank_lines=True,
         index_col=None,
-        chunksize=10000,
+        chunksize=1000,
         dtype=_types,
         engine='c',
         converters=_converters
@@ -186,37 +197,138 @@ def read_geonames(file_name, collection=None):
     for i, chunk in enumerate(reader):
 
         alldata = alldata.append(chunk)
-        if collection:
-            export_to_mongo(chunk, collection)
+        export_chunk_to_girder(chunk, collection)
 
-        if len(alldata) >= 10000:
+        progress_report(
+            0, 10200, 'Reading {}'.format(file_name), 'lines'
+        )
+        if len(alldata) >= 1000:
             # there are about 10.1 million rows now
             progress_report(
-                i, max(i, 1010), 'Reading {}'.format(file_name), 'lines'
+                i, max(i, 10200), 'Reading {}'.format(file_name), 'lines'
             )
 
     done_report()
     return alldata
 
 
-def export_to_mongo(data, collection):
+def export_chunk_to_girder(data, collection):
     """Export the geonames data to mongo."""
+    def is_nan(x):
+        """Return true if the value is NaN."""
+        if not isinstance(x, float):
+            return False
+        return not (x <= 0 or x >= 0)
+
     records = data.to_dict(orient='records')
     # move index to _id for mongo
     for d in records:
         for k in _types.keys():
             val = d[k]
-            if val is np.nan or val is None:
+            if is_nan(val) or val is None:
                 d.pop(k)
             elif val <= 0 and k in ('population', 'dem'):
                 d.pop(k)
-
+        export_to_girder(d)
         d['_id'] = d.pop('geonameid')
 
-    if hasattr(collection, 'insert_many'):
+    if not collection:
+        return
+
+    if False:  # pymongo 3.0
         collection.insert_many(records)
     else:
         collection.insert(records)
+
+
+def export_to_girder(data):
+    """Export the geonames data to a girder folder."""
+    d = data
+    item = ModelImporter.model('item')
+    folder = geonames_folder()
+    user = get_user()
+
+    name = d.get('asciiname', d['name'])
+    desc = d['name'] + ', ' + ', '.join(
+        d.get('alternatenames', '').split(',')
+    )
+    i = item.createItem(
+        name=name,
+        creator=user,
+        folder=folder,
+        description=desc
+    )
+    item.setMetadata(i, d)
+
+
+# move to settings
+def get_user():
+    """Return the first user in the database."""
+    # ^^ i'm a terrible person ^^
+    global _user
+    if _user is not None:
+        return _user
+
+    user = ModelImporter.model('user')
+    return user.getAdmins().next()
+
+
+def minerva_collection(user=None,
+                       collection_name=_collection_name,
+                       public=False):
+    """Return the id of the minerva collection."""
+    global _collection
+    if _collection is not None and user is not None:
+        return _collection
+
+    collection = ModelImporter.model('collection')
+    c = collection.findOne({'name': collection_name})
+
+    if user is None:
+        user = get_user()
+
+    if c is None:
+        # create the collection
+        c = collection.createCollection(
+            name=collection_name,
+            creator=user,
+            description='Contains global items for the Minerva plugin',
+            public=public
+        )
+    _collection = c
+    return _collection
+
+
+def geonames_folder(collection=None, folder_name=_folder_name, public=False):
+    """Return the folder containing geonames items."""
+    global _folder
+    if _folder is not None and collection is None:
+        return _folder
+
+    if collection is None:
+        collection = minerva_collection(public=public)
+
+    folder = ModelImporter.model('folder')
+    f = folder.findOne({
+        'name': folder_name,
+        'parentId': collection['_id']
+    })
+
+    if f is None:
+        # create the folder
+        f = folder.createFolder(
+            parent=collection,
+            name=folder_name,
+            description='Contains the geonames database',
+            parentType='collection',
+            public=public
+        )
+    _folder = f
+
+    for i in folder.childItems(f):
+        ModelImporter.model('item').remove(i)
+
+    return f
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -226,14 +338,14 @@ if __name__ == '__main__':
     if not os.path.exists(_allZip):
         data_file = download_all_countries()
 
-    collection = MongoClient()['minerva']['geonames']
-    collection.drop()
-    try:
-        from pymongo import write_concern
-        collection = collection.with_options(
-            write_concern=write_concern.WriteConcern(w=0)
-        )
-    except ImportError:
-        pass
+#    collection = MongoClient()['minerva']['geonames']
+#    collection.drop()
+#    try:
+#        from pymongo import write_concern
+#        collection = collection.with_options(
+#            write_concern=write_concern.WriteConcern(w=0)
+#        )
+#    except ImportError:
+#        pass
 
-    data = read_geonames(data_file, collection)
+    data = read_geonames(data_file)
