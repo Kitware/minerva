@@ -56,7 +56,7 @@ _types = {
     'population': np.object_,
     'elevation': np.object_,
     'dem': np.object_,
-    'name': np.unicode_,
+    'name': np.str_,
     'asciiname': np.str_,
     'alternatenames': np.str_,  # ascii comma seperated list
     'feature class': np.str_,
@@ -242,11 +242,11 @@ def export_chunk_to_girder(data, collection):
     records = data.to_dict(orient='records')
     # move index to _id for mongo
     for d in records:
-        for k in _types.keys():
-            val = d[k]
+        for k in _columns:
+            val = d.get(k)
             if is_nan(val) or val is None:
                 d.pop(k)
-            elif val <= 0 and k in ('population', 'dem'):
+            elif k in ('population', 'dem') and val <= 0:
                 d.pop(k)
         export_to_girder(d)
         d['_id'] = d.pop('geonameid')
