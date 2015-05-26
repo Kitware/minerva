@@ -189,10 +189,14 @@ def read_geonames(file_name, collection=None):
     """Read a geonames dump and return a pandas Dataframe."""
     import pandas
 
-    z = zipfile.ZipFile(file_name)
+    try:
+        z = zipfile.ZipFile(file_name)
+        f = z.open('allCountries.txt')
+    except Exception:  # also try to open as a text file
+        f = open(file_name)
 
     reader = pandas.read_csv(
-        z.open('allCountries.txt'),
+        f,
         sep='\t',
         error_bad_lines=False,
         names=_columns,
