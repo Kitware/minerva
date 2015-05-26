@@ -6,6 +6,7 @@ import urllib
 import time
 import tempfile
 import zipfile
+import json
 
 import numpy as np
 # from pymongo import MongoClient
@@ -264,13 +265,26 @@ def export_to_girder(data):
 
     name = d['name']
     desc = ', '.join(d['alternatenames'])
-    i = item.createItem(
-        name=name,
-        creator=user,
-        folder=folder,
-        description=desc
-    )
-    item.setMetadata(i, d)
+    try:
+        i = item.createItem(
+            name=name,
+            creator=user,
+            folder=folder,
+            description=desc
+        )
+    except Exception:
+        sys.stderr.write('Failed to insert item "{}"\n'.format(repr(name)))
+        return
+
+    try:
+        item.setMetadata(i, d)
+    except Exception:
+        sys.stderr.write('Failed to write metadata:')
+        sys.stderr.write(json.dumps(
+            d,
+            default=repr,
+            indent=4
+        ) + '\n')
 
 
 # move to settings
@@ -314,7 +328,7 @@ def minerva_collection(user=None,
 def geonames_folder(collection=None, folder_name=_folder_name, public=False):
     """Return the folder containing geonames items."""
     global _folder
-    if _folder is not None and collection is None:
+    if _folder is not None:
         return _folder
 
     if collection is None:
@@ -326,19 +340,18 @@ def geonames_folder(collection=None, folder_name=_folder_name, public=False):
         'parentId': collection['_id']
     })
 
-    if f is None:
-        # create the folder
-        f = folder.createFolder(
-            parent=collection,
-            name=folder_name,
-            description='Contains the geonames database',
-            parentType='collection',
-            public=public
-        )
-    _folder = f
+    if f is not None:
+        folder.remove(f)
 
-    for i in folder.childItems(f):
-        ModelImporter.model('item').remove(i)
+    # create the folder
+    f = folder.createFolder(
+        parent=collection,
+        name=folder_name,
+        description='Contains the geonames database',
+        parentType='collection',
+        public=public
+    )
+    _folder = f
 
     return f
 
