@@ -163,8 +163,14 @@ def done_report(stream=sys.stderr):
         stream.write('\n')
 
 
-def download_all_countries(dest=_allZip, url=_allUrl):
+def download_all_countries(dest=_allZip, url=_allUrl,
+                           progress=None, done=None):
     """Download the geonames data file to the given destination."""
+    if progress is None:
+        progress = progress_report
+    if done is None:
+        done = done_report
+
     message = 'Downloading allCountries.zip'
     tmp = os.path.join(tempfile.gettempdir(), 'allCountries.zip')
 
@@ -172,11 +178,11 @@ def download_all_countries(dest=_allZip, url=_allUrl):
         urllib.urlretrieve(
             url,
             tmp,
-            lambda nb, bs, fs, url=url: progress_report(
+            lambda nb, bs, fs, url=url: progress(
                 nb * bs, fs, message, 'b'
             )
         )
-        done_report()
+        done()
         os.rename(tmp, dest)
     finally:
         if os.path.exists(tmp):
@@ -184,9 +190,16 @@ def download_all_countries(dest=_allZip, url=_allUrl):
     return dest
 
 
-def read_geonames(file_name, collection=None):
+def read_geonames(folder, user, file_name=_allZip,
+                  progress=None, done=None):
     """Read a geonames dump and return a pandas Dataframe."""
     import pandas
+
+    if progress is None:
+        progress = progress_report
+
+    if done is None:
+        done = done_report
 
     try:
         z = zipfile.ZipFile(file_name)
@@ -215,22 +228,22 @@ def read_geonames(file_name, collection=None):
 
         i = i * 1000
         alldata = alldata.append(chunk)
-        export_chunk_to_girder(chunk)
+        export_chunk_to_girder(chunk, folder, user)
 
-        progress_report(
+        progress(
             0, n, 'Reading {}'.format(file_name), 'lines'
         )
         if len(alldata) >= 1000:
             # there are about 10.1 million rows now
-            progress_report(
+            progress(
                 i, max(i, n), 'Reading {}'.format(file_name), 'lines'
             )
 
-    done_report()
+    done()
     return alldata
 
 
-def export_chunk_to_girder(data):
+def export_chunk_to_girder(data, folder, user):
     """Export the geonames data to mongo."""
     def is_nan(x):
         """Return true if the value is NaN."""
@@ -266,15 +279,13 @@ def export_chunk_to_girder(data):
         ]
         # features.append(feature)
 
-        export_to_girder(feature)
+        export_to_girder(feature, folder, user)
 
 
-def export_to_girder(data):
+def export_to_girder(data, folder, user):
     """Export the geonames data to a girder folder."""
     d = data
     item = ModelImporter.model('item')
-    folder = geonames_folder()
-    user = get_user()
 
     name = d['properties']['name']
     desc = ', '.join(d['properties']['alternatenames'])
@@ -381,22 +392,15 @@ def geonames_folder(collection=None, folder_name=_folder_name, public=False):
 
     return f
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        _allZip = sys.argv[1]
 
+def main():
+    """Download the allCountries file and update the database."""
     data_file = _allZip
     if not os.path.exists(_allZip):
         data_file = download_all_countries()
 
-#    collection = MongoClient()['minerva']['geonames']
-#    collection.drop()
-#    try:
-#        from pymongo import write_concern
-#        collection = collection.with_options(
-#            write_concern=write_concern.WriteConcern(w=0)
-#        )
-#    except ImportError:
-#        pass
+    read_geonames(data_file)
 
-    data = read_geonames(data_file)
+
+if __name__ == '__main__':
+    main()

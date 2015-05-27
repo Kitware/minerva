@@ -19,7 +19,7 @@
 
 import mako
 
-from .rest import dataset, session, shapefile
+from .rest import dataset, session, shapefile, geocode
 
 
 class CustomAppRoot(object):
@@ -99,6 +99,11 @@ def load(info):
                                shapefileREST.createGeoJson)
     info['apiRoot'].item.route('GET', (':id', 'geojson'),
                                shapefileREST.findGeoJson)
+
+    # Admin endpoint for initializing the geonames database
+    geocodeREST = geocode.Geonames()
+    info['apiRoot'].resource.route('POST', ('geonames',),
+                                   geocodeREST.setup)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
     info['apiRoot'].minerva_session = session.Session()
