@@ -163,13 +163,15 @@ def done_report(stream=sys.stderr):
         stream.write('\n')
 
 
-def download_all_countries(dest=_allZip, url=_allUrl,
+def download_all_countries(dest=_allZip, url=None,
                            progress=None, done=None):
     """Download the geonames data file to the given destination."""
     if progress is None:
         progress = progress_report
     if done is None:
         done = done_report
+    if url is None:
+        url = _allUrl
 
     message = 'Downloading allCountries.zip'
     tmp = os.path.join(tempfile.gettempdir(), 'allCountries.zip')
@@ -207,6 +209,7 @@ def read_geonames(folder, user, file_name=_allZip,
     except Exception:  # also try to open as a text file
         f = open(file_name)
 
+    chunksize = 100
     reader = pandas.read_csv(
         f,
         sep='\t',
@@ -216,34 +219,34 @@ def read_geonames(folder, user, file_name=_allZip,
         parse_dates=[18],
         skip_blank_lines=True,
         index_col=None,
-        chunksize=1000,
+        chunksize=chunksize,
         dtype=_types,
         engine='c',
         converters=_converters
     )
 
-    alldata = pandas.DataFrame()
+    # alldata = pandas.DataFrame()
     n = 10200000
     for i, chunk in enumerate(reader):
 
-        i = i * 1000
-        alldata = alldata.append(chunk)
-        export_chunk_to_girder(chunk, folder, user)
+        i = i * chunksize
 
+        records = chunk.to_dict(orient='records')
+
+        export_chunk_to_girder(records, folder, user)
+
+        # there are about 10.1 million rows now
         progress(
-            0, n, 'Reading {}'.format(file_name), 'lines'
+            i, max(i, n),
+            u'Importing item {}: {}'.format(i, records[0]['name']),
+            'lines'
         )
-        if len(alldata) >= 1000:
-            # there are about 10.1 million rows now
-            progress(
-                i, max(i, n), 'Reading {}'.format(file_name), 'lines'
-            )
 
     done()
-    return alldata
+    # return alldata
 
 
-def export_chunk_to_girder(data, folder, user):
+def export_chunk_to_girder(records, folder, user):
     """Export the geonames data to mongo."""
     def is_nan(x):
         """Return true if the value is NaN."""
@@ -251,7 +254,6 @@ def export_chunk_to_girder(data, folder, user):
             return False
         return not (x <= 0 or x >= 0)
 
-    records = data.to_dict(orient='records')
     # features = []
     # move index to _id for mongo
     for d in records:
