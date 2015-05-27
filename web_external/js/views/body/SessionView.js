@@ -15,6 +15,28 @@ minerva.views.SessionView = minerva.View.extend({
         },
         'click button.m-save-session-button': function () {
             this.model.saveSession();
+        },
+        'click a.m-delete-session': function () {
+            var page = this;
+            var session = this.model;
+            girder.confirm({
+                text: 'Are you sure you want to delete <b>' + session.escape('name') + '</b>?',
+                yestext: 'Delete',
+                escapedHtml: true,
+                confirmCallback: _.bind(function () {
+                    this.model.destroy({
+                        progress: true
+                    }).on('g:deleted', function () {
+                        girder.events.trigger('g:alert', {
+                            icon: 'ok',
+                            text: 'Session deleted.',
+                            type: 'success',
+                            timeout: 4000
+                        });
+                        minerva.router.navigate('/', {trigger: true});
+                    });
+                }, this)
+            });
         }
     },
 
