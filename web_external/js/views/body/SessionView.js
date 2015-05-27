@@ -111,6 +111,10 @@ minerva.views.SessionView = minerva.View.extend({
                 widget_base_dimensions: [210, 210],
                 draggable: {
                     handle: '.panelTitle'
+                },
+                resize: {
+                    enabled: true,
+                    min_size: [1, 1]
                 }
             });
 
