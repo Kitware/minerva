@@ -9,11 +9,10 @@ import zipfile
 import json
 
 import numpy as np
-# from pymongo import MongoClient
-try:
-    from girder.utility.model_importer import ModelImporter
-except ImportError:
-    pass
+from girder.utility.model_importer import ModelImporter
+
+#:  Get from geospatial plugin
+GEOSPATIAL_FIELD = 'geo'
 
 #: Put this in settings
 _collection_name = 'minerva'
@@ -216,7 +215,7 @@ def read_geonames(file_name, collection=None):
 
         i = i * 1000
         alldata = alldata.append(chunk)
-        export_chunk_to_girder(chunk, collection)
+        export_chunk_to_girder(chunk)
 
         progress_report(
             0, n, 'Reading {}'.format(file_name), 'lines'
@@ -231,7 +230,7 @@ def read_geonames(file_name, collection=None):
     return alldata
 
 
-def export_chunk_to_girder(data, collection):
+def export_chunk_to_girder(data):
     """Export the geonames data to mongo."""
     def is_nan(x):
         """Return true if the value is NaN."""
@@ -240,24 +239,34 @@ def export_chunk_to_girder(data, collection):
         return not (x <= 0 or x >= 0)
 
     records = data.to_dict(orient='records')
+    # features = []
     # move index to _id for mongo
     for d in records:
+        # create a geojson point feature for girder's geospatial plugin
+        feature = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+            },
+            'properties': d
+
+        }
+
+        # remove empty/invalid fields
         for k in _columns:
             val = d.get(k)
             if is_nan(val) or val is None:
                 d.pop(k)
             elif k in ('population', 'dem') and val <= 0:
                 d.pop(k)
-        export_to_girder(d)
-        d['_id'] = d.pop('geonameid')
 
-    if not collection:
-        return
+        feature['geometry']['coordinates'] = [
+            d.pop('longitude'),
+            d.pop('latitude')
+        ]
+        # features.append(feature)
 
-    if False:  # pymongo 3.0
-        collection.insert_many(records)
-    else:
-        collection.insert(records)
+        export_to_girder(feature)
 
 
 def export_to_girder(data):
@@ -267,8 +276,8 @@ def export_to_girder(data):
     folder = geonames_folder()
     user = get_user()
 
-    name = d['name']
-    desc = ', '.join(d['alternatenames'])
+    name = d['properties']['name']
+    desc = ', '.join(d['properties']['alternatenames'])
     try:
         i = item.createItem(
             name=name,
@@ -281,11 +290,24 @@ def export_to_girder(data):
         return
 
     try:
-        item.setMetadata(i, d)
+        item.setMetadata(i, d['properties'])
     except Exception:
-        sys.stderr.write('Failed to write metadata:')
+        sys.stderr.write('Failed to write metadata:\n')
         sys.stderr.write(json.dumps(
             d,
+            default=repr,
+            indent=4
+        ) + '\n')
+
+    try:
+        i[GEOSPATIAL_FIELD] = {
+            'geometry': data['geometry']
+        }
+        i = item.updateItem(i)
+    except Exception:
+        sys.stderr.write('Failed to write geospatial data:\n')
+        sys.stderr.write(json.dumps(
+            i[GEOSPATIAL_FIELD],
             default=repr,
             indent=4
         ) + '\n')
