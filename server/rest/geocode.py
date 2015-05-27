@@ -14,10 +14,12 @@ class Geonames(Resource):
 
     """API Endpoint for managing Geonames database."""
 
-    def _progress_adapter(self, ctx):
+    def _progress_adapter(self, ctx, unknown=False):
         """Return an adapter method from geonames progress arguments."""
         def progress(count, total, message, units):
             """Update the notification model."""
+            if unknown:
+                total = 0
             ctx.update(
                 total=total,
                 current=count,
@@ -41,7 +43,8 @@ class Geonames(Resource):
                              title=u'Downloading geonames database') as ctx:
 
             import_data.download_all_countries(
-                progress=self._progress_adapter(ctx)
+                progress=self._progress_adapter(ctx),
+                url=params.get('url')
             )
             ctx.update(message='Done', force=True)
 
@@ -51,7 +54,7 @@ class Geonames(Resource):
 
             import_data.read_geonames(
                 folder, self.getCurrentUser(),
-                progress=self._progress_adapter(ctx)
+                progress=self._progress_adapter(ctx, unknown=True)
             )
             ctx.update(message='Done', force=True)
 
@@ -66,6 +69,7 @@ class Geonames(Resource):
     setup.description = (
         Description('Set up the geonames database for geocoding support.')
         .param('folder', 'The folder to import the items to.', required=True)
+        .param('url', 'The URL of the data file to import.', required=False)
         .param('progress',
                'Enable progress notifications.',
                required=False,
