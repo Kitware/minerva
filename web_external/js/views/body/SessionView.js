@@ -71,8 +71,6 @@ minerva.views.SessionView = minerva.View.extend({
                 accessLevel: accessLevel,
                 girder: girder
             }));
-            //TODO we have the collection of datasets and also the session data
-            //use the session data to show which dataset is displayed
 
             this.dataPanel = new minerva.views.DataPanel({
                 el: this.$('.dataPanel'),
@@ -80,8 +78,7 @@ minerva.views.SessionView = minerva.View.extend({
                 collection: this.datasetsCollection,
                 parentView: this
             });
-            // TODO pass session to layers
-            // TODO save session with every +/- to layers
+
             this.layersPanel = new minerva.views.LayersPanel({
                 el: this.$('.layersPanel'),
                 collection: this.datasetsCollection,
@@ -111,7 +108,10 @@ minerva.views.SessionView = minerva.View.extend({
 
             this.$('.gridster > ul').gridster({
                 widget_margins: [10, 10],
-                widget_base_dimensions: [210, 210]
+                widget_base_dimensions: [210, 210],
+                draggable: {
+                    handle: '.panelTitle'
+                }
             });
 
         }, this));
