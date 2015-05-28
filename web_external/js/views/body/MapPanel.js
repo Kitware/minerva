@@ -57,6 +57,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 center: this.session.sessionJsonContents.center
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer('ui')
+                .createWidget('slider');
             this.map.draw();
         }
     },
