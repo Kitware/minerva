@@ -71,7 +71,8 @@ class CustomAppRoot(object):
         <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
         </script>
         <script src="${staticRoot}/built/app.min.js"></script>
-        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js"></script>
+        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
+        </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
