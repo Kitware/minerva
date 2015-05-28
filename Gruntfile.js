@@ -67,7 +67,8 @@ module.exports = function (grunt) {
 
         var jsDir = pluginDir + '/' + sourceDir + '/js';
         // depends on npm install being run locally in this plugin dir
-        var geojsDistDir = pluginDir + '/node_modules/geojs/dist/built';
+        var geojsDir = pluginDir + '/node_modules/geojs';
+        var geojsDistDir = geojsDir + '/dist/built';
         var extDir = jsDir + '/ext';
         if (fs.existsSync(jsDir)) {
             var files = {};
@@ -84,6 +85,15 @@ module.exports = function (grunt) {
                 jsDir + '/models/**/*.js',
                 jsDir + '/collections/**/*.js',
                 jsDir + '/views/**/*.js'
+            ];
+            // since Girder already provides jquery and d3
+            // don't take the prepackaged geo.ext.min.js from geojs, but rather
+            // create one based on the other required dependencies
+            files[staticDir + '/geo.ext.min.js'] = [
+                geojsDir + '/bower_components/jquery-mousewheel/jquery-mousewheel.js',
+                geojsDir + '/bower_components/gl-matrix/dist/gl-matrix.js',
+                geojsDir + '/bower_components/proj4/dist/proj4-src.js',
+                geojsDir + '/node_modules/pnltri/pnltri.js'
             ];
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
@@ -102,11 +112,11 @@ module.exports = function (grunt) {
         if (fs.existsSync(extraDir)) {
             var files = [
                 { expand: true, cwd: extraDir, src: ['**'], dest: staticDir },
-                { expand: true, cwd: geojsDistDir, src: ['geo.ext.min.js', 'geo.min.js'], dest: staticDir }
+                { expand: true, cwd: geojsDistDir, src: ['geo.min.js'], dest: staticDir }
             ];
             grunt.config.set('copy.' + pluginName, { files: files});
             grunt.config.set('watch.copy_' + pluginName, {
-                files: [extraDir + '/**/*', geojsDistDir + '/geo.ext.min.js', geojsDistDir + '/geo.min.js'],
+                files: [extraDir + '/**/*', geojsDistDir + '/geo.min.js'],
                 tasks: ['copy:' + pluginName]
             });
             defaultTasks.push('copy:' + pluginName);
