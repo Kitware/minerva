@@ -7,7 +7,6 @@ minerva.views.EditBaseLayerWidget = minerva.View.extend({
             e.preventDefault();
 
             var fields = {
-                basemap: this.$('#m-baselayer-basemap').val(),
                 centerx: this.$('#m-baselayer-centerx').val(),
                 centery: this.$('#m-baselayer-centery').val()
             };
@@ -31,7 +30,6 @@ minerva.views.EditBaseLayerWidget = minerva.View.extend({
             view.$('#m-baselayer-basemap').focus();
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', function () {
-            view.$('#m-baselayer-basemap').val(view.model.sessionJsonContents.basemap);
             view.$('#m-baselayer-centerx').val(view.model.sessionJsonContents.center.x);
             view.$('#m-baselayer-centery').val(view.model.sessionJsonContents.center.y);
         });
@@ -42,16 +40,15 @@ minerva.views.EditBaseLayerWidget = minerva.View.extend({
     },
 
     updateBaseLayer: function (fields) {
-        this.model.sessionJsonContents.basemap = fields.basemap;
         this.model.sessionJsonContents.center.x = fields.centerx;
         this.model.sessionJsonContents.center.y = fields.centery;
-        this.model.on('g:saved', function () {
+        this.model.on('m:saved', function () {
             this.$el.modal('hide');
             this.trigger('g:saved', this.model);
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.m-save-baselayer').removeClass('disabled');
             this.$('#m-baselayer-' + err.responseJSON.field).focus();
-        }, this).save();
+        }, this).saveSession();
     }
 });
