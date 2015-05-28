@@ -16,8 +16,19 @@ minerva.views.SessionView = minerva.View.extend({
         'click button.m-save-session-button': function () {
             this.model.saveSession();
         },
+        'click a.m-edit-baselayer': function () {
+            if (!this.editBaseLayerWidget) {
+                this.editBaseLayerWidget = new minerva.views.EditBaseLayerWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.model.trigger('m:mapUpdated');
+                }, this);
+            }
+            this.editBaseLayerWidget.render();
+        },
         'click a.m-delete-session': function () {
-            var page = this;
             var session = this.model;
             girder.confirm({
                 text: 'Are you sure you want to delete <b>' + session.escape('name') + '</b>?',
@@ -107,13 +118,9 @@ minerva.views.SessionView = minerva.View.extend({
                 parentView: this
             });
 
-            var mapSettings = {
-                basemap: this.model.sessionJsonContents.basemap,
-                center: this.model.sessionJsonContents.center
-            };
             this.mapPanel = new minerva.views.MapPanel({
                 el: this.$('.mapPanel'),
-                mapSettings: mapSettings,
+                session: this.model,
                 collection: this.datasetsCollection,
                 parentView: this
             }).render();

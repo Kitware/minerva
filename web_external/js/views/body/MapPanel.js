@@ -39,10 +39,14 @@ minerva.views.MapPanel = minerva.View.extend({
     initialize: function (settings) {
         girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
         girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
-        // specifying the properties needed to initialize the geojs map
-        // in an effort to separate what geojs needs from the structure of the
-        // saved session.
-        this.mapSettings = settings.mapSettings;
+        this.session = settings.session;
+        this.listenTo(this.session, 'm:mapUpdated', function () {
+            // TODO base layer changes, for now only dealing with center
+            if (this.map) {
+                // TODO could better separate geojs needs from session storage
+                this.map.center(this.session.sessionJsonContents.center);
+            }
+        });
         this.datasets = {};
     },
 
@@ -50,9 +54,9 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: this.mapSettings.center
+                center: this.session.sessionJsonContents.center
             });
-            this.map.createLayer(this.mapSettings.basemap);
+            this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.map.draw();
         }
     },
