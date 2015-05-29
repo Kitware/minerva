@@ -48,4 +48,6 @@ girder.views.HierarchyWidget.prototype.events['click .g-import-geonames-data-but
             progress: true
         }
     });
+
+    this.parentView.render();
 };
