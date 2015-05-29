@@ -1,4 +1,6 @@
 """REST API for geocode services."""
+from datetime import datetime, timedelta
+
 from ..geonames import import_data
 
 from pymongo import GEOSPHERE
@@ -18,12 +20,14 @@ class Geonames(Resource):
         """Return an adapter method from geonames progress arguments."""
         def progress(count, total, message, units):
             """Update the notification model."""
+            now = datetime.utcnow()
             if unknown:
                 total = 0
             ctx.update(
                 total=total,
                 current=count,
-                message=message
+                message=message,
+                expires=now + timedelta(minutes=5)
             )
 
         return progress
@@ -37,6 +41,12 @@ class Geonames(Resource):
     def setup(self, folder, params):
         """Call the main geonames setup code in a new job."""
         progress = self.boolParam('progress', params, default=False)
+
+        # insert an item indicating the geonames import
+        self.model('item').createItem(
+            'geonames_import', self.getCurrentUser(), folder,
+            description=datetime.utcnow().isoformat()
+        )
 
         # download the data
         with ProgressContext(progress, user=self.getCurrentUser(),
@@ -66,6 +76,13 @@ class Geonames(Resource):
                 GEOSPHERE
             )])
             ctx.update(message='Done', force=True)
+
+        # insert an item indicating completion
+        self.model('item').createItem(
+            'geonames_done', self.getCurrentUser(), folder,
+            description=datetime.utcnow().isoformat()
+        )
+
     setup.description = (
         Description('Set up the geonames database for geocoding support.')
         .param('folder', 'The folder to import the items to.', required=True)

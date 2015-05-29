@@ -7,16 +7,14 @@ girder.views.minerva_ConfigView = girder.View.extend({
             var value = this.$('#minerva.geonames_folder').val().trim();
 
             this.$('#g-minerva-error-message').empty();
-            this.$('#minerva-import-button').prop('disabled', 'disabled');
             this._saveSettings([{
                 key: 'minerva.geonames_folder',
                 value: value
             }]);
-
             event.preventDefault();
         },
         'click #g-minerva-import-button': function (event) {
-            var value = this.$('#minerva.geonames_folder').val().trim();
+            this._maybeImport();
             event.preventDefault();
         }
     },
@@ -33,9 +31,6 @@ girder.views.minerva_ConfigView = girder.View.extend({
             this.$('#minerva.geonames_folder').val(
                 resp['minerva.geonames_folder']
             );
-            if (resp['minerva.geonames_folder']) {
-                this.$('#minerva-import-button').prop('disabled', null);
-            }
         }, this));
     },
 
@@ -67,29 +62,9 @@ girder.views.minerva_ConfigView = girder.View.extend({
                 type: 'success',
                 timeout: 4000
             });
-            this._maybeAllowImport();
         }, this)).error(_.bind(function (resp) {
             this.$('#g-minerva-error-message').text(
                 resp.responseJSON.message);
-        }, this));
-    },
-
-    /**
-     * If the given folder is empty then enable the import button.
-     */
-    _maybeAllowImport: function () {
-        var folder = this.$('#minerva.geonames_folder').val().trim();
-        girder.restRequest({
-            type: 'GET',
-            path: 'item',
-            data: {
-                folderId: folder,
-                limit: 1
-            }
-        }).done(_.bind(function (resp) {
-            if (!resp.length) {
-                this.$('#minerva-import-button').prop('disabled', null);
-            }
         }, this));
     }
 });
