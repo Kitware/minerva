@@ -95,6 +95,12 @@ class Geonames(Resource):
                 'geo.geometry.coordinates',
                 GEOSPHERE
             )])
+            self.model('item').collection.ensure_index([
+                'meta.asciiname'
+            ])
+            self.model('item').collection.ensure_index([
+                'meta.alternatenames',
+            ])
             ctx.update(message='Done', force=True)
 
         # insert an item indicating completion
