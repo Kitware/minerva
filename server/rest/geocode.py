@@ -125,12 +125,26 @@ class Geonames(Resource):
         folder = self.geonames_folder()
         if folder is None:
             raise RestException('Geocoding not configured')
-        return list(self.model('item').textSearch(
+
+        results = list(self.model('item').textSearch(
             params.get('name'),
             user=self.getCurrentUser(),
             filters={'folderId': folder},
             limit=params.get('limit', 10)
         ))
+
+        geo = {
+            "type": "FeatureCollection",
+            "features": []
+        }
+
+        # generate a geojson object
+        for result in results:
+            result['properties'] = result.pop('meta')
+            result['id'] = result['properties'].pop('geonameid')
+            geo['features'].append(result)
+
+        return geo
 
     geocode.description = (
         Description('Search for geonames items with the given name.')
