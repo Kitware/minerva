@@ -238,12 +238,11 @@ def read_geonames(folder, user, file_name=_allZip,
         # there are about 10.1 million rows now
         progress(
             i, max(i, n),
-            u'Importing item {}: {}'.format(i, records[0]['name']),
+            u'Importing item #{}: {}'.format(i, records[0]['name']),
             'lines'
         )
 
     done()
-    # return alldata
 
 
 def export_chunk_to_girder(records, folder, user):
@@ -379,17 +378,16 @@ def geonames_folder(collection=None, folder_name=_folder_name, public=False):
         'parentId': collection['_id']
     })
 
-    if f is not None:
-        folder.remove(f)
+    if f is None:
+        # create the folder
+        f = folder.createFolder(
+            parent=collection,
+            name=folder_name,
+            description='Contains the geonames database',
+            parentType='collection',
+            public=public
+        )
 
-    # create the folder
-    f = folder.createFolder(
-        parent=collection,
-        name=folder_name,
-        description='Contains the geonames database',
-        parentType='collection',
-        public=public
-    )
     _folder = f
 
     return f
