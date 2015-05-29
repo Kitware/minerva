@@ -42,7 +42,7 @@ girder.views.HierarchyWidget.prototype.events['click .g-import-geonames-data-but
 
     girder.restRequest({
         type: 'POST',
-        path: 'resource/geonames',
+        path: 'geonames/setup',
         data: {
             folder: this.parentModel.get('_id'),
             progress: true
