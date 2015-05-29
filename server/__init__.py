@@ -115,9 +115,11 @@ def load(info):
                                shapefileREST.findGeoJson)
 
     # Admin endpoint for initializing the geonames database
-    geocodeREST = geocode.Geonames()
-    info['apiRoot'].resource.route('POST', ('geonames',),
+    info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
+    info['apiRoot'].geonames.route('POST', ('setup',),
                                    geocodeREST.setup)
+    info['apiRoot'].geonames.route('GET', ('geocode',),
+                                   geocodeREST.geocode)
     events.bind('model.setting.validate', 'minerva', validate_settings)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
