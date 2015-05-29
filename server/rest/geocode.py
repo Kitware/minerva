@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 from ..geonames import import_data
 
 from pymongo import GEOSPHERE
+from bson.objectid import ObjectId
 
-from girder.api.rest import Resource, loadmodel
+from girder.api.rest import Resource, loadmodel, RestException
 from girder.api.describe import Description
 from girder.api import access
 from girder.utility.progress import ProgressContext
@@ -15,6 +16,25 @@ from girder.constants import AccessType
 class Geonames(Resource):
 
     """API Endpoint for managing Geonames database."""
+
+    _geonames_folder = None
+
+    def __init__(self):
+        """Set up the resource."""
+        self.resourceName = 'geonames'
+
+    def geonames_folder(self):
+        """Return the configured geonames folder."""
+        self._geonames_folder
+
+        if self._geonames_folder is None:
+            self._geonames_folder = ObjectId(
+                self.model('setting').get(
+                    'minerva.geonames_folder', None
+                )
+            )
+
+        return self._geonames_folder
 
     def _progress_adapter(self, ctx, unknown=False):
         """Return an adapter method from geonames progress arguments."""
@@ -91,4 +111,28 @@ class Geonames(Resource):
                'Enable progress notifications.',
                required=False,
                dataType='boolean')
+    )
+
+    @access.public
+    def geocode(self, params):
+        """Return a list of geojson points matching the given name."""
+        folder = self.geonames_folder()
+        if folder is None:
+            raise RestException('Geocoding not configured')
+        return list(self.model('item').textSearch(
+            params.get('name'),
+            user=self.getCurrentUser(),
+            filters={'folderId': folder},
+            limit=params.get('limit', 10)
+        ))
+
+    geocode.description = (
+        Description('Search for geonames items with the given name.')
+        .param('name', 'The location name', required=True)
+        .param(
+            'limit',
+            'The maximum number of results to return.',
+            required=False,
+            dataType='integer'
+        )
     )
