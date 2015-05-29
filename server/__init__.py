@@ -55,8 +55,6 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/minerva.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/jobs/plugin.min.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
@@ -65,16 +63,15 @@ class CustomAppRoot(object):
       <body>
         <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
         <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-        <script src="${staticRoot}/built/libs.min.js"></script>
-        <script src="${staticRoot}/built/app.min.js"></script>
-        <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
-        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
-        </script>
         <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js">
         </script>
+        <script src="${staticRoot}/built/libs.min.js"></script>
+        <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
+        </script>
         <script src="${staticRoot}/built/plugins/minerva/geo.min.js">
+        </script>
+        <script src="${staticRoot}/built/app.min.js"></script>
+        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>

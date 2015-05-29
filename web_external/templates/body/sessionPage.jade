@@ -17,17 +17,13 @@
             li(role="presentation")
               a.m-edit-session(role="menuitem")
                 i.icon-edit
-                | Edit info
+                | Edit session
             li(role="presentation")
               a.m-edit-baselayer(role="menuitem")
-                i.icon-plus
-                | Edit base layer
+                i.icon-bullseye
+                | Recenter base layer
             if (accessLevel  >= girder.AccessType.ADMIN)
               li.divider(role="presentation")
-              li(role="presentation")
-                a.m-minerva-access-control(role="menuitem")
-                  i.icon-lock
-                  | Access control
               li(role="presentation")
                 a.m-delete-session(role="menuitem")
                   i.icon-trash

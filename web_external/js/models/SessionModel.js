@@ -50,6 +50,7 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
         var sessionJsonContents = {};
         sessionJsonContents.basemap = 'osm';
         sessionJsonContents.center = {x: -100, y: 36.5};
+        sessionJsonContents.zoom = 1;
         sessionJsonContents.features = [];
         // now save this as session.json as a file in the item
         this.sessionJsonFile = new girder.models.FileModel();

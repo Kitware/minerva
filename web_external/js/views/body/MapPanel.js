@@ -1,6 +1,21 @@
 minerva.views.MapPanel = minerva.View.extend({
 
+    events: {
+        'click .m-save-current-baselayer': function () {
+            this.session.sessionJsonContents.center = this.map.center();
+            this.session.sessionJsonContents.zoom = this.map.zoom();
+            this.session.saveSession();
+        }
+    },
+
     addDataset: function (dataset) {
+        // TODO HACK
+        // deleting and re-adding ui layer to keep it on top
+        //this.map.deleteLayer(this.uiLayer);
+        // this causes a problem when there are at least two feature layers,
+        // so for now it is commented out
+        // this means we keep re-adding the ui layer each time a dataset is
+        // added as a feature layer, which is even more of a HACK
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             var layer,
@@ -19,6 +34,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 complete: _.bind(function () {
                     layer.clear();
                     reader.read(data, _.bind(function () {
+                        this.uiLayer = this.map.createLayer('ui');
+                        this.uiLayer.createWidget('slider');
                         this.map.draw();
                     }, this));
                 }, this)
@@ -39,10 +56,14 @@ minerva.views.MapPanel = minerva.View.extend({
     initialize: function (settings) {
         girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
         girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
-        // specifying the properties needed to initialize the geojs map
-        // in an effort to separate what geojs needs from the structure of the
-        // saved session.
-        this.mapSettings = settings.mapSettings;
+        this.session = settings.session;
+        this.listenTo(this.session, 'm:mapUpdated', function () {
+            // TODO for now only dealing with center
+            if (this.map) {
+                // TODO could better separate geojs needs from session storage
+                this.map.center(this.session.sessionJsonContents.center);
+            }
+        });
         this.datasets = {};
     },
 
@@ -50,16 +71,27 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: this.mapSettings.center
+                center: this.session.sessionJsonContents.center,
+                zoom: this.session.sessionJsonContents.zoom
             });
-            this.map.createLayer(this.mapSettings.basemap);
-            this.map.draw();
+            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.uiLayer = this.map.createLayer('ui');
+            this.uiLayer.createWidget('slider');
+            window.map = this.map;
         }
+        this.map.draw();
     },
 
     render: function () {
         this.$el.html(minerva.templates.mapPanel());
         this.renderMap();
+        var tooltipProperties = {
+            placement: 'left',
+            delay: 400,
+            container: this.$el,
+            trigger: 'hover'
+        };
+        this.$('.m-save-current-baselayer').tooltip(tooltipProperties);
         return this;
     }
 });
