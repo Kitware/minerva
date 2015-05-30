@@ -1,0 +1,19 @@
+.modal-dialog
+  .modal-content
+    form#m-edit-baselayer-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Recenter base layer
+      .modal-body
+        .form-group
+          label.control-label(for="m-baselayer-centerx") Center x coordinate
+          input.input-sm#m-baselayer-centerx.form-control(type="text", placeholder="Enter baselayer center x coordinate")
+        .form-group
+          label.control-label(for="m-baselayer-centery") Center y coordinate
+          input.input-sm#m-baselayer-centery.form-control(type="text", placeholder="Enter baselayer center y coordinate")
+        .g-validation-failed-message
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-save-baselayer.btn.btn-small.btn-primary(type="submit")
+          | Save
