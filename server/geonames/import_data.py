@@ -192,97 +192,6 @@ def download_all_countries(dest=_allZip, url=None,
     return dest
 
 
-def read_geonames(folder, user, file_name=_allZip,
-                  progress=None, done=None):
-    """Read a geonames dump and return a pandas Dataframe."""
-    import pandas
-
-    if progress is None:
-        progress = progress_report
-
-    if done is None:
-        done = done_report
-
-    try:
-        z = zipfile.ZipFile(file_name)
-        f = z.open('allCountries.txt')
-    except Exception:  # also try to open as a text file
-        f = open(file_name)
-
-    chunksize = 100
-    reader = pandas.read_csv(
-        f,
-        sep='\t',
-        error_bad_lines=False,
-        names=_columns,
-        encoding='utf-8',
-        parse_dates=[18],
-        skip_blank_lines=True,
-        index_col=None,
-        chunksize=chunksize,
-        dtype=_types,
-        engine='c',
-        converters=_converters
-    )
-
-    # alldata = pandas.DataFrame()
-    n = 10200000
-    for i, chunk in enumerate(reader):
-
-        i = i * chunksize
-
-        records = chunk.to_dict(orient='records')
-
-        export_chunk_to_girder(records, folder, user)
-
-        # there are about 10.1 million rows now
-        progress(
-            i, max(i, n),
-            u'Importing item #{}: {}'.format(i, records[0]['name']),
-            'lines'
-        )
-
-    done()
-
-
-def export_chunk_to_girder(records, folder, user):
-    """Export the geonames data to mongo."""
-    def is_nan(x):
-        """Return true if the value is NaN."""
-        if not isinstance(x, float):
-            return False
-        return not (x <= 0 or x >= 0)
-
-    # features = []
-    # move index to _id for mongo
-    for d in records:
-        # create a geojson point feature for girder's geospatial plugin
-        feature = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-            },
-            'properties': d
-
-        }
-
-        # remove empty/invalid fields
-        for k in _columns:
-            val = d.get(k)
-            if is_nan(val) or val is None:
-                d.pop(k)
-            elif k in ('population', 'dem') and val <= 0:
-                d.pop(k)
-
-        feature['geometry']['coordinates'] = [
-            d.pop('longitude'),
-            d.pop('latitude')
-        ]
-        # features.append(feature)
-
-        export_to_girder(feature, folder, user)
-
-
 def export_to_girder(data, folder, user):
     """Export the geonames data to a girder folder."""
     d = data
@@ -323,6 +232,137 @@ def export_to_girder(data, folder, user):
             default=repr,
             indent=4
         ) + '\n')
+
+
+def read_geonames(folder=None, user=None, file_name=_allZip, chunksize=100,
+                  progress=None, done=None, handler=export_to_girder):
+    """Read a geonames dump and return a pandas Dataframe."""
+    import pandas
+
+    if progress is None:
+        progress = progress_report
+
+    if done is None:
+        done = done_report
+
+    try:
+        z = zipfile.ZipFile(file_name)
+        f = z.open('allCountries.txt')
+    except Exception:  # also try to open as a text file
+        f = open(file_name)
+
+    reader = pandas.read_csv(
+        f,
+        sep='\t',
+        error_bad_lines=False,
+        names=_columns,
+        encoding='utf-8',
+        parse_dates=[18],
+        skip_blank_lines=True,
+        index_col=None,
+        chunksize=chunksize,
+        dtype=_types,
+        engine='c',
+        converters=_converters
+    )
+
+    # alldata = pandas.DataFrame()
+    n = 10200000
+    for i, chunk in enumerate(reader):
+
+        i = i * chunksize
+
+        records = chunk.to_dict(orient='records')
+
+        export_chunk(records, folder, user, handler)
+
+        # there are about 10.1 million rows now
+        progress(
+            i, max(i, n),
+            u'Importing item #{}: {}'.format(i, records[0]['name']),
+            'lines'
+        )
+
+    done()
+
+
+def export_to_girder(data, folder, user):
+    """Export the geonames data to a girder folder."""
+    item = ModelImporter.model('item')
+    for d in data:
+        name = d['properties']['name']
+        desc = ', '.join(d['properties']['alternatenames'])
+        try:
+            i = item.createItem(
+                name=name,
+                creator=user,
+                folder=folder,
+                description=desc
+            )
+        except Exception:
+            sys.stderr.write('Failed to insert item "{}"\n'.format(repr(name)))
+            return
+
+        try:
+            item.setMetadata(i, d['properties'])
+        except Exception:
+            sys.stderr.write('Failed to write metadata:\n')
+            sys.stderr.write(json.dumps(
+                d,
+                default=repr,
+                indent=4
+            ) + '\n')
+
+        try:
+            i[GEOSPATIAL_FIELD] = {
+                'geometry': d['geometry']
+            }
+            i = item.updateItem(i)
+        except Exception:
+            sys.stderr.write('Failed to write geospatial data:\n')
+            sys.stderr.write(json.dumps(
+                i[GEOSPATIAL_FIELD],
+                default=repr,
+                indent=4
+            ) + '\n')
+
+
+def export_chunk(records, folder, user,
+                 handler=export_to_girder):
+    """Export the geonames data to mongo."""
+    def is_nan(x):
+        """Return true if the value is NaN."""
+        if not isinstance(x, float):
+            return False
+        return not (x <= 0 or x >= 0)
+
+    features = []
+    for d in records:
+        # create a geojson point feature for girder's geospatial plugin
+        feature = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+            },
+            'properties': d
+
+        }
+
+        # remove empty/invalid fields
+        for k in _columns:
+            val = d.get(k)
+            if is_nan(val) or val is None:
+                d.pop(k)
+            elif k in ('population', 'dem') and val <= 0:
+                d.pop(k)
+
+        feature['geometry']['coordinates'] = [
+            d.pop('longitude'),
+            d.pop('latitude')
+        ]
+        features.append(feature)
+
+    handler(features, folder, user)
 
 
 # move to settings
