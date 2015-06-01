@@ -356,6 +356,10 @@ def export_chunk(records, folder, user,
             elif k in ('population', 'dem') and val <= 0:
                 d.pop(k)
 
+        if 'longitude' not in d or 'latitude' not in d:
+            print('Invalid geometry: ' + repr(d))
+            continue
+
         feature['geometry']['coordinates'] = [
             d.pop('longitude'),
             d.pop('latitude')
