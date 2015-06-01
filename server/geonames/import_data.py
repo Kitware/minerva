@@ -263,7 +263,8 @@ def read_geonames(folder=None, user=None, file_name=_allZip, chunksize=100,
         chunksize=chunksize,
         dtype=_types,
         engine='c',
-        converters=_converters
+        converters=_converters,
+        quoting=3
     )
 
     # alldata = pandas.DataFrame()
