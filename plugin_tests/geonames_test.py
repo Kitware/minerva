@@ -60,8 +60,8 @@ class GeonamesTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-    def test_import(self):
-        """Test importing the geonames database."""
+    def test_geocode(self):
+        """Test importing the geonames database and geocoding."""
         # get the minerva user's public folder
         params = {
             'parentType': 'user',
@@ -89,7 +89,7 @@ class GeonamesTestCase(base.TestCase):
             )
             self.assertStatus(response, 403)
 
-            # attempt to import with a bad url
+            # import the database
             response = self.request(
                 path='/geonames/setup',
                 method='POST',
@@ -99,3 +99,35 @@ class GeonamesTestCase(base.TestCase):
                 user=self._admin
             )
             self.assertStatusOk(response)
+
+        # set the geonames folder
+        response = self.request(
+            path='/system/setting',
+            method='PUT',
+            params={
+                'key': 'minerva.geonames_folder',
+                'value': user_folder['_id']
+            },
+            user=self._admin
+        )
+        self.assertStatusOk(response)
+
+        # hit the geocoding endpoint
+        response = self.request(
+            path='/geonames/geocode',
+            params={
+                'name': '"little sheep mountain"'
+            },
+            user=self._user
+        )
+        self.assertStatusOk(response)
+
+        # check the response
+        self.assertEqual(
+            len(response.json['features']),
+            1
+        )
+        self.assertEqual(
+            response.json['features'][0]['id'],
+            5428978  # geonameid
+        )
