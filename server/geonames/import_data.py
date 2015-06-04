@@ -194,44 +194,43 @@ def download_all_countries(dest=_allZip, url=None,
 
 def export_to_girder(data, folder, user):
     """Export the geonames data to a girder folder."""
-    d = data
     item = ModelImporter.model('item')
+    for d in data:
+        name = d['properties']['name']
+        desc = ', '.join(d['properties']['alternatenames'])
+        try:
+            i = item.createItem(
+                name=name,
+                creator=user,
+                folder=folder,
+                description=desc
+            )
+        except Exception:
+            sys.stderr.write('Failed to insert item "{}"\n'.format(repr(name)))
+            return
 
-    name = d['properties']['name']
-    desc = ', '.join(d['properties']['alternatenames'])
-    try:
-        i = item.createItem(
-            name=name,
-            creator=user,
-            folder=folder,
-            description=desc
-        )
-    except Exception:
-        sys.stderr.write('Failed to insert item "{}"\n'.format(repr(name)))
-        return
+        try:
+            item.setMetadata(i, d['properties'])
+        except Exception:
+            sys.stderr.write('Failed to write metadata:\n')
+            sys.stderr.write(json.dumps(
+                d,
+                default=repr,
+                indent=4
+            ) + '\n')
 
-    try:
-        item.setMetadata(i, d['properties'])
-    except Exception:
-        sys.stderr.write('Failed to write metadata:\n')
-        sys.stderr.write(json.dumps(
-            d,
-            default=repr,
-            indent=4
-        ) + '\n')
-
-    try:
-        i[GEOSPATIAL_FIELD] = {
-            'geometry': data['geometry']
-        }
-        i = item.updateItem(i)
-    except Exception:
-        sys.stderr.write('Failed to write geospatial data:\n')
-        sys.stderr.write(json.dumps(
-            i[GEOSPATIAL_FIELD],
-            default=repr,
-            indent=4
-        ) + '\n')
+        try:
+            i[GEOSPATIAL_FIELD] = {
+                'geometry': d['geometry']
+            }
+            i = item.updateItem(i)
+        except Exception:
+            sys.stderr.write('Failed to write geospatial data:\n')
+            sys.stderr.write(json.dumps(
+                i[GEOSPATIAL_FIELD],
+                default=repr,
+                indent=4
+            ) + '\n')
 
 
 def read_geonames(folder=None, user=None, file_name=_allZip, chunksize=100,
@@ -285,47 +284,6 @@ def read_geonames(folder=None, user=None, file_name=_allZip, chunksize=100,
         )
 
     done()
-
-
-def export_to_girder(data, folder, user):
-    """Export the geonames data to a girder folder."""
-    item = ModelImporter.model('item')
-    for d in data:
-        name = d['properties']['name']
-        desc = ', '.join(d['properties']['alternatenames'])
-        try:
-            i = item.createItem(
-                name=name,
-                creator=user,
-                folder=folder,
-                description=desc
-            )
-        except Exception:
-            sys.stderr.write('Failed to insert item "{}"\n'.format(repr(name)))
-            return
-
-        try:
-            item.setMetadata(i, d['properties'])
-        except Exception:
-            sys.stderr.write('Failed to write metadata:\n')
-            sys.stderr.write(json.dumps(
-                d,
-                default=repr,
-                indent=4
-            ) + '\n')
-
-        try:
-            i[GEOSPATIAL_FIELD] = {
-                'geometry': d['geometry']
-            }
-            i = item.updateItem(i)
-        except Exception:
-            sys.stderr.write('Failed to write geospatial data:\n')
-            sys.stderr.write(json.dumps(
-                i[GEOSPATIAL_FIELD],
-                default=repr,
-                indent=4
-            ) + '\n')
 
 
 def export_chunk(records, folder, user,
