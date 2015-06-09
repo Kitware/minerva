@@ -7,7 +7,7 @@ logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
 from carmen_properties import *
 from carmen_utils import Utils
-from Location import Location
+from location import Location
 from geocode_location_resolver import GeocodeLocationResolver
 import json
 import os
@@ -65,9 +65,12 @@ class LocationResolver(object):
                 currentLocation = parent
                 parent = self.createParentOfLocation(currentLocation)
         if self.usePlace:
-            self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties["place_name_mapping"]), None, self.placeNameToNormalizedPlaceName, False)
-        self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties["state_names_file"]), self.stateFullNames, self.stateAbbreviationToFullName, True);
-        self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties["country_names_file"]), self.countryFullNames, self.countryAbbreviationToFullName, True);
+            self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties[
+                "place_name_mapping"]), None, self.placeNameToNormalizedPlaceName, False)
+        self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties["state_names_file"]),
+            self.stateFullNames, self.stateAbbreviationToFullName, True);
+        self.loadNameAndAbbreviation(os.path.join(root,CarmenProperties["country_names_file"]),
+            self.countryFullNames, self.countryAbbreviationToFullName, True);
         if self.useGeocodes:
             self.geocodeLocationResolver = GeocodeLocationResolver()
             for location in self.idToLocation.values():
@@ -87,12 +90,16 @@ class LocationResolver(object):
     def createParentOfLocation(self, location):
         parentLocation = None
         if location.getCity():
-            parentLocation = Location(location.getCountry(), location.getState(), location.getCounty(), None, None, None, -1, False)
+            parentLocation = Location(location.getCountry(), location.getState(),
+                location.getCounty(), None, None, None, -1, False)
         elif location.getCountry():
-            parentLocation = Location(location.getCountry(), location.getState(), None, None, None, None, -1, False)
+            parentLocation = Location(location.getCountry(), location.getState(),
+                None, None, None, None, -1, False)
         elif location.getState():
-            parentLocation = Location(location.getCountry(), None, None, None, None, None, -1, False)
-        elif location.getCountry() and location.getCountry().lower() != Constants.DS_LOCATION_NONE.lower():
+            parentLocation = Location(location.getCountry(), None, None, None,
+                None, None, -1, False)
+        elif location.getCountry() and location.getCountry().lower() != \
+            Constants.DS_LOCATION_NONE.lower():
             parentLocation = Location.getNoneLocation()
         if not parentLocation:
             return None
@@ -192,7 +199,8 @@ class LocationResolver(object):
                     if self.stateAbbreviationToFullName.has_key(matchedString):
                         state = self.stateAbbreviationToFullName[matchedString]
                     else:
-                        st_matches = [st for st in self.stateAbbreviationToFullName.values() if st == matchedString]
+                        st_matches = [st for st in self.stateAbbreviationToFullName.values()
+                            if st == matchedString]
                         if len(st_matches) > 0:
                             state = st_matches[0]
                 return self.getLocationForPlace(country, state, None, city, url, id)
@@ -224,7 +232,8 @@ class LocationResolver(object):
         if self.stateAbbreviationToFullName.has_key(matchedString):
             state = self.stateAbbreviationToFullName[matchedString]
         else:
-            st_matches = [st for st in self.stateAbbreviationToFullName.values() if st == matchedString]
+            st_matches = [st for st in self.stateAbbreviationToFullName.values()
+                if st == matchedString]
             if len(st_matches) > 0:
                 state = st_matches[0]
         return state
@@ -234,7 +243,8 @@ class LocationResolver(object):
         if self.countryAbbreviationToFullName.has_key(matchedString):
             co = self.countryAbbreviationToFullName[matchedString]
         else:
-            co_matches = [co for co in self.countryAbbreviationToFullName.values() if co == matchedString]
+            co_matches = [co for co in self.countryAbbreviationToFullName.values()
+                if co == matchedString]
             if len(co_matches) > 0:
                 co = co_matches[0]
         return co
@@ -258,7 +268,8 @@ class LocationResolver(object):
                     if len(items) == 2:
                         state = self.extract_state(items[1].strip())
                         if state:
-                            return Location('united states', state, matchedString.split(',')[0], None, None, None, -1, False)
+                            return Location('united states', state, matchedString.split(',')[0],
+                                None, None, None, -1, False)
                         else:
                             co = self.extract_country(items[1].strip())
                             return Location(co, None, None, None, None, None, -1, False)
@@ -267,13 +278,16 @@ class LocationResolver(object):
                         if co:
                             state = self.extract_state(items[1].strip())
                             if state:
-                                return Location(co, state, items[0].strip(), None, None, None, -1, False)
+                                return Location(co, state, items[0].strip(),
+                                    None, None, None, -1, False)
                             else:
-                                return Location(co, None, None, None, None, None, -1, False)
+                                return Location(co, None, None, None, None,
+                                    None, -1, False)
                         else:
                             state = self.extract_state(items[2].strip())
                             if state:
-                                return Location('united states', state, None, None, None, None, -1, False)
+                                return Location('united states', state, None,
+                                    None, None, None, -1, False)
         return None
 
     def getLocationForId(self, id):
@@ -387,7 +401,11 @@ def main():
 
 #    a = None
     resolver = LocationResolver.getLocationResolver()
-    tweet = {"user": {"follow_request_sent": None, "profile_use_background_image": True, "default_profile_image": False, "id": 450118613, "verified": False, "profile_image_url_https": "https://si0.twimg.com/profile_images/3057746486/e59e5762dae908d6c6827556b5230886_normal.jpeg", "profile_sidebar_fill_color": "FFF7CC", "profile_text_color": "0C3E53", "followers_count": 163, "profile_sidebar_border_color": "F2E195", "id_str": "450118613", "profile_background_color": "BADFCD", "listed_count": 0, "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme12/bg.gif", "utc_offset": -18000, "statuses_count": 2146, "description": "Jesus is my Savior!! I love to live, laugh, learn, and love. Friends are my rock!! Track yo(; 'Hakuna Matata' that's my motta! \ue32c", "friends_count": 386, "location": "Bethel Acers, Oklahoma", "profile_link_color": "FF0000", "profile_image_url": "http://a0.twimg.com/profile_images/3057746486/e59e5762dae908d6c6827556b5230886_normal.jpeg", "following": None, "geo_enabled": True, "profile_banner_url": "https://si0.twimg.com/profile_banners/450118613/1359593437", "profile_background_image_url": "http://a0.twimg.com/images/themes/theme12/bg.gif", "name": "Jazmine Rena\u00e9 ", "lang": "en", "profile_background_tile": False, "favourites_count": 118, "screen_name": "renaejazzz", "notifications": None, "url": None, "created_at": "Thu Dec 29 22:08:38 +0000 2011", "contributors_enabled": False, "time_zone": "Eastern Time (US & Canada)", "protected": False, "default_profile": False, "is_translator": False}, "favorited": False, "entities": {"user_mentions": [{"id": 563928121, "indices": [1, 12], "id_str": "563928121", "screen_name": "PeytonEpp9", "name": "Peyton Too Cold\u2744\u2744"}, {"id": 450118613, "indices": [14, 25], "id_str": "450118613", "screen_name": "renaejazzz", "name": "Jazmine Rena\u00e9 "}], "hashtags": [], "urls": []}, "contributors": None, "truncated": False, "text": "\"@PeytonEpp9: @renaejazzz in track tho&gt;&gt;&gt;&gt;\" I try!! \ud83d\ude0f", "created_at": "Fri Feb 01 00:00:10 +0000 2013", "retweeted": False, "in_reply_to_status_id_str": None, "coordinates": None, "in_reply_to_user_id_str": None, "lang": "nl", "source": "<a href=\"http://twitter.com/devices\" rel=\"nofollow\">txt</a>", "in_reply_to_status_id": None, "in_reply_to_screen_name": None, "id_str": "297132196270067713", "place": None, "retweet_count": 0, "geo": None, "id": 297132196270067713, "in_reply_to_user_id": None}
+    tweet = {"user": {"follow_request_sent": None, "profile_use_background_image": True,
+        "default_profile_image": False, "id": 450118613,
+        "verified": False,
+        "profile_image_url_https": "https://si0.twimg.com/profile_images/3057746486/e59e5762dae908d6c6827556b5230886_normal.jpeg", "profile_sidebar_fill_color": "FFF7CC", "profile_text_color": "0C3E53", "followers_count": 163, "profile_sidebar_border_color": "F2E195", "id_str": "450118613", "profile_background_color": "BADFCD", "listed_count": 0, "profile_background_image_url_https": "https://si0.twimg.com/images/themes/theme12/bg.gif", "utc_offset": -18000, "statuses_count": 2146, "description": "Jesus is my Savior!! I love to live, laugh, learn, and love. Friends are my rock!! Track yo(; 'Hakuna Matata' that's my motta! \ue32c", "friends_count": 386, "location": "Bethel Acers, Oklahoma", "profile_link_color": "FF0000", "profile_image_url": "http://a0.twimg.com/profile_images/3057746486/e59e5762dae908d6c6827556b5230886_normal.jpeg", "following": None, "geo_enabled": True, "profile_banner_url": "https://si0.twimg.com/profile_banners/450118613/1359593437", "profile_background_image_url": "http://a0.twimg.com/images/themes/theme12/bg.gif", "name": "Jazmine Rena\u00e9 ", "lang": "en", "profile_background_tile": False, "favourites_count": 118, "screen_name": "renaejazzz", "notifications": None, "url": None, "created_at": "Thu Dec 29 22:08:38 +0000 2011", "contributors_enabled": False, "time_zone": "Eastern Time (US & Canada)", "protected": False, "default_profile": False, "is_translator": False}, "favorited": False, "entities": {"user_mentions": [{"id": 563928121, "indices": [1, 12], "id_str": "563928121", "screen_name": "PeytonEpp9", "name": "Peyton Too Cold\u2744\u2744"}, {"id": 450118613, "indices": [14, 25], "id_str": "450118613", "screen_name": "renaejazzz", "name": "Jazmine Rena\u00e9 "}], "hashtags": [], "urls": []}, "contributors": None, "truncated": False, "text": "\"@PeytonEpp9: @renaejazzz in track tho&gt;&gt;&gt;&gt;\" I try!! \ud83d\ude0f", "created_at": "Fri Feb 01 00:00:10 +0000 2013", "retweeted": False, "in_reply_to_status_id_str": None, "coordinates": None, "in_reply_to_user_id_str": None, "lang": "nl", "source": "<a href=\"http://twitter.com/devices\" rel=\"nofollow\">txt</a>", "in_reply_to_status_id": None, "in_reply_to_screen_name": None, "id_str": "297132196270067713", "place": None,
+            "retweet_count": 0, "geo": None, "id": 297132196270067713, "in_reply_to_user_id": None}
     print tweet['text']
     tweet['text'] = ' new york '
     location = resolver.resolveLocationFromTweet(tweet)

@@ -30,7 +30,7 @@ class Location:
         return hash(self.getDisplayString())
 
     def __eq__(self, other):
-        return str(self.getDisplayString()) == str(other.getDisplayString())
+        return self.getDisplayString() == other.getDisplayString()
 
     def getCountry(self):
         return self.country;
@@ -46,7 +46,8 @@ class Location:
 
     def equals(self, location):
         if (self.areEqual(self.city, location.city) and self.areEqual(self.state, location.state) \
-            and self.areEqual(self.county, location.county) and self.areEqual(self.country, location.country) \
+            and self.areEqual(self.county, location.county) and
+                self.areEqual(self.country, location.country) \
             and self.isNone == location.isNone):
             return True
         else:

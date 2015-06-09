@@ -5,7 +5,7 @@ import re
 import logging
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
-from CarmenProperties import *
+from carmen_properties import *
 from carmen_utils import *
 import math
 
@@ -27,7 +27,8 @@ class GeocodeLocationResolver(object):
         lat2R = math.radians(point2[0])
         dLatR = abs(lat2R - lat1R)
         dLngR = abs(math.radians(point2[1] - point1[1]))
-        a = math.sin(dLatR / 2) * math.sin(dLatR / 2) + math.cos(lat1R) * math.cos(lat2R) * math.sin(dLngR / 2) * math.sin(dLngR / 2)
+        a = math.sin(dLatR / 2) * math.sin(dLatR / 2) + math.cos(lat1R) * \
+            math.cos(lat2R) * math.sin(dLngR / 2) * math.sin(dLngR / 2)
         return 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     def getEarthRadius(self, unit):
@@ -83,13 +84,22 @@ class GeocodeLocationResolver(object):
         longitude = latLong[1] * 100
         shiftSize = self.cellSize  / 2.0
         keys = []
-        keys.append('{}&&{}'.format((int) (latitude/self.cellSize), (int) (longitude/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize), (int) (longitude/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize), (int) (longitude/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude/self.cellSize), (int) (longitude+shiftSize/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude/self.cellSize), (int) (longitude-shiftSize/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize), (int) (longitude+shiftSize/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize), (int) (longitude-shiftSize/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize), (int) (longitude+shiftSize/self.cellSize)));
-        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize), (int) (longitude-shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude/self.cellSize),
+            (int) (longitude/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize),
+            (int) (longitude/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize),
+            (int) (longitude/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude/self.cellSize),
+            (int) (longitude+shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude/self.cellSize),
+            (int) (longitude-shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize),
+            (int) (longitude+shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude+shiftSize/self.cellSize),
+            (int) (longitude-shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize),
+            (int) (longitude+shiftSize/self.cellSize)));
+        keys.append('{}&&{}'.format((int) (latitude-shiftSize/self.cellSize),
+            (int) (longitude-shiftSize/self.cellSize)));
         return keys
