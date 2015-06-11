@@ -57,5 +57,25 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 timeout: 4000
             });
         }, this));
+    },
+
+    geocodeTweet: function (callback) {
+        girder.restRequest({
+            path: 'item/' + this.get('_id') + '/geocodetweet',
+            type: 'POST'
+        }).done(_.bind(function (resp) {
+            this.geojsonFileId = resp._id;
+            callback(this);
+        }, this)).error(_.bind(function (err) {
+            console.error(err);
+            girder.events.trigger('g:alert', {
+                icon: 'cancel',
+                text: 'Could not create geojson in shapefile item.',
+                type: 'error',
+                timeout: 4000
+            });
+        }, this));
     }
 });
+
+

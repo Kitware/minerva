@@ -23,7 +23,7 @@ from girder import events
 from girder.models.model_base import ValidationException
 from girder.utility.model_importer import ModelImporter
 
-from .rest import dataset, session, shapefile, geocode
+from .rest import dataset, session, shapefile, geocode, geocode_tweet
 
 
 class CustomAppRoot(object):
@@ -113,6 +113,10 @@ def load(info):
                                shapefileREST.createGeoJson)
     info['apiRoot'].item.route('GET', (':id', 'geojson'),
                                shapefileREST.findGeoJson)
+
+    geocodeTweetREST = geocode_tweet.GeocodeTweet()
+    info['apiRoot'].item.route('POST', (':id', 'geocodetweet'),
+                               geocodeTweetREST.geocodeTweet)
 
     # Admin endpoint for initializing the geonames database
     info['apiRoot'].geonames = geocodeREST = geocode.Geonames()

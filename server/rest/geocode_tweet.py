@@ -42,9 +42,72 @@ class GeocodeTweet(Resource):
             user, token = self.getCurrentUser(returnToken=True)
             self.client.token = token['_id']
 
-    def _geocodeTweet(item, tmpdir):
-        file_name = os.path.join(tmpdir, item['name'])
+    def _geocodeTweet(self, item, tmpdir):
+        import carmen, json
+        file_name = os.path.join(tmpdir, item['name'] + "/" + item['name'] + ".json")
         print file_name
+
+        with open(file_name) as infile:
+            json_data = infile.readlines()
+            tweets = []
+            for item in json_data:
+                try:
+                    tweet = json.loads(item)
+                    tweets.append(tweet)
+                except ValueError as e:
+                    print e
+        infile.close()
+
+        outfile = open(file_name, "w")
+        for tweet in tweets:
+            print tweet
+            resolver = carmen.get_resolver()
+            resolver.load_locations()
+            location = resolver.resolve_tweet(tweet)
+            if location is not None:
+                print location[1]
+                tweet["location"] = location[1].__dict__
+        json.dump(tweets, outfile)
+        outfile.close()
+        return file_name
+
+    def _createWorkDir(self, itemId):
+        tmpdir = os.path.join(os.getcwd(), 'tmp')
+        if not os.path.exists(tmpdir):
+            os.makedirs(tmpdir)
+        # TODO clean up tmpdir if exception
+        # TODO deal with tmpdir name collision
+        tmpdir = os.path.join(tmpdir, str(time.time()) + itemId)
+        if not os.path.exists(tmpdir):
+            os.makedirs(tmpdir)
+        return tmpdir
+
+    def _downloadItemFiles(self, itemId, tmpdir):
+        self._initClient()
+        self.client.downloadItem(itemId, tmpdir)
+        # TODO worry about stale authentication
+
+    def _cleanWorkDir(self, tmpdir):
+        shutil.rmtree(tmpdir)
+
+    def _findFileId(self, item):
+        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemGeoJson:
+                return str(file['_id'])
+        return None
+
+    def _findFileId(self, item):
+        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
+        for file in self.model('item').childFiles(item):
+            if file['name'] == itemGeoJson:
+                return str(file['_id'])
+        return None
+
+    def _addFileToItem(self, itemId, jsonfile):
+        self._initClient()
+        self.client.uploadFileToItem(itemId, jsonfile)
+        # TODO worry about stale authentication
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
@@ -56,8 +119,8 @@ class GeocodeTweet(Resource):
         itemId = str(item['_id'])
         tmpdir = self._createWorkDir(itemId)
         self._downloadItemFiles(itemId, tmpdir)
-        geocodedFile = self._convertToGeoJson(item, tmpdir)
-        self._geocodeTweet(itemId, geojsonFile)
+        geocodedFile = self._geocodeTweet(item, tmpdir)
+        self._addFileToItem(itemId, geocodedFile)
         self._cleanWorkDir(tmpdir)
         fileId = self._findFileId(item)
         return {'_id': fileId}

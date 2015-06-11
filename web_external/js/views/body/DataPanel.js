@@ -156,16 +156,22 @@ minerva.views.DataPanel = minerva.View.extend({
         }).save();
     },
 
+    /**
+     * Post-process data after it has been loaded depending on the
+     * extension of the dataset.
+     */
     uploadFinished: function () {
-        // console.log("upload finished");
-        // console.log(this.collection);
         if (this.newItemExt && this.newItemExt === ".shp") {
-            // this.newDataset.createGeoJson(_.bind(function (dataset) {
-            //     this.collection.add(dataset);
-            // }, this));
-        } else {
+            this.newDataset.createGeoJson(_.bind(function (dataset) {
+                this.collection.add(dataset);
+            }, this));
+        } else if (this.newItemExt && this.newItemExt === ".json") {
             // Do nothing
             console.log(this.newItemExt);
+            this.newDataset.geocodeTweet(_.bind(function (dataset) {
+                this.collection.add(dataset);
+            }, this));
+        } else  {
             this.collection.add(this.newDataset);
         }
     }
