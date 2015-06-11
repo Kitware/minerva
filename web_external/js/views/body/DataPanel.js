@@ -89,6 +89,7 @@ minerva.views.DataPanel = minerva.View.extend({
      */
     filesSelected: function (files) {
         this.newItemName = null;
+        this.newItemExt = null;
         if (this.validateShapefileExtensions) {
             // get a list of file extensions in the selected files
             var fileExts = _.filter(_.map(files, function (file) {
@@ -116,6 +117,7 @@ minerva.views.DataPanel = minerva.View.extend({
             });
             if (shapefile && shapefile.name.lastIndexOf('.') > -1) {
                 this.newItemName = shapefile.name.substr(0, shapefile.name.lastIndexOf('.'));
+                this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
             }
 
             this.uploadWidget.setUploadEnabled(this.shapefileContentsOk);
@@ -131,6 +133,7 @@ minerva.views.DataPanel = minerva.View.extend({
             if (files && files.length > 0) {
                 var zeroethFileName = files[0].name;
                 this.newItemName = zeroethFileName.substr(0, zeroethFileName.lastIndexOf('.'));
+                this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
             }
         }
     },
@@ -154,8 +157,16 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     uploadFinished: function () {
-        this.newDataset.createGeoJson(_.bind(function (dataset) {
-            this.collection.add(dataset);
-        }, this));
+        // console.log("upload finished");
+        // console.log(this.collection);
+        if (this.newItemExt && this.newItemExt === ".shp") {
+            // this.newDataset.createGeoJson(_.bind(function (dataset) {
+            //     this.collection.add(dataset);
+            // }, this));
+        } else {
+            // Do nothing
+            console.log(this.newItemExt);
+            this.collection.add(this.newDataset);
+        }
     }
 });
