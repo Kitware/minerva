@@ -64,13 +64,22 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             path: 'item/' + this.get('_id') + '/geocodetweet',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            this.geojsonFileId = resp._id;
-            callback(this);
+            if (resp._id !== "") {
+                this.geojsonFileId = resp._id;
+                callback(this);
+            } else {
+                girder.events.trigger('g:alert', {
+                    icon: 'cancel',
+                    text: 'Could not geocode tweets.',
+                    type: 'error',
+                    timeout: 4000
+                });
+            }
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {
                 icon: 'cancel',
-                text: 'Could not create geojson in shapefile item.',
+                text: 'Could not geocode tweets.',
                 type: 'error',
                 timeout: 4000
             });

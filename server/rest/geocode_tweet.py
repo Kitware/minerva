@@ -42,9 +42,9 @@ class GeocodeTweet(Resource):
             user, token = self.getCurrentUser(returnToken=True)
             self.client.token = token['_id']
 
-    def _geocodeTweet(self, item, tmpdir):
+    def _geocodeTweet(self, file, item, tmpdir):
         import carmen, json
-        file_name = os.path.join(tmpdir, item['name'] + "/" + item['name'] + ".json")
+        file_name = os.path.join(tmpdir, item['name'], file['name'])
         print file_name
 
         with open(file_name) as infile:
@@ -91,14 +91,7 @@ class GeocodeTweet(Resource):
         shutil.rmtree(tmpdir)
 
     def _findFileId(self, item):
-        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
-        for file in self.model('item').childFiles(item):
-            if file['name'] == itemGeoJson:
-                return str(file['_id'])
-        return None
-
-    def _findFileId(self, item):
-        itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
+        itemGeoJson = item['name'] + ".json"
         for file in self.model('item').childFiles(item):
             if file['name'] == itemGeoJson:
                 return str(file['_id'])
@@ -114,16 +107,21 @@ class GeocodeTweet(Resource):
     def geocodeTweet(self, item, params):
         # output is a file id for a geojson file in the item
         fileId = self._findFileId(item)
-        if fileId is not None:
-            return {'_id': fileId}
         itemId = str(item['_id'])
         tmpdir = self._createWorkDir(itemId)
         self._downloadItemFiles(itemId, tmpdir)
-        geocodedFile = self._geocodeTweet(item, tmpdir)
-        self._addFileToItem(itemId, geocodedFile)
-        self._cleanWorkDir(tmpdir)
-        fileId = self._findFileId(item)
-        return {'_id': fileId}
+
+        # WARNING: Expecting only one file per item
+        num_files = self.model('item').childFiles(item).count()
+        files = self.model('item').childFiles(item)
+        if (num_files == 1):
+            geocodedFile = self._geocodeTweet(files[0], item, tmpdir)
+            self._addFileToItem(itemId, geocodedFile)
+            self._cleanWorkDir(tmpdir)
+            fileId = self._findFileId(item)
+            return {'_id': fileId}
+        else:
+            return {'_id': ""}
     geocodeTweet.description = (
         Description('Geocode single or collection of tweet using carmen method.')
         .param('tweets', 'Collection of tweet', paramType='json')
