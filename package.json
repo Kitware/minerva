@@ -4,6 +4,7 @@
   "description": "An application for geospatial analytics.",
   "license": "Apache-2.0",
   "dependencies": {
-    "geojs": "0.4.1"
+    "geojs": "0.4.1",
+    "JSONPath": "0.10.0"
   }
 }

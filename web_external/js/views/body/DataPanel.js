@@ -1,9 +1,46 @@
 minerva.views.DataPanel = minerva.View.extend({
-
     events: {
         'click .m-add-dataset-button': 'uploadDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
-        'click .delete-dataset': 'deleteDatasetEvent'
+        'click .delete-dataset': 'deleteDatasetEvent',
+        'click .csv-mapping': 'mapTableDataset'
+    },
+
+    mapTableDataset: function (event) {
+        console.log('map');
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        console.log(dataset);
+        // TODO may want to split out json from csv at some point
+        // TODO standardize on callback or else dual calls of getX and getXData
+
+        var datasetType = dataset.getDatasetType();
+        if (datasetType === 'json') {
+            console.log('json');
+            dataset.on('m:jsonrowGot', function () {
+                // let the widget get the data
+                this.keymapWidget = new minerva.views.KeymapWidget({
+                    el: $('#g-dialog-container'),
+                    dataset: dataset,
+                    parentView: this
+                });
+                this.keymapWidget.render();
+            }, this);
+            dataset.getJsonRow();
+        // return json row if exists in minerva meta
+        } else {
+            // assuming csv
+            // list the files of this item
+            var filesCallback = _.bind(function () {
+                this.tableWidget = new minerva.views.TableWidget({
+                    el: $('#g-dialog-container'),
+                    dataset: dataset,
+                    parentView: this
+                });
+                this.tableWidget.render();
+            }, this);
+            dataset.getCSVFile(filesCallback);
+        }
     },
 
     addDatasetToSessionEvent: function (event) {
@@ -34,6 +71,11 @@ minerva.views.DataPanel = minerva.View.extend({
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
         this.listenTo(this.collection, 'g:changed', function () {
+            this.render();
+        }, this).listenTo(this.collection, 'change', function () {
+            this.render();
+        }, this).listenTo(this.collection, 'change:meta', function () {
+            console.log('meta change');
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function () {
             this.render();
@@ -154,8 +196,8 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     uploadFinished: function () {
-        this.newDataset.createGeoJson(_.bind(function (dataset) {
+        this.newDataset.on('m:datasetCreated', function (dataset) {
             this.collection.add(dataset);
-        }, this));
+        }, this).createDataset();
     }
 });

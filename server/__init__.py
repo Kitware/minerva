@@ -55,6 +55,8 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/minerva.min.css">
+        <link rel="stylesheet"
+              href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
@@ -72,6 +74,12 @@ class CustomAppRoot(object):
         </script>
         <script src="${staticRoot}/built/app.min.js"></script>
         <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
+        </script>
+    <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
