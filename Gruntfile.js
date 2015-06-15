@@ -68,6 +68,7 @@ module.exports = function (grunt) {
         var jsDir = pluginDir + '/' + sourceDir + '/js';
         // depends on npm install being run locally in this plugin dir
         var geojsDir = pluginDir + '/node_modules/geojs';
+        var jsonpathjsDir = pluginDir + '/node_modules/JSONPath/lib';
         var geojsDistDir = geojsDir + '/dist/built';
         var extDir = jsDir + '/ext';
         if (fs.existsSync(jsDir)) {
@@ -97,6 +98,9 @@ module.exports = function (grunt) {
             ];
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
+            ];
+            files[staticDir + '/jsonpath.min.js'] = [
+                jsonpathjsDir + '/jsonpath.js'
             ];
             grunt.config.set('uglify.' + pluginName, {
                 files: files

@@ -17,8 +17,9 @@
 #  limitations under the License.
 ###############################################################################
 
-from constants import PluginSettings
 from girder.utility.model_importer import ModelImporter
+
+from girder.plugins.minerva.constants import PluginSettings
 
 
 def findNamedFolder(currentUser, user, parent, parentType, name, create=False):
