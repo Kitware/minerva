@@ -19,27 +19,20 @@ minerva.views.MapPanel = minerva.View.extend({
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             var layer,
-                reader,
-                data;
+                reader;
             layer = this.map.createLayer('feature');
             this.datasets[datasetId] = layer;
             reader = geo.createFileReader('jsonReader', {layer: layer});
-            // load a geojson file on top of the map
-            $.ajax({
-                url: girder.apiRoot + '/file/' + dataset.geojsonFileId + '/download',
-                contentType: 'application/json',
-                success: function (_data) {
-                    data = _data;
-                },
-                complete: _.bind(function () {
-                    layer.clear();
-                    reader.read(data, _.bind(function () {
-                        this.uiLayer = this.map.createLayer('ui');
-                        this.uiLayer.createWidget('slider');
-                        this.map.draw();
-                    }, this));
-                }, this)
-            });
+            var readGeoJsonToLayer = _.bind(function (geoJsonData) {
+                layer.clear();
+                reader.read(geoJsonData, _.bind(function () {
+                    this.uiLayer = this.map.createLayer('ui');
+                    this.uiLayer.createWidget('slider');
+                    this.map.draw();
+                }, this));
+            }, this);
+            // leave it up to the dataset to get the geojson contents
+            dataset.getGeoJsonData(readGeoJsonToLayer);
         }
     },
 
