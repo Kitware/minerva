@@ -20,7 +20,6 @@
 import mako
 
 from girder import events
-from girder.models.model_base import ValidationException
 from girder.utility.model_importer import ModelImporter
 
 from .rest import dataset, session, shapefile, geocode
