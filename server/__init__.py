@@ -19,7 +19,10 @@
 
 import mako
 
-from .rest import dataset, session, shapefile
+from girder import events
+from girder.utility.model_importer import ModelImporter
+
+from .rest import dataset, session, shapefile, geocode
 
 
 class CustomAppRoot(object):
@@ -96,6 +99,16 @@ class CustomAppRoot(object):
         return self.indexHtml
 
 
+def validate_settings(event):
+    """Validate minerva specific settings."""
+    key = event.info['key']
+    val = event.info['value']
+
+    if key == 'minerva.geonames_folder':
+        ModelImporter.model('folder').load(val, exc=True, force=True)
+        event.preventDefault().stopPropagation()
+
+
 def load(info):
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
@@ -107,6 +120,14 @@ def load(info):
                                shapefileREST.createGeoJson)
     info['apiRoot'].item.route('GET', (':id', 'geojson'),
                                shapefileREST.findGeoJson)
+
+    # Admin endpoint for initializing the geonames database
+    info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
+    info['apiRoot'].geonames.route('POST', ('setup',),
+                                   geocodeREST.setup)
+    info['apiRoot'].geonames.route('GET', ('geocode',),
+                                   geocodeREST.geocode)
+    events.bind('model.setting.validate', 'minerva', validate_settings)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
     info['apiRoot'].minerva_session = session.Session()
