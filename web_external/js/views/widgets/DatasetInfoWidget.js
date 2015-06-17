@@ -3,12 +3,10 @@
 */
 minerva.views.DatasetInfoWidget = minerva.View.extend({
     initialize: function (settings) {
-        console.log('di i');
         this.dataset = settings.dataset;
     },
 
     render: function () {
-        console.log('di r');
         var modal = this.$el.html(minerva.templates.datasetInfoWidget({
         })).girderModal(this).on('ready.girder.modal', _.bind(function () {
             this.$('#datasetInfo').text(JSON.stringify(this.dataset.get('meta').minerva, null, 4));
@@ -16,6 +14,5 @@ minerva.views.DatasetInfoWidget = minerva.View.extend({
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
         return this;
-    },
+    }
 });
-

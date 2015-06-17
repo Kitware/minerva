@@ -8,16 +8,13 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     mapTableDataset: function (event) {
-        console.log('map');
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        console.log(dataset);
         // TODO may want to split out json from csv at some point
         // TODO standardize on callback or else dual calls of getX and getXData
 
         var datasetType = dataset.getDatasetType();
         if (datasetType === 'json') {
-            console.log('json');
             dataset.on('m:jsonrowGot', function () {
                 // let the widget get the data
                 this.keymapWidget = new minerva.views.KeymapWidget({
@@ -67,10 +64,8 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     displayDatasetInfo: function (event) {
-        console.log('display');
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        console.log(dataset);
         this.datasetInfoWidget = new minerva.views.DatasetInfoWidget({
             el: $('#g-dialog-container'),
             dataset: dataset,
