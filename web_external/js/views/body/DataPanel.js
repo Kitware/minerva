@@ -3,7 +3,8 @@ minerva.views.DataPanel = minerva.View.extend({
         'click .m-add-dataset-button': 'uploadDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
-        'click .csv-mapping': 'mapTableDataset'
+        'click .csv-mapping': 'mapTableDataset',
+        'click .dataset-info': 'displayDatasetInfo'
     },
 
     mapTableDataset: function (event) {
@@ -63,6 +64,19 @@ minerva.views.DataPanel = minerva.View.extend({
             dataset.destroy();
             this.collection.remove(dataset);
         }
+    },
+
+    displayDatasetInfo: function (event) {
+        console.log('display');
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        console.log(dataset);
+        this.datasetInfoWidget = new minerva.views.DatasetInfoWidget({
+            el: $('#g-dialog-container'),
+            dataset: dataset,
+            parentView: this
+        });
+        this.datasetInfoWidget.render();
     },
 
     initialize: function (settings) {
