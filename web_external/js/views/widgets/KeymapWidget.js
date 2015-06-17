@@ -10,7 +10,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var mapper = {
                 longitudeKeypath: this.$('#m-longitude-mapper').val(),
                 latitudeKeypath: this.$('#m-latitude-mapper').val(),
-                coloredPointKeypath: this.$('#m-colored-point-mapper').val(),
+                coloredPointKeypath: this.$('#m-colored-point-mapper').val()
             };
 
             // validate columns, be sure they aren't equal
