@@ -9,7 +9,8 @@ minerva.views.KeymapWidget = minerva.View.extend({
 
             var mapper = {
                 longitudeKeypath: this.$('#m-longitude-mapper').val(),
-                latitudeKeypath: this.$('#m-latitude-mapper').val()
+                latitudeKeypath: this.$('#m-latitude-mapper').val(),
+                coloredPointKeypath: this.$('#m-colored-point-mapper').val(),
             };
 
             // validate columns, be sure they aren't equal
@@ -53,6 +54,11 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var longExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLong); // jshint ignore:line
             this.$('#m-longitude-example-value').val(longExampleVal);
         },
+        'change #m-colored-point-mapper': function () {
+            var jsonpathColoredPoint = this.$('#m-colored-point-mapper').val();
+            var coloredPointExampleVal = jsonPath.eval(this.jsonrowData, jsonpathColoredPoint); // jshint ignore:line
+            this.$('#m-colored-point-example-value').val(coloredPointExampleVal);
+        },
         'click .hide-keymap-preview': function () {
             this.$('.hide-keymap-preview').hide();
             this.$('.jsonrowData').hide();
@@ -79,20 +85,26 @@ minerva.views.KeymapWidget = minerva.View.extend({
     render: function () {
         var longitudeKeypath = null,
             latitudeKeypath = null,
+            coloredPointKeypath = null,
             latExampleVal = null,
-            longExampleVal = null;
+            longExampleVal = null,
+            coloredPointExampleVal = null;
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
+            coloredPointKeypath = this.minervaMetadata.mapper.coloredPointKeypath;
             latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath); // jshint ignore:line
             longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath); // jshint ignore:line
+            coloredPointExampleVal = jsonPath.eval(this.jsonrowData, coloredPointKeypath); // jshint ignore:line
         }
         var modal = this.$el.html(minerva.templates.keymapWidget({
             create: this.create,
             longitudeKeypath: longitudeKeypath,
             latitudeKeypath: latitudeKeypath,
+            booleanColoredPointKeypathValSaved: coloredPointKeypath,
             latExampleVal: latExampleVal,
-            longExampleVal: longExampleVal
+            longExampleVal: longExampleVal,
+            booleanColoredPointExampleValSaved: coloredPointExampleVal
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {

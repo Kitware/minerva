@@ -31,6 +31,14 @@
                             | resulting value
                             - var longitudeExampleVal = create ? '' : longExampleVal
                             input.coordExampleValue.input-sm#m-longitude-example-value.form-control(type="text", readonly value=longitudeExampleVal)
+                    .form-group.booleanColoredPoint
+                        label.control-label(for="m-colored-point-mapper") Boolean colored point property
+                        - var booleanColoredPointKeypathVal = create ? '' : booleanColoredPointKeypathValSaved
+                        input.input-sm#m-colored-point-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=booleanColoredPointKeypathVal)
+                        #boolean-colored-point-example-value.example-value
+                            | resulting value
+                            - var booleanColoredPointExampleVal = create ? '' : booleanColoredPointExampleValSaved
+                            input.booleanColoredExampleValue.input-sm#m-colored-point-example-value.form-control(type="text", readonly value=booleanColoredPointExampleVal)
                 .g-validation-failed-message
             .jsonrowDataContainer
                 .jsonrowDataContainerHeader
