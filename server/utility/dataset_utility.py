@@ -102,6 +102,12 @@ def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
                               jsonMapper):
     lat_expr = jsonpath_rw.parse(jsonMapper['latitudeKeypath'])
     long_expr = jsonpath_rw.parse(jsonMapper['longitudeKeypath'])
+    coloredPoint_expr = None
+    if 'coloredPointKeypath' in jsonMapper:
+        coloredPointKeypath = jsonMapper['coloredPointKeypath']
+        if coloredPointKeypath != "":
+            coloredPoint_expr = \
+                jsonpath_rw.parse(coloredPointKeypath)
 
     def extractLat(obj):
         match = lat_expr.find(obj)
@@ -109,6 +115,10 @@ def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
 
     def extractLong(obj):
         match = long_expr.find(obj)
+        return match[0].value
+
+    def extractColoredPoint(obj):
+        match = coloredPoint_expr.find(obj)
         return match[0].value
 
     writer = open(geoJsonFilePath, 'w')
@@ -129,8 +139,20 @@ def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
         point = geojson.Point((extractLong(obj), extractLat(obj)))
         # TODO add elevation of 0 for a placeholder
         # unclear if we need a property to display
-        # TODO somehow add a mapping so that we can get properties from json
-        feature = geojson.Feature(geometry=point, properties={"elevation": 0})
+        properties = {"elevation": 0}
+        pointColor = {
+            True: {"r": 241./255., "g": 163./255., "b": 64./255.},
+            False: {"r": 153./255., "g": 142./255., "b": 195./255.}
+        }
+        if coloredPoint_expr is not None:
+            boolPoint = extractColoredPoint(obj)
+            properties['fillColor'] = pointColor[boolPoint]
+            properties['strokeColor'] = pointColor[boolPoint]
+            properties['stroke'] = True
+            properties['strokeWidth'] = 1
+            properties['radius'] = 5
+
+        feature = geojson.Feature(geometry=point, properties=properties)
         return feature
 
     def getFeatureWriter(lineEnder):

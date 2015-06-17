@@ -20,6 +20,8 @@
                         //- trash icon to delete dataset
                         - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
                         i(class=classes)&attributes(attributes)
+                        //- info icon for minerva metadata display
+                        i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
                         if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json'
                             //- table icon for mapping columns of csv/json
                             - var classes = (dataset.get('displayed') ? 'icon-table csv-mapping icon-disabled dataset-in-session' : 'icon-table csv-mapping icon-enabled')

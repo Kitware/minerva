@@ -13,22 +13,32 @@
                         a(target="_blank", href="http://goessner.net/articles/JsonPath/")  JSONPath
                         |  syntax
             .modal-body
-                .form-group
-                    label.control-label(for="m-latitude-mapper") Latitude (Y)
-                    - var latitudeKeypathVal = create ? '' : latitudeKeypath
-                    input.input-sm#m-latitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=latitudeKeypathVal)
-                    #latitude-example-value.example-value
-                        | resulting value
-                        - var latitudeExampleVal = create ? '' : latExampleVal
-                        input.input-sm#m-latitude-example-value.form-control(type="text", readonly value=latitudeExampleVal)
-                 .form-group
-                    label.control-label(for="m-longitude-mapper") Longitude (X)
-                    - var longitudeKeypathVal = create ? '' : longitudeKeypath
-                    input.input-sm#m-longitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=longitudeKeypathVal)
-                    #longitude-example-value.example-value
-                        | resulting value
-                        - var longitudeExampleVal = create ? '' : longExampleVal
-                        input.input-sm#m-longitude-example-value.form-control(type="text", readonly value=longitudeExampleVal)
+                .latLongMapping
+                    .form-group.coordMapping
+                        label.control-label(for="m-latitude-mapper") Latitude (Y)
+                        - var latitudeKeypathVal = create ? '' : latitudeKeypath
+                        input.input-sm#m-latitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=latitudeKeypathVal)
+                        #latitude-example-value.example-value
+                            | resulting value
+                            - var latitudeExampleVal = create ? '' : latExampleVal
+                            input.coordExampleValue.input-sm#m-latitude-example-value.form-control(type="text", readonly value=latitudeExampleVal)
+                    .coordMappingSpacer 
+                    .form-group.coordMapping
+                        label.control-label(for="m-longitude-mapper") Longitude (X)
+                        - var longitudeKeypathVal = create ? '' : longitudeKeypath
+                        input.input-sm#m-longitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=longitudeKeypathVal)
+                        #longitude-example-value.example-value
+                            | resulting value
+                            - var longitudeExampleVal = create ? '' : longExampleVal
+                            input.coordExampleValue.input-sm#m-longitude-example-value.form-control(type="text", readonly value=longitudeExampleVal)
+                    .form-group.booleanColoredPoint
+                        label.control-label(for="m-colored-point-mapper") Boolean colored point property
+                        - var booleanColoredPointKeypathVal = create ? '' : booleanColoredPointKeypathValSaved
+                        input.input-sm#m-colored-point-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=booleanColoredPointKeypathVal)
+                        #boolean-colored-point-example-value.example-value
+                            | resulting value
+                            - var booleanColoredPointExampleVal = create ? '' : booleanColoredPointExampleValSaved
+                            input.booleanColoredExampleValue.input-sm#m-colored-point-example-value.form-control(type="text", readonly value=booleanColoredPointExampleVal)
                 .g-validation-failed-message
             .jsonrowDataContainer
                 .jsonrowDataContainerHeader

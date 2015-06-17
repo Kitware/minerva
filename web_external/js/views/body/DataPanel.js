@@ -3,20 +3,18 @@ minerva.views.DataPanel = minerva.View.extend({
         'click .m-add-dataset-button': 'uploadDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
-        'click .csv-mapping': 'mapTableDataset'
+        'click .csv-mapping': 'mapTableDataset',
+        'click .dataset-info': 'displayDatasetInfo'
     },
 
     mapTableDataset: function (event) {
-        console.log('map');
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        console.log(dataset);
         // TODO may want to split out json from csv at some point
         // TODO standardize on callback or else dual calls of getX and getXData
 
         var datasetType = dataset.getDatasetType();
         if (datasetType === 'json') {
-            console.log('json');
             dataset.on('m:jsonrowGot', function () {
                 // let the widget get the data
                 this.keymapWidget = new minerva.views.KeymapWidget({
@@ -63,6 +61,17 @@ minerva.views.DataPanel = minerva.View.extend({
             dataset.destroy();
             this.collection.remove(dataset);
         }
+    },
+
+    displayDatasetInfo: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        this.datasetInfoWidget = new minerva.views.DatasetInfoWidget({
+            el: $('#g-dialog-container'),
+            dataset: dataset,
+            parentView: this
+        });
+        this.datasetInfoWidget.render();
     },
 
     initialize: function (settings) {
