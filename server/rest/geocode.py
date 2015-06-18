@@ -1,7 +1,7 @@
 """REST API for geocode services."""
 from datetime import datetime, timedelta
 
-from ..geonames import import_data
+from girder.plugins.minerva.geonames import import_data
 
 from pymongo import GEOSPHERE
 from bson.objectid import ObjectId
