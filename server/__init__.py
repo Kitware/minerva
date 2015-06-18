@@ -121,10 +121,6 @@ def load(info):
     info['apiRoot'].item.route('GET', (':id', 'geojson'),
                                shapefileREST.findGeoJson)
 
-    geocodeTweetREST = geocode_tweet.GeocodeTweet()
-    info['apiRoot'].item.route('POST', (':id', 'geocodetweet'),
-                               geocodeTweetREST.geocodeTweet)
-
     # Admin endpoint for initializing the geonames database
     info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
     info['apiRoot'].geonames.route('POST', ('setup',),

@@ -29,21 +29,25 @@ from girder.constants import AccessType
 from girder.utility import config
 
 from girder.plugins.minerva.constants import PluginSettings
+from girder.plugins.minerva.libs.carmen import get_resolver
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 from girder.plugins.minerva.utility.dataset_utility import \
-    jsonArrayHead, convertJsonArrayToGeoJson
+    jsonArrayHead, convertJsonArrayToGeoJson, jsonArrayRewriter
 
 import girder_client
 
 
-# utility functions for creating geojson
-# TODO refactor these with the dataset_utility, local jobs, and
-# gaia + romanesco integration in mind
-# lots of repeated boilerplate and everything happening
-# in synchronous local cherrypy threads
-class DatasetUtility(Resource):
-
+class Dataset(Resource):
     def __init__(self):
+        self.resourceName = 'minerva_dataset'
+        self.route('GET', (), self.listDatasets)
+        self.route('GET', ('folder',), self.getDatasetFolder)
+        self.route('POST', ('folder',), self.createDatasetFolder)
+        self.route('POST', (':id', 'dataset'), self.createDataset)
+        self.route('GET', (':id', 'dataset'), self.getDataset)
+        self.route('POST', (':id', 'geojson'), self.createGeojson)
+        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
+        self.route('POST', (':id', 'geocode_tweets'), self.createTweetGeocodes)
         self.client = None
 
     def _initClient(self):
@@ -58,22 +62,10 @@ class DatasetUtility(Resource):
         self.client.downloadItem(itemId, tmpdir)
         # TODO worry about stale authentication
 
-    def _convertShapefileToGeoJson(self, item, tmpdir):
-        from gaia.pandas import GeopandasReader, GeopandasWriter
-        reader = GeopandasReader()
-        reader.file_name = os.path.join(tmpdir, item['name'])
-        geojsonFile = os.path.join(tmpdir, item['name'] +
-                                   PluginSettings.GEOJSON_EXTENSION)
-        writer = GeopandasWriter()
-        writer.file_name = geojsonFile
-        writer.format = 'GeoJSON'
-        writer.set_input(port=reader.get_output())
-        writer.run()
-        return geojsonFile
-
-    def _addGeoJsonFileToItem(self, itemId, geojsonFile):
+    def _addFileToItem(self, item, filepath):
+        itemId = str(item['_id'])
         self._initClient()
-        self.client.uploadFileToItem(itemId, geojsonFile)
+        self.client.uploadFileToItem(itemId, filepath)
         # TODO worry about stale authentication
 
     def _findGeoJsonFile(self, item):
@@ -83,11 +75,16 @@ class DatasetUtility(Resource):
                 return file
         return None
 
-    def createGeoJsonFromShapefile(self, item):
-        # TODO there is probably a problem when
-        # we look for a name in an item as a duplicate
-        # i.e. looking for filex, but the item name is filex (1)
+    def datasetJob(self, item, job):
+        itemid = str(item['_id'])
+        tmpdir = tempfile.mkdtemp()
+        self._downloadItemFiles(itemid, tmpdir)
+        job(item, tmpdir)
+        shutil.rmtree(tmpdir)
+        self.model('item').setMetadata(item, item['meta'])
+        return item['meta']['minerva']
 
+    def _convertShapefileToGeoJson(self, item, tmpdir):
         # TODO need to figure out convention here
         # assumes a shapefile is stored as a single item with a certain name
         # and all of the shapefiles as files within that item with
@@ -101,66 +98,86 @@ class DatasetUtility(Resource):
         #     item.files[3]['name'] =  myshapefile.shp
         #     item.files[4]['name'] =  myshapefile.shx
 
-        # output is a file id for a geojson file in the item
-        geojsonFile = self._findGeoJsonFile(item)
-        if geojsonFile is not None:
-            return geojsonFile
-        # grab all the files in the shapefile
-        # write them out to a temp dir
-        # convert shapefile to geojson with gaia
-        # upload geojson as a file in the shapefile item
-        # TODO clean work dir in context
-        # TODO lots of repeated boilerplate
-        itemId = str(item['_id'])
-        tmpdir = tempfile.mkdtemp()
-        self._downloadItemFiles(itemId, tmpdir)
-        geojsonFile = self._convertShapefileToGeoJson(item, tmpdir)
-        self._addGeoJsonFileToItem(itemId, geojsonFile)
-        shutil.rmtree(tmpdir)
-        geojsonFile = self._findGeoJsonFile(item)
-        return geojsonFile
+        from gaia.pandas import GeopandasReader, GeopandasWriter
+        reader = GeopandasReader()
+        reader.file_name = os.path.join(tmpdir, item['name'])
+        geojsonFilepath = os.path.join(tmpdir, item['name'] +
+                                       PluginSettings.GEOJSON_EXTENSION)
+        writer = GeopandasWriter()
+        writer.file_name = geojsonFilepath
+        writer.format = 'GeoJSON'
+        writer.set_input(port=reader.get_output())
+        writer.run()
+        return geojsonFilepath
 
-    def createJsonRowFromJsonArray(self, item):
-        itemId = str(item['_id'])
-        tmpdir = tempfile.mkdtemp()
-        self._downloadItemFiles(itemId, tmpdir)
-        jsonFilename = item['name'] + '.json'
-        jsonFilepath = os.path.join(tmpdir, item['name'], jsonFilename)
-        # take the only entry of the array
-        jsonRow = jsonArrayHead(jsonFilepath, limit=1)[0]
-        shutil.rmtree(tmpdir)
-        return jsonRow
-
-    def createGeoJsonFromJson(self, item):
-        # TODO clean work dir in context
-        # TODO lots of repeated boilerplate
-        # TODO want to add the minerva meta for geojson
-        itemId = str(item['_id'])
-        tmpdir = tempfile.mkdtemp()
-        self._downloadItemFiles(itemId, tmpdir)
+    def _convertJsonfileToGeoJson(self, item, tmpdir):
         jsonFilepath = os.path.join(tmpdir, item['name'],
                                     item['name'] + '.json')
         geoJsonFilename = item['name'] + PluginSettings.GEOJSON_EXTENSION
-        geoJsonFilePath = os.path.join(tmpdir, item['name'], geoJsonFilename)
-        convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
+        geoJsonFilepath = os.path.join(tmpdir, item['name'], geoJsonFilename)
+        convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilepath,
                                   item['meta']['minerva']['mapper'])
-        self._addGeoJsonFileToItem(itemId, geoJsonFilePath)
-        shutil.rmtree(tmpdir)
-        # TODO really should add meta with adding geojson
-        geojsonFile = self._findGeoJsonFile(item)
-        return geojsonFile
+        return geoJsonFilepath
 
+    def createGeoJson(self, item):
+        # TODO there is probably a problem when
+        # we look for a name in an item as a duplicate
+        # i.e. looking for filex, but the item name is filex (1)
 
-class Dataset(Resource):
-    def __init__(self):
-        self.resourceName = 'minerva_dataset'
-        self.route('GET', (), self.listDatasets)
-        self.route('GET', ('folder',), self.getDatasetFolder)
-        self.route('POST', ('folder',), self.createDatasetFolder)
-        self.route('POST', (':id', 'dataset'), self.createDataset)
-        self.route('GET', (':id', 'dataset'), self.getDataset)
-        self.route('POST', (':id', 'geojson'), self.createGeojson)
-        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
+        minerva_metadata = item['meta']['minerva']
+        if minerva_metadata['original_type'] == 'shapefile':
+            converter = self._convertShapefileToGeoJson
+        elif minerva_metadata['original_type'] == 'json':
+            converter = self._convertJsonfileToGeoJson
+        else:
+            raise Exception('Unsupported conversion type %s' %
+                            minerva_metadata['original_type'])
+
+        def converterJob(item, tmpdir):
+            geojsonFilepath = converter(item, tmpdir)
+            self._addFileToItem(item, geojsonFilepath)
+            geojsonFile = self._findGeoJsonFile(item)
+            item['meta']['minerva']['geojson_file'] = {
+                'name': geojsonFile['name'],
+                '_id': geojsonFile['_id']
+            }
+
+        return self.datasetJob(item, converterJob)
+
+    def createJsonRowFromJsonArray(self, item):
+
+        def createJsonRowJob(item, tmpdir):
+            jsonFilename = item['name'] + '.json'
+            jsonFilepath = os.path.join(tmpdir, item['name'], jsonFilename)
+            # take the only entry of the array
+            jsonRow = jsonArrayHead(jsonFilepath, limit=1)[0]
+            item['meta']['minerva']['json_row'] = jsonRow
+
+        return self.datasetJob(item, createJsonRowJob)
+
+    def geocodeTweets(self, item):
+        # WARNING: Expecting only one file per item, with a name
+        # as itemname.json
+
+        def geocoderJob(item, tmpdir):
+            jsonFilepath = os.path.join(tmpdir, item['name'],
+                                        item['name'] + '.json')
+
+            def tweetGeocoder(tweet):
+                resolver = get_resolver()
+                resolver.load_locations()
+                location = resolver.resolve_tweet(tweet)
+                if location is not None:
+                    tweet["location"] = location[1].__dict__
+                return tweet
+
+            outfile = jsonArrayRewriter(jsonFilepath, tmpdir, tweetGeocoder)
+            # move the converted file to the original file name to replace
+            # the item file with the new version
+            shutil.move(outfile, jsonFilepath)
+            self._addFileToItem(item, jsonFilepath)
+
+        return self.datasetJob(item, geocoderJob)
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
@@ -296,11 +313,7 @@ class Dataset(Resource):
             raise RestException(
                 'Dataset is not json.',
                 'girder.api.v1.minerva_dataset.create-json-row')
-        datasetUtility = DatasetUtility()
-        jsonRow = datasetUtility.createJsonRowFromJsonArray(item)
-        minerva_meta['json_row'] = jsonRow
-        item_meta['minerva'] = minerva_meta
-        self.model('item').setMetadata(item, item_meta)
+        minerva_meta = self.createJsonRowFromJsonArray(item)
         return minerva_meta
     createJsonRow.description = (
         Description('Extract the top row from a json array dataset, adds '
@@ -315,29 +328,29 @@ class Dataset(Resource):
         # always create the geojson as perhaps the params have changed
         item_meta = item['meta']
         minerva_meta = item_meta['minerva']
-        if minerva_meta['original_type'] == 'shapefile':
-            datasetUtility = DatasetUtility()
-            geoJsonFile = datasetUtility.createGeoJsonFromShapefile(item)
-        elif minerva_meta['original_type'] == 'json':
-            datasetUtility = DatasetUtility()
-            geoJsonFile = datasetUtility.createGeoJsonFromJson(item)
+        supported_conversions = ['shapefile', 'json']
+        if minerva_meta['original_type'] in supported_conversions:
+            minerva_meta = self.createGeoJson(item)
         elif minerva_meta['original_type'] == 'geojson':
             return minerva_meta
         elif minerva_meta['original_type'] == 'csv':
-            # datasetUtility = DatasetUtility()
-            # geoJsonFile = datasetUtility.createGeoJsonFromCSV(item)
             raise RestException('CSV to geojson not implemented')
         else:
             raise RestException('create geojson on unknown type')
-        minerva_meta['geojson_file'] = {
-            'name': geoJsonFile['name'],
-            '_id': geoJsonFile['_id']
-        }
-        item_meta['minerva'] = minerva_meta
-        self.model('item').setMetadata(item, item_meta)
         return minerva_meta
     createGeojson.description = (
         Description('Create geojson for a dataset, if possible.')
+        .param('id', 'The Item ID', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Write permission denied on the Item.', 403))
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.WRITE)
+    def createTweetGeocodes(self, item, params):
+        return self.geocodeTweets(item)
+    createTweetGeocodes.description = (
+        Description('Replace Item File holding json array of tweets with ' +
+                    'json array of geocoded tweets, using Carmen.')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
