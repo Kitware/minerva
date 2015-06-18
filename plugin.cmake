@@ -17,8 +17,16 @@
 add_python_test(dataset PLUGIN minerva)
 add_python_test(session PLUGIN minerva)
 add_python_test(geonames PLUGIN minerva)
-add_python_style_test(pep8_style_minerva
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server")
+
+add_python_style_test(pep8_style_minerva_constants
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/constants.py")
+add_python_style_test(pep8_style_minerva_geonames
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/geonames")
+add_python_style_test(pep8_style_minerva_rest
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/rest")
+add_python_style_test(pep8_style_minerva_utility
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/utility")
+
 add_javascript_style_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
     JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
