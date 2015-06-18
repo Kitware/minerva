@@ -337,14 +337,14 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         }
     },
 
-    geocodeTweet: function (callback) {
+    geocodeTweet: function () {
         girder.restRequest({
             path: 'item/' + this.get('_id') + '/geocodetweet',
             type: 'POST'
         }).done(_.bind(function (resp) {
             if (resp._id !== "") {
                 this.geojsonFileId = resp._id;
-                callback(this);
+                this.trigger('m:tweetGeocoded', this);
             } else {
                 girder.events.trigger('g:alert', {
                     icon: 'cancel',
