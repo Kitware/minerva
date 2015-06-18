@@ -210,7 +210,7 @@ class DatasetTestCase(base.TestCase):
         # geojson
         files = [{
             'name': 'states.geojson',
-            'path': os.path.join(pluginTestDir, 'testdata', 'states.geojson'),
+            'path': os.path.join(pluginTestDir, 'data', 'states.geojson'),
             'mimeType': 'application/vnd.geo+json'
         }]
         minervaMetadata, itemId = createDataset('geojson', files)
@@ -221,7 +221,7 @@ class DatasetTestCase(base.TestCase):
         fileExts = ['cpg', 'dbf', 'prj', 'shp', 'shx']
         files = [{
             'name': 'shapefile.' + ext,
-            'path': os.path.join(pluginTestDir, 'testdata', 'shapefile.' + ext),
+            'path': os.path.join(pluginTestDir, 'data', 'shapefile.' + ext),
             'mimeType': 'application/octet-stream'
         } for ext in fileExts]
         shapefileMinervaMetadata, shapefileItemId = createDataset('shapefile', files)
@@ -230,7 +230,7 @@ class DatasetTestCase(base.TestCase):
         # json array
         files = [{
             'name': 'twopoints.json',
-            'path': os.path.join(pluginTestDir, 'testdata', 'twopoints.json'),
+            'path': os.path.join(pluginTestDir, 'data', 'twopoints.json'),
             'mimeType': 'application/json'
         }]
         jsonMinervaMetadata, jsonItemId = createDataset('twopoints', files)
@@ -239,7 +239,7 @@ class DatasetTestCase(base.TestCase):
         # csv
         files = [{
             'name': 'points.csv',
-            'path': os.path.join(pluginTestDir, 'testdata', 'points.csv'),
+            'path': os.path.join(pluginTestDir, 'data', 'points.csv'),
             'mimeType': 'application/csv'
         }]
         csvMinervaMetadata, csvItemId = createDataset('csv', files)
@@ -248,7 +248,7 @@ class DatasetTestCase(base.TestCase):
         # other type exception
         files = [{
             'name': 'points.other',
-            'path': os.path.join(pluginTestDir, 'testdata', 'points.other'),
+            'path': os.path.join(pluginTestDir, 'data', 'points.other'),
             'mimeType': 'application/other'
         }]
         minervaMetadata, itemId = createDataset('other', files, 400)
