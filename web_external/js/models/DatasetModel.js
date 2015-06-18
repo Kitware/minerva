@@ -335,6 +335,33 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         } else {
             this.trigger('m:geojsonLoaded', this);
         }
+    },
+
+    geocodeTweet: function () {
+        girder.restRequest({
+            path: 'item/' + this.get('_id') + '/geocodetweet',
+            type: 'POST'
+        }).done(_.bind(function (resp) {
+            if (resp._id !== '') {
+                this.geojsonFileId = resp._id;
+                this.trigger('m:tweetGeocoded', this);
+            } else {
+                girder.events.trigger('g:alert', {
+                    icon: 'cancel',
+                    text: 'Could not geocode tweets.',
+                    type: 'error',
+                    timeout: 4000
+                });
+            }
+        }, this)).error(_.bind(function (err) {
+            console.error(err);
+            girder.events.trigger('g:alert', {
+                icon: 'cancel',
+                text: 'Could not geocode tweets.',
+                type: 'error',
+                timeout: 4000
+            });
+        }, this));
     }
 
 });

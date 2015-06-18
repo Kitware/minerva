@@ -139,7 +139,9 @@ minerva.views.DataPanel = minerva.View.extend({
      * Called when the user selects or drops files to be uploaded.
      */
     filesSelected: function (files) {
+        var zeroethFileName = null;
         this.newItemName = null;
+        this.newItemExt = null;
         if (this.validateShapefileExtensions) {
             // get a list of file extensions in the selected files
             var fileExts = _.filter(_.map(files, function (file) {
@@ -167,6 +169,7 @@ minerva.views.DataPanel = minerva.View.extend({
             });
             if (shapefile && shapefile.name.lastIndexOf('.') > -1) {
                 this.newItemName = shapefile.name.substr(0, shapefile.name.lastIndexOf('.'));
+                this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
             }
 
             this.uploadWidget.setUploadEnabled(this.shapefileContentsOk);
@@ -180,8 +183,9 @@ minerva.views.DataPanel = minerva.View.extend({
         } else {
             // take the new item's name from the first file
             if (files && files.length > 0) {
-                var zeroethFileName = files[0].name;
+                zeroethFileName = files[0].name;
                 this.newItemName = zeroethFileName.substr(0, zeroethFileName.lastIndexOf('.'));
+                this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
             }
         }
     },
@@ -204,6 +208,10 @@ minerva.views.DataPanel = minerva.View.extend({
         }).save();
     },
 
+    /**
+     * Post-process data after it has been loaded depending on the
+     * extension of the dataset.
+     */
     uploadFinished: function () {
         this.newDataset.on('m:datasetCreated', function (dataset) {
             this.collection.add(dataset);

@@ -18,6 +18,8 @@
 ###############################################################################
 
 import decimal
+import json
+import tempfile
 
 import geojson
 import ijson
@@ -98,31 +100,47 @@ def jsonArrayHead(filepath, limit=10):
     return objs
 
 
+def jsonArrayRewriter(jsonFilepath, tmpdir, objConverter, header='[',
+                      footer=']', outFilepath=None, jsonDumpser=json.dumps):
+    '''
+    Reads a file with an array of json objects, for each of them, will
+    call objConverter on them, then writes out the resulting json array
+    into outFilepath, using jsonDumpser to write out each rewritten
+    json object.
+
+    :param jsonFilepath: path to json array file.
+    :param tmpdir: temporary work dir.
+    :param objConverter: function to call on each dict read from a json obj.
+    :param header: string prefix of output json array file.
+    :param footer: string suffix of output json array file.
+    :param outFilepath: path to output file, created if not specified.
+    :param jsonDumpser: specialized dumps function if needed.
+    '''
+    if not outFilepath:
+        outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
+
+    writer = open(outFilepath, 'w')
+    writer.write(header)
+    writer.write('\n')
+
+    reader = jsonObjectReader(jsonFilepath)
+
+    for ind, obj in enumerate(reader):
+        if ind > 0:
+            writer.write(',\n')
+        else:
+            writer.write('\n')
+        writer.write(jsonDumpser(objConverter(obj)))
+
+    writer.write(footer)
+    writer.close()
+
+    return outFilepath
+
+
 def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
                               jsonMapper):
-    lat_expr = jsonpath_rw.parse(jsonMapper['latitudeKeypath'])
-    long_expr = jsonpath_rw.parse(jsonMapper['longitudeKeypath'])
-    coloredPoint_expr = None
-    if 'coloredPointKeypath' in jsonMapper:
-        coloredPointKeypath = jsonMapper['coloredPointKeypath']
-        if coloredPointKeypath != "":
-            coloredPoint_expr = \
-                jsonpath_rw.parse(coloredPointKeypath)
 
-    def extractLat(obj):
-        match = lat_expr.find(obj)
-        return match[0].value
-
-    def extractLong(obj):
-        match = long_expr.find(obj)
-        return match[0].value
-
-    def extractColoredPoint(obj):
-        match = coloredPoint_expr.find(obj)
-        return match[0].value
-
-    writer = open(geoJsonFilePath, 'w')
-    # TODO hardcoding crs
     geojson_header = """{
     "type": "FeatureCollection",
     "crs": {
@@ -133,9 +151,34 @@ def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
     },
     "features": [
     """
-    writer.write(geojson_header)
+
+    geojson_footer = """
+    ]
+    }
+    """
 
     def convertToGeoJson(obj):
+        lat_expr = jsonpath_rw.parse(jsonMapper['latitudeKeypath'])
+        long_expr = jsonpath_rw.parse(jsonMapper['longitudeKeypath'])
+        coloredPoint_expr = None
+        if 'coloredPointKeypath' in jsonMapper:
+            coloredPointKeypath = jsonMapper['coloredPointKeypath']
+            if coloredPointKeypath != "":
+                coloredPoint_expr = \
+                    jsonpath_rw.parse(coloredPointKeypath)
+
+        def extractLat(obj):
+            match = lat_expr.find(obj)
+            return match[0].value
+
+        def extractLong(obj):
+            match = long_expr.find(obj)
+            return match[0].value
+
+        def extractColoredPoint(obj):
+            match = coloredPoint_expr.find(obj)
+            return match[0].value
+
         point = geojson.Point((extractLong(obj), extractLat(obj)))
         # TODO add elevation of 0 for a placeholder
         # unclear if we need a property to display
@@ -155,23 +198,6 @@ def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
         feature = geojson.Feature(geometry=point, properties=properties)
         return feature
 
-    def getFeatureWriter(lineEnder):
-        def featureWriter(obj):
-            writer.write(lineEnder)
-            feature = convertToGeoJson(obj)
-            writer.write(geojson.dumps(feature))
-        return featureWriter
-
-    reader = jsonObjectReader(jsonFilepath)
-    firstWriter = getFeatureWriter('\n')
-    firstWriter(reader.next())
-    nextWriter = getFeatureWriter(',\n')
-    for obj in reader:
-        nextWriter(obj)
-
-    geojson_footer = """
-    ]
-    }
-    """
-    writer.write(geojson_footer)
-    writer.close()
+    jsonArrayRewriter(jsonFilepath, tmpdir, convertToGeoJson,
+                      header=geojson_header, footer=geojson_footer,
+                      outFilepath=geoJsonFilePath, jsonDumpser=geojson.dumps)

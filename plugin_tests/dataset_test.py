@@ -210,7 +210,7 @@ class DatasetTestCase(base.TestCase):
         # geojson
         files = [{
             'name': 'states.geojson',
-            'path': os.path.join(pluginTestDir, 'testdata', 'states.geojson'),
+            'path': os.path.join(pluginTestDir, 'data', 'states.geojson'),
             'mimeType': 'application/vnd.geo+json'
         }]
         minervaMetadata, itemId = createDataset('geojson', files)
@@ -221,7 +221,7 @@ class DatasetTestCase(base.TestCase):
         fileExts = ['cpg', 'dbf', 'prj', 'shp', 'shx']
         files = [{
             'name': 'shapefile.' + ext,
-            'path': os.path.join(pluginTestDir, 'testdata', 'shapefile.' + ext),
+            'path': os.path.join(pluginTestDir, 'data', 'shapefile.' + ext),
             'mimeType': 'application/octet-stream'
         } for ext in fileExts]
         shapefileMinervaMetadata, shapefileItemId = createDataset('shapefile', files)
@@ -230,7 +230,7 @@ class DatasetTestCase(base.TestCase):
         # json array
         files = [{
             'name': 'twopoints.json',
-            'path': os.path.join(pluginTestDir, 'testdata', 'twopoints.json'),
+            'path': os.path.join(pluginTestDir, 'data', 'twopoints.json'),
             'mimeType': 'application/json'
         }]
         jsonMinervaMetadata, jsonItemId = createDataset('twopoints', files)
@@ -239,7 +239,7 @@ class DatasetTestCase(base.TestCase):
         # csv
         files = [{
             'name': 'points.csv',
-            'path': os.path.join(pluginTestDir, 'testdata', 'points.csv'),
+            'path': os.path.join(pluginTestDir, 'data', 'points.csv'),
             'mimeType': 'application/csv'
         }]
         csvMinervaMetadata, csvItemId = createDataset('csv', files)
@@ -248,7 +248,7 @@ class DatasetTestCase(base.TestCase):
         # other type exception
         files = [{
             'name': 'points.other',
-            'path': os.path.join(pluginTestDir, 'testdata', 'points.other'),
+            'path': os.path.join(pluginTestDir, 'data', 'points.other'),
             'mimeType': 'application/other'
         }]
         minervaMetadata, itemId = createDataset('other', files, 400)
@@ -398,3 +398,38 @@ class DatasetTestCase(base.TestCase):
             user=self._user,
         )
         self.assertStatus(response, 400)
+
+        #
+        # Test geocode_tweets endpoint
+        #
+
+        files = [{
+            'name': 'ungeocoded_tweet.json',
+            'path': os.path.join(pluginTestDir, 'data', 'ungeocoded_tweet.json'),
+            'mimeType': 'application/json'
+        }]
+        tweetMinervaMetadata, tweetItemId = createDataset('ungeocoded_tweet', files)
+        self.assertEquals(tweetMinervaMetadata['original_type'], 'json', 'Expected json dataset original_type')
+
+        # geocode the tweets, should replace the file with a new file
+        path = '/minerva_dataset/{}/geocode_tweets'.format(tweetItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+
+        # download the file and test it is valid json with location info
+        jsonFileId = response.json['original_files'][0]['_id']
+        path = '/file/{}/download'.format(jsonFileId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            isJson=False
+        )
+        jsonContents = self.getBody(response)
+        contents = json.loads(jsonContents)
+        self.assertEquals(len(contents), 1, 'geocoded json should have one element')
+        self.assertHasKeys(contents[0], ['location'])
+        self.assertHasKeys(contents[0]['location'], ['latitude','longitude'])
