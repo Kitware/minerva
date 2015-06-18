@@ -139,6 +139,7 @@ minerva.views.DataPanel = minerva.View.extend({
      * Called when the user selects or drops files to be uploaded.
      */
     filesSelected: function (files) {
+        var zeroethFileName = null;
         this.newItemName = null;
         this.newItemExt = null;
         if (this.validateShapefileExtensions) {
@@ -182,7 +183,7 @@ minerva.views.DataPanel = minerva.View.extend({
         } else {
             // take the new item's name from the first file
             if (files && files.length > 0) {
-                var zeroethFileName = files[0].name;
+                zeroethFileName = files[0].name;
                 this.newItemName = zeroethFileName.substr(0, zeroethFileName.lastIndexOf('.'));
                 this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
             }
