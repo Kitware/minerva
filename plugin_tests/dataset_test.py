@@ -398,3 +398,38 @@ class DatasetTestCase(base.TestCase):
             user=self._user,
         )
         self.assertStatus(response, 400)
+
+        #
+        # Test geocode_tweets endpoint
+        #
+
+        files = [{
+            'name': 'ungeocoded_tweet.json',
+            'path': os.path.join(pluginTestDir, 'data', 'ungeocoded_tweet.json'),
+            'mimeType': 'application/json'
+        }]
+        tweetMinervaMetadata, tweetItemId = createDataset('ungeocoded_tweet', files)
+        self.assertEquals(tweetMinervaMetadata['original_type'], 'json', 'Expected json dataset original_type')
+
+        # geocode the tweets, should replace the file with a new file
+        path = '/minerva_dataset/{}/geocode_tweets'.format(tweetItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+
+        # download the file and test it is valid json with location info
+        jsonFileId = response.json['original_files'][0]['_id']
+        path = '/file/{}/download'.format(jsonFileId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            isJson=False
+        )
+        jsonContents = self.getBody(response)
+        contents = json.loads(jsonContents)
+        self.assertEquals(len(contents), 1, 'geocoded json should have one element')
+        self.assertHasKeys(contents[0], ['location'])
+        self.assertHasKeys(contents[0]['location'], ['latitude','longitude'])
