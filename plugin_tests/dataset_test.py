@@ -17,6 +17,14 @@
 #  limitations under the License.
 ###############################################################################
 
+import json
+import os
+
+import geojson
+
+# Need to set the environment variable before importing girder
+os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
+
 from tests import base
 
 
@@ -25,7 +33,7 @@ def setUpModule():
     Enable the minerva plugin and start the server.
     """
     base.enabledPlugins.append('minerva')
-    base.startServer()
+    base.startServer(False)
 
 
 def tearDownModule():
@@ -137,9 +145,256 @@ class DatasetTestCase(base.TestCase):
         self.assertTrue(item1Id in datasetIds, "expected item1Id in datasets")
         self.assertTrue(item2Id in datasetIds, "expected item2Id in datasets")
 
-        # TODO
-        # will want some test data , a shapefile and a geojson
-        # upload the geojson, then process it, then list it as
-        # a dataset
+        #
+        # Test minerva_dataset/id/dataset creating a dataset from uploads
+        #
 
-        # probably change this to an overall minerva test
+        def createDataset(itemname, files, error=None):
+            # create the item
+            params = {
+                'name': itemname,
+                'folderId': folder['_id']
+            }
+            response = self.request(path='/item', method='POST', params=params, user=self._user)
+            self.assertStatusOk(response)
+            itemId = response.json['_id']
+
+            for itemfile in files:
+                filename = itemfile['name']
+                filepath = itemfile['path']
+                mimeType = itemfile['mimeType']
+                sizeBytes = os.stat(filepath).st_size
+
+                # create the file
+                response = self.request(
+                    path='/file',
+                    method='POST',
+                    user=self._user,
+                    params={
+                        'parentType': 'item',
+                        'parentId': itemId,
+                        'name': filename,
+                        'size': sizeBytes,
+                        'mimeType': mimeType
+                    }
+                )
+                self.assertStatusOk(response)
+                uploadId = response.json['_id']
+
+                # upload the file contents
+                with open(filepath, 'rb') as file:
+                    filedata = file.read()
+
+                response = self.multipartRequest(
+                    path='/file/chunk',
+                    user=self._user,
+                    fields=[('offset', 0), ('uploadId', uploadId)],
+                    files=[('chunk', filename, filedata)]
+                )
+
+            # create a dataset from the item
+            path = '/minerva_dataset/{}/dataset'.format(itemId)
+            response = self.request(
+                path=path,
+                method='POST',
+                user=self._user,
+            )
+            if error is not None:
+                self.assertStatus(response, error)
+            else:
+                self.assertStatusOk(response)
+            return response.json, itemId
+
+        pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+
+        # geojson
+        files = [{
+            'name': 'states.geojson',
+            'path': os.path.join(pluginTestDir, 'testdata', 'states.geojson'),
+            'mimeType': 'application/vnd.geo+json'
+        }]
+        minervaMetadata, itemId = createDataset('geojson', files)
+        self.assertEquals(minervaMetadata['original_type'], 'geojson', 'Expected geojson dataset original_type')
+        self.assertEquals(minervaMetadata['geojson_file']['name'], 'states.geojson', 'Expected geojson file to be set')
+
+        # shapefile
+        fileExts = ['cpg', 'dbf', 'prj', 'shp', 'shx']
+        files = [{
+            'name': 'shapefile.' + ext,
+            'path': os.path.join(pluginTestDir, 'testdata', 'shapefile.' + ext),
+            'mimeType': 'application/octet-stream'
+        } for ext in fileExts]
+        shapefileMinervaMetadata, shapefileItemId = createDataset('shapefile', files)
+        self.assertEquals(shapefileMinervaMetadata['original_type'], 'shapefile', 'Expected shapefile dataset original_type')
+
+        # json array
+        files = [{
+            'name': 'twopoints.json',
+            'path': os.path.join(pluginTestDir, 'testdata', 'twopoints.json'),
+            'mimeType': 'application/json'
+        }]
+        jsonMinervaMetadata, jsonItemId = createDataset('twopoints', files)
+        self.assertEquals(jsonMinervaMetadata['original_type'], 'json', 'Expected json dataset original_type')
+
+        # csv
+        files = [{
+            'name': 'points.csv',
+            'path': os.path.join(pluginTestDir, 'testdata', 'points.csv'),
+            'mimeType': 'application/csv'
+        }]
+        csvMinervaMetadata, csvItemId = createDataset('csv', files)
+        self.assertEquals(csvMinervaMetadata['original_type'], 'csv', 'Expected csv dataset original_type')
+
+        # other type exception
+        files = [{
+            'name': 'points.other',
+            'path': os.path.join(pluginTestDir, 'testdata', 'points.other'),
+            'mimeType': 'application/other'
+        }]
+        minervaMetadata, itemId = createDataset('other', files, 400)
+
+        #
+        # Test minerva_dataset/id/jsonrow creating an example row of json
+        #
+
+        path = '/minerva_dataset/{}/jsonrow'.format(jsonItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertHasKeys(response.json, ['json_row'])
+        self.assertHasKeys(response.json['json_row'], ['coordinates'])
+
+        #
+        # Test minerva_dataset/id/geojson creating geojson from json
+        #
+
+        # get the item metadata
+        path = '/item/{}'.format(jsonItemId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+        )
+        metadata = response.json
+
+        # update the minerva metadata with coordinate mapping
+        # and boolean colored point mapping
+        jsonMinervaMetadata["mapper"] = {
+            "latitudeKeypath": "$.coordinates.coordinates[1]",
+            "longitudeKeypath": "$.coordinates.coordinates[0]",
+            "coloredPointKeypath": "sentiment"
+        }
+
+        metadata['minerva'] = jsonMinervaMetadata
+        path = '/item/{}/metadata'.format(jsonItemId)
+        response = self.request(
+            path=path,
+            method='PUT',
+            user=self._user,
+            body=json.dumps(metadata),
+            type='application/json'
+        )
+        metadata = response.json
+
+        # create geojson in the dataset
+        path = '/minerva_dataset/{}/geojson'.format(jsonItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertHasKeys(response.json, ['geojson_file'])
+
+        # download the file and test it is valid geojson
+        geojsonFileId = response.json['geojson_file']['_id']
+        path = '/file/{}/download'.format(geojsonFileId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            isJson=False
+        )
+        geojsonContents = self.getBody(response)
+        twopointsGeojson = geojson.loads(geojsonContents)
+        self.assertEquals(len(twopointsGeojson['features']), 2, 'geojson should have two features')
+        # to ensure correct mapping, -85 < x < -80, 20 < y < 30
+        features = twopointsGeojson['features']
+        for feature in features:
+            coordinates = feature['geometry']['coordinates']
+            self.assertTrue(-85 < coordinates[0], 'x coordinate out of range')
+            self.assertTrue(-80 > coordinates[0], 'x coordinate out of range')
+            self.assertTrue(20 < coordinates[1], 'y coordinate out of range')
+            self.assertTrue(30 > coordinates[1], 'y coordinate out of range')
+        # since there is a color mapping, check that a fillColor is set and
+        # that it is different between the two points, since their sentiment values
+        # are different
+        self.assertNotEquals(features[0]['properties']['fillColor']['g'], features[1]['properties']['fillColor']['g'], 'two points should have different colors')
+
+        #
+        # Test minerva_dataset/id/geojson creating geojson from shapefile
+        #
+
+        # create geojson in the dataset
+        path = '/minerva_dataset/{}/geojson'.format(shapefileItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertHasKeys(response.json, ['geojson_file'])
+
+        # download the file and test it is valid geojson
+        geojsonFileId = response.json['geojson_file']['_id']
+        path = '/file/{}/download'.format(geojsonFileId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            isJson=False
+        )
+        geojsonContents = self.getBody(response)
+        shapefileGeojson = geojson.loads(geojsonContents)
+        self.assertEquals(len(shapefileGeojson['features']), 5, 'geojson should have five features')
+
+        #
+        # Test minerva_dataset/id/geojson creating geojson from csv
+        # Currently should throw an exception as this conversion is
+        # only implemented in javascript.
+        #
+
+        # get the item metadata
+        path = '/item/{}'.format(csvItemId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+        )
+        metadata = response.json
+
+        # update the minerva metadata with coordinate mapping
+        csvMinervaMetadata["mapper"] = {
+            "latitudeColumn": "2",
+            "longitudeColumn": "1"
+        }
+
+        metadata['minerva'] = csvMinervaMetadata
+        path = '/item/{}/metadata'.format(csvItemId)
+        response = self.request(
+            path=path,
+            method='PUT',
+            user=self._user,
+            body=json.dumps(metadata),
+            type='application/json'
+        )
+        metadata = response.json
+
+        # create geojson in the dataset
+        path = '/minerva_dataset/{}/geojson'.format(csvItemId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertStatus(response, 400)

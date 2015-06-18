@@ -1,6 +1,7 @@
 """This modules defines geocoding endpoints using the geonames database."""
 
 import sys
+import shutil
 import os
 import urllib
 import time
@@ -185,7 +186,7 @@ def download_all_countries(dest=_allZip, url=None,
             )
         )
         done()
-        os.rename(tmp, dest)
+        shutil.move(tmp, dest)
     finally:
         if os.path.exists(tmp):
             os.remove(tmp)

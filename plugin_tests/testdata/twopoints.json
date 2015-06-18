@@ -1,0 +1,26 @@
+[
+    {
+        "_id": 384837718574120960,
+        "contributors": null,
+        "coordinates": {
+            "type": "Point",
+            "coordinates": [
+                -80.3569238,
+                25.8848683
+            ]
+        },
+        "sentiment": false
+    },
+    {
+        "_id": 384837718477258750,
+        "contributors": null,
+        "coordinates": {
+            "type": "Point",
+            "coordinates": [
+                -82.20691974,
+                28.37690553
+            ]
+        },
+        "sentiment": true
+    }
+]

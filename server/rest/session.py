@@ -19,13 +19,13 @@
 
 import pymongo
 
-from ..constants import PluginSettings
-from ..utility import findSessionFolder
-
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
+
+from girder.plugins.minerva.constants import PluginSettings
+from girder.plugins.minerva.utility.minerva_utility import findSessionFolder
 
 
 class Session(Resource):

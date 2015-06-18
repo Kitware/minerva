@@ -47,7 +47,7 @@ def download_data(url, dest, *a, **kw):
 
 class GeonamesTestCase(base.TestCase):
 
-    """Tests of the minerva dataset API endpoints."""
+    """Tests of the minerva geonames API endpoints."""
 
     def setUp(self):  # noqa
         """Set up the test case with  a user."""
