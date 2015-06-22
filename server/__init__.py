@@ -22,7 +22,7 @@ import mako
 from girder import events
 from girder.utility.model_importer import ModelImporter
 
-from .rest import dataset, session, shapefile, geocode, geocode_tweet
+from girder.plugins.minerva.rest import dataset, session, shapefile, geocode
 
 
 class CustomAppRoot(object):
