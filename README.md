@@ -4,6 +4,24 @@ Assumes you have a running version of Girder.
 
 ### Running Minerva
 
+#### Install of system dependencies
+
+##### Ubuntu 14.04
+
+This includes all system dependencies necessary for running Girder.  So if you have a running Girder installation, many of these
+will already be satisfied.
+
+- sudo apt-get update
+- sudo apt-get install curl g++ git libffi-dev make python-dev python-pip libfreetype6-dev libpng12-dev pkg-config libgdal-dev
+- sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+- echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'     | sudo tee /etc/apt/sources.list.d/mongodb.list
+- sudo apt-get update
+- sudo apt-get install mongodb-org-server
+- curl -sL https://deb.nodesource.com/setup | sudo bash -
+- sudo apt-get install nodejs
+
+#### Install of Minerva as a Girder plugin
+
 - clone Minerva into the Girder plugins dir
 - pip install the `minerva/requirements.txt`
 
