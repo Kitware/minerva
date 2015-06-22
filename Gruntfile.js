@@ -91,7 +91,6 @@ module.exports = function (grunt) {
             // don't take the prepackaged geo.ext.min.js from geojs, but rather
             // create one based on the other required dependencies
             files[staticDir + '/geo.ext.min.js'] = [
-                geojsDir + '/bower_components/jquery-mousewheel/jquery-mousewheel.js',
                 geojsDir + '/bower_components/gl-matrix/dist/gl-matrix.js',
                 geojsDir + '/bower_components/proj4/dist/proj4-src.js',
                 geojsDir + '/node_modules/pnltri/pnltri.js'
