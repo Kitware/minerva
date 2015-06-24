@@ -1,3 +1,5 @@
+from girder.plugins.minerva.libs.carmen import get_resolver
+
 # Requires tweepy (pip install tweepy)
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
@@ -22,12 +24,23 @@ class TwitterStreamListener(StreamListener):
 
     """
     def __init__(self):
+        """Initialize twitter stream"""
         StreamListener.__init__(self)
-        self.mongo = pymongo.MongoClient().minerva.tweets
-        print "self.mongo ", self.mongo
+        self._mongo = pymongo.MongoClient().minerva.tweets
+        self._filters = []
+
+    def add_filter(self, filter):
+        """A filter takes JSON  as input and outputs a JSON as well"""
+        if callback not in self._filters:
+            self._filters.append(filter);
 
     def on_data(self, data):
+        """Receive tweet and save it to the database"""
         json_data = json.loads(data)
+
+        for filter in self._filters:
+            json_data = filter(json_data)
+
         retweet_cont = 0
         if 'retweet_cont' in json_data.keys():
             retweet_cont = json_data['retweet_cont']
@@ -42,12 +55,15 @@ class TwitterStreamListener(StreamListener):
             "retweet_cont" : retweet_cont
         }
 
+        print "inserting ", rec
+
         # Insert data in mongodb
-        self.mongo.insert(rec)
+        self._mongo.insert(rec)
 
         return True
 
     def on_error(self, status):
+        """Handle any error encountered during streaming"""
         print status
 
     def on_timeout(self):
@@ -63,9 +79,19 @@ def exitHandler():
 
 atexit.register(exitHandler)
 
+def tweetGeocoder(tweet):
+    resolver = get_resolver()
+    resolver.load_locations()
+    location = resolver.resolve_tweet(tweet)
+    if location is not None:
+        tweet["location"] = location[1].__dict__
+    return tweet
+
 
 def stream():
     listn = TwitterStreamListener()
+    listn.add_filter(tweetGeocoder)
+
     auth = OAuthHandler(minerva_twitter_config["twitter"]["CONSUMER_KEY"],
                         minerva_twitter_config["twitter"]["CONSUMER_SECRET"])
     auth.set_access_token(minerva_twitter_config["twitter"]["ACCESS_KEY"],
@@ -74,6 +100,5 @@ def stream():
     stream.filter(track=['ebola'], async=False)
 
 if __name__ == '__main__':
-    print "main"
     stream()
 
