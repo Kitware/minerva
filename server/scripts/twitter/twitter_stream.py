@@ -1,3 +1,4 @@
+# Requires tweepy (pip install tweepy)
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
@@ -9,51 +10,40 @@ import json
 import atexit
 import pymongo
 
-# Load config
-minerva_ebola_config = json.load(open(
-    os.path.join(os.path.dirname(__file__), "minerva.json")
+# A configuration is required for authentication purposes or else
+# streaming service won't work.
+minerva_twitter_config = json.load(open(
+    os.path.join(os.path.dirname(__file__), "twitter.json")
 ))
 
-
-class EbolaListener(StreamListener):
+class TwitterStreamListener(StreamListener):
     """ A listener handles tweets are the received from the stream.
     This is a basic listener that just prints received tweets to stdout.
 
     """
     def __init__(self):
         StreamListener.__init__(self)
-        self._buffer = []
-        self.mongo = pymongo.MongoClient().ebola.minerva
+        self.mongo = pymongo.MongoClient().minerva.tweets
         print "self.mongo ", self.mongo
 
     def on_data(self, data):
         json_data = json.loads(data)
-        #print 'json_data', json_data
-        if json_data['geo'] is not None:
-            retweet_cont = 0
-            if 'retweet_cont' in json_data.keys():
-                retweet_cont = json_data['retweet_cont']
+        retweet_cont = 0
+        if 'retweet_cont' in json_data.keys():
+            retweet_cont = json_data['retweet_cont']
 
-            # self._buffer.append(dict({
-            #     "id": json_data['id_str'],
-            #     "location": json_data['geo'],
-            #     "text": json_data['text'],
-            #     "timestamp_ms": json_data['timestamp_ms'],
-            #     "created_at": json_data['created_at'],
-            #     "retweeted" : json_data['retweeted'],
-            #     "retweet_cont" : retweet_cont
-            # }))
-            rec = {
-                "id": json_data['id_str'],
-                "location": json_data['geo'],
-                "text": json_data['text'],
-                "timestamp_ms": json_data['timestamp_ms'],
-                "created_at": json_data['created_at'],
-                "retweeted" : json_data['retweeted'],
-                "retweet_cont" : retweet_cont
-            }
-            # Insert data in mongodb
-            self.mongo.insert(rec)
+        rec = {
+            "id": json_data['id_str'],
+            "location": json_data['geo'],
+            "text": json_data['text'],
+            "timestamp_ms": json_data['timestamp_ms'],
+            "created_at": json_data['created_at'],
+            "retweeted" : json_data['retweeted'],
+            "retweet_cont" : retweet_cont
+        }
+
+        # Insert data in mongodb
+        self.mongo.insert(rec)
 
         return True
 
@@ -65,13 +55,7 @@ class EbolaListener(StreamListener):
         time.sleep(60)
         return
 
-    def getNewTweets(self):
-        arr = self._buffer
-        self._buffer = []
-        return arr
-
 _exit = False
-
 
 def exitHandler():
     global _exit
@@ -81,20 +65,13 @@ atexit.register(exitHandler)
 
 
 def stream():
-    print "stream 1"
-    listn = EbolaListener()
-    auth = OAuthHandler(minerva_ebola_config["twitter"]["CONSUMER_KEY"],
-                        minerva_ebola_config["twitter"]["CONSUMER_SECRET"])
-    auth.set_access_token(minerva_ebola_config["twitter"]["ACCESS_KEY"],
-                          minerva_ebola_config["twitter"]["ACCESS_SECRET"])
+    listn = TwitterStreamListener()
+    auth = OAuthHandler(minerva_twitter_config["twitter"]["CONSUMER_KEY"],
+                        minerva_twitter_config["twitter"]["CONSUMER_SECRET"])
+    auth.set_access_token(minerva_twitter_config["twitter"]["ACCESS_KEY"],
+                          minerva_twitter_config["twitter"]["ACCESS_SECRET"])
     stream = Stream(auth, listn)
     stream.filter(track=['ebola'], async=False)
-    print "stream 2"
-
-    # while not _exit:
-    #     yield listn.getNewTweets()
-
-    #stream.disconnect()
 
 if __name__ == '__main__':
     print "main"
