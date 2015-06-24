@@ -1,5 +1,3 @@
-from girder.plugins.minerva.libs.carmen import get_resolver
-
 # Requires tweepy (pip install tweepy)
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
@@ -11,6 +9,8 @@ import time
 import json
 import atexit
 import pymongo
+
+from girder.plugins.minerva.libs.carmen import get_resolver
 
 # A configuration is required for authentication purposes or else
 # streaming service won't work.
