@@ -9,8 +9,9 @@ import time
 import json
 import atexit
 import pymongo
+import inspect
 
-from girder.plugins.minerva.libs.carmen import get_resolver
+from carmen import get_resolver
 
 # A configuration is required for authentication purposes or else
 # streaming service won't work.
@@ -31,7 +32,7 @@ class TwitterStreamListener(StreamListener):
 
     def add_filter(self, filter):
         """A filter takes JSON  as input and outputs a JSON as well"""
-        if callback not in self._filters:
+        if filter not in self._filters:
             self._filters.append(filter);
 
     def on_data(self, data):
@@ -45,20 +46,19 @@ class TwitterStreamListener(StreamListener):
         if 'retweet_cont' in json_data.keys():
             retweet_cont = json_data['retweet_cont']
 
-        rec = {
-            "id": json_data['id_str'],
-            "location": json_data['geo'],
-            "text": json_data['text'],
-            "timestamp_ms": json_data['timestamp_ms'],
-            "created_at": json_data['created_at'],
-            "retweeted" : json_data['retweeted'],
-            "retweet_cont" : retweet_cont
-        }
+        if 'location' in json_data:
+            rec = {
+                "id": json_data['id_str'],
+                "location": json_data['location'],
+                "text": json_data['text'],
+                "timestamp_ms": json_data['timestamp_ms'],
+                "created_at": json_data['created_at'],
+                "retweeted" : json_data['retweeted'],
+                "retweet_cont" : retweet_cont
+            }
 
-        print "inserting ", rec
-
-        # Insert data in mongodb
-        self._mongo.insert(rec)
+            # Insert data in mongodb
+            self._mongo.insert(rec)
 
         return True
 
