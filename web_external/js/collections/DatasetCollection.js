@@ -1,7 +1,16 @@
 minerva.collections.DatasetCollection = girder.Collection.extend({
     // minerva datasets are items in a specific folder
     resourceName: 'item',
-    model: minerva.models.DatasetModel,
+    // Make the collection polymorphic ...
+    model: function(attrs, options) {
+        if (attrs.meta && ('minerva' in attrs.meta) &&
+            attrs.meta.minerva.original_type === 's3') {
+            return new minerva.models.S3DatasetModel(attrs, options);
+        }
+        else {
+            return new minerva.models.DatasetModel(attrs, options);
+        }
+    },
     pageLimit: 100,
     // TODO maybe we want to override default sort order to recency
     initialize: function () {
