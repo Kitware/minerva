@@ -11,7 +11,7 @@ import atexit
 import pymongo
 import inspect
 
-from carmen import get_resolver
+from libs.carmen import get_resolver
 
 # A configuration is required for authentication purposes or else
 # streaming service won't work.
