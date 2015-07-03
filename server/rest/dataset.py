@@ -235,6 +235,7 @@ class Dataset(Resource):
         desc = 'external mongo dataset for %s' % name
         item = self.model('item').createItem(name, user, folder, desc)
         minerva_metadata = {
+            'dataset_id': item['_id'],
             'original_type': 'mongo',
             'mongo_connection': {
                 'db_uri': dbConnectionUri,
@@ -382,6 +383,7 @@ class Dataset(Resource):
                 break
         if not minerva_metadata:
             raise RestException('No valid dataset type found in Item Files.')
+        minerva_metadata['dataset_id'] = item['_id']
         if 'meta' in item:
             metadata = item['meta']
         else:
