@@ -14,7 +14,7 @@ minerva.views.DataPanel = minerva.View.extend({
         // TODO standardize on callback or else dual calls of getX and getXData
 
         var datasetType = dataset.getDatasetType();
-        if (datasetType === 'json') {
+        if (datasetType === 'json' || datasetType === 'mongo') {
             dataset.on('m:jsonrowGot', function () {
                 // let the widget get the data
                 this.keymapWidget = new minerva.views.KeymapWidget({
@@ -121,7 +121,6 @@ minerva.views.DataPanel = minerva.View.extend({
             overrideStart: true,
             parentView: this
         }).on('g:uploadFinished', function () {
-            girder.dialogs.handleClose('upload');
             this.upload = false;
         }, this).render();
 

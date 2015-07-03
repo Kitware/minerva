@@ -23,16 +23,16 @@ minerva.views.MapPanel = minerva.View.extend({
             layer = this.map.createLayer('feature');
             this.datasets[datasetId] = layer;
             reader = geo.createFileReader('jsonReader', {layer: layer});
-            var readGeoJsonToLayer = _.bind(function (geoJsonData) {
+            // leave it up to the dataset to get the geojson contents
+            dataset.on('m:geoJsonDataLoaded', function () {
                 layer.clear();
-                reader.read(geoJsonData, _.bind(function () {
+                reader.read(dataset.geoJsonData, _.bind(function () {
                     this.uiLayer = this.map.createLayer('ui');
                     this.uiLayer.createWidget('slider');
                     this.map.draw();
                 }, this));
             }, this);
-            // leave it up to the dataset to get the geojson contents
-            dataset.getGeoJsonData(readGeoJsonToLayer);
+            dataset.loadGeoJsonData();
         }
     },
 
