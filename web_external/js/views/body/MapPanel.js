@@ -18,13 +18,12 @@ minerva.views.MapPanel = minerva.View.extend({
         // added as a feature layer, which is even more of a HACK
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
-            var layer,
-                reader;
-            layer = this.map.createLayer('feature');
-            this.datasets[datasetId] = layer;
-            reader = geo.createFileReader('jsonReader', {layer: layer});
-            // leave it up to the dataset to get the geojson contents
-            dataset.on('m:geoJsonDataLoaded', function () {
+            dataset.once('m:geoJsonDataLoaded', function () {
+                var layer,
+                    reader;
+                layer = this.map.createLayer('feature');
+                this.datasets[datasetId] = layer;
+                reader = geo.createFileReader('jsonReader', {layer: layer});
                 layer.clear();
                 reader.read(dataset.geoJsonData, _.bind(function () {
                     this.uiLayer = this.map.createLayer('ui');
@@ -70,7 +69,6 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
             this.uiLayer.createWidget('slider');
-            window.map = this.map;
         }
         this.map.draw();
     },
