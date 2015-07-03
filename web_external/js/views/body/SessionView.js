@@ -112,18 +112,18 @@ minerva.views.SessionView = minerva.View.extend({
                 parentView: this
             });
 
-            this.layersPanel = new minerva.views.LayersPanel({
-                el: this.$('.layersPanel'),
-                collection: this.datasetsCollection,
-                parentView: this
-            });
-
             this.mapPanel = new minerva.views.MapPanel({
                 el: this.$('.mapPanel'),
                 session: this.model,
                 collection: this.datasetsCollection,
                 parentView: this
             }).render();
+
+            this.layersPanel = new minerva.views.LayersPanel({
+                el: this.$('.layersPanel'),
+                collection: this.datasetsCollection,
+                parentView: this
+            });
 
             this.geometryPanel = new minerva.views.GeometryPanel({
                 el: this.$('.geometryPanel'),

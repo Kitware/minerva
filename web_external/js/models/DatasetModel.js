@@ -73,13 +73,11 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
     setMinervaMetadata: function (minervaMetadata) {
         this.set('meta', _.extend(this.get('meta') || {}, {minerva: minervaMetadata}));
         // TODO may want an extend minervaMetadata, this one replaces
-        console.log(minervaMetadata);
         if (minervaMetadata.geojson_file || minervaMetadata.geojson) {
             this.geoJsonAvailable = true;
         }
         if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
             this.geoJsonData = minervaMetadata.geojson.data;
-            console.log(this.geoJsonData);
         }
     },
 
