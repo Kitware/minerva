@@ -502,3 +502,59 @@ class ExternalMongoDatasetTestCase(base.TestCase):
         self.assertEquals(response.json['original_type'], 'mongo', 'expected mongo for original_type')
         self.assertEquals(response.json['mongo_connection']['collection_name'], self.collectionName, 'unexpected collection name')
         self.assertEquals(response.json['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
+        minervaMetadata = response.json
+        datasetId = minervaMetadata['dataset_id']
+
+        # update the minerva metadata with coordinate mapping
+        minervaMetadata["mapper"] = {
+            "latitudeKeypath": "coordinates.coordinates[1]",
+            "longitudeKeypath": "coordinates.coordinates[0]",
+        }
+
+        path = '/item/{}/metadata'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+        )
+        metadata = response.json
+
+        metadata['minerva'] = minervaMetadata
+        response = self.request(
+            path=path,
+            method='PUT',
+            user=self._user,
+            body=json.dumps(metadata),
+            type='application/json'
+        )
+        metadata = response.json
+
+        # create geojson in the dataset
+        path = '/minerva_dataset/{}/geojson'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertHasKeys(response.json, ['geojson'])
+        # expect 50 points back as that is the default page size
+        geojsonData = geojson.loads(response.json['geojson']['data'])
+        # coordinate limits empirically figured
+        # coords = [feature['geometry']['coordinates'] for feature in geojsonData['features']]
+        # print min([c[0] for c in coords])
+        # print max([c[0] for c in coords])
+        # print min([c[1] for c in coords])
+        # print max([c[1] for c in coords])
+        xMin = -122.27055356
+        xMax = -57.93991735
+        yMin = -34.93523486
+        yMax = 47.696623
+        self.assertEquals(len(geojsonData['features']), 50, 'geojson should have 50 features')
+        # to ensure correct mapping, check coords
+        features = geojsonData['features']
+        for feature in features:
+            coordinates = feature['geometry']['coordinates']
+            self.assertTrue(xMin <= coordinates[0], 'x coordinate out of range')
+            self.assertTrue(xMax >= coordinates[0], 'x coordinate out of range')
+            self.assertTrue(yMin <= coordinates[1], 'y coordinate out of range')
+            self.assertTrue(yMax >= coordinates[1], 'y coordinate out of range')
