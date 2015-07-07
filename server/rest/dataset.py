@@ -252,7 +252,11 @@ class Dataset(Resource):
         db = dbConn.get_default_database()
         from girder.external.mongodb_proxy import MongoProxy
         collection = MongoProxy(db[collectionName])
-        minerva_metadata['json_row'] = list(collection.find(limit=1))[0]
+        collectionList = list(collection.find(limit=1))
+        if len(collectionList) > 0:
+            minerva_metadata['json_row'] = collectionList[0]
+        else:
+            minerva_metadata['json_row'] = None
         if 'meta' not in item:
             item['meta'] = {}
         item['meta']['minerva'] = minerva_metadata
