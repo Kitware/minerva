@@ -32,7 +32,7 @@ from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.libs.carmen import get_resolver
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 from girder.plugins.minerva.utility.dataset_utility import \
-    jsonArrayHead, convertJsonArrayToGeoJson, jsonArrayRewriter
+    jsonArrayHead, JsonMapper, GeoJsonMapper, jsonObjectReader
 
 import girder_client
 
@@ -44,6 +44,8 @@ class Dataset(Resource):
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
         self.route('POST', (':id', 'dataset'), self.createDataset)
+        self.route('POST', ('external_mongo_dataset',),
+                   self.createExternalMongoDataset)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
@@ -115,11 +117,16 @@ class Dataset(Resource):
                                     item['name'] + '.json')
         geoJsonFilename = item['name'] + PluginSettings.GEOJSON_EXTENSION
         geoJsonFilepath = os.path.join(tmpdir, item['name'], geoJsonFilename)
-        convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilepath,
-                                  item['meta']['minerva']['mapper'])
+
+        mapping = item['meta']['minerva']['mapper']
+        geoJsonMapper = GeoJsonMapper(objConverter=None,
+                                      mapping=mapping)
+        objects = jsonObjectReader(jsonFilepath)
+        geoJsonMapper.mapToJsonFile(tmpdir, objects, geoJsonFilepath)
+
         return geoJsonFilepath
 
-    def createGeoJson(self, item):
+    def createGeoJson(self, item, params):
         # TODO there is probably a problem when
         # we look for a name in an item as a duplicate
         # i.e. looking for filex, but the item name is filex (1)
@@ -129,6 +136,46 @@ class Dataset(Resource):
             converter = self._convertShapefileToGeoJson
         elif minerva_metadata['original_type'] == 'json':
             converter = self._convertJsonfileToGeoJson
+        elif minerva_metadata['original_type'] == 'mongo':
+            # TODO maybe here we can store limit and offset?
+            # set a placeholder for geojson file, even though
+            # there is no actual geojson file, rather we will
+            # generate it on the fly
+
+            # in this case we don't actually want to store a file
+            # but store the metadata we used to create the geojson
+
+            minerva_metadata['geojson'] = {}
+            minerva_metadata['geojson']['limit'] = 50
+            minerva_metadata['geojson']['offset'] = 0
+            # add the geojson to the minerva metadata returned
+            # but don't save it
+            # TODO think on caching implications
+            connection = minerva_metadata['mongo_connection']
+            dbConnectionUri = connection['db_uri']
+            collectionName = connection['collection_name']
+            # TODO this is also copied from above where we create an external
+            # mongo dataset
+            # TODO not sure if this is a good idea to do this db stuff here
+            # maybe this suggests a new model?
+            from girder.models import getDbConnection
+            dbConn = getDbConnection(dbConnectionUri)
+            db = dbConn.get_default_database()
+            from girder.external.mongodb_proxy import MongoProxy
+            collection = MongoProxy(db[collectionName])
+            objects = list(collection.find(limit=50))
+
+            mapping = item['meta']['minerva']['mapper']
+            geoJsonMapper = GeoJsonMapper(objConverter=None,
+                                          mapping=mapping)
+            import cStringIO
+            writer = cStringIO.StringIO()
+            geoJsonMapper.mapToJson(objects, writer)
+
+            item['meta']['minerva'] = minerva_metadata
+            self.model('item').setMetadata(item, item['meta'])
+            item['meta']['minerva']['geojson']['data'] = writer.getvalue()
+            return minerva_metadata
         else:
             raise Exception('Unsupported conversion type %s' %
                             minerva_metadata['original_type'])
@@ -171,13 +218,52 @@ class Dataset(Resource):
                     tweet["location"] = location[1].__dict__
                 return tweet
 
-            outfile = jsonArrayRewriter(jsonFilepath, tmpdir, tweetGeocoder)
+            jsonMapper = JsonMapper(tweetGeocoder)
+            objects = jsonObjectReader(jsonFilepath)
+            outfile = jsonMapper.mapToJsonFile(tmpdir, objects)
             # move the converted file to the original file name to replace
             # the item file with the new version
             shutil.move(outfile, jsonFilepath)
             self._addFileToItem(item, jsonFilepath)
 
         return self.datasetJob(item, geocoderJob)
+
+    def createExternalMongo(self, name, dbConnectionUri, collectionName):
+        # assuming to create in the user space of the current user
+        user = self.getCurrentUser()
+        folder = findDatasetFolder(user, user)
+        desc = 'external mongo dataset for %s' % name
+        item = self.model('item').createItem(name, user, folder, desc)
+        minerva_metadata = {
+            'dataset_id': item['_id'],
+            'original_type': 'mongo',
+            'mongo_connection': {
+                'db_uri': dbConnectionUri,
+                'collection_name': collectionName
+            }
+        }
+        # TODO not sure if this is a good idea to do this db stuff here
+        # maybe this suggests a new model?
+        # get the first entry in the collection, set as json_row
+        # TODO integrate this with the methods for taking a row from a JSON
+        # array in a file
+        from girder.models import getDbConnection
+        dbConn = getDbConnection(dbConnectionUri)
+        db = dbConn.get_default_database()
+        from girder.external.mongodb_proxy import MongoProxy
+        collection = MongoProxy(db[collectionName])
+        collectionList = list(collection.find(limit=1))
+        if len(collectionList) > 0:
+            minerva_metadata['json_row'] = collectionList[0]
+        else:
+            minerva_metadata['json_row'] = None
+        if 'meta' not in item:
+            item['meta'] = {}
+        item['meta']['minerva'] = minerva_metadata
+        self.model('item').setMetadata(item, item['meta'])
+        return item['meta']['minerva']
+
+    # REST Endpoints
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
@@ -240,6 +326,16 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
 
+    @access.user
+    def createExternalMongoDataset(self, params):
+        return self.createExternalMongo(**params)
+    createExternalMongoDataset.description = (
+        Description('Create a dataset from an external mongo collection.')
+        .param('name', 'The name of the dataset')
+        .param('dbConnectionUri', 'Connection URI to MongoDB')
+        .param('collectionName', 'Collection name within the MongoDB.')
+        .errorResponse('Write permission denied on the dataset folder.', 403))
+
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
     def createDataset(self, item, params):
@@ -291,6 +387,7 @@ class Dataset(Resource):
                 break
         if not minerva_metadata:
             raise RestException('No valid dataset type found in Item Files.')
+        minerva_metadata['dataset_id'] = item['_id']
         if 'meta' in item:
             metadata = item['meta']
         else:
@@ -328,9 +425,11 @@ class Dataset(Resource):
         # always create the geojson as perhaps the params have changed
         item_meta = item['meta']
         minerva_meta = item_meta['minerva']
-        supported_conversions = ['shapefile', 'json']
+        supported_conversions = ['shapefile', 'json', 'mongo']
         if minerva_meta['original_type'] in supported_conversions:
-            minerva_meta = self.createGeoJson(item)
+            # TODO passing params for limit and offset
+            # maybe better to make those explicit and for all original_type
+            minerva_meta = self.createGeoJson(item, params)
         elif minerva_meta['original_type'] == 'geojson':
             return minerva_meta
         elif minerva_meta['original_type'] == 'csv':

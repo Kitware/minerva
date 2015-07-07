@@ -19,6 +19,7 @@
 
 import json
 import os
+import zipfile
 
 import geojson
 
@@ -433,3 +434,127 @@ class DatasetTestCase(base.TestCase):
         self.assertEquals(len(contents), 1, 'geocoded json should have one element')
         self.assertHasKeys(contents[0], ['location'])
         self.assertHasKeys(contents[0]['location'], ['latitude','longitude'])
+
+
+
+
+class ExternalMongoDatasetTestCase(base.TestCase):
+    """
+    Tests of the minerva external mongo dataset .
+    """
+
+    def setUp(self):
+        """
+        Set up the mongo db for the external dataset, with a collection
+        named tweetsgeo, which have tweet data that is geolocated.
+        """
+        super(ExternalMongoDatasetTestCase, self).setUp()
+
+        self._user = self.model('user').createUser(
+            'minervauser', 'password', 'minerva', 'user',
+            'minervauser@example.com')
+
+        from girder.utility import config
+        dbUri = config.getConfig()['database']['uri']
+        self.dbName = 'minerva_test_external_mongo_dataset'
+        dbUriParts = dbUri.split('/')[0:-1]
+        self.dbUri = '/'.join(dbUriParts + [self.dbName])
+        from girder.models import getDbConnection
+        self.externalMongoDbConnection = getDbConnection(self.dbUri)
+        self.externalMongoDb = self.externalMongoDbConnection.get_default_database()
+        from girder.external.mongodb_proxy import MongoProxy
+        self.collectionName = 'tweetsgeo'
+        self.tweetsgeoCollection = MongoProxy(self.externalMongoDb[self.collectionName])
+        # add test data to external dataset
+        self.pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+        tweets100Path = os.path.join(self.pluginTestDir, 'data', 'tweets100.json')
+        z = zipfile.ZipFile('%s.zip' % tweets100Path)
+        tweets = json.load(z.open('tweets100.json'))
+        for tweet in tweets:
+            self.tweetsgeoCollection.save(tweet)
+
+        path = '/minerva_dataset/folder'
+        params = {
+            'userId': self._user['_id'],
+        }
+        # create a dataset folder
+        self.request(path=path, method='POST', params=params, user=self._user)
+
+    def tearDown(self):
+        self.externalMongoDbConnection.drop_database(self.dbName)
+
+
+    def testExternalDataset(self):
+        # create an external dataset from the mongo collection
+        path = '/minerva_dataset/external_mongo_dataset'
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+            params={
+                'name': 'tweetsgeodataset',
+                'dbConnectionUri': self.dbUri,
+                'collectionName': self.collectionName
+            }
+        )
+        self.assertStatusOk(response)
+        self.assertHasKeys(response.json, ['mongo_connection', 'json_row', 'original_type'])
+        self.assertEquals(response.json['original_type'], 'mongo', 'expected mongo for original_type')
+        self.assertEquals(response.json['mongo_connection']['collection_name'], self.collectionName, 'unexpected collection name')
+        self.assertEquals(response.json['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
+        minervaMetadata = response.json
+        datasetId = minervaMetadata['dataset_id']
+
+        # update the minerva metadata with coordinate mapping
+        minervaMetadata["mapper"] = {
+            "latitudeKeypath": "coordinates.coordinates[1]",
+            "longitudeKeypath": "coordinates.coordinates[0]",
+        }
+
+        path = '/item/{}/metadata'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+        )
+        metadata = response.json
+
+        metadata['minerva'] = minervaMetadata
+        response = self.request(
+            path=path,
+            method='PUT',
+            user=self._user,
+            body=json.dumps(metadata),
+            type='application/json'
+        )
+        metadata = response.json
+
+        # create geojson in the dataset
+        path = '/minerva_dataset/{}/geojson'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+        )
+        self.assertHasKeys(response.json, ['geojson'])
+        # expect 50 points back as that is the default page size
+        geojsonData = geojson.loads(response.json['geojson']['data'])
+        # coordinate limits empirically figured
+        # coords = [feature['geometry']['coordinates'] for feature in geojsonData['features']]
+        # print min([c[0] for c in coords])
+        # print max([c[0] for c in coords])
+        # print min([c[1] for c in coords])
+        # print max([c[1] for c in coords])
+        xMin = -122.27055356
+        xMax = -57.93991735
+        yMin = -34.93523486
+        yMax = 47.696623
+        self.assertEquals(len(geojsonData['features']), 50, 'geojson should have 50 features')
+        # to ensure correct mapping, check coords
+        features = geojsonData['features']
+        for feature in features:
+            coordinates = feature['geometry']['coordinates']
+            self.assertTrue(xMin <= coordinates[0], 'x coordinate out of range')
+            self.assertTrue(xMax >= coordinates[0], 'x coordinate out of range')
+            self.assertTrue(yMin <= coordinates[1], 'y coordinate out of range')
+            self.assertTrue(yMax >= coordinates[1], 'y coordinate out of range')

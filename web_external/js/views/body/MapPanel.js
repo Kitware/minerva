@@ -18,21 +18,47 @@ minerva.views.MapPanel = minerva.View.extend({
         // added as a feature layer, which is even more of a HACK
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
-            var layer,
-                reader;
-            layer = this.map.createLayer('feature');
-            this.datasets[datasetId] = layer;
-            reader = geo.createFileReader('jsonReader', {layer: layer});
-            var readGeoJsonToLayer = _.bind(function (geoJsonData) {
-                layer.clear();
-                reader.read(geoJsonData, _.bind(function () {
-                    this.uiLayer = this.map.createLayer('ui');
-                    this.uiLayer.createWidget('slider');
-                    this.map.draw();
-                }, this));
+            dataset.once('m:geoJsonDataLoaded', function () {
+                var layer = this.map.createLayer('feature');
+                var points = layer.createFeature('point');
+                this.datasets[datasetId] = layer;
+
+                function radius(d) {
+                    if (d.__cluster) {
+                        return 16;
+                    }
+                    return 4;
+                }
+
+                function fill(d) {
+                    if (d.__cluster) {
+                        return false;
+                    }
+                    return true;
+                }
+
+                var features = (JSON.parse(dataset.geoJsonData)).features;
+
+                points
+                .clustering(true)
+                .position(function (d) {
+                    if (d.__cluster) {
+                        return {x:d.x, y:d.y};
+                    }
+                    return {
+                        x: d.geometry.coordinates[0],
+                        y: d.geometry.coordinates[1]
+                    };
+                }).style('radius', radius)
+                    .style('fill', fill)
+                    .style('strokeColor', 'black')
+                    .data(features);
+
+                this.uiLayer = this.map.createLayer('ui');
+                this.uiLayer.createWidget('slider');
+                this.map.draw();
             }, this);
-            // leave it up to the dataset to get the geojson contents
-            dataset.getGeoJsonData(readGeoJsonToLayer);
+            dataset.loadGeoJsonData();
         }
     },
 
@@ -70,7 +96,6 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
             this.uiLayer.createWidget('slider');
-            window.map = this.map;
         }
         this.map.draw();
     },

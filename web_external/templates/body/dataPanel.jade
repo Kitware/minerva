@@ -2,7 +2,7 @@
   .panelTitle
     | Available Datasets
   .loadData
-     button.btn.btn-default.m-add-dataset-button(title="Upload dataset")
+     button.btn.btn-default.m-add-dataset-button(title="Add dataset")
        .icon-plus-squared
          | add dataset
   .savedDatasets
@@ -13,7 +13,7 @@
                 if dataset.get('meta').minerva
                     .dataset= dataset.get('name')
                         - var attributes = {'m-dataset-id': dataset.get('_id')}
-                        if dataset.get('meta').minerva.geojson_file
+                        if dataset.geoJsonAvailable
                             //- right arrow icon to move dataset into current session
                             - var classes = (dataset.get('displayed') ? 'icon-right-circled icon-disabled dataset-in-session' : 'icon-right-circled icon-enabled add-dataset-to-session')
                             i(class=classes)&attributes(attributes)
@@ -22,7 +22,11 @@
                         i(class=classes)&attributes(attributes)
                         //- info icon for minerva metadata display
                         i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-                        if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json'
+                        if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json' || dataset.get('meta').minerva.original_type === 'mongo'
                             //- table icon for mapping columns of csv/json
-                            - var classes = (dataset.get('displayed') ? 'icon-table csv-mapping icon-disabled dataset-in-session' : 'icon-table csv-mapping icon-enabled')
+                            - var displayed = dataset.get('displayed')
+                            if !displayed && (dataset.get('meta').minerva.original_type === 'json' || dataset.get('meta').minerva.original_type === 'mongo') && (!dataset.get('meta').minerva.json_row)
+                                //- when there is no json data, disable the table icon, as if the dataset was displayed
+                                - displayed = true
+                            - var classes = (displayed ? 'icon-table csv-mapping icon-disabled dataset-in-session' : 'icon-table csv-mapping icon-enabled')
                             i(class=classes)&attributes(attributes)

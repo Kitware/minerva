@@ -80,6 +80,7 @@ def jsonObjectReader(filepath):
 
 
 def jsonArrayHead(filepath, limit=10):
+    # TODO rewrite to be more agnostic of source, file or mongo etc
     '''
     Reads the top limit json objects out of a json array located
     in filepath, returns a list of Python dicts created from the
@@ -100,104 +101,101 @@ def jsonArrayHead(filepath, limit=10):
     return objs
 
 
-def jsonArrayRewriter(jsonFilepath, tmpdir, objConverter, header='[',
-                      footer=']', outFilepath=None, jsonDumpser=json.dumps):
-    '''
-    Reads a file with an array of json objects, for each of them, will
-    call objConverter on them, then writes out the resulting json array
-    into outFilepath, using jsonDumpser to write out each rewritten
-    json object.
+class JsonMapper(object):
 
-    :param jsonFilepath: path to json array file.
-    :param tmpdir: temporary work dir.
-    :param objConverter: function to call on each dict read from a json obj.
-    :param header: string prefix of output json array file.
-    :param footer: string suffix of output json array file.
-    :param outFilepath: path to output file, created if not specified.
-    :param jsonDumpser: specialized dumps function if needed.
-    '''
-    if not outFilepath:
-        outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
+    def __init__(self, objConverter, header='[', footer=']',
+                 jsonDumpser=json.dumps):
+        self.objConverter = objConverter
+        self.header = header
+        self.footer = footer
+        self.jsonDumpser = json.dumps
 
-    writer = open(outFilepath, 'w')
-    writer.write(header)
-    writer.write('\n')
+    def mapToJsonFile(self, tmpdir, objects, outFilepath=None):
+        if not outFilepath:
+            outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
+        writer = open(outFilepath, 'w')
+        self.mapToJson(objects, writer)
+        writer.close()
+        return outFilepath
 
-    reader = jsonObjectReader(jsonFilepath)
-
-    for ind, obj in enumerate(reader):
-        if ind > 0:
-            writer.write(',\n')
-        else:
-            writer.write('\n')
-        writer.write(jsonDumpser(objConverter(obj)))
-
-    writer.write(footer)
-    writer.close()
-
-    return outFilepath
+    def mapToJson(self, objects, writer):
+        writer.write(self.header)
+        writer.write('\n')
+        for ind, obj in enumerate(objects):
+            if ind > 0:
+                writer.write(',\n')
+            else:
+                writer.write('\n')
+            writer.write(self.jsonDumpser(self.objConverter(obj)))
+        writer.write(self.footer)
 
 
-def convertJsonArrayToGeoJson(jsonFilepath, tmpdir, geoJsonFilePath,
-                              jsonMapper):
+class GeoJsonMapper(JsonMapper):
 
-    geojson_header = """{
-    "type": "FeatureCollection",
-    "crs": {
-        "type": "name",
-        "properties": {
-            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    def __init__(self, objConverter=None, mapping=None):
+        geojson_header = """{
+        "type": "FeatureCollection",
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+            }
+        },
+        "features": [
+        """
+
+        geojson_footer = """
+        ]
         }
-    },
-    "features": [
-    """
+        """
 
-    geojson_footer = """
-    ]
-    }
-    """
+        if objConverter is None:
+            if mapping is None:
+                raise Exception('Must provide objConverter or geoJsonMapping')
 
-    def convertToGeoJson(obj):
-        lat_expr = jsonpath_rw.parse(jsonMapper['latitudeKeypath'])
-        long_expr = jsonpath_rw.parse(jsonMapper['longitudeKeypath'])
-        coloredPoint_expr = None
-        if 'coloredPointKeypath' in jsonMapper:
-            coloredPointKeypath = jsonMapper['coloredPointKeypath']
-            if coloredPointKeypath != "":
-                coloredPoint_expr = \
-                    jsonpath_rw.parse(coloredPointKeypath)
+            def convertToGeoJson(obj):
+                lat_expr = jsonpath_rw.parse(mapping['latitudeKeypath'])
+                long_expr = jsonpath_rw.parse(mapping['longitudeKeypath'])
+                coloredPoint_expr = None
+                if 'coloredPointKeypath' in mapping:
+                    coloredPointKeypath = mapping['coloredPointKeypath']
+                    if coloredPointKeypath != "":
+                        coloredPoint_expr = \
+                            jsonpath_rw.parse(coloredPointKeypath)
 
-        def extractLat(obj):
-            match = lat_expr.find(obj)
-            return match[0].value
+                def extractLat(obj):
+                    match = lat_expr.find(obj)
+                    return match[0].value
 
-        def extractLong(obj):
-            match = long_expr.find(obj)
-            return match[0].value
+                def extractLong(obj):
+                    match = long_expr.find(obj)
+                    return match[0].value
 
-        def extractColoredPoint(obj):
-            match = coloredPoint_expr.find(obj)
-            return match[0].value
+                def extractColoredPoint(obj):
+                    match = coloredPoint_expr.find(obj)
+                    return match[0].value
 
-        point = geojson.Point((extractLong(obj), extractLat(obj)))
-        # TODO add elevation of 0 for a placeholder
-        # unclear if we need a property to display
-        properties = {"elevation": 0}
-        pointColor = {
-            True: {"r": 241./255., "g": 163./255., "b": 64./255.},
-            False: {"r": 153./255., "g": 142./255., "b": 195./255.}
-        }
-        if coloredPoint_expr is not None:
-            boolPoint = extractColoredPoint(obj)
-            properties['fillColor'] = pointColor[boolPoint]
-            properties['strokeColor'] = pointColor[boolPoint]
-            properties['stroke'] = True
-            properties['strokeWidth'] = 1
-            properties['radius'] = 5
+                point = geojson.Point((extractLong(obj), extractLat(obj)))
+                # TODO add elevation of 0 for a placeholder
+                # unclear if we need a property to display
+                properties = {"elevation": 0}
+                pointColor = {
+                    True: {"r": 241./255., "g": 163./255., "b": 64./255.},
+                    False: {"r": 153./255., "g": 142./255., "b": 195./255.}
+                }
+                if coloredPoint_expr is not None:
+                    boolPoint = extractColoredPoint(obj)
+                    properties['fillColor'] = pointColor[boolPoint]
+                    properties['strokeColor'] = pointColor[boolPoint]
+                    properties['stroke'] = True
+                    properties['strokeWidth'] = 1
+                    properties['radius'] = 5
 
-        feature = geojson.Feature(geometry=point, properties=properties)
-        return feature
+                feature = geojson.Feature(geometry=point,
+                                          properties=properties)
+                return feature
 
-    jsonArrayRewriter(jsonFilepath, tmpdir, convertToGeoJson,
-                      header=geojson_header, footer=geojson_footer,
-                      outFilepath=geoJsonFilePath, jsonDumpser=geojson.dumps)
+            objConverter = convertToGeoJson
+
+        super(GeoJsonMapper, self).__init__(objConverter, geojson_header,
+                                            geojson_footer, geojson.dumps)
