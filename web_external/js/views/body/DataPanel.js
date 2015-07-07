@@ -15,17 +15,12 @@ minerva.views.DataPanel = minerva.View.extend({
 
         var datasetType = dataset.getDatasetType();
         if (datasetType === 'json' || datasetType === 'mongo') {
-            dataset.on('m:jsonrowGot', function () {
-                // let the widget get the data
-                this.keymapWidget = new minerva.views.KeymapWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.keymapWidget.render();
-            }, this);
-            dataset.getJsonRow();
-        // return json row if exists in minerva meta
+            this.keymapWidget = new minerva.views.KeymapWidget({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                parentView: this
+            });
+            this.keymapWidget.render();
         } else {
             // assuming csv
             // list the files of this item
@@ -117,5 +112,5 @@ minerva.views.DataPanel = minerva.View.extend({
             el: container,
             parentView: this
         }).render();
-    },
+    }
 });

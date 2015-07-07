@@ -27,19 +27,25 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             path: 'minerva_dataset/' + this.get('_id') + '/dataset',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);//this.set('meta', _.extend(this.get('meta') || {}, {minerva: resp}));
-            if (_.has(this.get('meta').minerva, 'geojson_file')) {
+            this.setMinervaMetadata(resp);
+            var minervaMetadata = this.getMinervaMetadata();
+            if (_.has(minervaMetadata, 'geojson_file')) {
                 this.trigger('m:datasetCreated', this);
             } else {
-                var originalType = this.get('meta').minerva.original_type;
+                var originalType = minervaMetadata.original_type;
                 if (originalType === 'shapefile') {
                     this.on('m:geojsonCreated', function () {
                         this.trigger('m:datasetCreated', this);
                     }, this);
                     this.createGeoJson();
-                } else if (originalType === 'csv' || originalType === 'json') {
+                } else if (originalType === 'csv') {
                     // cannot do further processing without user input
                     this.trigger('m:datasetCreated', this);
+                } else if (originalType === 'json') {
+                    // cannot do further processing without user input
+                    this.on('m:jsonrowGot', function () {
+                        this.trigger('m:datasetCreated', this);
+                    }, this).getJsonRow();
                 }
             }
         }, this)).error(_.bind(function (err) {
@@ -50,6 +56,27 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 type: 'error',
                 timeout: 4000
             });
+        }, this));
+    },
+
+    createExternalMongoDataset: function (datasetName, mongoUri, mongoCollection) {
+        var data = {
+            name: datasetName,
+            dbConnectionUri: mongoUri,
+            collectionName: mongoCollection
+        };
+        girder.restRequest({
+            path: 'minerva_dataset/external_mongo_dataset',
+            type: 'POST',
+            data: data
+        }).done(_.bind(function (resp) {
+            this.setMinervaMetadata(resp);
+            var minervaMetadata = this.getMinervaMetadata();
+            this.set('_id', minervaMetadata.dataset_id);
+            // fetch to load all of the properties of the item
+            this.on('g:fetched', function () {
+                this.trigger('m:externalMongoDatasetCreated', this);
+            }, this).fetch();
         }, this));
     },
 
@@ -113,7 +140,6 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
     // TODO split out to a subclass
 
     getJsonRow: function () {
-        console.log('getJsonRow');
         var minervaMetadata = this.getMinervaMetadata();
         if (!_.has(minervaMetadata, 'json_row')) {
             girder.restRequest({
@@ -139,13 +165,10 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
     getJsonRowData: function () {
         // assumes jsonrow is available in metdata
         var minervaMetadata = this.getMinervaMetadata();
-        console.log(minervaMetadata);
         return _.has(minervaMetadata, 'json_row') ? minervaMetadata.json_row : null;
     },
 
     // TODO organize
-                //this.dataset.createGeoJsonFromJson();
-                //this.dataset.on('m:geojsonCreatedFromJson', function () {
 
     createGeoJson: function () {
         girder.restRequest({
@@ -163,12 +186,6 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 timeout: 4000
             });
         }, this));
-    },
-
-    getFullDataset: function () {
-        // TODO maybe this isn't needed
-        // get the full item
-        console.log('DatasetModel.getFullDataset, no implementation');
     },
 
     getAllFiles: function (callback) {

@@ -17,7 +17,6 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
                     overrideStart: true,
                     parentView: this.parentView
                 }).on('g:uploadFinished', function () {
-                    girder.dialogs.handleClose('upload');
                     this.upload = false;
                 }, this).render();
 
@@ -25,12 +24,16 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
                 this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
                 this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
                 this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
-            }
-            else if (dataSetType === 'm-s3-dataset') {
+            } else if (dataSetType === 'm-s3-dataset') {
                 // TODO
-            }
-            else if (dataSetType === 'm-mongo-dataset') {
-                // TODO
+                console.log('todo');
+            } else if (dataSetType === 'm-mongo-dataset') {
+                this.mongoDatasetWidget = new minerva.views.AddMongoDatasetWidget({
+                    el: container,
+                    title: 'Add a Mongo collection as a dataset',
+                    collection: this.collection,
+                    parentView: this.parentView
+                }).render();
             }
         }
     },
@@ -162,6 +165,5 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
             this.collection.add(dataset);
         }, this).createDataset();
     }
-
 
 });
