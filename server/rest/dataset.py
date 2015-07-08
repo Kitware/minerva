@@ -46,6 +46,8 @@ class Dataset(Resource):
         self.route('POST', (':id', 'dataset'), self.createDataset)
         self.route('POST', ('external_mongo_dataset',),
                    self.createExternalMongoDataset)
+        self.route('GET', (':id', 'external_mongo_limits'),
+                   self.getExternalMongoLimits)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
@@ -126,7 +128,85 @@ class Dataset(Resource):
 
         return geoJsonFilepath
 
-    def createGeoJson(self, item, params):
+    def _convertMongoToGeoJson(self, item, params):
+        minerva_metadata = item['meta']['minerva']
+        # TODO time to break this code out to another method
+
+        # TODO maybe here we can store limit and offset?
+        # set a placeholder for geojson file, even though
+        # there is no actual geojson file, rather we will
+        # generate it on the fly
+
+        # in this case we don't actually want to store a file
+        # but store the metadata we used to create the geojson
+
+        # Look for datetime limits, if none, look for limit and offset
+        # use 50/0 as defaults
+
+        # TODO HACK testing
+
+        # params['dateField'] = 'created_at'
+        # params['startTime'] = '2015-07-05T17:30:00'
+        # params['endTime'] = '2015-07-06T12:00:00'
+
+        # TODO HACK testing
+
+        if 'dateField' in params:
+            dateField = params['dateField']
+        else:
+            if 'startTime' in params or 'endTime' in params:
+                raise RestException('dateField param required for startTime ' +
+                                    'or endTime param')
+
+        query = {}
+        metadataQuery = {}
+        from datetime import datetime
+        isoFormat = '%Y-%m-%dT%H:%M:%S'
+
+        if 'startTime' in params:
+            startTime = params['startTime']
+            start = datetime.strptime(startTime, isoFormat)
+            query[dateField] = {'$gte': start}
+            metadataQuery['startTime'] = startTime
+
+        if 'endTime' in params:
+            endTime = params['endTime']
+            end = datetime.strptime(endTime, isoFormat)
+            dateFieldQuery = query.get(dateField, {})
+            dateFieldQuery['$lte'] = end
+            query[dateField] = dateFieldQuery
+            metadataQuery['endTime'] = endTime
+
+        minerva_metadata['geojson'] = {}
+        minerva_metadata['geojson']['query'] = metadataQuery
+
+        # TODO no reason couldn't have query and limit/offset
+
+        # add the geojson to the minerva metadata returned
+        # but don't save it
+        # TODO think on caching implications
+        connection = minerva_metadata['mongo_connection']
+        dbConnectionUri = connection['db_uri']
+        collectionName = connection['collection_name']
+        collection = self.mongoCollection(dbConnectionUri, collectionName)
+
+        query_count = collection.find(query).count()
+        minerva_metadata['geojson']['query_count'] = query_count
+        objects = collection.find(query)
+
+        mapping = item['meta']['minerva']['mapper']
+        geoJsonMapper = GeoJsonMapper(objConverter=None,
+                                      mapping=mapping)
+        import cStringIO
+        writer = cStringIO.StringIO()
+        geoJsonMapper.mapToJson(objects, writer)
+
+        item['meta']['minerva'] = minerva_metadata
+        self.model('item').setMetadata(item, item['meta'])
+        item['meta']['minerva']['geojson']['data'] = writer.getvalue()
+        return minerva_metadata
+
+    def createGeoJsonFromDataset(self, item, params):
         # TODO there is probably a problem when
         # we look for a name in an item as a duplicate
         # i.e. looking for filex, but the item name is filex (1)
@@ -137,45 +217,7 @@ class Dataset(Resource):
         elif minerva_metadata['original_type'] == 'json':
             converter = self._convertJsonfileToGeoJson
         elif minerva_metadata['original_type'] == 'mongo':
-            # TODO maybe here we can store limit and offset?
-            # set a placeholder for geojson file, even though
-            # there is no actual geojson file, rather we will
-            # generate it on the fly
-
-            # in this case we don't actually want to store a file
-            # but store the metadata we used to create the geojson
-
-            minerva_metadata['geojson'] = {}
-            minerva_metadata['geojson']['limit'] = 50
-            minerva_metadata['geojson']['offset'] = 0
-            # add the geojson to the minerva metadata returned
-            # but don't save it
-            # TODO think on caching implications
-            connection = minerva_metadata['mongo_connection']
-            dbConnectionUri = connection['db_uri']
-            collectionName = connection['collection_name']
-            # TODO this is also copied from above where we create an external
-            # mongo dataset
-            # TODO not sure if this is a good idea to do this db stuff here
-            # maybe this suggests a new model?
-            from girder.models import getDbConnection
-            dbConn = getDbConnection(dbConnectionUri)
-            db = dbConn.get_default_database()
-            from girder.external.mongodb_proxy import MongoProxy
-            collection = MongoProxy(db[collectionName])
-            objects = list(collection.find(limit=50))
-
-            mapping = item['meta']['minerva']['mapper']
-            geoJsonMapper = GeoJsonMapper(objConverter=None,
-                                          mapping=mapping)
-            import cStringIO
-            writer = cStringIO.StringIO()
-            geoJsonMapper.mapToJson(objects, writer)
-
-            item['meta']['minerva'] = minerva_metadata
-            self.model('item').setMetadata(item, item['meta'])
-            item['meta']['minerva']['geojson']['data'] = writer.getvalue()
-            return minerva_metadata
+            return self._convertMongoToGeoJson(item, params)
         else:
             raise Exception('Unsupported conversion type %s' %
                             minerva_metadata['original_type'])
@@ -228,6 +270,16 @@ class Dataset(Resource):
 
         return self.datasetJob(item, geocoderJob)
 
+    def mongoCollection(self, connectionUri, collectionName):
+        # TODO not sure if this is a good idea to do this db stuff here
+        # maybe this suggests a new model?
+        from girder.models import getDbConnection
+        dbConn = getDbConnection(connectionUri)
+        db = dbConn.get_default_database()
+        from girder.external.mongodb_proxy import MongoProxy
+        collection = MongoProxy(db[collectionName])
+        return collection
+
     def createExternalMongo(self, name, dbConnectionUri, collectionName):
         # assuming to create in the user space of the current user
         user = self.getCurrentUser()
@@ -242,16 +294,10 @@ class Dataset(Resource):
                 'collection_name': collectionName
             }
         }
-        # TODO not sure if this is a good idea to do this db stuff here
-        # maybe this suggests a new model?
         # get the first entry in the collection, set as json_row
         # TODO integrate this with the methods for taking a row from a JSON
         # array in a file
-        from girder.models import getDbConnection
-        dbConn = getDbConnection(dbConnectionUri)
-        db = dbConn.get_default_database()
-        from girder.external.mongodb_proxy import MongoProxy
-        collection = MongoProxy(db[collectionName])
+        collection = self.mongoCollection(dbConnectionUri, collectionName)
         collectionList = list(collection.find(limit=1))
         if len(collectionList) > 0:
             minerva_metadata['json_row'] = collectionList[0]
@@ -262,6 +308,20 @@ class Dataset(Resource):
         item['meta']['minerva'] = minerva_metadata
         self.model('item').setMetadata(item, item['meta'])
         return item['meta']['minerva']
+
+    def findExternalMongoLimits(self, item, field):
+        minerva_metadata = item['meta']['minerva']
+        mongo_connection = minerva_metadata['mongo_connection']
+        connectionUri = mongo_connection['db_uri']
+        collectionName = mongo_connection['collection_name']
+        collection = self.mongoCollection(connectionUri, collectionName)
+        minVal = (collection.find(limit=1).sort(field, 1))[0][field]
+        maxVal = (collection.find(limit=1).sort(field, -1))[0][field]
+        # update but don't save the meta, as it could become stale
+        mongo_fields = minerva_metadata.get('mongo_fields', {})
+        mongo_fields[field] = {'min': minVal, 'max': maxVal}
+        minerva_metadata['mongo_fields'] = mongo_fields
+        return minerva_metadata
 
     # REST Endpoints
 
@@ -335,6 +395,18 @@ class Dataset(Resource):
         .param('dbConnectionUri', 'Connection URI to MongoDB')
         .param('collectionName', 'Collection name within the MongoDB.')
         .errorResponse('Write permission denied on the dataset folder.', 403))
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.WRITE)
+    def getExternalMongoLimits(self, item,  params):
+        field = params['field']
+        return self.findExternalMongoLimits(item, field)
+    getExternalMongoLimits.description = (
+        Description('Find min and max for the field in the datset')
+        .param('id', 'The Dataset ID', paramType='path')
+        .param('field', 'The field for which range limits are sought')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Write permission denied on the Item.', 403))
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
@@ -429,7 +501,7 @@ class Dataset(Resource):
         if minerva_meta['original_type'] in supported_conversions:
             # TODO passing params for limit and offset
             # maybe better to make those explicit and for all original_type
-            minerva_meta = self.createGeoJson(item, params)
+            minerva_meta = self.createGeoJsonFromDataset(item, params)
         elif minerva_meta['original_type'] == 'geojson':
             return minerva_meta
         elif minerva_meta['original_type'] == 'csv':
@@ -440,6 +512,10 @@ class Dataset(Resource):
     createGeojson.description = (
         Description('Create geojson for a dataset, if possible.')
         .param('id', 'The Item ID', paramType='path')
+        .param('dateField', 'date field for filtering results, required for ' +
+               'startTime or endTime params', required=False)
+        .param('startTime', 'earliest time to include result', required=False)
+        .param('endTime', 'latest time to include result', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
 

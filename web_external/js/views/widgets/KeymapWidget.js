@@ -10,7 +10,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var mapper = {
                 longitudeKeypath: this.$('#m-longitude-mapper').val(),
                 latitudeKeypath: this.$('#m-latitude-mapper').val(),
-                coloredPointKeypath: this.$('#m-colored-point-mapper').val()
+                dateKeypath: this.$('#m-date-range-filter-mapper').val()
             };
 
             // validate columns, be sure they aren't equal
@@ -34,8 +34,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
                     // can't seem to get the dataset panel to pick up the update events from collection or dataset
                     this.parentView.render();
                 }, this);
-                // TODO here
-                this.dataset.createGeoJson();
+                this.dataset.createGeoJson(mapper.dateKeypath, this.startTime, this.endTime);
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('button.m-save-keymap-mapping').removeClass('disabled');
@@ -58,6 +57,9 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var jsonpathColoredPoint = this.$('#m-colored-point-mapper').val();
             var coloredPointExampleVal = jsonPath.eval(this.jsonrowData, jsonpathColoredPoint); // jshint ignore:line
             this.$('#m-colored-point-example-value').val(coloredPointExampleVal);
+        },
+        'change #m-date-range-filter-mapper': function () {
+            this.populateDateRangeFilter();
         },
         'click .hide-keymap-preview': function () {
             this.$('.hide-keymap-preview').hide();
@@ -82,33 +84,77 @@ minerva.views.KeymapWidget = minerva.View.extend({
         this.jsonrowData = this.dataset.getJsonRowData();
     },
 
+    populateDateRangeFilter: function () {
+        var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
+        if (jsonpathDate) {
+            var dateExampleVal = jsonPath.eval(this.jsonrowData, jsonpathDate); // jshint ignore:line
+            this.$('#m-date-example-value').val(dateExampleVal);
+            if (dateExampleVal.length > 0) {
+                // TODO
+                // probably want a button to trigger this
+                this.dataset.on('m:externalMongoLimitsGot', function () {
+                    var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
+                    var fields = this.dataset.getMinervaMetadata().mongo_fields;
+                    var fieldLimits = fields[jsonpathDate];
+                    this.startTime = fieldLimits.min.replace(' ', 'T');
+                    this.endTime = fieldLimits.max.replace(' ', 'T');
+                    this.$('#m-date-range-filter').prop('disabled', false);
+                    this.$('#m-date-range-filter').val(fieldLimits.min + ' - ' + fieldLimits.max);
+                    this.$('#m-date-range-filter').daterangepicker({
+                        timePicker: true,
+                        format: 'YYYY-MM-DD h:mm:s',
+                        timePickerIncrement: 30,
+                        timePicker12Hour: false,
+                        minDate: fieldLimits.min,
+                        maxDate: fieldLimits.max,
+                        timePickerSeconds: false
+                    });
+                    this.$('#m-date-range-filter').on('apply.daterangepicker', _.bind(function (ev, picker) {
+                        this.startTime = picker.startDate._d.toISOString();
+                        this.endTime = picker.endDate._d.toISOString();
+                    }, this));
+                }, this);
+                this.dataset.getExternalMongoLimits(jsonpathDate);
+            } else {
+                this.$('#m-date-range-filter').val('');
+            }
+        }
+    },
+
     render: function () {
         var longitudeKeypath = null,
             latitudeKeypath = null,
             coloredPointKeypath = null,
+            dateKeypath = null,
             latExampleVal = null,
             longExampleVal = null,
+            dateExampleVal = null,
             coloredPointExampleVal = null;
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
             coloredPointKeypath = this.minervaMetadata.mapper.coloredPointKeypath;
+            dateKeypath = this.minervaMetadata.mapper.dateKeypath;
             latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath); // jshint ignore:line
             longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath); // jshint ignore:line
             coloredPointExampleVal = jsonPath.eval(this.jsonrowData, coloredPointKeypath); // jshint ignore:line
+            dateExampleVal = jsonPath.eval(this.jsonrowData, dateKeypath); // jshint ignore:line
         }
         var modal = this.$el.html(minerva.templates.keymapWidget({
             create: this.create,
             longitudeKeypath: longitudeKeypath,
             latitudeKeypath: latitudeKeypath,
             booleanColoredPointKeypathValSaved: coloredPointKeypath,
+            dateKeypath: dateKeypath,
             latExampleVal: latExampleVal,
             longExampleVal: longExampleVal,
-            booleanColoredPointExampleValSaved: coloredPointExampleVal
+            booleanColoredPointExampleValSaved: coloredPointExampleVal,
+            dateExampleVal: dateExampleVal
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
             this.$('#jsonrow-preview').text(JSON.stringify(this.jsonrowData, null, 4));
+            this.populateDateRangeFilter();
         }, this));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 

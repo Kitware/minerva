@@ -537,7 +537,7 @@ class ExternalMongoDatasetTestCase(base.TestCase):
             user=self._user,
         )
         self.assertHasKeys(response.json, ['geojson'])
-        # expect 50 points back as that is the default page size
+        # expect 100 points back as that is the size of the mongo dataset
         geojsonData = geojson.loads(response.json['geojson']['data'])
         # coordinate limits empirically figured
         # coords = [feature['geometry']['coordinates'] for feature in geojsonData['features']]
@@ -545,11 +545,11 @@ class ExternalMongoDatasetTestCase(base.TestCase):
         # print max([c[0] for c in coords])
         # print min([c[1] for c in coords])
         # print max([c[1] for c in coords])
-        xMin = -122.27055356
+        xMin = -122.64
         xMax = -57.93991735
         yMin = -34.93523486
         yMax = 47.696623
-        self.assertEquals(len(geojsonData['features']), 50, 'geojson should have 50 features')
+        self.assertEquals(len(geojsonData['features']), 100, 'geojson should have 100 features')
         # to ensure correct mapping, check coords
         features = geojsonData['features']
         for feature in features:
