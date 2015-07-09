@@ -25,11 +25,16 @@ minerva.views.MapPanel = minerva.View.extend({
 
                 function radius(d) {
                     if (d.__cluster) {
-                        return 16;
+//                        console.log(d.__data.length);
+                        return 6 + Math.ceil(Math.sqrt(d.__data.length));
                     }
                     return 4;
                 }
-
+                //pointColor = {
+                    //True: {"r": 241./255., "g": 163./255., "b": 64./255.},
+                    //False: {"r": 153./255., "g": 142./255., "b": 195./255.}
+                //}
+//['rgb(64,0,75)','rgb(118,42,131)','rgb(153,112,171)','rgb(194,165,207)','rgb(231,212,232)','rgb(247,247,247)','rgb(217,240,211)','rgb(166,219,160)','rgb(90,174,97)','rgb(27,120,55)','rgb(0,68,27)']
                 function fill(d) {
                     if (d.__cluster) {
                         return false;
@@ -40,7 +45,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 var features = (JSON.parse(dataset.geoJsonData)).features;
 
                 points
-                .clustering(true)
+                .clustering({radius: 0.015})
+//                .clustering(true)
                 .position(function (d) {
                     if (d.__cluster) {
                         return {x:d.x, y:d.y};
