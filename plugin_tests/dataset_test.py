@@ -470,7 +470,11 @@ class ExternalMongoDatasetTestCase(base.TestCase):
         tweets100Path = os.path.join(self.pluginTestDir, 'data', 'tweets100.json')
         z = zipfile.ZipFile('%s.zip' % tweets100Path)
         tweets = json.load(z.open('tweets100.json'))
+        from datetime import datetime
+        dateformat = '%Y-%m-%dT%H:%M:%S'
         for tweet in tweets:
+            d = datetime.strptime((tweet['created_at']), dateformat)
+            tweet['created_at'] = int((d - datetime(1970, 1, 1)).total_seconds())
             self.tweetsgeoCollection.save(tweet)
 
         path = '/minerva_dataset/folder'
@@ -558,3 +562,33 @@ class ExternalMongoDatasetTestCase(base.TestCase):
             self.assertTrue(xMax >= coordinates[0], 'x coordinate out of range')
             self.assertTrue(yMin <= coordinates[1], 'y coordinate out of range')
             self.assertTrue(yMax >= coordinates[1], 'y coordinate out of range')
+
+        # test external_mongo_limits endpoint
+
+        path = '/minerva_dataset/{}/external_mongo_limits'.format(datasetId)
+        params = {'field': 'created_at'}
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            params=params
+        )
+        limits = response.json['mongo_fields']['created_at']
+        self.assertEquals(limits['max'], 1380587461, 'incorrect max date')
+        self.assertEquals(limits['min'], 1380587436, 'incorrect min date')
+
+        # test limiting geojson to date range
+
+        params = {
+            'dateField': 'created_at',
+            'startTime': 1380587440,
+            'endTime':   1380587455,
+        }
+        path = '/minerva_dataset/{}/geojson'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+            params=params
+        )
+        self.assertEquals(response.json['geojson']['query_count'], 52, 'invalid query count')

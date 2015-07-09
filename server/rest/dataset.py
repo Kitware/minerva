@@ -143,39 +143,28 @@ class Dataset(Resource):
         # Look for datetime limits, if none, look for limit and offset
         # use 50/0 as defaults
 
-        # TODO HACK testing
-
-        # params['dateField'] = 'created_at'
-        # params['startTime'] = '2015-07-05T17:30:00'
-        # params['endTime'] = '2015-07-06T12:00:00'
-
-        # TODO HACK testing
-
+        metadataQuery = {}
         if 'dateField' in params:
             dateField = params['dateField']
+            metadataQuery = {dateField: {}}
         else:
             if 'startTime' in params or 'endTime' in params:
                 raise RestException('dateField param required for startTime ' +
                                     'or endTime param')
 
         query = {}
-        metadataQuery = {}
-        from datetime import datetime
-        isoFormat = '%Y-%m-%dT%H:%M:%S'
 
         if 'startTime' in params:
             startTime = params['startTime']
-            start = datetime.strptime(startTime, isoFormat)
-            query[dateField] = {'$gte': start}
-            metadataQuery['startTime'] = startTime
+            query[dateField] = {'$gte': int(startTime)}
+            metadataQuery[dateField]['startTime'] = startTime
 
         if 'endTime' in params:
             endTime = params['endTime']
-            end = datetime.strptime(endTime, isoFormat)
             dateFieldQuery = query.get(dateField, {})
-            dateFieldQuery['$lte'] = end
+            dateFieldQuery['$lte'] = int(endTime)
             query[dateField] = dateFieldQuery
-            metadataQuery['endTime'] = endTime
+            metadataQuery[dateField]['endTime'] = endTime
 
         minerva_metadata['geojson'] = {}
         minerva_metadata['geojson']['query'] = metadataQuery

@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 
@@ -5,6 +6,16 @@ import pymongo
 import tweepy
 
 from libs.carmen import get_resolver
+
+
+dateformat = '%Y-%m-%dT%H:%M:%S'
+
+def datestring_to_epoch(datestring):
+    d = datestring
+    if not isinstance(d, datetime):
+        d = datetime.strptime(datestring, dateformat)
+    epoch = int((d - datetime(1970, 1, 1)).total_seconds())
+    return epoch
 
 def search(query, pages):
     _mongo = pymongo.MongoClient().minerva[query]
@@ -30,10 +41,10 @@ def search(query, pages):
                     "id": result.id_str,
                     "location": location[1].__dict__,
                     "text": result.text,
-                    "created_at": result.created_at,
+                    "created_at": datestring_to_epoch(result.created_at)
                 }
                 _mongo.insert(rec)
 
 if __name__ == '__main__':
     import sys
-    search(sys.argv[1], 10)
+    search(sys.argv[1], 20)

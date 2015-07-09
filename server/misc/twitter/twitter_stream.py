@@ -3,6 +3,7 @@ from tweepy import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+from datetime import datetime
 import os
 import sys
 import time
@@ -17,6 +18,22 @@ from libs.carmen import get_resolver
 minerva_twitter_config = json.load(open(
     os.path.join(os.path.dirname(__file__), "twitter.json")
 ))
+
+# TODO why a different format between streaming and search apis?
+dateformat = '%a %b %d %H:%M:%S %Y'
+
+def datestring_to_epoch(datestring):
+    d = datestring
+    if not isinstance(d, datetime):
+        # TODO yuck, clean up date handling generally
+        # strip off tzoffset
+        parts = datestring.split()
+        parseableParts = parts[0:-2]
+        parseableParts.append(parts[-1])
+        datestring = ' '.join(parseableParts)
+        d = datetime.strptime(datestring, dateformat)
+    epoch = int((d - datetime(1970, 1, 1)).total_seconds())
+    return epoch
 
 
 class TwitterStreamListener(StreamListener):
@@ -52,7 +69,7 @@ class TwitterStreamListener(StreamListener):
                 "location": json_data['location'],
                 "text": json_data['text'],
                 "timestamp_ms": json_data['timestamp_ms'],
-                "created_at": json_data['created_at'],
+                "created_at": datestring_to_epoch(json_data['created_at']),
                 "retweeted": json_data['retweeted'],
                 "retweet_cont": retweet_cont
             }
