@@ -19,7 +19,7 @@ minerva.views.MapPanel = minerva.View.extend({
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             dataset.once('m:geoJsonDataLoaded', function () {
-                var layer = this.map.createLayer('feature');
+                var layer = this.map.createLayer('feature', {'render': 'vgl'});
                 var points = layer.createFeature('point');
                 this.datasets[datasetId] = layer;
 

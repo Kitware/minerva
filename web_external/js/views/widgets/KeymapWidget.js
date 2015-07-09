@@ -92,26 +92,44 @@ minerva.views.KeymapWidget = minerva.View.extend({
             if (dateExampleVal.length > 0) {
                 // TODO
                 // probably want a button to trigger this
+
+                function secondsSinceEpochToDateString(seconds) {
+                    var d = new Date(seconds * 1000);
+                    var dateString = d.getUTCFullYear() +"-"+
+                        ("0" + (d.getUTCMonth()+1)).slice(-2) +"-"+
+                        ("0" + d.getUTCDate()).slice(-2) + " " +
+                        ("0" + d.getUTCHours()).slice(-2) + ":" +
+                        ("0" + d.getUTCMinutes()).slice(-2) + ":" +
+                        ("0" + d.getUTCSeconds()).slice(-2);
+                    return dateString;
+                }
+
                 this.dataset.on('m:externalMongoLimitsGot', function () {
                     var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
                     var fields = this.dataset.getMinervaMetadata().mongo_fields;
                     var fieldLimits = fields[jsonpathDate];
-                    this.startTime = fieldLimits.min.replace(' ', 'T');
-                    this.endTime = fieldLimits.max.replace(' ', 'T');
+                    // fieldLimits are epoch time, convert to date
+                    this.startTime = fieldLimits.min;
+                    this.endTime = fieldLimits.max;
+                    var startTimeString = secondsSinceEpochToDateString(this.startTime);
+                    var endTimeString = secondsSinceEpochToDateString(this.endTime);
                     this.$('#m-date-range-filter').prop('disabled', false);
-                    this.$('#m-date-range-filter').val(fieldLimits.min + ' - ' + fieldLimits.max);
+                    this.$('#m-date-range-filter').val(startTimeString + ' - ' + endTimeString);
                     this.$('#m-date-range-filter').daterangepicker({
                         timePicker: true,
-                        format: 'YYYY-MM-DD h:mm:s',
+                        //timeZone: "00:00",
+                        format: 'YYYY-MM-DD H:mm:s',
+                        //format: 'YYYY-MM-DD h:mm:s',
                         timePickerIncrement: 30,
                         timePicker12Hour: false,
-                        minDate: fieldLimits.min,
-                        maxDate: fieldLimits.max,
+                        minDate: startTimeString,
+                        maxDate: endTimeString,
                         timePickerSeconds: false
                     });
                     this.$('#m-date-range-filter').on('apply.daterangepicker', _.bind(function (ev, picker) {
-                        this.startTime = picker.startDate._d.toISOString();
-                        this.endTime = picker.endDate._d.toISOString();
+                        // HACK super ugly convert to GMT - 4
+                        this.startTime = (Date.parse(picker.startDate._d.toISOString()) / 1000) - (4*3600);
+                        this.endTime = (Date.parse(picker.endDate._d.toISOString()) / 1000) - (4*3600);
                     }, this));
                 }, this);
                 this.dataset.getExternalMongoLimits(jsonpathDate);

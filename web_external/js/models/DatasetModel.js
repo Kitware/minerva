@@ -188,9 +188,8 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         if (dateKeypath) {
             data = {
                 dateField: dateKeypath,
-                // trim off GMT time zone
-                startTime: startTime.split('.')[0],
-                endTime: endTime.split('.')[0]
+                startTime: startTime,
+                endTime: endTime,
             };
         }
         girder.restRequest({
