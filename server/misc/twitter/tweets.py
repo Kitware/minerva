@@ -32,8 +32,8 @@ def search(query, pages):
                     "text": result.text,
                     "created_at": result.created_at,
                 }
-                print(rec)
                 _mongo.insert(rec)
 
 if __name__ == '__main__':
-    search('influenza', 10)
+    import sys
+    search(sys.argv[1], 10)
