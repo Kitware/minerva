@@ -25,28 +25,49 @@ minerva.views.MapPanel = minerva.View.extend({
 
                 function radius(d) {
                     if (d.__cluster) {
-//                        console.log(d.__data.length);
-                        return 6 + Math.ceil(Math.sqrt(d.__data.length));
+                        return 6 + Math.ceil(Math.sqrt(2 * d.__data.length));
                     }
                     return 4;
                 }
-                //pointColor = {
-                    //True: {"r": 241./255., "g": 163./255., "b": 64./255.},
-                    //False: {"r": 153./255., "g": 142./255., "b": 195./255.}
-                //}
-//['rgb(64,0,75)','rgb(118,42,131)','rgb(153,112,171)','rgb(194,165,207)','rgb(231,212,232)','rgb(247,247,247)','rgb(217,240,211)','rgb(166,219,160)','rgb(90,174,97)','rgb(27,120,55)','rgb(0,68,27)']
-                function fill(d) {
+
+                // range is PRGn 11 from Colorbrewer 2
+                var colorRange = ["#40004b","#762a83","#9970ab","#c2a5cf","#e7d4e8","#f7f7f7","#d9f0d3","#a6dba0","#5aae61","#1b7837","#00441b"];
+                var color = d3.scale.ordinal().range(colorRange);
+                function fillColor(d) {
+                    var i = 0, sum = 0;
                     if (d.__cluster) {
-                        return false;
+                        for (i = 0; i < d.__data.length; i += 1) {
+                            if (d.__data[i].properties.resolution_method === 'geocode') {
+                                sum += 0;
+                            } else {
+                                sum += 1;
+                            }
+                        }
+                        return color(Math.floor(sum/d.__data.length));
+                    } else {
+                        if (d.properties.resolution_method === 'geocode') {
+                            return colorRange[colorRange.length - 1];
+                        } else {
+                            return colorRange[0];
+                        }
                     }
-                    return true;
+                }
+                function strokeColor(d) {
+                    if (d.__cluster) {
+                        return 'black';
+                    } else {
+                        if (d.properties.resolution_method === 'geocode') {
+                            return colorRange[colorRange.length - 1];
+                        } else {
+                            return colorRange[0];
+                        }
+                    }
                 }
 
                 var features = (JSON.parse(dataset.geoJsonData)).features;
 
                 points
                 .clustering({radius: 0.015})
-//                .clustering(true)
                 .position(function (d) {
                     if (d.__cluster) {
                         return {x:d.x, y:d.y};
@@ -56,8 +77,8 @@ minerva.views.MapPanel = minerva.View.extend({
                         y: d.geometry.coordinates[1]
                     };
                 }).style('radius', radius)
-                    .style('fill', fill)
-                    .style('strokeColor', 'black')
+                    .style('fillColor', fillColor)
+                    .style('strokeColor', strokeColor)
                     .data(features);
 
                 this.uiLayer = this.map.createLayer('ui');
