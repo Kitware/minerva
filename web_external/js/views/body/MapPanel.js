@@ -19,71 +19,17 @@ minerva.views.MapPanel = minerva.View.extend({
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             dataset.once('m:geoJsonDataLoaded', function () {
-                var layer = this.map.createLayer('feature', {'render': 'vgl'});
-                var points = layer.createFeature('point');
+                var layer,
+                    reader;
+                layer = this.map.createLayer('feature');
                 this.datasets[datasetId] = layer;
-
-                function radius(d) {
-                    if (d.__cluster) {
-                        return 6 + Math.ceil(Math.sqrt(2 * d.__data.length));
-                    }
-                    return 4;
-                }
-
-                // range is PRGn 11 from Colorbrewer 2
-                var colorRange = ["#40004b","#762a83","#9970ab","#c2a5cf","#e7d4e8","#f7f7f7","#d9f0d3","#a6dba0","#5aae61","#1b7837","#00441b"];
-                var color = d3.scale.ordinal().range(colorRange);
-                function fillColor(d) {
-                    var i = 0, sum = 0;
-                    if (d.__cluster) {
-                        for (i = 0; i < d.__data.length; i += 1) {
-                            if (d.__data[i].properties.resolution_method === 'geocode') {
-                                sum += 0;
-                            } else {
-                                sum += 1;
-                            }
-                        }
-                        return color(Math.floor(sum/d.__data.length));
-                    } else {
-                        if (d.properties.resolution_method === 'geocode') {
-                            return colorRange[colorRange.length - 1];
-                        } else {
-                            return colorRange[0];
-                        }
-                    }
-                }
-                function strokeColor(d) {
-                    if (d.__cluster) {
-                        return 'black';
-                    } else {
-                        if (d.properties.resolution_method === 'geocode') {
-                            return colorRange[colorRange.length - 1];
-                        } else {
-                            return colorRange[0];
-                        }
-                    }
-                }
-
-                var features = (JSON.parse(dataset.geoJsonData)).features;
-
-                points
-                .clustering({radius: 0.015})
-                .position(function (d) {
-                    if (d.__cluster) {
-                        return {x:d.x, y:d.y};
-                    }
-                    return {
-                        x: d.geometry.coordinates[0],
-                        y: d.geometry.coordinates[1]
-                    };
-                }).style('radius', radius)
-                    .style('fillColor', fillColor)
-                    .style('strokeColor', strokeColor)
-                    .data(features);
-
-                this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
-                this.map.draw();
+                reader = geo.createFileReader('jsonReader', {layer: layer});
+                layer.clear();
+                reader.read(dataset.geoJsonData, _.bind(function () {
+                    this.uiLayer = this.map.createLayer('ui');
+                    this.uiLayer.createWidget('slider');
+                    this.map.draw();
+                }, this));
             }, this);
             dataset.loadGeoJsonData();
         }

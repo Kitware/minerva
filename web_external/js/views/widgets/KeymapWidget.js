@@ -88,16 +88,16 @@ minerva.views.KeymapWidget = minerva.View.extend({
                 // TODO
                 // probably want a button to trigger this
 
-                function secondsSinceEpochToDateString(seconds) {
+                var secondsSinceEpochToDateString = function (seconds) {
                     var d = new Date(seconds * 1000);
-                    var dateString = d.getUTCFullYear() +"-"+
-                        ("0" + (d.getUTCMonth()+1)).slice(-2) +"-"+
-                        ("0" + d.getUTCDate()).slice(-2) + " " +
-                        ("0" + d.getUTCHours()).slice(-2) + ":" +
-                        ("0" + d.getUTCMinutes()).slice(-2) + ":" +
-                        ("0" + d.getUTCSeconds()).slice(-2);
+                    var dateString = d.getUTCFullYear() + '-' +
+                        ('0' + (d.getUTCMonth() + 1)).slice(-2) + '-' +
+                        ('0' + d.getUTCDate()).slice(-2) + ' ' +
+                        ('0' + d.getUTCHours()).slice(-2) + ':' +
+                        ('0' + d.getUTCMinutes()).slice(-2) + ':' +
+                        ('0' + d.getUTCSeconds()).slice(-2);
                     return dateString;
-                }
+                };
 
                 this.dataset.on('m:externalMongoLimitsGot', function () {
                     var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
@@ -112,9 +112,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
                     this.$('#m-date-range-filter').val(startTimeString + ' - ' + endTimeString);
                     this.$('#m-date-range-filter').daterangepicker({
                         timePicker: true,
-                        //timeZone: "00:00",
                         format: 'YYYY-MM-DD H:mm:s',
-                        //format: 'YYYY-MM-DD h:mm:s',
                         timePickerIncrement: 30,
                         timePicker12Hour: false,
                         minDate: startTimeString,
@@ -123,8 +121,8 @@ minerva.views.KeymapWidget = minerva.View.extend({
                     });
                     this.$('#m-date-range-filter').on('apply.daterangepicker', _.bind(function (ev, picker) {
                         // HACK super ugly convert to GMT - 4
-                        this.startTime = (Date.parse(picker.startDate._d.toISOString()) / 1000) - (4*3600);
-                        this.endTime = (Date.parse(picker.endDate._d.toISOString()) / 1000) - (4*3600);
+                        this.startTime = (Date.parse(picker.startDate._d.toISOString()) / 1000) - (4 * 3600);
+                        this.endTime = (Date.parse(picker.endDate._d.toISOString()) / 1000) - (4 * 3600);
                     }, this));
                 }, this);
                 this.dataset.getExternalMongoLimits(jsonpathDate);
@@ -140,7 +138,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
             dateKeypath = null,
             latExampleVal = null,
             longExampleVal = null,
-            dateExampleVal = null,
+            dateExampleVal = null;
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
