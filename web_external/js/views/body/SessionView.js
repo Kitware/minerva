@@ -125,11 +125,6 @@ minerva.views.SessionView = minerva.View.extend({
                 parentView: this
             });
 
-            this.geometryPanel = new minerva.views.GeometryPanel({
-                el: this.$('.geometryPanel'),
-                parentView: this
-            }).render();
-
             this.analysisPanel = new minerva.views.AnalysisPanel({
                 el: this.$('.analysisPanel'),
                 parentView: this
