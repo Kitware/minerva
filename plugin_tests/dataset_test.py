@@ -281,11 +281,9 @@ class DatasetTestCase(base.TestCase):
         metadata = response.json
 
         # update the minerva metadata with coordinate mapping
-        # and boolean colored point mapping
         jsonMinervaMetadata["mapper"] = {
             "latitudeKeypath": "$.coordinates.coordinates[1]",
-            "longitudeKeypath": "$.coordinates.coordinates[0]",
-            "coloredPointKeypath": "sentiment"
+            "longitudeKeypath": "$.coordinates.coordinates[0]"
         }
 
         metadata['minerva'] = jsonMinervaMetadata
@@ -328,10 +326,6 @@ class DatasetTestCase(base.TestCase):
             self.assertTrue(-80 > coordinates[0], 'x coordinate out of range')
             self.assertTrue(20 < coordinates[1], 'y coordinate out of range')
             self.assertTrue(30 > coordinates[1], 'y coordinate out of range')
-        # since there is a color mapping, check that a fillColor is set and
-        # that it is different between the two points, since their sentiment values
-        # are different
-        self.assertNotEquals(features[0]['properties']['fillColor']['g'], features[1]['properties']['fillColor']['g'], 'two points should have different colors')
 
         #
         # Test minerva_dataset/id/geojson creating geojson from shapefile

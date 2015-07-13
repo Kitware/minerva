@@ -189,7 +189,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             data = {
                 dateField: dateKeypath,
                 startTime: startTime,
-                endTime: endTime,
+                endTime: endTime
             };
         }
         girder.restRequest({
