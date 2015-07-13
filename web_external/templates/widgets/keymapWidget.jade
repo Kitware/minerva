@@ -31,14 +31,21 @@
                             | resulting value
                             - var longitudeExampleVal = create ? '' : longExampleVal
                             input.coordExampleValue.input-sm#m-longitude-example-value.form-control(type="text", readonly value=longitudeExampleVal)
-                    .form-group.booleanColoredPoint
-                        label.control-label(for="m-colored-point-mapper") Boolean colored point property
-                        - var booleanColoredPointKeypathVal = create ? '' : booleanColoredPointKeypathValSaved
-                        input.input-sm#m-colored-point-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=booleanColoredPointKeypathVal)
-                        #boolean-colored-point-example-value.example-value
-                            | resulting value
-                            - var booleanColoredPointExampleVal = create ? '' : booleanColoredPointExampleValSaved
-                            input.booleanColoredExampleValue.input-sm#m-colored-point-example-value.form-control(type="text", readonly value=booleanColoredPointExampleVal)
+
+                    .form-group.dateRangeFilterMapping
+                        .dateRangeMapping.dateRange
+                            label.control-label(for="m-date-range-filter-mapper") Date property
+                            - var dateKeypathVal = create ? '' : dateKeypath
+                            input.input-sm#m-date-range-filter-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=dateKeypathVal)
+                            #date-filter-example-value.example-value
+                                | resulting value
+                                - dateExampleVal = create ? '' : dateExampleVal
+                                input.dateExampleValue.input-sm#m-date-example-value.form-control(type="text", readonly value=dateExampleVal)
+                        .coordMappingSpacer
+                        .dateRangeFilter.dateRange
+                            label Date range filter
+                            input.input-sm#m-date-range-filter.form-control(type="text", disabled="disabled")
+
                 .g-validation-failed-message
             .jsonrowDataContainer
                 .jsonrowDataContainerHeader

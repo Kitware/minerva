@@ -175,10 +175,24 @@ class GeoJsonMapper(JsonMapper):
                     match = coloredPoint_expr.find(obj)
                     return match[0].value
 
+                # TODO temporary
+
+                res_method_expr = jsonpath_rw.parse('location.resolution_method')
+                def extractResolutionMethod(obj):
+                    match = res_method_expr.find(obj)
+                    return match[0].value
+
+
                 point = geojson.Point((extractLong(obj), extractLat(obj)))
                 # TODO add elevation of 0 for a placeholder
                 # unclear if we need a property to display
-                properties = {"elevation": 0}
+
+                # TODO HACK temporary extraction of location.resolution_method
+                # TODO what we want is something like a mapping of:
+                    # property_name: json_path
+
+
+                properties = {"elevation": 0, "resolution_method": extractResolutionMethod(obj)}
                 pointColor = {
                     True: {"r": 241./255., "g": 163./255., "b": 64./255.},
                     False: {"r": 153./255., "g": 142./255., "b": 195./255.}
