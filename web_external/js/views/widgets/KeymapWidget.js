@@ -53,11 +53,6 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var longExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLong); // jshint ignore:line
             this.$('#m-longitude-example-value').val(longExampleVal);
         },
-        'change #m-colored-point-mapper': function () {
-            var jsonpathColoredPoint = this.$('#m-colored-point-mapper').val();
-            var coloredPointExampleVal = jsonPath.eval(this.jsonrowData, jsonpathColoredPoint); // jshint ignore:line
-            this.$('#m-colored-point-example-value').val(coloredPointExampleVal);
-        },
         'change #m-date-range-filter-mapper': function () {
             this.populateDateRangeFilter();
         },
@@ -142,31 +137,25 @@ minerva.views.KeymapWidget = minerva.View.extend({
     render: function () {
         var longitudeKeypath = null,
             latitudeKeypath = null,
-            coloredPointKeypath = null,
             dateKeypath = null,
             latExampleVal = null,
             longExampleVal = null,
             dateExampleVal = null,
-            coloredPointExampleVal = null;
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
-            coloredPointKeypath = this.minervaMetadata.mapper.coloredPointKeypath;
             dateKeypath = this.minervaMetadata.mapper.dateKeypath;
             latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath); // jshint ignore:line
             longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath); // jshint ignore:line
-            coloredPointExampleVal = jsonPath.eval(this.jsonrowData, coloredPointKeypath); // jshint ignore:line
             dateExampleVal = jsonPath.eval(this.jsonrowData, dateKeypath); // jshint ignore:line
         }
         var modal = this.$el.html(minerva.templates.keymapWidget({
             create: this.create,
             longitudeKeypath: longitudeKeypath,
             latitudeKeypath: latitudeKeypath,
-            booleanColoredPointKeypathValSaved: coloredPointKeypath,
             dateKeypath: dateKeypath,
             latExampleVal: latExampleVal,
             longExampleVal: longExampleVal,
-            booleanColoredPointExampleValSaved: coloredPointExampleVal,
             dateExampleVal: dateExampleVal
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
