@@ -5,6 +5,7 @@
     "dependencies": [
         "gravatar",
         "jobs"
+        "romanesco"
     ],
     "grunt": {
         "file": "Gruntfile.js",
