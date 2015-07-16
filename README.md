@@ -51,3 +51,20 @@ Post-Minerva:
 
 http://localhost:8080           => serves Minerva
 http://localhost:8080/girder    => serves Girder
+
+
+#### Installing a specific version of GeoJs for development
+
+This is to get around the fact that npm is for installing packages, not managing source repositories.  So when npm installs geojs, it doesn't install it as a git repo with the .git dir.
+
+  1. change the reference in the `geojs` line of package.json to point to the correct branch or sha reference
+  2. run `npm install` from the top level `minerva` directory
+  3. `cd node_modules/geojs`
+  4. `rm -rf vgl`
+  5. `git clone https://github.com/OpenGeoscience/vgl.git`
+  6. find the hash of vgl from the geojs branch
+  7. `cd vgl; git checkout $HASH_FROM_GEOJS_BRANCH; cd ..`
+  8. `npm install` (this time inside geojs)
+  9. `grunt` (inside geojs)
+
+At this point geo.min.js should be rebuilt with the checked out version of vgl, and this will be included the next time minerva is built by `grunt`-ing at the top level of girder.
