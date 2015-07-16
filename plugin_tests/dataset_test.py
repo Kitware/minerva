@@ -64,7 +64,6 @@ class DatasetTestCase(base.TestCase):
         """
         Test the minerva dataset API enpdpoints.
         """
-        self.assertEqual(0, 0)
 
         # at first the dataset folder is None
 
