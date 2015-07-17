@@ -77,8 +77,8 @@ class S3Dataset(Resource):
                                                   secret, prefix, service,
                                                   read_only)
 
-        dataset_folder = findMinervaFolder(user, user, create=True)
-        s3_folder = findNamedFolder(user, user, dataset_folder,
+        minerva_folder = findMinervaFolder(user, user, create=True)
+        s3_folder = findNamedFolder(user, user, minerva_folder,
                                     'folder', 's3', create=True)
         bucket_folder = findNamedFolder(user, user, s3_folder,
                                     'folder', bucket, create=True)

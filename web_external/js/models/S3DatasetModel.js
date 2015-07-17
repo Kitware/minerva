@@ -22,7 +22,7 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
                 data: data,
                 error: null // don't do default error behavior (validation may fail)
             }).done(_.bind(function (resp) {
-                this.set('meta', _.extend(this.get('meta') || {}, {minerva: resp}));
+                this.setMinervaMetadata(resp);
                 this.trigger('m:saved');
             }, this)).error(_.bind(function (err) {
                 this.trigger('m:error', err);
@@ -40,7 +40,7 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
     destroy: function (opts) {
         var meta = this.get('meta');
 
-        // First call the superclass to create the item
+        // First call the superclass to delete the item
         minerva.models.DatasetModel.prototype.destroy.call(this).on('g:deleted', _.bind(function() {
 
             if (meta) {
