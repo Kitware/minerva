@@ -105,7 +105,7 @@ class S3Dataset(Resource):
 
         minerva_metadata = {
             'original_type': 's3',
-            'bucket': 'bucket',
+            'bucket': bucket,
             'prefix': prefix,
             'assetstoreId': str(target_assetstore['_id']),
             'folderId': prefix_folder['_id']
