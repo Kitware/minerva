@@ -281,11 +281,9 @@ class DatasetTestCase(base.TestCase):
         metadata = response.json
 
         # update the minerva metadata with coordinate mapping
-        # and boolean colored point mapping
         jsonMinervaMetadata["mapper"] = {
             "latitudeKeypath": "$.coordinates.coordinates[1]",
-            "longitudeKeypath": "$.coordinates.coordinates[0]",
-            "coloredPointKeypath": "sentiment"
+            "longitudeKeypath": "$.coordinates.coordinates[0]"
         }
 
         metadata['minerva'] = jsonMinervaMetadata
@@ -328,10 +326,6 @@ class DatasetTestCase(base.TestCase):
             self.assertTrue(-80 > coordinates[0], 'x coordinate out of range')
             self.assertTrue(20 < coordinates[1], 'y coordinate out of range')
             self.assertTrue(30 > coordinates[1], 'y coordinate out of range')
-        # since there is a color mapping, check that a fillColor is set and
-        # that it is different between the two points, since their sentiment values
-        # are different
-        self.assertNotEquals(features[0]['properties']['fillColor']['g'], features[1]['properties']['fillColor']['g'], 'two points should have different colors')
 
         #
         # Test minerva_dataset/id/geojson creating geojson from shapefile
@@ -470,7 +464,11 @@ class ExternalMongoDatasetTestCase(base.TestCase):
         tweets100Path = os.path.join(self.pluginTestDir, 'data', 'tweets100.json')
         z = zipfile.ZipFile('%s.zip' % tweets100Path)
         tweets = json.load(z.open('tweets100.json'))
+        from datetime import datetime
+        dateformat = '%Y-%m-%dT%H:%M:%S'
         for tweet in tweets:
+            d = datetime.strptime((tweet['created_at']), dateformat)
+            tweet['created_at'] = int((d - datetime(1970, 1, 1)).total_seconds())
             self.tweetsgeoCollection.save(tweet)
 
         path = '/minerva_dataset/folder'
@@ -537,7 +535,7 @@ class ExternalMongoDatasetTestCase(base.TestCase):
             user=self._user,
         )
         self.assertHasKeys(response.json, ['geojson'])
-        # expect 50 points back as that is the default page size
+        # expect 100 points back as that is the size of the mongo dataset
         geojsonData = geojson.loads(response.json['geojson']['data'])
         # coordinate limits empirically figured
         # coords = [feature['geometry']['coordinates'] for feature in geojsonData['features']]
@@ -545,11 +543,11 @@ class ExternalMongoDatasetTestCase(base.TestCase):
         # print max([c[0] for c in coords])
         # print min([c[1] for c in coords])
         # print max([c[1] for c in coords])
-        xMin = -122.27055356
+        xMin = -122.64
         xMax = -57.93991735
         yMin = -34.93523486
         yMax = 47.696623
-        self.assertEquals(len(geojsonData['features']), 50, 'geojson should have 50 features')
+        self.assertEquals(len(geojsonData['features']), 100, 'geojson should have 100 features')
         # to ensure correct mapping, check coords
         features = geojsonData['features']
         for feature in features:
@@ -558,3 +556,33 @@ class ExternalMongoDatasetTestCase(base.TestCase):
             self.assertTrue(xMax >= coordinates[0], 'x coordinate out of range')
             self.assertTrue(yMin <= coordinates[1], 'y coordinate out of range')
             self.assertTrue(yMax >= coordinates[1], 'y coordinate out of range')
+
+        # test external_mongo_limits endpoint
+
+        path = '/minerva_dataset/{}/external_mongo_limits'.format(datasetId)
+        params = {'field': 'created_at'}
+        response = self.request(
+            path=path,
+            method='GET',
+            user=self._user,
+            params=params
+        )
+        limits = response.json['mongo_fields']['created_at']
+        self.assertEquals(limits['max'], 1380587461, 'incorrect max date')
+        self.assertEquals(limits['min'], 1380587436, 'incorrect min date')
+
+        # test limiting geojson to date range
+
+        params = {
+            'dateField': 'created_at',
+            'startTime': 1380587440,
+            'endTime':   1380587455,
+        }
+        path = '/minerva_dataset/{}/geojson'.format(datasetId)
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+            params=params
+        )
+        self.assertEquals(response.json['geojson']['query_count'], 52, 'invalid query count')

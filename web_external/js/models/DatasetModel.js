@@ -80,6 +80,18 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         }, this));
     },
 
+    getExternalMongoLimits: function (field) {
+        var data = { field: field };
+        girder.restRequest({
+            path: 'minerva_dataset/' + this.get('_id') + '/external_mongo_limits',
+            type: 'GET',
+            data: data
+        }).done(_.bind(function (resp) {
+            this.setMinervaMetadata(resp);
+            this.trigger('m:externalMongoLimitsGot', this);
+        }, this));
+    },
+
     //
     // this is the start of trying to build an interface around the minerva metadata
     // TODO what assumptions/error handling to make for minerva metadata
@@ -170,10 +182,20 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
 
     // TODO organize
 
-    createGeoJson: function () {
+    createGeoJson: function (dateKeypath, startTime, endTime) {
+        var data = {};
+        // TODO protect if params undefined
+        if (dateKeypath) {
+            data = {
+                dateField: dateKeypath,
+                startTime: startTime,
+                endTime: endTime
+            };
+        }
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/geojson',
-            type: 'POST'
+            type: 'POST',
+            data: data
         }).done(_.bind(function (resp) {
             this.setMinervaMetadata(resp);
             this.trigger('m:geojsonCreated', this);

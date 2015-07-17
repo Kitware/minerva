@@ -19,44 +19,17 @@ minerva.views.MapPanel = minerva.View.extend({
         var datasetId = dataset.id;
         if (!_.contains(this.datasets, datasetId)) {
             dataset.once('m:geoJsonDataLoaded', function () {
-                var layer = this.map.createLayer('feature');
-                var points = layer.createFeature('point');
+                var layer,
+                    reader;
+                layer = this.map.createLayer('feature');
                 this.datasets[datasetId] = layer;
-
-                function radius(d) {
-                    if (d.__cluster) {
-                        return 16;
-                    }
-                    return 4;
-                }
-
-                function fill(d) {
-                    if (d.__cluster) {
-                        return false;
-                    }
-                    return true;
-                }
-
-                var features = (JSON.parse(dataset.geoJsonData)).features;
-
-                points
-                .clustering(true)
-                .position(function (d) {
-                    if (d.__cluster) {
-                        return {x:d.x, y:d.y};
-                    }
-                    return {
-                        x: d.geometry.coordinates[0],
-                        y: d.geometry.coordinates[1]
-                    };
-                }).style('radius', radius)
-                    .style('fill', fill)
-                    .style('strokeColor', 'black')
-                    .data(features);
-
-                this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
-                this.map.draw();
+                reader = geo.createFileReader('jsonReader', {layer: layer});
+                layer.clear();
+                reader.read(dataset.geoJsonData, _.bind(function () {
+                    this.uiLayer = this.map.createLayer('ui');
+                    this.uiLayer.createWidget('slider');
+                    this.map.draw();
+                }, this));
             }, this);
             dataset.loadGeoJsonData();
         }

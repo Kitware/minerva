@@ -156,12 +156,6 @@ class GeoJsonMapper(JsonMapper):
             def convertToGeoJson(obj):
                 lat_expr = jsonpath_rw.parse(mapping['latitudeKeypath'])
                 long_expr = jsonpath_rw.parse(mapping['longitudeKeypath'])
-                coloredPoint_expr = None
-                if 'coloredPointKeypath' in mapping:
-                    coloredPointKeypath = mapping['coloredPointKeypath']
-                    if coloredPointKeypath != "":
-                        coloredPoint_expr = \
-                            jsonpath_rw.parse(coloredPointKeypath)
 
                 def extractLat(obj):
                     match = lat_expr.find(obj)
@@ -171,26 +165,8 @@ class GeoJsonMapper(JsonMapper):
                     match = long_expr.find(obj)
                     return match[0].value
 
-                def extractColoredPoint(obj):
-                    match = coloredPoint_expr.find(obj)
-                    return match[0].value
-
                 point = geojson.Point((extractLong(obj), extractLat(obj)))
-                # TODO add elevation of 0 for a placeholder
-                # unclear if we need a property to display
-                properties = {"elevation": 0}
-                pointColor = {
-                    True: {"r": 241./255., "g": 163./255., "b": 64./255.},
-                    False: {"r": 153./255., "g": 142./255., "b": 195./255.}
-                }
-                if coloredPoint_expr is not None:
-                    boolPoint = extractColoredPoint(obj)
-                    properties['fillColor'] = pointColor[boolPoint]
-                    properties['strokeColor'] = pointColor[boolPoint]
-                    properties['stroke'] = True
-                    properties['strokeWidth'] = 1
-                    properties['radius'] = 5
-
+                properties = {"placeholder": 0}
                 feature = geojson.Feature(geometry=point,
                                           properties=properties)
                 return feature
