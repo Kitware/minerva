@@ -57,14 +57,21 @@ http://localhost:8080/girder    => serves Girder
 
 This is to get around the fact that npm is for installing packages, not managing source repositories.  So when npm installs geojs, it doesn't install it as a git repo with the .git dir.
 
-  1. change the reference in the `geojs` line of package.json to point to the correct branch or sha reference
-  2. run `npm install` from the top level `minerva` directory
-  3. `cd node_modules/geojs`
-  4. `rm -rf vgl`
-  5. `git clone https://github.com/OpenGeoscience/vgl.git`
-  6. find the hash of vgl from the geojs branch
-  7. `cd vgl; git checkout $HASH_FROM_GEOJS_BRANCH; cd ..`
-  8. `npm install` (this time inside geojs)
-  9. `grunt` (inside geojs)
+Minerva currently tracks the latest released version of geojs in the master branch, as published in geojs/geo.min.js.
 
-At this point geo.min.js should be rebuilt with the checked out version of vgl, and this will be included the next time minerva is built by `grunt`-ing at the top level of girder.
+If you need to use Minerva with a specific reference of geojs that isn't a release, do the following
+
+  1. from the minerva top level dir, `cd node_modules`
+  2. remove or move geojs, e.g. `mv geojs geojs_fromnpm`
+  3. `git clone https://github.com/OpenGeoscience/geojs.git`
+  4. `cd geojs`
+  5. checkout from git whatever branch or reference you are interested in, e.g. `git checkout experimental_branch`
+
+At this point, you are just following the geojs build instructions.
+
+  6. `git submodule init`
+  7. `git submodule update`
+  8. `npm install`
+  9. `grunt`
+
+At this point geojs/dist/built/geo.min.js should be rebuilt, and this will be included the next time minerva is built by `grunt`-ing at the top level of girder.
