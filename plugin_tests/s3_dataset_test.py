@@ -17,11 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 
-import json
 import os
-import zipfile
-
-import geojson
 
 # Need to set the environment variable before importing girder
 os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
