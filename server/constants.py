@@ -19,6 +19,7 @@
 
 
 class PluginSettings():
+    MINERVA_COLLECTION = 'minerva'
     MINERVA_FOLDER = 'minerva'
     DATASET_FOLDER = 'dataset'
     SESSION_FOLDER = 'session'

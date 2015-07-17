@@ -61,3 +61,35 @@ def findSessionFolder(currentUser, user, create=False):
     else:
         return findNamedFolder(currentUser, user, minervaFolder, 'folder',
                                PluginSettings.SESSION_FOLDER, create)
+
+
+def findNamedCollection(currentUser, name, create=False):
+    collections = \
+        [ModelImporter.model('collection').filter(c, currentUser) for c in
+         ModelImporter.model('collection').textSearch(name, user=currentUser)]
+    # collections should have len of 0 or 1, since we are looking
+    # for a collection with a certain name
+    if len(collections) == 0:
+        if create:
+            return ModelImporter.model('collection').createCollection(
+                name, description='', public=True, creator=currentUser)
+        else:
+            return None
+    else:
+        return collections[0]
+
+
+def findMinervaCollection(currentUser, create=False):
+    return findNamedCollection(currentUser, PluginSettings.MINERVA_COLLECTION,
+                               create)
+
+
+def findAnalysisFolder(currentUser, create=False):
+    minervaCollection = findMinervaCollection(currentUser,  create)
+    if minervaCollection is None:
+        return None
+    else:
+        analysisFolder = findNamedFolder(currentUser, currentUser,
+                                         minervaCollection, 'collection',
+                                         'analysis', create)
+        return analysisFolder
