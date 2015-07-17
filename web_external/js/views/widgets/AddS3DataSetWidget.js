@@ -1,4 +1,4 @@
-(function() {
+(function () {
 
     /**
     * This widget is used to add a new dataset
@@ -19,7 +19,7 @@
                     folderId: this.collection.datasetFolderId
                 };
 
-                if (fields.prefix.indexOf('/') != 0) {
+                if (fields.prefix.indexOf('/') !== 0) {
                     fields.prefix = '/' + fields.prefix;
                 }
 
@@ -56,13 +56,12 @@
         },
 
         render: function () {
-            var view = this;
             var modal = this.$el.html(minerva.templates.addS3DataSetWidget({
                 session: this.model
-            }))
+            }));
             modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
             return this;
-        },
+        }
     });
 })();

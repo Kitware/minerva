@@ -17,24 +17,14 @@
 #  limitations under the License.
 ###############################################################################
 
-import os
-import shutil
-import pymongo
-import tempfile
-import imp
 import uuid
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel, RestException
+from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
-from girder.utility import config
-
-from girder.plugins.minerva.constants import PluginSettings
-from girder.plugins.minerva.libs.carmen import get_resolver
-from girder.plugins.minerva.utility.minerva_utility import findNamedFolder, findMinervaFolder
-
-import girder_client
+from girder.plugins.minerva.utility.minerva_utility import findNamedFolder, \
+    findMinervaFolder
 
 
 class S3Dataset(Resource):
@@ -55,9 +45,6 @@ class S3Dataset(Resource):
         service = params.get('service', '').strip()
         read_only = self.boolParam('readOnly', params, default=False)
 
-
-
-        target_assetstore = None
         # First check if we have already have asset store for this bucket with
         # the same credentials etc.
         args = {
@@ -73,15 +60,17 @@ class S3Dataset(Resource):
         # Create a new assetstore if we don't already have one that matches
         if not target_assetstore:
             target_assetstore = assetstore.createS3Assetstore(uuid.uuid4().hex,
-                                                  bucket, access_key_id,
-                                                  secret, prefix, service,
-                                                  read_only)
+                                                              bucket,
+                                                              access_key_id,
+                                                              secret, prefix,
+                                                              service,
+                                                              read_only)
 
         minerva_folder = findMinervaFolder(user, user, create=True)
         s3_folder = findNamedFolder(user, user, minerva_folder,
                                     'folder', 's3', create=True)
         bucket_folder = findNamedFolder(user, user, s3_folder,
-                                    'folder', bucket, create=True)
+                                        'folder', bucket, create=True)
 
         # Create a folder to import S3 prefix
         prefix_folder = self.model('folder').createFolder(
@@ -95,16 +84,17 @@ class S3Dataset(Resource):
         kwargs = {
             'assetstore': target_assetstore,
             'parent': prefix_folder,
-            'parentType': 'folder' ,
+            'parentType': 'folder',
             'params': params,
             'progress': None,
             'user': user
         }
 
         job = self.model('job', 'jobs').createLocalJob(
-            title='Import S3 bucket %s with prefix %s' % (bucket, prefix), user=user,
-            type='s3.import', public=False, kwargs=kwargs,
-            module='girder.plugins.minerva.utility.s3_import_worker', async=True)
+            title='Import S3 bucket %s with prefix %s' % (bucket, prefix),
+            user=user, type='s3.import', public=False, kwargs=kwargs,
+            module='girder.plugins.minerva.utility.s3_import_worker',
+            async=True)
 
         self.model('job', 'jobs').scheduleJob(job)
 
@@ -113,7 +103,7 @@ class S3Dataset(Resource):
         else:
             metadata = {}
 
-        minerva_metadata =  {
+        minerva_metadata = {
             'original_type': 's3',
             'bucket': 'bucket',
             'prefix': prefix,
@@ -128,8 +118,7 @@ class S3Dataset(Resource):
         return minerva_metadata
 
     createDataset.description = (
-        Description('Create metadata for an Item, promoting it to a S3 Dataset, and trigger import.')
+        Description('Create metadata for an Item, promoting it to a S3 Dataset, \
+        and trigger import.')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.'))
-
-

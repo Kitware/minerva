@@ -6,7 +6,7 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
     save: function () {
 
         // First call the superclass to create the item
-        minerva.models.DatasetModel.prototype.save.call(this).on('g:saved', _.bind(function() {
+        minerva.models.DatasetModel.prototype.save.call(this).on('g:saved', _.bind(function () {
             var data = {};
             _.each(this.attributes, function (value, key) {
                 if (typeof value !== 'object') {
@@ -37,11 +37,11 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
         return this;
     },
 
-    destroy: function (opts) {
+    destroy: function () {
         var meta = this.get('meta');
 
         // First call the superclass to delete the item
-        minerva.models.DatasetModel.prototype.destroy.call(this).on('g:deleted', _.bind(function() {
+        minerva.models.DatasetModel.prototype.destroy.call(this).on('g:deleted', _.bind(function () {
 
             if (meta) {
                 var args = {
@@ -63,5 +63,5 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
 
     getDatasetType: function () {
         return 's3';
-    },
+    }
 });
