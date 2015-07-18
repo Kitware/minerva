@@ -68,6 +68,7 @@ minerva.views.SessionView = minerva.View.extend({
     initialize: function (settings) {
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;
+        this.analysisCollection = settings.analysisCollection;
         _.each(this.datasetsCollection.models, function (dataset) {
             if (this.model.datasetInFeatures(dataset)) {
                 dataset.set('displayed', true);
@@ -127,7 +128,8 @@ minerva.views.SessionView = minerva.View.extend({
 
             this.analysisPanel = new minerva.views.AnalysisPanel({
                 el: this.$('.analysisPanel'),
-                parentView: this
+                parentView: this,
+                collection: this.analysisCollection
             }).render();
 
             this.$('.gridster > ul').gridster({
@@ -160,10 +162,14 @@ minerva.router.route('session/:id', 'session', function (id) {
     }).on('m:fetched', function () {
         var datasetsCollection = new minerva.collections.DatasetCollection();
         datasetsCollection.on('g:changed', function () {
-            girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
-                datasetsCollection: datasetsCollection,
-                session: session
-            });
+            var analysisCollection = new minerva.collections.AnalysisCollection();
+            analysisCollection.on('g:changed', function () {
+                girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
+                    analysisCollection: analysisCollection,
+                    datasetsCollection: datasetsCollection,
+                    session: session
+                });
+            }).fetch();
         }).fetch();
     }, this).on('g:error', function () {
         minerva.router.navigate('sessions', {trigger: true});

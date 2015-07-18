@@ -40,11 +40,11 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
             console.error(err);
             girder.events.trigger('g:alert', {
                 icon: 'cancel',
-                text: 'Could not update Minera metadata in Item.',
+                text: 'Could not update Minerva metadata in Item.',
                 type: 'error',
                 timeout: 4000
             });
         }, this));
-    },
+    }
 
 });

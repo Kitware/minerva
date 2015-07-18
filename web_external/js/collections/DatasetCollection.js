@@ -3,7 +3,8 @@ minerva.collections.DatasetCollection = minerva.collections.MinervaCollection.ex
     model: minerva.models.DatasetModel,
     path: 'minerva_dataset',
     getInitData: function () {
-       return { userId: girder.currentUser.get('_id') };
+        var initData = { userId: girder.currentUser.get('_id') };
+        return initData;
     }
 
 });
