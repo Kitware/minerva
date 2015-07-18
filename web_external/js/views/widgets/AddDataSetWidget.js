@@ -25,8 +25,11 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
                 this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
                 this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
             } else if (dataSetType === 'm-s3-dataset') {
-                // TODO
-                console.log('todo');
+                this.s3Widget = new minerva.views.AddS3DataSetWidget({
+                    el: container,
+                    noParent: true,
+                    parentView: this.parentView
+                }).render();
             } else if (dataSetType === 'm-mongo-dataset') {
                 this.mongoDatasetWidget = new minerva.views.AddMongoDatasetWidget({
                     el: container,
