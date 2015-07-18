@@ -1,0 +1,61 @@
+language: python
+python:
+    - "2.7"
+    - "3.4"
+
+sudo: false
+
+compiler:
+    - gcc
+
+addons:
+  apt:
+    packages:
+    - libfreetype6-dev
+    - libpng12-dev
+    - libgdal1-dev
+    - pkg-config
+    
+before_install:
+
+    # minerva has been cloned to OpenGeoscience/minerva by travis
+    # girder needs to be cloned and then minerva moved under girder
+    - cd "${HOME}"/build
+    - git clone https://github.com/girder/girder.git
+    - mv OpenGeoscience/minerva girder/plugins
+    - cd girder
+
+    # Show the memory state; this lets us more quickly determine when the
+    # travis environment is bad
+    - vmstat
+    - export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
+    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
+    - if [ -n "${PY3}" ]; then export MONGO_VERSION=3.0.2; export PY_COVG="OFF"; else export MONGO_VERSION=2.6.9; export PY_COVG="ON"; export DEPLOY=true; fi
+
+    - pushd "${HOME}"
+    - curl "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGO_VERSION}.tgz" | gunzip -c | tar x
+    - cd mongodb-*/bin && export PATH="${PWD}:${PATH}"
+    - popd
+    - mkdir /tmp/db
+    - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
+
+    - mongod --version
+    - pushd "${HOME}"
+    - curl "http://www.cmake.org/files/v3.1/cmake-3.1.0-Linux-x86_64.tar.gz" | gunzip -c | tar x
+    - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
+    - popd
+    - cmake --version
+
+    - npm install -g npm@next
+    - npm --version
+
+install:
+    - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
+    - npm install grunt grunt-cli
+    - npm install
+script:
+    - mkdir _build
+    - cd _build
+    - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} ..
+    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV || true
+    - if [ -f test_failed ] ; then false ; fi
