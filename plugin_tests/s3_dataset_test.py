@@ -105,7 +105,7 @@ class S3DatasetTestCase(base.TestCase):
 
         self.assertEquals(response.json['prefix'], prefix, 'Expected %s as prefix' % prefix)
         self.assertEquals(response.json['original_type'], 's3', 'Expected s3 dataset original_type')
-        self.assertEquals(response.json['bucket'], bucket, 'Expected s3 dataset original_type')
+        self.assertEquals(response.json['bucket'], bucket, 'Expected s3 dataset bucket %s' % bucket)
 
         # Ensure the import folder has been created
         path = '/folder/%s' % str(response.json['folderId'])
