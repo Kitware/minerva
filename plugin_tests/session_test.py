@@ -55,7 +55,6 @@ class SessionTestCase(base.TestCase):
         """
         Test the minerva session API enpdpoints.
         """
-        self.assertEqual(0, 0)
 
         # at first the session folder is None
 

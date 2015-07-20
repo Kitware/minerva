@@ -16,6 +16,7 @@
 
 add_python_test(dataset PLUGIN minerva)
 add_python_test(session PLUGIN minerva)
+add_python_test(analysis PLUGIN minerva)
 add_python_test(geonames PLUGIN minerva)
 add_python_test(s3_dataset PLUGIN minerva)
 

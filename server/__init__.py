@@ -22,7 +22,7 @@ import mako
 from girder import events
 from girder.utility.model_importer import ModelImporter
 
-from girder.plugins.minerva.rest import dataset, s3_dataset, session, shapefile, geocode
+from girder.plugins.minerva.rest import analysis, dataset, s3_dataset, session, shapefile, geocode
 
 
 class CustomAppRoot(object):
@@ -138,5 +138,6 @@ def load(info):
     events.bind('model.setting.validate', 'minerva', validate_settings)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
+    info['apiRoot'].minerva_analysis = analysis.Analysis()
     info['apiRoot'].minerva_session = session.Session()
     info['apiRoot'].minerva_dataset_s3 = s3_dataset.S3Dataset()
