@@ -71,6 +71,11 @@ module.exports = function (grunt) {
         var jsonpathjsDir = pluginDir + '/node_modules/JSONPath/lib';
         var geojsDistDir = geojsDir + '/dist/built';
         var extDir = jsDir + '/ext';
+
+        if(!fs.existsSync(geojsDistDir)) {
+            geojsDistDir = geojsDir;
+        }
+
         if (fs.existsSync(jsDir)) {
             var files = {};
             // name this minerva.min.js instead of plugin.min.js
