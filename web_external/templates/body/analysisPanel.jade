@@ -1,11 +1,11 @@
-.analysisPanelContainer
+.m-analysisPanelContainer
   .panelTitle
     | Analysis Panel
-  .analysisList
-    .analyses
+  .m-analysisList
+    .m-analyses
         each analysis in analyses
             if analysis.getMinervaMetadata()
-                .analysis= analysis.get('name')
+                .m-analysis= analysis.get('name')
                     - var attributes = {'m-analysis-id': analysis.get('_id')}
                     - var classes = 'icon-play-circled m-attempt-analysis'
                     i(class=classes)&attributes(attributes)
