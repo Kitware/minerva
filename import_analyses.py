@@ -21,7 +21,7 @@ def import_analyses(client):
         analysis = romanesco.load(analysis_file)
         analysis_name = analysis['name']
 
-        # See if we already have an analysis with with name
+        # See if we already have an analysis with that name
         items = client.listItem(analyses_folder['_id'], analysis_name)
 
         if len(items) == 0:
