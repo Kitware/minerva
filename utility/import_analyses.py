@@ -5,10 +5,7 @@ import romanesco
 
 from girder_client import GirderClient
 
-def import_analyses(client):
-    path = os.path.dirname(os.path.realpath(__file__))
-    analyses_path = os.path.join(path, 'analyses')
-
+def import_analyses(client, analyses_path):
     # First get the analysis folder
     analyses_folder = client.get('/minerva_analysis/folder')
 
@@ -45,6 +42,7 @@ def main():
     parser.add_argument('--port', required=False, default='8080')
     parser.add_argument('--api-root', required=False, default='/api/v1',
                         help='path to the Girder REST API')
+    parser.add_argument('--path', required=True, help='the path to import the analyses from')
 
     config = parser.parse_args()
 
@@ -52,7 +50,7 @@ def main():
                           apiRoot=config.api_root, scheme=config.scheme)
     client.authenticate(config.username, config.password)
 
-    import_analyses(client)
+    import_analyses(client, config.path)
 
 if __name__ == '__main__':
     main()

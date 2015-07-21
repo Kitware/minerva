@@ -27,7 +27,7 @@ os.environ['GIRDER_PORT'] = girder_port# noqa
 from tests import base
 from girder_client import GirderClient
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
 import import_analyses
 
 def setUpModule():
@@ -71,7 +71,10 @@ class ImportAnalysesTestCase(base.TestCase):
         client = GirderClient('localhost', girder_port)
         client.authenticate(self._username, self._password)
 
-        import_analyses.import_analyses(client)
+        path = os.path.dirname(os.path.realpath(__file__))
+        analyses_path = os.path.join(path, 'analyses')
+
+        import_analyses.import_analyses(client, analyses_path)
 
         # Get the analysis folder
         path = '/minerva_analysis/folder'
