@@ -49,7 +49,7 @@ before_install:
     - npm install -g npm@next
     - npm --version
 
-    # Install R staisfy romanesco 
+    # Install R satisfy romanesco
     - eval "$(curl https://data.kitware.com/api/v1/file/55735da88d777f649a9ba181/download | /bin/bash)"
     - eval "$(travis-install 5575e0d88d777f649a9ba197)"
     - R --version
