@@ -28,6 +28,10 @@ add_python_style_test(pep8_style_minerva_rest
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server/rest")
 add_python_style_test(pep8_style_minerva_utility
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server/utility")
+add_python_style_test(pep8_style_minerva_analyses
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/analyses")
+add_python_style_test(pep8_style_minerva_jobs
+                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/jobs")
 
 add_javascript_style_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"

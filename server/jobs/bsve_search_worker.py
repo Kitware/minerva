@@ -16,6 +16,7 @@ from girder.plugins.minerva.utility.dataset_utility import \
 
 import girder_client
 
+
 def run(job):
     job_model = ModelImporter.model('job', 'jobs')
     job_model.updateJob(job, status=JobStatus.RUNNING)
@@ -59,7 +60,8 @@ def run(job):
         client.uploadFileToItem(datasetId, humanFilepath)
 
         # TODO some stuff here using models will only work on a local job
-        # will have to be rewritter using girder client to work in romanesco non-locally
+        # will have to be rewritten using girder client to work in romanesco
+        # non-locally
 
         user_model = ModelImporter.model('user')
         user = user_model.load(job['userId'], force=True)
@@ -72,8 +74,8 @@ def run(job):
         # TODO only works locally
         file_model = ModelImporter.model('file')
         existing = file_model.findOne({
-           'itemId': dataset['_id'],
-           'name': outFilename
+            'itemId': dataset['_id'],
+            'name': outFilename
         })
         if existing:
             minerva_metadata['original_files'] = {
@@ -81,7 +83,8 @@ def run(job):
                 'name': outFilename
             }
         else:
-            raise Exception('Cannot find file %s in dataset %s' % (outFilename, datasetId))
+            raise (Exception('Cannot find file %s in dataset %s' %
+                   (outFilename, datasetId)))
 
         jsonRow = jsonArrayHead(humanFilepath, limit=1)[0]
         minerva_metadata['json_row'] = jsonRow
