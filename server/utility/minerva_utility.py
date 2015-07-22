@@ -93,3 +93,19 @@ def findAnalysisFolder(currentUser, create=False):
                                          minervaCollection, 'collection',
                                          'analysis', create)
         return analysisFolder
+
+
+def findAnalysisByName(currentUser, name):
+    analysisFolder = findAnalysisFolder(currentUser)
+    filters = {}
+    filters['$text'] = {
+        '$search': name
+    }
+    analyses = [ModelImporter.model('item').filter(item, currentUser)
+                for item in
+                ModelImporter.model('folder').childItems(folder=analysisFolder,
+                                                         filters=filters)]
+    if len(analyses) > 0:
+        return analyses[0]
+    else:
+        return None
