@@ -59,6 +59,9 @@ install:
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     - npm install grunt grunt-cli
     - npm install
+    # Create symlink for romanesco plugin
+    - ln -s `python -c "import romanesco;import os;print os.path.dirname(romanesco.__file__)"` "${HOME}"/build/girder/plugins/romanesco
+
 script:
     - mkdir _build
     - cd _build
