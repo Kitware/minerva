@@ -15,7 +15,7 @@ addons:
     - libpng12-dev
     - libgdal1-dev
     - pkg-config
-    
+
 before_install:
 
     # minerva has been cloned to OpenGeoscience/minerva by travis
@@ -63,5 +63,4 @@ script:
     - mkdir _build
     - cd _build
     - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} ..
-    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV || true
-    - if [ -f test_failed ] ; then false ; fi
+    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV
