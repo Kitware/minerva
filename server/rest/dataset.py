@@ -73,6 +73,7 @@ class Dataset(Resource):
         # TODO worry about stale authentication
 
     def _findGeoJsonFile(self, item):
+        # TODO change to findOne
         itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
         for file in self.model('item').childFiles(item):
             if file['name'] == itemGeoJson:
