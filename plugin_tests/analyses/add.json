@@ -1,0 +1,29 @@
+{
+    "inputs":[
+       {
+          "default":{
+             "data":"0",
+             "format":"json"
+          },
+          "format":"number",
+          "name":"a",
+          "type":"number"
+       },
+       {
+          "format":"number",
+          "name":"b",
+          "type":"number"
+       }
+    ],
+    "mode":"python",
+    "name":"add",
+    "outputs":[
+       {
+          "format":"number",
+          "name":"c",
+          "type":"number"
+       }
+    ],
+    "script":"c = a + b"
+}
+

@@ -19,6 +19,7 @@ add_python_test(session PLUGIN minerva)
 add_python_test(analysis PLUGIN minerva)
 add_python_test(geonames PLUGIN minerva)
 add_python_test(s3_dataset PLUGIN minerva)
+add_python_test(import_analyses PLUGIN minerva)
 
 add_python_style_test(pep8_style_minerva_constants
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server/constants.py")

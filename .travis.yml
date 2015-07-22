@@ -1,7 +1,7 @@
 language: python
 python:
     - "2.7"
-    - "3.4"
+#    - "3.4" For now romanesco doesn't support Python 3
 
 sudo: false
 
@@ -15,7 +15,7 @@ addons:
     - libpng12-dev
     - libgdal1-dev
     - pkg-config
-    
+
 before_install:
 
     # minerva has been cloned to OpenGeoscience/minerva by travis
@@ -49,13 +49,21 @@ before_install:
     - npm install -g npm@next
     - npm --version
 
+    # Install R satisfy romanesco
+    - eval "$(curl https://data.kitware.com/api/v1/file/55735da88d777f649a9ba181/download | /bin/bash)"
+    - eval "$(travis-install 5575e0d88d777f649a9ba197)"
+    - R --version
+    - R -e '.libPaths(); sessionInfo()'
+
 install:
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     - npm install grunt grunt-cli
     - npm install
+    # Create symlink for romanesco plugin
+    - ln -s `python -c "import romanesco;import os;print os.path.dirname(romanesco.__file__)"` "${HOME}"/build/girder/plugins/romanesco
+
 script:
     - mkdir _build
     - cd _build
     - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} ..
-    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV || true
-    - if [ -f test_failed ] ; then false ; fi
+    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV
