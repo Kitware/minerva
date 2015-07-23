@@ -18,8 +18,6 @@ minerva.views.DataPanel = minerva.View.extend({
             parentView: this
         });
 
-        this.datasetHierarchyWidget.render();
-
     },
 
     mapTableDataset: function (event) {

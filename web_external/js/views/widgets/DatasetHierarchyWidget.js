@@ -11,7 +11,7 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
             "_id": settings.folderID
         })
 
-this.folder.on('g:fetched', function () {
+        this.folder.on('g:fetched', function () {
             this._createHierarchyWidget();
             this.render();
         }, this).on('g:error', function () {
@@ -31,6 +31,7 @@ this.folder.on('g:fetched', function () {
             itemCreate: false,
             parentView: this
         });
+        return this;
     },
 
     render: function () {
@@ -40,7 +41,7 @@ this.folder.on('g:fetched', function () {
                 .girderModal(this)
                 .on('ready.girder.modal',
                     _.bind(function () {
-                        this.hierarchyWidget.setElement("#datasetHeirarchy").render();
+                        this.hierarchyWidget.setElement(this.$(".datasetHierarchy")).render();
                     }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
