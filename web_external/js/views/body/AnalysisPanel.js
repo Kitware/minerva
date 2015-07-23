@@ -7,15 +7,18 @@ minerva.views.AnalysisPanel = minerva.View.extend({
     attemptAnalysis: function (event) {
         var analysisId = $(event.currentTarget).attr('m-analysis-id');
         var analysis = this.collection.get(analysisId);
-        console.log(analysis);
         // display the correct UI for this analysis
         // TODO undoubtedly there are better ways...
+        // this would be irritating to switch on multiple analyses
+        // perhaps a mapping of analysis types to widgets, each
+        // might need its own param set for initialization
         var minervaMetadata = analysis.getMinervaMetadata();
         if (minervaMetadata.analysis_type === 'bsve_search') {
-            // what we really want to do is open a dialog for the analysis
-            // instead for now we'll just call an endpoint
-            // TODO call the endpoint
-            console.log('call an end point');
+            this.bsveSearchWidget = new minerva.views.BsveSearchWidget({
+                el: $('#g-dialog-container'),
+                parentView: this
+            });
+            this.bsveSearchWidget.render();
         } else {
             var errMsg = 'Unsupported analysis_type ' + minervaMetadata.analysis_type;
             console.error(errMsg);
