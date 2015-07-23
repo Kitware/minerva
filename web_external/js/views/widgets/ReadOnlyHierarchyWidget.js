@@ -30,7 +30,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         this.folderCount = null;
         this.itemCount = null;
 
-        this.$el.html(girder.templates.hierarchyWidget({
+        this.$el.html(minerva.templates.readOnlyHierarchyWidget({
             type: this.parentModel.resourceName,
             model: this.parentModel,
             // force 'level'  to be READ
