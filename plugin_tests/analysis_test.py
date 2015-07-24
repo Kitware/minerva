@@ -17,15 +17,24 @@
 #  limitations under the License.
 ###############################################################################
 
-from tests import base
+import httmock
+from httmock import urlmatch, HTTMock
+import json
+import os
+import time
 
+# Need to set the environment variable before importing girder
+os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
+
+from tests import base
 
 def setUpModule():
     """
     Enable the minerva plugin and start the server.
     """
     base.enabledPlugins.append('minerva')
-    base.startServer()
+    base.enabledPlugins.append('jobs')
+    base.startServer(False)
 
 
 def tearDownModule():
@@ -33,7 +42,6 @@ def tearDownModule():
     Stop the server.
     """
     base.stopServer()
-
 
 class AnalysisTestCase(base.TestCase):
     """
@@ -50,8 +58,8 @@ class AnalysisTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-    def testAnalysisEndpoints(self):
-        """ Test the minerva analysis endpoints.  """
+    def testAnalysisUtilityEndpoints(self):
+        """ Test the minerva analysis utility endpoints.  """
 
         # at first there is no analysis folder or minerva collection
 
@@ -74,3 +82,68 @@ class AnalysisTestCase(base.TestCase):
         response = self.request(path=path, method='GET', user=self._user)
         self.assertStatusOk(response)
         self.assertNotEquals(response.json['folder'], None, 'An analysis folder should exist')
+
+    def testBsveSearchAnalysis(self):
+        # create the analysis folder
+        path = '/minerva_analysis/folder'
+        response = self.request(path=path, method='POST', user=self._user)
+        self.assertStatusOk(response)
+
+        # create the dataset folder
+        path = '/minerva_dataset/folder'
+        params = {
+            'userId': self._user['_id'],
+        }
+        response = self.request(path=path, method='POST', params=params, user=self._user)
+        self.assertStatusOk(response)
+
+        # mock the calls to bsve search
+        @urlmatch(netloc=r'(.*\.)?beta-search.bsvecosystem.net(.*)$')
+        def bsve_mock(url, request):
+            if url.path.split('/')[-1] == 'request':
+                return httmock.response(200, '12345')
+            else:
+                content = {
+                    'status': 1,
+                    'results': [{'key1': 'val1'}, {'key2': 'val2'}]
+                }
+                content = json.dumps(content)
+                headers = {
+                    'content-length': len(content),
+                    'content-type': 'application/json'
+                }
+                return httmock.response(200, content, headers, request=request)
+
+        with HTTMock(bsve_mock):
+            response = self.request(
+                path='/minerva_analysis/bsve_search',
+                method='POST',
+                params={
+                    'datasetName': 'test dataset',
+                    'bsveSearchParams': '{}'
+                },
+                user=self._user
+            )
+
+            # wait for the async job to complete
+            searchResultsFinished = False
+            count = 0
+            while not searchResultsFinished and count < 5:
+                # get the dataset and check if it has been updated
+                path = '/minerva_dataset/%s/dataset' % str(response.json['dataset_id'])
+                response = self.request(
+                    path=path,
+                    method='GET',
+                    user=self._user
+                )
+                dataset = response.json
+                if 'json_row' in dataset:
+                    searchResultsFinished = True
+                else:
+                    time.sleep(2)
+                    count += 1
+
+            # ensure the first row of results was added to the dataset
+            self.assertTrue('json_row' in dataset, 'json_row expected in dataset')
+            self.assertTrue('key1' in dataset['json_row'], 'key1 should be in json_row')
+            self.assertFalse('key2' in dataset['json_row'], 'key2 should be in json_row')

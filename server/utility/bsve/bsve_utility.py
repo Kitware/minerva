@@ -82,7 +82,6 @@ class BsveUtility():
         endpoint = '/api/search/v1/request'
 
         url = host + endpoint
-
         headers = self.buildHarbingerAuthenticationHeader()
         headers['Content-Type'] = 'application/json'
 
@@ -123,6 +122,7 @@ class BsveUtility():
             # error
             return search
         else:
+            # TODO could be problematic as it can hold onto the async thread
             # wait and loop
             import time
             time.sleep(5)

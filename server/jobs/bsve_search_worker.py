@@ -41,7 +41,6 @@ def run(job):
         writer = open(outFilepath, 'w')
         writer.write(json.dumps(searchResult))
         writer.close()
-        print(outFilepath)
 
         # rename the file so it will have the right name when uploaded
         # could probably be done post upload
