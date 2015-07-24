@@ -88,6 +88,8 @@ module.exports = function (grunt) {
                 jsDir + '/view.js',
                 jsDir + '/app.js',
                 jsDir + '/utilities.js',
+                jsDir + '/MinervaModel.js',
+                jsDir + '/MinervaCollection.js',
                 jsDir + '/models/**/*.js',
                 jsDir + '/collections/**/*.js',
                 jsDir + '/views/**/*.js'

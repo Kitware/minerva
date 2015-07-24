@@ -10,7 +10,7 @@
     .savedDataList
         .datasets
             each dataset in datasets
-                if dataset.get('meta').minerva
+                if dataset.getMinervaMetadata()
                     .dataset= dataset.get('name')
                         - var attributes = {'m-dataset-id': dataset.get('_id')}
                         if dataset.geoJsonAvailable

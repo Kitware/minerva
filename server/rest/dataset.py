@@ -74,10 +74,14 @@ class Dataset(Resource):
 
     def _findGeoJsonFile(self, item):
         itemGeoJson = item['name'] + PluginSettings.GEOJSON_EXTENSION
-        for file in self.model('item').childFiles(item):
-            if file['name'] == itemGeoJson:
-                return file
-        return None
+        existing = self.model('file').findOne({
+            'itemId': item['_id'],
+            'name': itemGeoJson
+        })
+        if existing:
+            return existing
+        else:
+            return None
 
     def datasetJob(self, item, job):
         itemid = str(item['_id'])

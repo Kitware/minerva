@@ -1,0 +1,20 @@
+.modal-dialog
+  .modal-content
+    form#m-bsve-search-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | BSVE Search
+        .modal-body
+            .form-group.m-bsveSearchDatasetNameGroup
+                label.control-label(for="m-bsveSearchDatasetName") Output Dataset Name
+                input.input-sm#m-bsveSearchDatasetName.form-control(type="text")
+            .form-group.m-bsveSearchParamsGroup
+                label.control-label(for="m-bsveSearchParams") JSON BSVE Search Params
+                textarea#m-bsveSearchParams.form-control(rows=20)
+            .g-validation-failed-message
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-runBsveSearch.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run

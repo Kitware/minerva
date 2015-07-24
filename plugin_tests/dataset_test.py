@@ -62,7 +62,7 @@ class DatasetTestCase(base.TestCase):
 
     def testDataset(self):
         """
-        Test the minerva dataset API enpdpoints.
+        Test the minerva dataset API enppoints.
         """
 
         # at first the dataset folder is None

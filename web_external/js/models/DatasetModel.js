@@ -70,8 +70,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             type: 'POST',
             data: data
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
-            var minervaMetadata = this.getMinervaMetadata();
+            var minervaMetadata = this.setMinervaMetadata(resp);
             this.set('_id', minervaMetadata.dataset_id);
             // fetch to load all of the properties of the item
             this.on('g:fetched', function () {
@@ -118,6 +117,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
             this.geoJsonData = minervaMetadata.geojson.data;
         }
+        return minervaMetadata;
     },
 
     saveMinervaMetadata: function (minervaMetadata) {
