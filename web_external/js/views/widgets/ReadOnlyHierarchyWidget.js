@@ -15,7 +15,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         }).on('g:fetched', function () {
             this.breadcrumbs.push(parent);
 
-            if (parentType === 'folder' && parent.get("name") !== folder.minerva.bucket) {
+            if (parentType === 'folder' && parent.get("name") !== folder.get("minerva").bucket) {
                 this._fetchToRoot(parent);
             } else {
                 this.breadcrumbs.reverse();
@@ -24,8 +24,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         }, this).fetch();
     },
 
-    
-    
+        
     render: function () {
         this.folderCount = null;
         this.itemCount = null;
@@ -70,18 +69,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
                 show: 100
             }
         });
-
-        if (this.upload) {
-            this.uploadDialog();
-        } else if (this.folderAccess) {
-            this.editFolderAccess();
-        } else if (this.folderCreate) {
-            this.createFolderDialog();
-        } else if (this.folderEdit) {
-            this.editFolderDialog();
-        } else if (this.itemCreate) {
-            this.createItemDialog();
-        }
 
         return this;
     },
