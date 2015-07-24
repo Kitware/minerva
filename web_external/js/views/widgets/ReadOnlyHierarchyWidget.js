@@ -115,6 +115,10 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
             this.parentView.$(".g-list-checkbox:not(:checked)").removeAttr("disabled");
         }
 
+    },
+
+    getCheckedResources: function (){
+        return this._getCheckedResourceParam(true);
     }
 
     

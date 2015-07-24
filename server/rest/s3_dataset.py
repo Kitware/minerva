@@ -108,7 +108,8 @@ class S3Dataset(Resource):
             'bucket': bucket,
             'prefix': prefix,
             'assetstoreId': str(target_assetstore['_id']),
-            'folderId': prefix_folder['_id']
+            'folderId': prefix_folder['_id'],
+            'selectedItems': []
         }
 
         metadata['minerva'] = minerva_metadata

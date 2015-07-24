@@ -2,15 +2,18 @@
 * This widget is used to diplay minerva metadata for a dataset.
 */
 minerva.views.DatasetHierarchyWidget = minerva.View.extend({
+    events: {
+        'click .m-use-selected-button': 'updateModelWithSelectedItems'
+    },
     initialize: function (settings) {
         // this.folderAccess = settings.folderAccess || false;
         this.folderAccess = false;
-        
+        this.dataset =  settings.dataset;
         this.folder = new girder.models.FolderModel();
 
         this.folder.set({
-            "_id": settings.minerva.folderId,
-            "minerva": settings.minerva
+            "_id": this.dataset.get("meta").minerva.folderId,
+            "minerva": this.dataset.get("meta").minerva
         });
 
         this.folder.on('g:fetched', function () {
@@ -22,7 +25,19 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
             this.render();
         }, this).fetch();
 
+
     },
+
+    updateModelWithSelectedItems: function(){
+        var resources = this.hierarchyWidget.getCheckedResources();
+        if ( _.has(resources, "item")) {
+            this.dataset.get("meta").minerva.selectedItems = resources.item;
+            this.$el.modal("hide");
+        } else {
+            // error here
+        }
+    },
+
     _createHierarchyWidget: function () {
 
         this.hierarchyWidget = new minerva.views.ReadOnlyHierarchyWidget({

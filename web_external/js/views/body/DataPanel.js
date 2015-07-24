@@ -14,7 +14,7 @@ minerva.views.DataPanel = minerva.View.extend({
 
 	this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
             el: $('#g-dialog-container'),
-            minerva: dataset.get("meta").minerva,
+	    dataset: dataset,
             parentView: this
         });
 
