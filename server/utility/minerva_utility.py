@@ -23,7 +23,6 @@ from girder.plugins.minerva.constants import PluginSettings
 
 
 def findNamedFolder(currentUser, user, parent, parentType, name, create=False):
-    # TODO findOne
     folders = [
         ModelImporter.model('folder').filter(folder, currentUser) for folder in
         ModelImporter.model('folder').childFolders(
@@ -70,7 +69,6 @@ def findNamedCollection(currentUser, name, create=False):
          ModelImporter.model('collection').textSearch(name, user=currentUser)]
     # collections should have len of 0 or 1, since we are looking
     # for a collection with a certain name
-    # TODO findOne
     if len(collections) == 0:
         if create:
             return ModelImporter.model('collection').createCollection(
@@ -98,7 +96,6 @@ def findAnalysisFolder(currentUser, create=False):
 
 
 def findAnalysisByName(currentUser, name):
-    # TODO findOne if possible
     analysisFolder = findAnalysisFolder(currentUser)
     filters = {}
     filters['$text'] = {
