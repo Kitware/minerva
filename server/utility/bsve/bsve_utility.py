@@ -42,9 +42,9 @@ class BsveUtility():
             """Generate pseudorandom number."""
             return ''.join([str(random.randint(0, 9)) for i in range(length)])
 
-        apiKey = self.bsveConfig['bsve']['API_KEY']
-        secretKey = self.bsveConfig['bsve']['SECRET_KEY']
-        userName = self.bsveConfig['bsve']['USER_NAME']
+        apiKey = str(self.bsveConfig['bsve']['API_KEY'])
+        secretKey = str(self.bsveConfig['bsve']['SECRET_KEY'])
+        userName = str(self.bsveConfig['bsve']['USER_NAME'])
 
         nonce = generate_nonce()
         timestamp = str(int(time.time() * 1000))

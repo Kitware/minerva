@@ -24,6 +24,8 @@ before_install:
     - git clone https://github.com/girder/girder.git
     - mv OpenGeoscience/minerva girder/plugins
     - cd girder
+    # copy the placeholder bsve credentials, needed even though we mock bsve api calls
+    - cp plugins/minerva/server/utility/bsve/bsve.json.in plugins/minerva/server/utility/bsve/bsve.json
 
     # Show the memory state; this lets us more quickly determine when the
     # travis environment is bad
