@@ -31,11 +31,13 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
     updateModelWithSelectedItems: function(){
         var resources = this.hierarchyWidget.getCheckedResources();
         if ( _.has(resources, "item")) {
-            this.dataset.get("meta").minerva.selectedItems = resources.item;
             this.$el.modal("hide");
+            this.dataset.get("meta").minerva.selectedItems = resources.item;
+            this.dataset.save();
         } else {
             // error here
         }
+        return this;
     },
 
     _createHierarchyWidget: function () {
