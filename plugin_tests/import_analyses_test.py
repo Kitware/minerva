@@ -92,6 +92,10 @@ class ImportAnalysesTestCase(base.TestCase):
         analysis = response.json[0]
         self.assertEquals(analysis['name'], 'add', 'Expecting analysis name to be "add"')
         expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'add',
+                u'analysis_id': analysis['_id']
+            },
             u'analysis': {
                 u'inputs': [{
                     u'default': {
