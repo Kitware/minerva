@@ -129,7 +129,8 @@ minerva.views.SessionView = minerva.View.extend({
             this.analysisPanel = new minerva.views.AnalysisPanel({
                 el: this.$('.analysisPanel'),
                 parentView: this,
-                collection: this.analysisCollection
+                collection: this.analysisCollection,
+                datasetsCollection: this.datasetsCollection
             }).render();
 
             this.$('.gridster > ul').gridster({

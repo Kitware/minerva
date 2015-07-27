@@ -36,9 +36,7 @@ def convert(data_path, variable, timestep):
     return contour_data
 
 client = GirderClient(host, port)
-client.authenticate(username, password)
-# TODO when we have a token set it on client
-#client.token = girder['token']
+client.token = token
 
 # Get the user
 user = client.get('user/me')

@@ -95,6 +95,7 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
+        <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
       </body>
     </html>
     """

@@ -68,13 +68,13 @@ class ContourAnalysesTestCase(base.TestCase):
             'minervauser@example.com')
 
         # Import the analyses
-        client = GirderClient('localhost', girder_port)
-        client.authenticate(self._username, self._password)
+        self._client = GirderClient('localhost', girder_port)
+        self._client.authenticate(self._username, self._password)
 
         path = os.path.dirname(os.path.realpath(__file__))
         analyses_path = os.path.join(path, '../analyses/NEX/')
 
-        import_analyses.import_analyses(client, analyses_path)
+        import_analyses.import_analyses(self._client, analyses_path)
 
         # Get the analysis folder
         path = '/minerva_analysis/folder'
@@ -165,40 +165,35 @@ class ContourAnalysesTestCase(base.TestCase):
         Test contour analysis
         """
         inputs =  {
-            "host": {
-                "format": "json",
-                "data": "localhost"
+            'host': {
+                'format': 'json',
+                'data': 'localhost'
             },
-            "port": {
-                "format": "json",
-                "data": girder_port
+            'port': {
+                'format': 'json',
+                'data': girder_port
             },
-            "username": {
-                "format": "json",
-                "data": self._username
+            'token': {
+                'format': 'json',
+                'data': self._client.token
             },
-            "password": {
-                "format": "json",
-                "data": self._password
+            'fileId': {
+                'format': 'json',
+                'data': self._dataset_file_id
             },
-            "fileId": {
-                "format": "json",
-                "name": "fileId",
-                "data": self._dataset_file_id
+            'variable': {
+                'format': 'json',
+                'data': 'pr'
             },
-            "variable": {
-                "format": "json",
-                "data": "pr"
-            },
-            "timestep": {
-                "format": "number",
-                "data": 0
+            'timestep': {
+                'format': 'number',
+                'data': 0
             }
         }
 
         outputs =  {
-            "result": {
-                "format": "json"
+            'result': {
+                'format': 'json'
             }
         }
 
