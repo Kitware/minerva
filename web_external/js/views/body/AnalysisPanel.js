@@ -1,13 +1,14 @@
 (function () {
 
-    var analysisTypeToWidgetName = function(type) {
-        return type.replace(/(\_\w)|(^\w)/g, function(m) {
-            var index = m[0]  === '_' ? 1 : 0
+    var analysisTypeToWidgetName = function (type) {
+        var name =  type.replace(/(\_\w)|(^\w)/g, function (m) {
+            var index = m[0]  === '_' ? 1 : 0;
 
             return m[index].toUpperCase();
-        }) + 'Widget';
-    };
+        });
 
+        return name  + 'Widget';
+    };
 
     minerva.views.AnalysisPanel = minerva.View.extend({
 
@@ -26,7 +27,7 @@
             var minervaMetadata = analysis.getMinervaMetadata();
 
             var analysisWidgetName = analysisTypeToWidgetName(minervaMetadata.analysis_type);
-            if (!analysisWidgetName in minerva.views) {
+            if (!(analysisWidgetName in minerva.views)) {
                 var message = _.template('No widget defined for analysis of type ' +
                     '"<%= type %>". Expected widget name "<%= name %>".');
 
