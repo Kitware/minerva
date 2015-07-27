@@ -15,6 +15,7 @@ addons:
     - libpng12-dev
     - libgdal1-dev
     - pkg-config
+    - libnetcdf-dev
 
 before_install:
 
