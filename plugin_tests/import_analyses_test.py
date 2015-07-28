@@ -88,12 +88,13 @@ class ImportAnalysesTestCase(base.TestCase):
         }
         response = self.request(path=path, method='GET', params=params, user=self._user)
         self.assertStatusOk(response)
-        self.assertEquals(len(response.json), 1, 'Expecting only one analysis')
+        self.assertEquals(len(response.json), 2, 'Expecting only one analysis')
         analysis = response.json[0]
         self.assertEquals(analysis['name'], 'add', 'Expecting analysis name to be "add"')
         expected_meta = {
             u'minerva': {
-                u'analysis_type': u'add',
+                u'analysis_type': u'analyses_add',
+                u'analysis_name': u'add',
                 u'analysis_id': analysis['_id']
             },
             u'analysis': {
@@ -120,6 +121,17 @@ class ImportAnalysesTestCase(base.TestCase):
                     u'format': u'number'
                 }],
                 u'name': u'add'
+            }
+        }
+        self.assertEquals(analysis['meta'], expected_meta, 'Unexpected value for meta data')
+
+        analysis = response.json[1]
+        self.assertEquals(analysis['name'], 'local', 'Expecting analysis name to be "local"')
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'local type',
+                u'analysis_name': u'local',
+                u'analysis_id': analysis['_id']
             }
         }
         self.assertEquals(analysis['meta'], expected_meta, 'Unexpected value for meta data')

@@ -23,14 +23,21 @@ def import_analyses(client, analyses_path):
 
         # If there is an analysis.json, it is a Romanesco analysis
         romanesco_analysis = os.path.join(analysis_path, 'analysis.json')
-        romanesco_metadata = {}
+        metadata = {}
+        minerva_metadata = {}
         if os.path.exists(romanesco_analysis):
             analysis = romanesco.load(romanesco_analysis)
             analysis_name = analysis['name']
-            romanesco_metadata['analysis'] = analysis
+            metadata['analysis'] = analysis
+            # set the analysis_type based on folder structure
+            minerva_metadata['analysis_type'] = '_'.join((analysis_path.split('/'))[-2:])
+            minerva_metadata['analysis_name'] = analysis_name
         else:
-            # set the analysis name based on folder structure
-            analysis_name = '_'.join((analysis_path.split('/'))[-2:])
+            # look for a minerva.json
+            minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
+            with open(minerva_metadata_path) as minerva_metadata_file:
+                minerva_metadata = json.load(minerva_metadata_file)
+                analysis_name = minerva_metadata['analysis_name']
 
         # See if we already have an analysis with that name
         items = client.listItem(minerva_analyses_folder['_id'], analysis_name)
@@ -43,14 +50,10 @@ def import_analyses(client, analyses_path):
             analysis_item = items[0]
 
         # Set the minerva metadata
-        if romanesco_analysis:
-            client.addMetadataToItem(analysis_item['_id'], romanesco_metadata)
         # add the item_id as the analysis_id
-        minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
-        with open(minerva_metadata_path) as minerva_metadata_file:
-            minerva_metadata = json.load(minerva_metadata_file)
-            minerva_metadata['minerva']['analysis_id'] = analysis_item['_id']
-            client.addMetadataToItem(analysis_item['_id'], minerva_metadata)
+        minerva_metadata['analysis_id'] = analysis_item['_id']
+        metadata['minerva'] = minerva_metadata
+        client.addMetadataToItem(analysis_item['_id'], metadata)
 
 
 def main():
