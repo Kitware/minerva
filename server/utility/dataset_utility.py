@@ -159,11 +159,11 @@ class GeoJsonMapper(JsonMapper):
 
                 def extractLat(obj):
                     match = lat_expr.find(obj)
-                    return match[0].value
+                    return float(match[0].value)
 
                 def extractLong(obj):
                     match = long_expr.find(obj)
-                    return match[0].value
+                    return float(match[0].value)
 
                 point = geojson.Point((extractLong(obj), extractLat(obj)))
                 properties = {"placeholder": 0}
