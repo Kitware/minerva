@@ -21,12 +21,18 @@ import httmock
 from httmock import urlmatch, HTTMock
 import json
 import os
+import sys
 import time
 
 # Need to set the environment variable before importing girder
-os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
+girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
+os.environ['GIRDER_PORT'] = girder_port# noqa
 
 from tests import base
+from girder_client import GirderClient
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
+import import_analyses
 
 def setUpModule():
     """
@@ -88,6 +94,32 @@ class AnalysisTestCase(base.TestCase):
         path = '/minerva_analysis/folder'
         response = self.request(path=path, method='POST', user=self._user)
         self.assertStatusOk(response)
+        analyses_folder = response.json['folder']
+
+        # import the bsve analysis
+        client = GirderClient('localhost', girder_port)
+        client.authenticate('minervauser', 'password')
+
+        bsve_analysis_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../analyses/bsve'))
+        import_analyses.import_analyses(client, bsve_analysis_path)
+
+        path = '/item'
+        params = {
+            'folderId': analyses_folder['_id']
+        }
+        response = self.request(path=path, method='GET', params=params, user=self._user)
+        self.assertStatusOk(response)
+        self.assertEquals(len(response.json), 1, 'Expecting only one analysis')
+        analysis = response.json[0]
+        self.assertEquals(analysis['name'], 'bsve search', 'Expecting analysis name to be "bsve search"')
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'bsve_search',
+                u'analysis_name': u'bsve search',
+                u'analysis_id': analysis['_id']
+            }
+        }
+        self.assertEquals(analysis['meta'], expected_meta, 'Unexpected value for meta data')
 
         # create the dataset folder
         path = '/minerva_dataset/folder'
