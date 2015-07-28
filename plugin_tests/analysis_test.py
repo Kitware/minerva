@@ -103,16 +103,18 @@ class AnalysisTestCase(base.TestCase):
             if url.path.split('/')[-1] == 'request':
                 return httmock.response(200, '12345')
             else:
-                content = {
-                    'status': 1,
-                    'results': [{'key1': 'val1'}, {'key2': 'val2'}]
-                }
-                content = json.dumps(content)
-                headers = {
-                    'content-length': len(content),
-                    'content-type': 'application/json'
-                }
-                return httmock.response(200, content, headers, request=request)
+                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+                filepath = os.path.join(pluginTestDir, 'data', 'bsve_search.json')
+                with open(filepath) as bsve_search_file:
+                    content = {
+                        'status': 1,
+                        'results': json.load(bsve_search_file)
+                    }
+                    headers = {
+                        'content-length': len(content),
+                        'content-type': 'application/json'
+                    }
+                    return httmock.response(200, content, headers, request=request)
 
         with HTTMock(bsve_mock):
             response = self.request(
@@ -145,5 +147,34 @@ class AnalysisTestCase(base.TestCase):
 
             # ensure the first row of results was added to the dataset
             self.assertTrue('json_row' in dataset, 'json_row expected in dataset')
-            self.assertTrue('key1' in dataset['json_row'], 'key1 should be in json_row')
-            self.assertFalse('key2' in dataset['json_row'], 'key2 should be in json_row')
+            self.assertTrue('data' in dataset['json_row'], 'data should be in json_row')
+            self.assertTrue('Longitude' in dataset['json_row']['data'], 'data.Longitude should be in json_row')
+
+            # ensure that we can map the Lat/Long to geojson, as this json has
+            # unicode values for Lat/Long
+
+            # update the minerva metadata with coordinate mapping
+            metadata = {'minerva': dataset}
+            metadata['minerva']['mapper'] = {
+                "latitudeKeypath": "data.Latitude",
+                "longitudeKeypath": "data.Longitude"
+            }
+
+            path = '/item/{}/metadata'.format(dataset['dataset_id'])
+            response = self.request(
+                path=path,
+                method='PUT',
+                user=self._user,
+                body=json.dumps(metadata),
+                type='application/json'
+            )
+            metadata = response.json
+
+            # create geojson in the dataset
+            path = '/minerva_dataset/{}/geojson'.format(dataset['dataset_id'])
+            response = self.request(
+                path=path,
+                method='POST',
+                user=self._user,
+            )
+            self.assertHasKeys(response.json, ['geojson_file'])
