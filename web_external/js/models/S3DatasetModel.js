@@ -10,7 +10,7 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
         // DatasetModel calls this.set(resp)  which blows away our selectedItems
         // values,  maintain that state here so we can actually update
         // this whole thing should probably get a little attention/refactoring
-        var meta = this.get("meta");
+        var meta = this.get('meta');
 
         // First call the superclass to create the item
         minerva.models.DatasetModel.prototype.save.call(this).off('g:saved').on('g:saved', _.bind(function () {

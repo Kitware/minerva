@@ -5,7 +5,7 @@
 minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
 
-    initialize: function (settings) {
+    initialize: function () {
 
 
         girder.views.HierarchyWidget.prototype.initialize.apply(this, arguments);
@@ -48,7 +48,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         }).on('g:fetched', function () {
             this.breadcrumbs.push(parent);
 
-            if (parentType === 'folder' && parent.get("name") !== folder.get("minerva").bucket) {
+            if (parentType === 'folder' && parent.get('name') !== folder.get('minerva').bucket) {
                 this._fetchToRoot(parent);
             } else {
                 this.breadcrumbs.reverse();
@@ -84,7 +84,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
         if (this.parentModel.resourceName === 'folder' && this._showItems) {
 
-            var itemId = this.parentView.folder.get("minerva").selectedItems[0] || false;            
+            var itemId = this.parentView.folder.get('minerva').selectedItems[0] || false;            
             this.itemListView.selected = itemId;
             
             this.itemListView.setElement(this.$('.g-item-list-container')).render();
@@ -138,12 +138,12 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
             this.parentView.$('.m-use-selected-button').removeClass('disabled');
 
             // DEMO - only allow one item to be selected for the demo
-            this.parentView.$(".g-list-checkbox:not(:checked)").attr("disabled", true);
+            this.parentView.$('.g-list-checkbox:not(:checked)').attr('disabled', true);
         } else {
             this.parentView.$('.m-use-selected-button').addClass('disabled', 'disabled');
 
             // DEMO - on uncheck allow any other checkbox to be checked
-            this.parentView.$(".g-list-checkbox:not(:checked)").removeAttr("disabled");
+            this.parentView.$('.g-list-checkbox:not(:checked)').removeAttr('disabled');
         }
 
     },

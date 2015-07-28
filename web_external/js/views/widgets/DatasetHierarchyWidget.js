@@ -12,8 +12,8 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
         this.folder = new girder.models.FolderModel();
 
         this.folder.set({
-            "_id": this.dataset.get("meta").minerva.folderId,
-            "minerva": this.dataset.get("meta").minerva
+            '_id': this.dataset.get('meta').minerva.folderId,
+            'minerva': this.dataset.get('meta').minerva
         });
 
         this.folder.on('g:fetched', function () {
@@ -30,13 +30,11 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
 
     updateModelWithSelectedItems: function(){
         var resources = this.hierarchyWidget.getCheckedResources();
-        if ( _.has(resources, "item")) {
-            this.$el.modal("hide");
-            this.dataset.get("meta").minerva.selectedItems = resources.item;
+        if ( _.has(resources, 'item')) {
+            this.$el.modal('hide');
+            this.dataset.get('meta').minerva.selectedItems = resources.item;
             this.dataset.save();
-        } else {
-            // error here
-        }
+        } 
         return this;
     },
 
@@ -61,7 +59,7 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
                 .girderModal(this)
                 .on('ready.girder.modal',
                     _.bind(function () {
-                        this.hierarchyWidget.setElement(this.$(".datasetHierarchy")).render();
+                        this.hierarchyWidget.setElement(this.$('.datasetHierarchy')).render();
                     }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));

@@ -1,12 +1,12 @@
 
 minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
 
-    initialize: function(settings) {
+    initialize: function() {
         girder.views.ItemListWidget.prototype.initialize.apply(this, arguments);
         this.selected = false;
     },
 
-    cidFromId: function(selected){
+    cidFromId: function(){
         var selected_cid;
 
         if( this.collection.get(this.selected) ){
