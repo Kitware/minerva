@@ -102,37 +102,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
      * the checked menu state.
      */
     updateChecked: function () {
-        var folders = this.folderListView.checked,
-            items = [];
-
-        var minFolderLevel = girder.AccessType.ADMIN;
-        _.every(folders, function (cid) {
-            var folder = this.folderListView.collection.get(cid);
-            minFolderLevel = Math.min(minFolderLevel, folder.getAccessLevel());
-            return minFolderLevel > girder.AccessType.READ; // acts as 'break'
-        }, this);
-
-        var minItemLevel = girder.AccessType.ADMIN;
-        if (this.itemListView) {
-            items = this.itemListView.checked;
-            if (items.length) {
-                minItemLevel = Math.min(minItemLevel, this.parentModel.getAccessLevel());
-            }
-        }
-
-        // switch to use-selected button instead of item action dropdown
-        if (folders.length + items.length) {
-            this.parentView.$('.m-use-selected-button').removeClass('disabled');
-
-            // DEMO - only allow one item to be selected for the demo
-            this.parentView.$('.g-list-checkbox:not(:checked)').attr('disabled', true);
-        } else {
-            this.parentView.$('.m-use-selected-button').addClass('disabled', 'disabled');
-
-            // DEMO - on uncheck allow any other checkbox to be checked
-            this.parentView.$('.g-list-checkbox:not(:checked)').removeAttr('disabled');
-        }
-
+        // do nothing - DatasetHierarchyWidget will handle updating the dataset
     },
 
     getCheckedResources: function () {

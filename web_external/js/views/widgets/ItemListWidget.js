@@ -37,15 +37,23 @@ minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
         var view = this;
         this.$('.g-list-checkbox').change(function () {
             var cid = $(this).attr('g-item-cid');
-            if (this.checked) {
-                view.checked.push(cid);
-            } else {
+            // if nothing is checked its because we checked outselves
+            if (view.$('.g-list-checkbox:checked').length === 0) {
                 var idx = view.checked.indexOf(cid);
                 if (idx !== -1) {
                     view.checked.splice(idx, 1);
                 }
+            } else {
+                // we checked outsleves for the first time,  or we checked someone else
+                view.$('.g-list-checkbox:checked').prop('checked', false);
+                view.checked = [];
+
+                $(this).prop('checked', true);
+                view.checked.push(cid);
             }
+
             view.trigger('g:checkboxesChanged');
+
         });
         return this;
     }
