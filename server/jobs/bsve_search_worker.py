@@ -77,10 +77,10 @@ def run(job):
             'name': outFilename
         })
         if existing:
-            minerva_metadata['original_files'] = {
+            minerva_metadata['original_files'] = [{
                 '_id': existing['_id'],
                 'name': outFilename
-            }
+            }]
         else:
             raise (Exception('Cannot find file %s in dataset %s' %
                    (outFilename, datasetId)))
