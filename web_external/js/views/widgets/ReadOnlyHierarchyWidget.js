@@ -1,6 +1,6 @@
 /**
  * This widget is used to navigate the data hierarchy of folders and items.
- * With only readonly data. 
+ * With only readonly data.
  */
 minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
@@ -9,23 +9,18 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
 
         girder.views.HierarchyWidget.prototype.initialize.apply(this, arguments);
-        // wrap itemListView render with a trigger so we know whe it is done
-        // we'll hoook into this later to check if we need to do any selecting
-        // based on previous dataset state (see DatasetHierarchyWidget.js)
 
-               
-        //
     },
 
     _initFolderViewSubwidgets: function () {
-        
+
         this.itemListView = new minerva.views.ItemListWidget({
             folderId: this.parentModel.get('_id'),
             checkboxes: this._checkboxes,
             parentView: this
             //selected: cid
         });
-        
+
         this.itemListView.on('g:itemClicked', this._onItemClick, this)
             .off('g:checkboxesChanged')
             .on('g:checkboxesChanged', this.updateChecked, this)
@@ -36,13 +31,12 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
     },
 
-    
-    
+
     _fetchToRoot: function (folder) {
         var parentId = folder.get('parentId');
         var parentType = folder.get('parentCollection');
         var parent = new girder.models[girder.getModelClassByName(parentType)]();
-        
+
         parent.set({
             _id: parentId
         }).on('g:fetched', function () {
@@ -57,7 +51,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         }, this).fetch();
     },
 
-        
     render: function () {
         this.folderCount = null;
         this.itemCount = null;
@@ -78,15 +71,12 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         }
 
         this.breadcrumbView.setElement(this.$('.g-hierarchy-breadcrumb-bar>ol')).render();
-    //    this.checkedMenuWidget.dropdownToggle = this.$('.g-checked-actions-button');
-    //    this.checkedMenuWidget.setElement(this.$('.g-checked-actions-menu')).render();
         this.folderListView.setElement(this.$('.g-folder-list-container')).render();
 
         if (this.parentModel.resourceName === 'folder' && this._showItems) {
 
-            var itemId = this.parentView.folder.get('minerva').selectedItems[0] || false;            
+            var itemId = this.parentView.folder.get('minerva').selectedItems[0] || false;
             this.itemListView.selected = itemId;
-            
             this.itemListView.setElement(this.$('.g-item-list-container')).render();
         }
 
@@ -148,9 +138,8 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
     },
 
-    getCheckedResources: function (){
+    getCheckedResources: function () {
         return this._getCheckedResourceParam(true);
     }
 
-    
 });

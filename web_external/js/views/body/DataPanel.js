@@ -8,13 +8,13 @@ minerva.views.DataPanel = minerva.View.extend({
         'click .dataset-info': 'displayDatasetInfo'
     },
 
-    selectS3Files: function(event) {
-	var datasetId = $(event.currentTarget).attr('m-dataset-id');
+    selectS3Files: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
 
-	this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
+        this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
             el: $('#g-dialog-container'),
-	    dataset: dataset,
+            dataset: dataset,
             parentView: this
         });
 

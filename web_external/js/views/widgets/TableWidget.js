@@ -66,7 +66,9 @@ minerva.views.TableWidget = minerva.View.extend({
 
     render: function () {
         // TODO probably want to synthesize colnames in dataset
-        var colnames = _.map(_.range(1, this.dataset.csv.data[0].length + 1), function (ind) { return { title: 'col' + ind }; });
+        var colnames = _.map(_.range(1, this.dataset.csv.data[0].length + 1), function (ind) {
+            return { title: 'col' + ind };
+        });
         var longitudeColumn = null,
             latitudeColumn = null;
         if (!this.create) {

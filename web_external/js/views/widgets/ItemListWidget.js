@@ -1,24 +1,24 @@
 
 minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
 
-    initialize: function() {
+    initialize: function () {
         girder.views.ItemListWidget.prototype.initialize.apply(this, arguments);
         this.selected = false;
     },
 
-    cidFromId: function(){
+    cidFromId: function () {
         var selected_cid;
 
-        if( this.collection.get(this.selected) ){
+        if (this.collection.get(this.selected)) {
             selected_cid = this.collection.get(this.selected).cid;
         }
-        
+
         return selected_cid;
     },
-    
+
     render: function () {
         this.checked = [];
-                
+
         this.$el.html(minerva.templates.itemList({
             items: this.collection.models,
             hasMore: this.collection.hasNextPage(),
@@ -30,7 +30,7 @@ minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
             // this indicates the cid of the item that may or
             // may not be in the current folder
             cid: this.cidFromId(this.selected),
-            
+
             checkboxes: this._checkboxes
         }));
 
@@ -51,5 +51,4 @@ minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
     }
 
 
-    
 });
