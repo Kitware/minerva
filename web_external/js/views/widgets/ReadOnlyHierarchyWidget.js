@@ -4,9 +4,7 @@
  */
 minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
-
     initialize: function () {
-
 
         girder.views.HierarchyWidget.prototype.initialize.apply(this, arguments);
 
@@ -30,7 +28,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
             }, this);
 
     },
-
 
     _fetchToRoot: function (folder) {
         var parentId = folder.get('parentId');

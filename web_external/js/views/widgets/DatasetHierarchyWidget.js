@@ -12,8 +12,8 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
         this.folder = new girder.models.FolderModel();
 
         this.folder.set({
-            '_id': this.dataset.get('meta').minerva.folderId,
-            'minerva': this.dataset.get('meta').minerva
+            _id: this.dataset.get('meta').minerva.folderId,
+            minerva: this.dataset.get('meta').minerva
         });
 
         this.folder.on('g:fetched', function () {
@@ -24,7 +24,6 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
             this._createHierarchyWidget();
             this.render();
         }, this).fetch();
-
 
     },
 

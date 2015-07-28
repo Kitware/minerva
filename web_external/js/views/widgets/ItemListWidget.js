@@ -49,6 +49,4 @@ minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
         });
         return this;
     }
-
-
 });
