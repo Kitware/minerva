@@ -128,13 +128,13 @@ class S3Dataset(Resource):
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.'))
 
-
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
     def updateDataset(self, item, params):
 
         # de-stringify selectedItems
-        params['selectedItems'] = json_util.loads(params.get("selectedItems", "[]"))
+        params['selectedItems'] = json_util.loads(params.get("selectedItems",
+                                                             "[]"))
         params['folderId'] = ObjectId(params['folderId'])
 
         # Metadata keys we allow to be updated
@@ -146,8 +146,10 @@ class S3Dataset(Resource):
             raise RestException(u"No metadata set, is this really a dataset?")
 
         # Strictly allow only updates to keys in valid_keys
-        if len(set([i for i in minerva_metadata.items() if i[0] not in valid_keys]) ^
-               set([i for i in params.items() if i[0] not in valid_keys])) > 0:
+        if len(set([i for i in minerva_metadata.items()
+                    if i[0] not in valid_keys]) ^
+               set([i for i in params.items()
+                    if i[0] not in valid_keys])) > 0:
             raise RestException("Only %s may be updated!" % valid_keys)
 
         minerva_metadata.update(params.items())
@@ -155,7 +157,6 @@ class S3Dataset(Resource):
         self.model('item').setMetadata(item, {'minerva': minerva_metadata})
 
         return minerva_metadata
-
 
     updateDataset.description = (
         Description('Update medata for an S3 Item')
