@@ -138,19 +138,19 @@ class S3Dataset(Resource):
         params['folderId'] = ObjectId(params['folderId'])
 
         # Metadata keys we allow to be updated
-        valid_keys = ['selectedItems']
+        whitelist_keys = ['selectedItems']
 
         try:
             minerva_metadata = item['meta']['minerva']
         except KeyError:
-            raise RestException(u"No metadata set, is this really a dataset?")
+            raise RestException("No metadata set, is this really a dataset?")
 
-        # Strictly allow only updates to keys in valid_keys
+        # Strictly allow only updates to keys in whitelist_keys
         if len(set([i for i in minerva_metadata.items()
-                    if i[0] not in valid_keys]) ^
+                    if i[0] not in whitelist_keys]) ^
                set([i for i in params.items()
-                    if i[0] not in valid_keys])) > 0:
-            raise RestException("Only %s may be updated!" % valid_keys)
+                    if i[0] not in whitelist_keys])) > 0:
+            raise RestException("Only %s may be updated!" % whitelist_keys)
 
         minerva_metadata.update(params.items())
 
