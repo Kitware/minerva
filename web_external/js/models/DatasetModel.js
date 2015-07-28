@@ -223,7 +223,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         }
     },
 
-   // TODO split CSV functionality out possibly to a subclass
+    // TODO split CSV functionality out possibly to a subclass
 
     getCSVFile: function (callback) {
         var processCSVFile = _.bind(function () {

@@ -108,7 +108,7 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
     saveSession: function () {
         // TODO will want more info on features, possibly layer or transparency or mapping or ??
         // for now just save the fileid
-                // update the json, save it
+        // update the json, save it
         this.sessionJsonFile.on('g:upload.complete', function () {
             this.trigger('m:saved');
             // TODO some work here

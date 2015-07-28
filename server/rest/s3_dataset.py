@@ -19,9 +19,12 @@
 
 import uuid
 
+from bson import json_util
+from bson.objectid import ObjectId
+
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel
+from girder.api.rest import Resource, loadmodel, RestException
 from girder.constants import AccessType
 from girder.plugins.minerva.utility.minerva_utility import findNamedFolder, \
     findMinervaFolder
@@ -31,6 +34,7 @@ class S3Dataset(Resource):
     def __init__(self):
         self.resourceName = 'minerva_dataset_s3'
         self.route('POST', (':id', 'dataset'), self.createDataset)
+        self.route('PUT', (':id', 'dataset'), self.updateDataset)
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
@@ -108,7 +112,8 @@ class S3Dataset(Resource):
             'bucket': bucket,
             'prefix': prefix,
             'assetstoreId': str(target_assetstore['_id']),
-            'folderId': prefix_folder['_id']
+            'folderId': prefix_folder['_id'],
+            'selectedItems': []
         }
 
         metadata['minerva'] = minerva_metadata
@@ -120,5 +125,40 @@ class S3Dataset(Resource):
     createDataset.description = (
         Description('Create metadata for an Item, promoting it to a S3 Dataset, \
         and trigger import.')
+        .param('id', 'The Item ID', paramType='path')
+        .errorResponse('ID was invalid.'))
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.WRITE)
+    def updateDataset(self, item, params):
+
+        # de-stringify selectedItems
+        params['selectedItems'] = json_util.loads(params.get("selectedItems",
+                                                             "[]"))
+        params['folderId'] = ObjectId(params['folderId'])
+
+        # Metadata keys we allow to be updated
+        whitelist_keys = ['selectedItems']
+
+        try:
+            minerva_metadata = item['meta']['minerva']
+        except KeyError:
+            raise RestException("No metadata set, is this really a dataset?")
+
+        # Strictly allow only updates to keys in whitelist_keys
+        if len(set([i for i in minerva_metadata.items()
+                    if i[0] not in whitelist_keys]) ^
+               set([i for i in params.items()
+                    if i[0] not in whitelist_keys])) > 0:
+            raise RestException("Only %s may be updated!" % whitelist_keys)
+
+        minerva_metadata.update(params.items())
+
+        self.model('item').setMetadata(item, {'minerva': minerva_metadata})
+
+        return minerva_metadata
+
+    updateDataset.description = (
+        Description('Update medata for an S3 Item')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.'))

@@ -4,21 +4,39 @@ minerva.models.S3DatasetModel = minerva.models.DatasetModel.extend({
     },
 
     save: function () {
+        // save isNew state before calling the super save() method
+        var isNew = this.isNew();
+
+        // DatasetModel calls this.set(resp)  which blows away our selectedItems
+        // values,  maintain that state here so we can actually update
+        // this whole thing should probably get a little attention/refactoring
+        var meta = this.get('meta');
 
         // First call the superclass to create the item
-        minerva.models.DatasetModel.prototype.save.call(this).on('g:saved', _.bind(function () {
+        minerva.models.DatasetModel.prototype.save.call(this).off('g:saved').on('g:saved', _.bind(function () {
             var data = {};
-            _.each(this.attributes, function (value, key) {
-                if (typeof value !== 'object') {
-                    data[key] = value;
-                }
-            });
+            if (isNew) {
+                _.each(this.attributes, function (value, key) {
+                    if (typeof value !== 'object') {
+                        data[key] = value;
+                    }
+                });
+            } else {
+                // do better error checking here
+                _.each(meta.minerva, function (value, key) {
+                    if (typeof value === 'object') {
+                        data[key] = JSON.stringify(value);
+                    } else {
+                        data[key] = value;
+                    }
+                });
+            }
 
             var id = this.get('_id');
 
             girder.restRequest({
                 path: '/minerva_dataset_s3/' + id + '/dataset',
-                type: 'POST',
+                type: isNew ? 'POST' : 'PUT',
                 data: data,
                 error: null // don't do default error behavior (validation may fail)
             }).done(_.bind(function (resp) {

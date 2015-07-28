@@ -49,7 +49,9 @@ minerva.views.LayersPanel = minerva.View.extend({
     },
 
     render: function () {
-        var displayedDatasets = _.filter(this.collection.models, function (dataset) { return dataset.get('displayed'); });
+        var displayedDatasets = _.filter(this.collection.models, function (dataset) {
+            return dataset.get('displayed');
+        });
         this.$el.html(minerva.templates.layersPanel({
             datasets: displayedDatasets
         }));

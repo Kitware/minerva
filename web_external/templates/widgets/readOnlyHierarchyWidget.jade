@@ -1,0 +1,17 @@
+.g-hierarchy-widget
+  .g-hierarchy-breadcrumb-bar
+    ol.breadcrumb
+  if showActions
+    //- DEMO - hide select all button
+    .g-hierarchy-actions-header.hidden
+      input.g-select-all(type="checkbox", data-toggle="tooltip",
+                         title="Select / Unselect all")
+      span(style="margin-left:7px;")
+      | Select / Unselect all
+      .g-clear-right
+  .g-folder-list-container
+  .g-item-list-container
+  .g-empty-parent-message.g-info-message-container.hide
+    i.icon-info-circled
+    |  This folder is empty.
+.g-folder-metadata
