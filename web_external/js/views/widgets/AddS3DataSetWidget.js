@@ -16,7 +16,7 @@
                     secret: $('#m-s3-secret').val(),
                     service: $('#m-s3-service').val(),
                     readOnly: $('#m-s3-readonly').val(),
-                    folderId: this.collection.datasetFolderId
+                    folderId: this.collection.folderId
                 };
 
                 if (fields.prefix.indexOf('/') !== 0) {
