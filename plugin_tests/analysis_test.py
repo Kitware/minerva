@@ -21,12 +21,18 @@ import httmock
 from httmock import urlmatch, HTTMock
 import json
 import os
+import sys
 import time
 
 # Need to set the environment variable before importing girder
-os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
+girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
+os.environ['GIRDER_PORT'] = girder_port# noqa
 
 from tests import base
+from girder_client import GirderClient
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
+import import_analyses
 
 def setUpModule():
     """
@@ -88,6 +94,32 @@ class AnalysisTestCase(base.TestCase):
         path = '/minerva_analysis/folder'
         response = self.request(path=path, method='POST', user=self._user)
         self.assertStatusOk(response)
+        analyses_folder = response.json['folder']
+
+        # import the bsve analysis
+        client = GirderClient('localhost', girder_port)
+        client.authenticate('minervauser', 'password')
+
+        bsve_analysis_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../analyses/bsve'))
+        import_analyses.import_analyses(client, bsve_analysis_path)
+
+        path = '/item'
+        params = {
+            'folderId': analyses_folder['_id']
+        }
+        response = self.request(path=path, method='GET', params=params, user=self._user)
+        self.assertStatusOk(response)
+        self.assertEquals(len(response.json), 1, 'Expecting only one analysis')
+        analysis = response.json[0]
+        self.assertEquals(analysis['name'], 'bsve search', 'Expecting analysis name to be "bsve search"')
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'bsve_search',
+                u'analysis_name': u'bsve search',
+                u'analysis_id': analysis['_id']
+            }
+        }
+        self.assertEquals(analysis['meta'], expected_meta, 'Unexpected value for meta data')
 
         # create the dataset folder
         path = '/minerva_dataset/folder'
@@ -103,16 +135,18 @@ class AnalysisTestCase(base.TestCase):
             if url.path.split('/')[-1] == 'request':
                 return httmock.response(200, '12345')
             else:
-                content = {
-                    'status': 1,
-                    'results': [{'key1': 'val1'}, {'key2': 'val2'}]
-                }
-                content = json.dumps(content)
-                headers = {
-                    'content-length': len(content),
-                    'content-type': 'application/json'
-                }
-                return httmock.response(200, content, headers, request=request)
+                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+                filepath = os.path.join(pluginTestDir, 'data', 'bsve_search.json')
+                with open(filepath) as bsve_search_file:
+                    content = {
+                        'status': 1,
+                        'results': json.load(bsve_search_file)
+                    }
+                    headers = {
+                        'content-length': len(content),
+                        'content-type': 'application/json'
+                    }
+                    return httmock.response(200, content, headers, request=request)
 
         with HTTMock(bsve_mock):
             response = self.request(
@@ -145,5 +179,34 @@ class AnalysisTestCase(base.TestCase):
 
             # ensure the first row of results was added to the dataset
             self.assertTrue('json_row' in dataset, 'json_row expected in dataset')
-            self.assertTrue('key1' in dataset['json_row'], 'key1 should be in json_row')
-            self.assertFalse('key2' in dataset['json_row'], 'key2 should be in json_row')
+            self.assertTrue('data' in dataset['json_row'], 'data should be in json_row')
+            self.assertTrue('Longitude' in dataset['json_row']['data'], 'data.Longitude should be in json_row')
+
+            # ensure that we can map the Lat/Long to geojson, as this json has
+            # unicode values for Lat/Long
+
+            # update the minerva metadata with coordinate mapping
+            metadata = {'minerva': dataset}
+            metadata['minerva']['mapper'] = {
+                "latitudeKeypath": "data.Latitude",
+                "longitudeKeypath": "data.Longitude"
+            }
+
+            path = '/item/{}/metadata'.format(dataset['dataset_id'])
+            response = self.request(
+                path=path,
+                method='PUT',
+                user=self._user,
+                body=json.dumps(metadata),
+                type='application/json'
+            )
+            metadata = response.json
+
+            # create geojson in the dataset
+            path = '/minerva_dataset/{}/geojson'.format(dataset['dataset_id'])
+            response = self.request(
+                path=path,
+                method='POST',
+                user=self._user,
+            )
+            self.assertHasKeys(response.json, ['geojson_file'])

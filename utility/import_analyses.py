@@ -1,37 +1,60 @@
 import os
-import glob
+import json
+#import glob
 import argparse
 import romanesco
 
 from girder_client import GirderClient
 
 def import_analyses(client, analyses_path):
-    # First get the analysis folder
-    analyses_folder = client.get('/minerva_analysis/folder')
+    # First get the minerva analysis folder
+    minerva_analyses_folder = client.get('/minerva_analysis/folder')
 
-    if not analyses_folder['folder']:
-        analyses_folder = client.post('/minerva_analysis/folder')
+    if not minerva_analyses_folder['folder']:
+        minerva_analyses_folder = client.post('/minerva_analysis/folder')
 
-    analyses_folder =  analyses_folder['folder']
+    minerva_analyses_folder = minerva_analyses_folder['folder']
 
-    for analysis_file in glob.glob(os.path.join(analyses_path, "*.json")):
-        analysis = romanesco.load(analysis_file)
-        analysis_name = analysis['name']
+    # look for specific analysis subfolders
+    # e.g. analyses/bsve
+
+    for analysis_subfolder in os.listdir(analyses_path):
+        analysis_path = os.path.join(analyses_path, analysis_subfolder)
+
+        # If there is an analysis.json, it is a Romanesco analysis
+        romanesco_analysis = os.path.join(analysis_path, 'analysis.json')
+        metadata = {}
+        minerva_metadata = {}
+        if os.path.exists(romanesco_analysis):
+            analysis = romanesco.load(romanesco_analysis)
+            analysis_name = analysis['name']
+            metadata['analysis'] = analysis
+            # set the analysis_type based on folder name
+            minerva_metadata['analysis_type'] = analysis_path.split('/')[-1]
+            minerva_metadata['analysis_name'] = analysis_name
+        else:
+            # look for a minerva.json
+            minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
+            with open(minerva_metadata_path) as minerva_metadata_file:
+                minerva_metadata = json.load(minerva_metadata_file)
+                analysis_name = minerva_metadata['analysis_name']
 
         # See if we already have an analysis with that name
-        items = client.listItem(analyses_folder['_id'], analysis_name)
+        items = client.listItem(minerva_analyses_folder['_id'], analysis_name)
 
         if len(items) == 0:
-            analysis_item = client.createItem(analyses_folder['_id'], analysis_name, analysis_name)
+            analysis_item = client.createItem(minerva_analyses_folder['_id'], analysis_name, analysis_name)
         elif len(items) > 1:
             raise Exception('More than one item found with name: %s' % analysis_name)
         else:
             analysis_item = items[0]
 
-        # Set the metadata
-        client.addMetadataToItem(analysis_item['_id'], {
-            'analysis': analysis
-        })
+        # Set the minerva metadata
+        # add the item_id as the analysis_id
+        minerva_metadata['analysis_id'] = analysis_item['_id']
+        metadata['minerva'] = minerva_metadata
+        client.addMetadataToItem(analysis_item['_id'], metadata)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Import analyses into minerva')

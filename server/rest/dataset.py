@@ -119,8 +119,16 @@ class Dataset(Resource):
         return geojsonFilepath
 
     def _convertJsonfileToGeoJson(self, item, tmpdir):
+        # use the first filename with json ext found in original_files
+        filename = None
+        files = item['meta']['minerva']['original_files']
+        for f in files:
+            if f['name'].endswith('.json'):
+                filename = f['name']
+        if filename is None:
+            raise RestException('Dataset %s has no json files' % item['name'])
         jsonFilepath = os.path.join(tmpdir, item['name'],
-                                    item['name'] + '.json')
+                                    filename)
         geoJsonFilename = item['name'] + PluginSettings.GEOJSON_EXTENSION
         geoJsonFilepath = os.path.join(tmpdir, item['name'], geoJsonFilename)
 
