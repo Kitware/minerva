@@ -29,8 +29,8 @@ def import_analyses(client, analyses_path):
             analysis = romanesco.load(romanesco_analysis)
             analysis_name = analysis['name']
             metadata['analysis'] = analysis
-            # set the analysis_type based on folder structure
-            minerva_metadata['analysis_type'] = '_'.join((analysis_path.split('/'))[-2:])
+            # set the analysis_type based on folder name
+            minerva_metadata['analysis_type'] = analysis_path.split('/')[-1]
             minerva_metadata['analysis_name'] = analysis_name
         else:
             # look for a minerva.json

@@ -93,7 +93,7 @@ class ImportAnalysesTestCase(base.TestCase):
         self.assertEquals(analysis['name'], 'add', 'Expecting analysis one name to be "add"')
         expected_meta = {
             u'minerva': {
-                u'analysis_type': u'analyses_add',
+                u'analysis_type': u'add',
                 u'analysis_name': u'add',
                 u'analysis_id': analysis['_id']
             },
