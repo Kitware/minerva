@@ -3,6 +3,12 @@ python:
     - "2.7"
 #    - "3.4" For now romanesco doesn't support Python 3
 
+cache:
+  directories:
+  - $HOME/virtualenv/python2.7.9
+  - $HOME/.cache/pip
+  - $HOME/build/girder/node_modules
+
 sudo: false
 
 compiler:
@@ -18,11 +24,15 @@ addons:
     - libnetcdf-dev
 
 before_install:
+    # move node_modules cache so that git clone girder completes
+    - mv $HOME/build/girder/node_modules $HOME/build/girder_node_modules_tmp
 
     # minerva has been cloned to OpenGeoscience/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
     - cd "${HOME}"/build
     - git clone https://github.com/girder/girder.git
+    # move the node_modules cache to the proper place
+    - mv $HOME/build/girder_node_modules_tmp $HOME/build/girder/node_modules
     - mv OpenGeoscience/minerva girder/plugins
     - cd girder
     # copy the placeholder bsve credentials, needed even though we mock bsve api calls
