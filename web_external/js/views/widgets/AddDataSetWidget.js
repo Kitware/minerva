@@ -149,7 +149,7 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
         // need to create a new item in the dataset folder, then upload there
         this.newDataset = new minerva.models.DatasetModel({
             name: this.newItemName,
-            folderId: this.collection.datasetFolderId
+            folderId: this.collection.folderId
         }).on('g:saved', function () {
             this.uploadWidget.parentType = 'item';
             this.uploadWidget.parent = this.newDataset;
