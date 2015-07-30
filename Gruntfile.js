@@ -86,6 +86,7 @@ module.exports = function (grunt) {
                 staticDir + '/minerva_templates.js',
                 jsDir + '/minerva-version.js',
                 jsDir + '/view.js',
+                jsDir + '/contourJsonReader.js',
                 jsDir + '/app.js',
                 jsDir + '/utilities.js',
                 jsDir + '/MinervaModel.js',
