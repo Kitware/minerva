@@ -28,7 +28,7 @@ minerva.views.MapPanel = minerva.View.extend({
 
                 layer.clear();
 
-                reader.read(dataset.geoJsonData, _.bind(function () {
+                reader.read(dataset.fileData, _.bind(function () {
                     this.uiLayer = this.map.createLayer('ui');
                     this.uiLayer.createWidget('slider');
                     this.map.draw();

@@ -1,4 +1,4 @@
-minerva.models.DatasetModel = girder.models.ItemModel.extend({
+minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     defaults: {
         geojsonFileId: null,
@@ -115,7 +115,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             this.geoJsonAvailable = true;
         }
         if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
-            this.geoJsonData = minervaMetadata.geojson.data;
+            this.fileData = minervaMetadata.geojson.data;
         }
         return minervaMetadata;
     },
@@ -313,7 +313,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
             };
             geoJsonData.features.push(point);
         }, this);
-        this.geoJsonData = JSON.stringify(geoJsonData);
+        this.fileData = JSON.stringify(geoJsonData);
         this.geoJsonFile = new girder.models.FileModel();
         this.geoJsonFile.on('g:upload.complete', function () {
             minervaMeta.geojson_file = {
@@ -324,22 +324,32 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 this.trigger('m:geojsonCreatedFromTabular');
             }, this);
             this.saveMinervaMetadata(minervaMeta);
-        }, this).uploadToItem(this, this.geoJsonData, this.get('name') + '.geojson', 'application/json');
+        }, this).uploadToItem(this, this.fileData, this.get('name') + '.geojson', 'application/json');
     },
 
     loadData: function () {
+        // underscore doesn't have a deep has() unction?
+
         if (this.geoJsonAvailable) {
             this.loadGeoJsonData();
         } else {
+            var file_id;
             var minervaMeta = this.getMinervaMetadata();
             // Manage contourJson style files here
             // for now. (will refactor this and loadGeoJsonData later)
-            if (_.has(minervaMeta, 'dataset_id')) {
+            try {
+                // need better API here or something -  why doesn't underscore
+                // have a recursive _.has()? e.g., _.has(minervaMeta, "original_files", 0, "_id")
+                file_id = minervaMeta.original_files[0]._id;
+            } catch (e) {
+                file_id = false;
+            }
+            if (file_id) {
                 $.ajax({
-                    url: girder.apiRoot + '/file/' + minervaMeta.dataset_id + '/download',
+                    url: girder.apiRoot + '/file/' + minervaMeta.original_files[0]._id + '/download',
                     contentType: 'application/json',
                     success: _.bind(function (data) {
-                        this.contourData = data;
+                        this.fileData = data;
                         this.geoFileReader = 'contourJsonReader';
                     }, this),
                     complete: _.bind(function () {
@@ -359,7 +369,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                     url: girder.apiRoot + '/file/' + minervaMeta.geojson_file._id + '/download',
                     contentType: 'application/json',
                     success: _.bind(function (data) {
-                        this.geoJsonData = data;
+                        this.fileData = data;
                         this.geoFileReader = 'jsonReader';
                     }, this),
                     complete: _.bind(function () {
@@ -372,14 +382,14 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 // if mongo, we'll need to pass down some search params to a new
                 // endpoint that will pull out of mongo and convert into geojson
                 if (minervaMeta.geojson && minervaMeta.geojson.data) {
-                    this.geoJsonData = minervaMeta.geojson.data;
+                    this.fileData = minervaMeta.geojson.data;
                     this.geoFileReader = 'jsonReader';
                     this.trigger('m:geoJsonDataLoaded', this.get('_id'));
                     this.trigger('m:dataLoaded', this.get('_id'));
                 } else {
                     this.on('m:geojsonCreated', function () {
                         var minervaMeta = this.getMinervaMetadata();
-                        this.geoJsonData = minervaMeta.geojson.data;
+                        this.fileData = minervaMeta.geojson.data;
                         this.geoFileReader = 'jsonReader';
                         this.trigger('m:geoJsonDataLoaded', this.get('_id'));
                         this.trigger('m:dataLoaded', this.get('_id'));
@@ -408,7 +418,7 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                     };
                     geoJsonData.features.push(point);
                 }, this);
-                this.geoJsonData = JSON.stringify(geoJsonData);
+                this.fileData = JSON.stringify(geoJsonData);
                 this.geoFileReader = 'jsonReader';
                 this.trigger('m:geoJsonDataLoaded', this.get('_id'));
                 this.trigger('m:dataLoaded', this.get('_id'));

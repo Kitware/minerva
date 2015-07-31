@@ -14,7 +14,7 @@
                     .dataset
                       span(title=dataset.get('name'))= dataset.get('name').length > 18 ? dataset.get('name').slice(0,18) + "..." : dataset.get('name')
                         - var attributes = {'m-dataset-id': dataset.get('_id')}
-                        if dataset.geoJsonAvailable
+                        if dataset.renderableP()
                             //- right arrow icon to move dataset into current session
                             - var classes = (dataset.get('displayed') ? 'icon-right-circled icon-disabled dataset-in-session' : 'icon-right-circled icon-enabled add-dataset-to-session')
                             i(class=classes)&attributes(attributes)
