@@ -316,12 +316,38 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
         this.geoJsonData = JSON.stringify(geoJsonData);
         this.geoJsonFile = new girder.models.FileModel();
         this.geoJsonFile.on('g:upload.complete', function () {
-            minervaMeta.geojson_file = {_id: this.geoJsonFile.get('_id'), name: this.geoJsonFile.get('name')};
+            minervaMeta.geojson_file = {
+                _id: this.geoJsonFile.get('_id'),
+                name: this.geoJsonFile.get('name')
+            };
             this.on('m:minervaMetadataSaved', function () {
                 this.trigger('m:geojsonCreatedFromTabular');
             }, this);
             this.saveMinervaMetadata(minervaMeta);
         }, this).uploadToItem(this, this.geoJsonData, this.get('name') + '.geojson', 'application/json');
+    },
+
+    loadData: function () {
+        if (this.geoJsonAvailable) {
+            this.loadGeoJsonData();
+        } else {
+            var minervaMeta = this.getMinervaMetadata();
+            // Manage contourJson style files here
+            // for now. (will refactor this and loadGeoJsonData later)
+            if (_.has(minervaMeta, 'dataset_id')) {
+                $.ajax({
+                    url: girder.apiRoot + '/file/' + minervaMeta.dataset_id + '/download',
+                    contentType: 'application/json',
+                    success: _.bind(function (data) {
+                        this.contourData = data;
+                        this.geoFileReader = 'contourJsonReader';
+                    }, this),
+                    complete: _.bind(function () {
+                        this.trigger('m:dataLoaded', this.get('_id'));
+                    }, this)
+                });
+            }
+        }
     },
 
     loadGeoJsonData: function () {
@@ -334,9 +360,11 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                     contentType: 'application/json',
                     success: _.bind(function (data) {
                         this.geoJsonData = data;
+                        this.geoFileReader = 'jsonReader';
                     }, this),
                     complete: _.bind(function () {
-                        this.trigger('m:geoJsonDataLoaded');
+                        this.trigger('m:geoJsonDataLoaded', this.get('_id'));
+                        this.trigger('m:dataLoaded', this.get('_id'));
                     }, this)
                 });
             } else if (minervaMeta.original_type === 'mongo') {
@@ -345,12 +373,16 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                 // endpoint that will pull out of mongo and convert into geojson
                 if (minervaMeta.geojson && minervaMeta.geojson.data) {
                     this.geoJsonData = minervaMeta.geojson.data;
-                    this.trigger('m:geoJsonDataLoaded');
+                    this.geoFileReader = 'jsonReader';
+                    this.trigger('m:geoJsonDataLoaded', this.get('_id'));
+                    this.trigger('m:dataLoaded', this.get('_id'));
                 } else {
                     this.on('m:geojsonCreated', function () {
                         var minervaMeta = this.getMinervaMetadata();
                         this.geoJsonData = minervaMeta.geojson.data;
-                        this.trigger('m:geoJsonDataLoaded');
+                        this.geoFileReader = 'jsonReader';
+                        this.trigger('m:geoJsonDataLoaded', this.get('_id'));
+                        this.trigger('m:dataLoaded', this.get('_id'));
                     }, this).createGeoJson();
                 }
             }
@@ -377,7 +409,9 @@ minerva.models.DatasetModel = girder.models.ItemModel.extend({
                     geoJsonData.features.push(point);
                 }, this);
                 this.geoJsonData = JSON.stringify(geoJsonData);
-                this.trigger('m:geoJsonDataLoaded');
+                this.geoFileReader = 'jsonReader';
+                this.trigger('m:geoJsonDataLoaded', this.get('_id'));
+                this.trigger('m:dataLoaded', this.get('_id'));
             }
         }
     },
