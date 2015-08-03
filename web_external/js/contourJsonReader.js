@@ -140,6 +140,6 @@ geo.contourJsonReader = function (arg) {
     };
 };
 
-inherit(geo.contourJsonReader, geo.fileReader);
+geo.inherit(geo.contourJsonReader, geo.fileReader);
 
 geo.registerFileReader('contourJsonReader', geo.contourJsonReader);

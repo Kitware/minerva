@@ -88,7 +88,7 @@ minerva.views.DataPanel = minerva.View.extend({
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
         this.listenTo(this.collection, 'g:changed', function () {
-            this.render();
+//            this.render();
         }, this).listenTo(this.collection, 'change', function () {
             this.render();
         }, this).listenTo(this.collection, 'change:meta', function () {
@@ -104,14 +104,8 @@ minerva.views.DataPanel = minerva.View.extend({
 
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);
-            var options = {
-                success: _.bind(function () {
-                    this.render();
-                }, this)
-            };
-
             if (status === girder.jobs_JobStatus.SUCCESS) {
-                this.collection.fetch(options);
+                this.collection.fetch();
             }
         }, this));
 

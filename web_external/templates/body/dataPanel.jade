@@ -12,7 +12,7 @@
             each dataset in datasets
                 if dataset.getMinervaMetadata()
                     .dataset
-                      span(title=dataset.get('name'))= dataset.get('name').length > 18 ? dataset.get('name').slice(0,18) + "..." : dataset.get('name')
+                      span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
                         - var attributes = {'m-dataset-id': dataset.get('_id')}
                         if dataset.renderableP()
                             //- right arrow icon to move dataset into current session
