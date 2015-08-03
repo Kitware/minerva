@@ -92,6 +92,29 @@ minerva.views.SessionView = minerva.View.extend({
             this._disableSave();
         });
 
+        this.dataPanel = new minerva.views.DataPanel({
+            session: this.model,
+            collection: this.datasetsCollection,
+            parentView: this
+        });
+
+        this.mapPanel = new minerva.views.MapPanel({
+            session: this.model,
+            collection: this.datasetsCollection,
+            parentView: this
+        });
+
+        this.layersPanel = new minerva.views.LayersPanel({
+            collection: this.datasetsCollection,
+            parentView: this
+        });
+
+        this.analysisPanel = new minerva.views.AnalysisPanel({
+            parentView: this,
+            collection: this.analysisCollection,
+            datasetsCollection: this.datasetsCollection
+        });
+
         this.render();
     },
 
@@ -106,33 +129,6 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            this.dataPanel = new minerva.views.DataPanel({
-                el: this.$('.dataPanel'),
-                session: this.model,
-                collection: this.datasetsCollection,
-                parentView: this
-            });
-
-            this.mapPanel = new minerva.views.MapPanel({
-                el: this.$('.mapPanel'),
-                session: this.model,
-                collection: this.datasetsCollection,
-                parentView: this
-            }).render();
-
-            this.layersPanel = new minerva.views.LayersPanel({
-                el: this.$('.layersPanel'),
-                collection: this.datasetsCollection,
-                parentView: this
-            });
-
-            this.analysisPanel = new minerva.views.AnalysisPanel({
-                el: this.$('.analysisPanel'),
-                parentView: this,
-                collection: this.analysisCollection,
-                datasetsCollection: this.datasetsCollection
-            }).render();
-
             this.$('.gridster > ul').gridster({
                 widget_margins: [10, 10],
                 widget_base_dimensions: [210, 210],
@@ -144,6 +140,11 @@ minerva.views.SessionView = minerva.View.extend({
                     min_size: [1, 1]
                 }
             });
+
+            this.dataPanel.setElement(this.$('.dataPanel')).render();
+            this.mapPanel.setElement(this.$('.mapPanel')).render();
+            this.layersPanel.setElement(this.$('.layersPanel')).render();
+            this.analysisPanel.setElement(this.$('.analysisPanel')).render();
 
         }, this));
 
@@ -160,11 +161,11 @@ minerva.router.route('session/:id', 'session', function (id) {
     var session = new minerva.models.SessionModel();
     session.set({
         _id: id
-    }).on('m:fetched', function () {
+    }).once('m:fetched', function () {
         var datasetsCollection = new minerva.collections.DatasetCollection();
-        datasetsCollection.on('g:changed', function () {
+        datasetsCollection.once('g:changed', function () {
             var analysisCollection = new minerva.collections.AnalysisCollection();
-            analysisCollection.on('g:changed', function () {
+            analysisCollection.once('g:changed', function () {
                 girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
                     analysisCollection: analysisCollection,
                     datasetsCollection: datasetsCollection,

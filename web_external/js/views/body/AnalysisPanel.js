@@ -77,7 +77,7 @@
                 console.log('AP remove');
                 this.render();
             }, this);
-            this.render();
+            // this.render();
 
         },
 
