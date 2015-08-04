@@ -45,7 +45,7 @@ minerva.views.LayersPanel = minerva.View.extend({
             girder.events.trigger('m:layerDatasetRemoved', dataset);
             this.render();
         }, this);
-//        this.render();
+
     },
 
     render: function () {

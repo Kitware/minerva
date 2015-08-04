@@ -109,7 +109,6 @@ minerva.views.DataPanel = minerva.View.extend({
             }
         }, this));
 
-//        this.render();
     },
 
     render: function () {

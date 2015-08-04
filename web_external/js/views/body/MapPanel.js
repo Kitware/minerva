@@ -20,7 +20,6 @@ minerva.views.MapPanel = minerva.View.extend({
 
             dataset.once('m:dataLoaded', function (datasetId) {
                 var dataset = this.collection.get(datasetId);
-//              var minervaMeta  = dataset.getMinervaMetadata();
                 var layer = this.map.createLayer('feature');
 
                 var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});

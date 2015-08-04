@@ -16,7 +16,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
             folderId: this.parentModel.get('_id'),
             checkboxes: this._checkboxes,
             parentView: this
-            //selected: cid
+
         });
 
         this.itemListView.on('g:itemClicked', this._onItemClick, this)
