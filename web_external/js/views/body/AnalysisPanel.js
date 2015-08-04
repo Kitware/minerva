@@ -48,13 +48,16 @@
 
             var analysisWidget = new minerva.views[analysisWidgetName]({
                     el: $('#g-dialog-container'),
-                    parentView: this
+                    parentView: this,
+                    datasetsCollection: this.datasetsCollection,
+                    analysis: analysis
                 });
             analysisWidget.render();
         },
 
         initialize: function (settings) {
             this.collection = settings.collection;
+            this.datasetsCollection = settings.datasetsCollection;
             this.listenTo(this.collection, 'g:changed', function () {
                 console.log('AP g:changed');
                 this.render();
@@ -74,7 +77,7 @@
                 console.log('AP remove');
                 this.render();
             }, this);
-            this.render();
+            // this.render();
 
         },
 

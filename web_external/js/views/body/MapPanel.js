@@ -16,22 +16,25 @@ minerva.views.MapPanel = minerva.View.extend({
         // so for now it is commented out
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
-        var datasetId = dataset.id;
-        if (!_.contains(this.datasets, datasetId)) {
-            dataset.once('m:geoJsonDataLoaded', function () {
-                var layer,
-                    reader;
-                layer = this.map.createLayer('feature');
+        if (!_.contains(this.datasets, dataset.id)) {
+
+            dataset.once('m:dataLoaded', function (datasetId) {
+                var dataset = this.collection.get(datasetId);
+                var layer = this.map.createLayer('feature');
+
+                var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
                 this.datasets[datasetId] = layer;
-                reader = geo.createFileReader('jsonReader', {layer: layer});
+
                 layer.clear();
-                reader.read(dataset.geoJsonData, _.bind(function () {
+
+                reader.read(dataset.fileData, _.bind(function () {
                     this.uiLayer = this.map.createLayer('ui');
                     this.uiLayer.createWidget('slider');
                     this.map.draw();
                 }, this));
             }, this);
-            dataset.loadGeoJsonData();
+
+            dataset.loadData();
         }
     },
 

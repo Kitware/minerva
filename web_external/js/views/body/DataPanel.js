@@ -101,7 +101,14 @@ minerva.views.DataPanel = minerva.View.extend({
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();
         }, this);
-        this.render();
+
+        girder.eventStream.on('g:event.job_status', _.bind(function (event) {
+            var status = window.parseInt(event.data.status);
+            if (status === girder.jobs_JobStatus.SUCCESS) {
+                this.collection.fetch({}, true);
+            }
+        }, this));
+
     },
 
     render: function () {

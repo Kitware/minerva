@@ -11,9 +11,10 @@
         .datasets
             each dataset in datasets
                 if dataset.getMinervaMetadata()
-                    .dataset= dataset.get('name')
+                    .dataset
+                      span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
                         - var attributes = {'m-dataset-id': dataset.get('_id')}
-                        if dataset.geoJsonAvailable
+                        if dataset.is_renderable()
                             //- right arrow icon to move dataset into current session
                             - var classes = (dataset.get('displayed') ? 'icon-right-circled icon-disabled dataset-in-session' : 'icon-right-circled icon-enabled add-dataset-to-session')
                             i(class=classes)&attributes(attributes)
