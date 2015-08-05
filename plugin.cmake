@@ -39,3 +39,8 @@ add_javascript_style_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
     JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
 )
+
+add_web_client_test(
+    minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/minervaSpec.js"
+    ENABLEDPLUGINS "gravatar" "jobs" "romanesco"
+    BASEURL "/static/built/testEnvMinerva.html")

@@ -17,6 +17,7 @@
 module.exports = function (grunt) {
 
     var fs = require('fs');
+    var jade = require('jade');
     var defaultTasks = [];
 
     // Since this is an external web app in a plugin,
@@ -25,9 +26,11 @@ module.exports = function (grunt) {
     // It is not included in the plugins being built by virtue of
     // the web client not living in web_client, but rather web_external
     var configureMinerva = function () {
-        var pluginName = "minerva";
-        var pluginDir = "plugins/minerva";
-        var staticDir = 'clients/web/static/built/plugins/' + pluginName;
+        var pluginName = 'minerva';
+        var pluginDir = 'plugins/' + pluginName;
+        var rootStaticDir = 'clients/web/static/built';
+        var rootStaticLibDir = 'clients/web/static/lib';
+        var staticDir = rootStaticDir + '/' + pluginDir;
         var sourceDir = "web_external";
 
         if (!fs.existsSync(staticDir)) {
@@ -131,6 +134,58 @@ module.exports = function (grunt) {
             });
             defaultTasks.push('copy:' + pluginName);
         }
+
+        grunt.registerTask('test-env-html:' + pluginName, 'Build the phantom test html page for '+pluginName, function () {
+            var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
+
+            var dependencies = [
+                '/clients/web/test/testUtils.js',
+                '/clients/web/static/built/libs.min.js',
+                '/' + staticDir + '/geo.ext.min.js',
+                // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
+                '/' + staticDir + '/jquery.gridster.js',
+                '/' + staticDir + '/geo.min.js',
+                '/' + rootStaticDir + '/app.min.js',
+                '/' + rootStaticDir + '/plugins/gravatar/plugin.min.js',
+                'http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js',
+                'http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js',
+                'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js',
+                '/' + staticDir + '/papaparse.min.js',
+                '/' + staticDir + '/jsonpath.min.js'
+            ];
+            var globs = grunt.config('uglify.' + pluginName + '.files')[staticDir + '/minerva.min.js'];
+            var jsFiles = [];
+            globs.forEach(function (glob) {
+                var files = grunt.file.expand(glob);
+                files.forEach(function (file) {
+                    jsFiles.push('/' + file);
+                });
+            });
+
+            var fn = jade.compile(buffer, {
+                client: false,
+                pretty: true
+            });
+            fs.writeFileSync(rootStaticDir + '/testEnvMinerva.html', fn({
+                cssFiles: [
+                    // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
+                    '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
+                    'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
+                    '/' + rootStaticLibDir + '/fontello/css/fontello.css',
+                    '/' + rootStaticLibDir + '/fontello/css/animation.css',
+                    '/' + staticDir + '/jquery.gridster.min.css',
+                    '/' + rootStaticDir + '/app.min.css',
+                    '/' + staticDir + '/minerva.min.css',
+                    'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
+                    'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
+                ],
+                jsFilesUncovered: dependencies,
+                jsFilesCovered: jsFiles,
+                staticRoot: grunt.config('serverConfig.staticRoot'),
+                apiRoot: grunt.config('serverConfig.apiRoot')
+            }));
+        });
+        defaultTasks.push('test-env-html:' + pluginName);
     };
 
     configureMinerva();
