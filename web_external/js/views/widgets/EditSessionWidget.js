@@ -66,7 +66,7 @@ minerva.views.EditSessionWidget = minerva.View.extend({
     createSession: function (fields) {
         var session = new minerva.models.SessionModel();
         session.set(_.extend(fields, {
-            folderId: this.parentCollection.sessionFolderId
+            folderId: this.parentCollection.folderId
         }));
         session.on('g:saved', function () {
             this.$el.modal('hide');
