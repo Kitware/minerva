@@ -46,4 +46,11 @@ minervaTest.createUser = function (login, email, firstName, lastName, password) 
         return $('.m-user-link')[0].text === firstName + ' ' + lastName;
     }, 'user to be logged in');
 
+    runs(function () {
+        expect(girder.currentUser).not.toBe(null);
+        expect(girder.currentUser.name()).toBe(firstName + ' ' + lastName);
+        expect(girder.currentUser.get('login')).toBe(login);
+    });
+
+
 };

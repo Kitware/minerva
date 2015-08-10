@@ -33,11 +33,7 @@ describe('Create an admin user and logout', function () {
                                'Admin',
                                'Admin',
                                'adminpassword!');
-        runs(function () {
-            expect(girder.currentUser).not.toBe(null);
-            expect(girder.currentUser.name()).toBe("Admin Admin");
-            expect(girder.currentUser.get('login')).toBe('admin');
-        });
+        expect($('.m-session-create-button').length).toBe(1);
     });
 
     it('should logout', girderTest.logout());
@@ -52,17 +48,11 @@ describe('Create a regular user and logout', function () {
                               'John',
                               'Doe',
                               'password!');
-        runs(function () {
-            expect(girder.currentUser).not.toBe(null);
-            expect(girder.currentUser.name()).toBe("John Doe");
-            expect(girder.currentUser.get('login')).toBe('johndoe');
-        });
+        expect($('.m-session-create-button').length).toBe(1);
+
     });
 
     it('should logout', girderTest.logout());
 
 });
-
-
-
 
