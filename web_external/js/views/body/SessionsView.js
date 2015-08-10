@@ -36,6 +36,25 @@ minerva.views.SessionsView = minerva.View.extend({
             parentView: this
         }).on('g:resultClicked', this._gotoSession, this);
 
+        girder.events.on('g:login', function () {
+            if (girder.currentUser) {
+                // unfortunately the underlying girder fetch() logic assumes
+                // we're working with a paged collection.  this means on login
+                // refresh we will try and grab the next page of session items instead
+                // of the current page. We can call fetch a la this.collection.fetch({}, true)
+                // to refresh the collection but the girder logic will not accept the folderId
+                // params from minerva.collections.SessionCollection() if we are 'reseting' this 
+                // means in order to fetch the session items we have to set the offset to 0 before
+                // calling the fetch() function.
+                this.collection.offset = 0;
+                this.collection.fetch();
+            } else {
+                // this.collection = new minerva.collections.SessionCollection();
+                this.collection.set([]);
+                this.render();
+            }
+        }, this);
+
         if (girder.currentUser) {
             this.collection.fetch();
         } else {
