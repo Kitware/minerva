@@ -4,7 +4,7 @@
   "description": "An application for geospatial analytics.",
   "license": "Apache-2.0",
   "dependencies": {
-    "geojs": "git+ssh://git@github.com:OpenGeoscience/geojs.git#master",
+    "geojs": "0.5.0",
     "JSONPath": "0.10.0"
   }
 }
