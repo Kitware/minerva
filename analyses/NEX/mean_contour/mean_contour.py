@@ -3,7 +3,7 @@ import sys
 # import shutil
 import tempfile
 import numpy as np
-# from bson import json_util
+from bson import json_util
 
 from netCDF4 import Dataset
 from girder_client import GirderClient
@@ -12,7 +12,16 @@ def debug(s):
     # noop here to disable debugging
     print s
 
-sc = None
+def cache(data):
+    import pickle
+    pickle.dump(data, open("/tmp/tmp.pickle", "wb"))
+
+
+def uncache():
+    import pickle
+    return pickle.load(open("/tmp/tmp.pickle", "rb"))
+
+
 # set up our spark context incase we are running this from the command line
 if 'sc' not in locals():
     spark_home = os.environ.get('SPARK_HOME')
@@ -26,20 +35,19 @@ if 'sc' not in locals():
     sys.path.append(os.path.join(spark_home, 'bin'))
 
     # Check that we can import SparkContext
-    from pyspark import SparkConf, SparkContext    
+    from pyspark import SparkConf, SparkContext
     spark_conf = SparkConf()
     spark_conf.set("spark.app.name", "n_timestep_means")
     sc = SparkContext(conf=spark_conf)
 
 
-    
 def convert(data, variable, timestep):
     variable = data.variables[variable]
     shape = variable[timestep].shape
 
     # For now sub select ( take about 10% of the grid )
-    lat_select_index = shape[0] / 10
-    lon_select_index = shape[1] / 10
+    lat_select_index = shape[0]
+    lon_select_index = shape[1]
 
     # Extract out the lat lon names
     dimensions = map(lambda d : d, data.dimensions)
@@ -69,7 +77,7 @@ def toNetCDFDataset(source, variable, data):
         target_var = target_file.createVariable(variable, src_var.datatype, src_var.dimensions)
         target_var.setncatts({k: src_var.getncattr(k) for k in src_var.ncattrs()})
         target_var[:] = src_var[:]
-        
+
     (fd, filepath) = tempfile.mkstemp()
     os.close(fd)
     output = Dataset(filepath, 'w')
@@ -183,19 +191,7 @@ def netcdf_mean(filepath, parameter, timesteps, grid_chunk_size, partitions):
 
             i += 1
 
-    cache(timestep_means)
-            
     return toNetCDFDataset(data, parameter, timestep_means)
-
-
-def cache(data):
-    import pickle
-    pickle.dump(data, open("/tmp/tmp.pickle", "wb"))
-
-
-def uncache():
-    import pickle
-    return pickle.load(open("/tmp/tmp.pickle", "rb"))
 
 ## provide defaults incase we are running this from the command line
 ## instead of providing these variables through the minerva interface
@@ -222,7 +218,8 @@ user = client.get('user/me')
 parameters = {
     'userId': user['_id']
 }
-dataset_folder = client.get('minerva_dataset/folder', parameters=parameters)['folder']
+dataset_folder = client.get('minerva_dataset/folder',
+                            parameters=parameters)['folder']
 dataset_folder_id = dataset_folder['_id']
 parameters = {
     'id': fileId,
@@ -240,26 +237,34 @@ output_file_name = input_file_name.replace('.nc', '.json')
 # (fd, filepath) = tempfile.mkstemp()
 # os.close(fd)
 
-if not os.path.exists("/data/%s" % input_file_name):
-    client.downloadItem(fileId, "/data")
+output_dir = "/data"
+output_filepath = os.path.join(output_dir, output_file_name)
 
-# data = netcdf_mean("/data/%s" % input_file_name,
-#                    variable,
-#                    timesteps,
-#                    grid_chunk_size,
-#                    partitions)
-data = uncache()
-contour = convert(toNetCDFDataset(Dataset("/data/%s" % input_file_name), 'pr', data),
-                  'pr',
-                  0)
-    
+if not os.path.exists(os.path.join(output_dir, input_file_name)):
+    client.downloadItem(fileId, output_dir)
+
+data = netcdf_mean(os.path.join(output_dir, input_file_name),
+                   variable,
+                   timesteps,
+                   grid_chunk_size,
+                   partitions)
+
+contour = convert(data, variable, 0)
+
+
+with open(output_filepath, 'w') as fp:
+    fp.write(json_util.dumps(contour))
+
+
 # Create an item for this file
-#output_item = client.createItem(dataset_folder_id, output_file_name, output_file_name)
+output_item = client.createItem(dataset_folder_id,
+                                output_file_name,
+                                output_file_name)
 
 # Now upload the result
-#client.uploadFileToItem(output_item['_id'], output_filepath)
+client.uploadFileToItem(output_item['_id'], output_filepath)
 
-#output_item_id = output_item['_id']
+output_item_id = output_item['_id']
 
 # Finally promote item to dataset
-#client.post('minerva_dataset/%s/dataset' % output_item_id)
+client.post('minerva_dataset/%s/dataset' % output_item_id)
