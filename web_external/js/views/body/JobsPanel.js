@@ -36,7 +36,7 @@ minerva.views.JobsPanel = minerva.View.extend({
 
     render: function () {
         this.$el.html(minerva.templates.jobsPanel({}));
-        this.jobListWidget.setElement(this.$('.m-jobsListContainer'));
+        this.jobListWidget.setElement(this.$('.m-jobsListContainer')).render();
 
         return this;
     }
