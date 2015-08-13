@@ -57,9 +57,9 @@ http://localhost:8080/girder    => serves Girder
 
 This is to get around the fact that npm is for installing packages, not managing source repositories.  So when npm installs geojs, it doesn't install it as a git repo with the .git dir.
 
-Minerva currently tracks the latest released version of geojs from geojs' master branch, as published in geojs/geo.min.js.
+Minerva currently tracks the latest released version of geojs from npm.
 
-If you need to use Minerva with a specific reference of geojs that isn't the current release version held in geojs github repo, do the following
+If you need to use Minerva with a specific reference of geojs that isn't the current release version held in npm, do the following
 
   1. from the minerva top level dir, `cd node_modules`
   2. remove or move geojs, e.g. `mv geojs geojs_fromnpm`
