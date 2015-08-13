@@ -198,12 +198,7 @@ partitions = partitions if 'partitions' in locals() else 8
 
 debug("Starting mean_contour task")
 client = GirderClient(host, port)
-
-if 'token' in locals():
-    client.token = token
-else:
-    client.authenticate('kotfic', 'letmein', False)
-
+client.token = token
 
 # Get the user
 user = client.get('user/me')
