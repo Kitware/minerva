@@ -14,7 +14,7 @@ def debug(s):
 def timer(s):
     t0 = time.time()
     yield
-    print "%s (%.2f)" % (s, time.time() - t0)
+    debug("%s (%.2f)" % (s, time.time() - t0))
 
 def convert(data_path, variable, timestep):
     data = Dataset(data_path)

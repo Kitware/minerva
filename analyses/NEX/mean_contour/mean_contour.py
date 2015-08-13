@@ -4,6 +4,8 @@ import sys
 import tempfile
 import numpy as np
 from bson import json_util
+import time
+from contextlib import contextmanager
 
 from netCDF4 import Dataset
 from girder_client import GirderClient
@@ -11,6 +13,13 @@ from girder_client import GirderClient
 def debug(s):
     # noop here to disable debugging
     print s
+
+@contextmanager
+def timer(s):
+    t0 = time.time()
+    yield
+    debug("%s (%.2f)" % (s, time.time() - t0))
+
 
 def cache(data):
     import pickle
@@ -204,6 +213,7 @@ timesteps = timesteps if 'timesteps' in locals() else 1140
 grid_chunk_size = grid_chunk_size if 'grid_chunk_size' in locals() else 20
 partitions = partitions if 'partitions' in locals() else 8
 
+debug("Starting mean_contour task")
 client = GirderClient(host, port)
 
 if 'token' in locals():
@@ -241,15 +251,17 @@ output_dir = "/data"
 output_filepath = os.path.join(output_dir, output_file_name)
 
 if not os.path.exists(os.path.join(output_dir, input_file_name)):
-    client.downloadItem(fileId, output_dir)
+    with timer("Downloading %s to %s" % (fileId, output_dir)):
+        client.downloadItem(fileId, output_dir)
 
-data = netcdf_mean(os.path.join(output_dir, input_file_name),
-                   variable,
-                   timesteps,
-                   grid_chunk_size,
-                   partitions)
-
-contour = convert(data, variable, 0)
+with timer("Finished running netcdf_mean"):
+    data = netcdf_mean(os.path.join(output_dir, input_file_name),
+                       variable,
+                       timesteps,
+                       grid_chunk_size,
+                       partitions)
+with timer("Finished converting to contour JSON"):
+    contour = convert(data, variable, 0)
 
 
 with open(output_filepath, 'w') as fp:
@@ -257,14 +269,17 @@ with open(output_filepath, 'w') as fp:
 
 
 # Create an item for this file
-output_item = client.createItem(dataset_folder_id,
-                                output_file_name,
-                                output_file_name)
+with timer("Created item"):
+    output_item = client.createItem(dataset_folder_id,
+                                    output_file_name,
+                                    output_file_name)
 
 # Now upload the result
-client.uploadFileToItem(output_item['_id'], output_filepath)
+with timer("Finished uploading item from %s" % (output_filepath)):
+    client.uploadFileToItem(output_item['_id'], output_filepath)
 
 output_item_id = output_item['_id']
 
 # Finally promote item to dataset
-client.post('minerva_dataset/%s/dataset' % output_item_id)
+with timer("Promited item %s to dataset" % output_item_id):
+    client.post('minerva_dataset/%s/dataset' % output_item_id)
