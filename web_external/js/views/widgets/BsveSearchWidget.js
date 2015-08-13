@@ -35,7 +35,8 @@ minerva.views.BsveSearchWidget = minerva.View.extend({
                 path: 'minerva_analysis/bsve_search',
                 type: 'POST',
                 data: data
-            }).done(_.bind(function () {
+            }).done(_.bind(function (response) {
+                girder.events.trigger('m:job.created');
                 this.$el.modal('hide');
             }, this));
         }

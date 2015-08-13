@@ -90,7 +90,7 @@ class Analysis(Resource):
         }
 
         job = self.model('job', 'jobs').createLocalJob(
-            title='Dataset output from bsve search',
+            title='bsve search: %s' % datasetName,
             user=currentUser,
             type='bsve.search',
             public=False,
