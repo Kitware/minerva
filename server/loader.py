@@ -18,8 +18,10 @@
 ###############################################################################
 
 import mako
+import json
+import os
 
-from girder import events
+from girder import constants, events
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import analysis, dataset, s3_dataset, session, shapefile, geocode
@@ -34,6 +36,7 @@ class CustomAppRoot(object):
     indexHtml = None
 
     vars = {
+        'plugins': [],
         'apiRoot': '/api/v1',
         'staticRoot': '/static',
         'title': 'Minerva'
@@ -57,16 +60,19 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/minerva.min.css">
+        % for plugin in pluginCss:
+            <link rel="stylesheet"
+            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
+        % endfor
         <link rel="stylesheet"
               href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
         <link rel="stylesheet"
               href="http:////cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css">
+        <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/minerva/minerva.min.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
-
       </head>
       <body>
         <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
@@ -79,9 +85,12 @@ class CustomAppRoot(object):
         <script src="${staticRoot}/built/plugins/minerva/geo.min.js">
         </script>
         <script src="${staticRoot}/built/app.min.js"></script>
-        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
         </script>
-    <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js">
+        % for plugin in pluginJs:
+            <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js">
+            </script>
+        % endfor
+        <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js">
         </script>
 <script src="http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js">
     </script>
@@ -95,13 +104,32 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
-        <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
-      </body>
+
+       </body>
     </html>
     """
 
     def GET(self):
         if self.indexHtml is None:
+            self.vars['pluginCss'] = []
+            self.vars['pluginJs'] = []
+            builtDir = os.path.join(constants.STATIC_ROOT_DIR, 'clients',
+                                    'web', 'static', 'built', 'plugins')
+            # it would be nice to get the activated plugins from girder's
+            # settings # but we need to reproduce this functionality in the
+            # Gruntfile, so pull these from the plugin.json
+            minervaPluginDir = os.path.dirname(os.path.realpath(__file__))
+            pluginJson = os.path.join(minervaPluginDir, '..', 'plugin.json')
+            with open(pluginJson, 'r') as pluginJsonData:
+                pluginConfig = json.load(pluginJsonData)
+                self.vars['plugins'] = pluginConfig['dependencies']
+            for plugin in self.vars['plugins']:
+                if os.path.exists(os.path.join(builtDir, plugin,
+                                               'plugin.min.css')):
+                    self.vars['pluginCss'].append(plugin)
+                if os.path.exists(os.path.join(builtDir, plugin,
+                                               'plugin.min.js')):
+                    self.vars['pluginJs'].append(plugin)
             self.indexHtml = mako.template.Template(self.template).render(
                 **self.vars)
 
