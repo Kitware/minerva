@@ -24,14 +24,9 @@
           "format":"json",
           "name":"variable",
           "type":"string"
-       },
-       {
-          "format":"json",
-          "name":"timesteps",
-          "type":"number"
        }
     ],
-    "mode":"python",
+    "mode":"spark.python",
     "name":"mean contour",
     "outputs":[
        {

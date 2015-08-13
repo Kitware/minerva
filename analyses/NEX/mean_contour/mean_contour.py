@@ -31,25 +31,6 @@ def uncache():
     return pickle.load(open("/tmp/tmp.pickle", "rb"))
 
 
-# set up our spark context incase we are running this from the command line
-if 'sc' not in locals():
-    spark_home = os.environ.get('SPARK_HOME')
-
-    if not spark_home:
-        raise Exception('spark_home must be set or SPARK_HOME must '
-                        'be set in the environment')
-
-    os.environ['SPARK_HOME'] = spark_home
-    sys.path.append(os.path.join(spark_home, 'python'))
-    sys.path.append(os.path.join(spark_home, 'bin'))
-
-    # Check that we can import SparkContext
-    from pyspark import SparkConf, SparkContext
-    spark_conf = SparkConf()
-    spark_conf.set("spark.app.name", "n_timestep_means")
-    sc = SparkContext(conf=spark_conf)
-
-
 def convert(data, variable, timestep):
     variable = data.variables[variable]
     shape = variable[timestep].shape
@@ -131,12 +112,20 @@ def toNetCDFDataset(source, variable, data):
     return output
 
 
-def netcdf_mean(filepath, parameter, timesteps, grid_chunk_size, partitions):
+def netcdf_mean(filepath, parameter, grid_chunk_size, partitions):
     data = Dataset(filepath)
     pr = data.variables[parameter]
-
+    
     # Get the number of timesteps
     num_timesteps = data.variables['time'].size
+
+    # For now don't break up timesteps,  just take mean across
+    # Grid sections. If we set this to some other value it would
+    # produce a new dataset with (num_timesteps / timesteps)  new
+    # panels where each panel was the mean of that group of timesteps
+    # e.g.,  if timesteps was 10  and num_timesteps was 50 we would have
+    # 5 panels,  with the average of timesteps 0-10, 10-20, 20-30 etc
+    timesteps = num_timesteps
 
     # Get number of locations per timestep
     shape = pr[0].shape
@@ -202,14 +191,8 @@ def netcdf_mean(filepath, parameter, timesteps, grid_chunk_size, partitions):
 
     return toNetCDFDataset(data, parameter, timestep_means)
 
-## provide defaults incase we are running this from the command line
-## instead of providing these variables through the minerva interface
-## and the romanesco call to exec
-host = host if 'host' in locals() else 'localhost'
-port = port if 'port' in locals() else '8081'
-fileId = fileId if 'fileId' in locals() else '55bbd421f4b14911dd2ffa65'
-variable = variable if 'variable' in locals() else 'pr'
-timesteps = timesteps if 'timesteps' in locals() else 1140
+## provide some defaults - these could be passed into the script from the
+## interface but for demo purposes we'll keep it simple.
 grid_chunk_size = grid_chunk_size if 'grid_chunk_size' in locals() else 20
 partitions = partitions if 'partitions' in locals() else 8
 
@@ -237,7 +220,8 @@ parameters = {
 }
 
 # Get the file resource so we can get the name
-input_file = client.get('item/%s' % str(fileId), parameters=parameters)
+# input_file = client.get('item/%s' % str(fileId), parameters=parameters)
+input_file = client.get('resource/%s' % str(fileId), parameters=parameters)
 input_file_name = input_file['name']
 output_file_name = input_file_name.replace('.nc', '.json')
 
@@ -257,7 +241,6 @@ if not os.path.exists(os.path.join(output_dir, input_file_name)):
 with timer("Finished running netcdf_mean"):
     data = netcdf_mean(os.path.join(output_dir, input_file_name),
                        variable,
-                       timesteps,
                        grid_chunk_size,
                        partitions)
 with timer("Finished converting to contour JSON"):
