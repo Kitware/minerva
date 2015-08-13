@@ -8,6 +8,7 @@ cache:
   - $HOME/virtualenv/python2.7.9
   - $HOME/.cache/pip
   - $HOME/build/girder/node_modules
+  - $HOME/build/girder/plugins/minerva/node_modules
 
 sudo: false
 
@@ -24,16 +25,22 @@ addons:
     - libnetcdf-dev
 
 before_install:
-    # move node_modules cache so that git clone girder completes
-    - mv $HOME/build/girder/node_modules $HOME/build/girder_node_modules_tmp
+    # move node_modules caches so that git clone girder completes
+    - mv $HOME/build/girder/node_modules $HOME/build/girder_node_modules_cache
+    - mv $HOME/build/girder/plugins/minerva/node_modules $HOME/build/minerva_node_modules_cache
 
     # minerva has been cloned to OpenGeoscience/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
     - cd "${HOME}"/build
+    # remove existing girder dir, it remains from caching operations
+    - rm -rf girder
     - git clone https://github.com/girder/girder.git
-    # move the node_modules cache to the proper place
-    - mv $HOME/build/girder_node_modules_tmp $HOME/build/girder/node_modules
     - mv OpenGeoscience/minerva girder/plugins
+
+    # move the node_modules caches
+    - mv $HOME/build/girder_node_modules_cache $HOME/build/girder/node_modules
+    - mv $HOME/build/minerva_node_modules_cache $HOME/build/girder/plugins/minerva/node_modules
+
     - cd girder
     # copy the placeholder bsve credentials, needed even though we mock bsve api calls
     - cp plugins/minerva/server/utility/bsve/bsve.json.in plugins/minerva/server/utility/bsve/bsve.json
@@ -65,6 +72,9 @@ before_install:
 install:
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     - npm install grunt grunt-cli
+    - pushd plugins/minerva
+    - npm install
+    - popd
     - npm install
     # Create symlink for romanesco plugin
     - ln -s `python -c "import romanesco;import os;print os.path.dirname(romanesco.__file__)"` "${HOME}"/build/girder/plugins/romanesco
