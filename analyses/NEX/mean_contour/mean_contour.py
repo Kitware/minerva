@@ -231,7 +231,8 @@ output_filepath = os.path.join(output_dir, output_file_name)
 
 if not os.path.exists(os.path.join(output_dir, input_file_name)):
     with timer("Downloading %s to %s" % (fileId, output_dir)):
-        client.downloadItem(fileId, output_dir)
+        client.downloadFile(fileId, output_filepath)
+        
 
 with timer("Finished running netcdf_mean"):
     data = netcdf_mean(os.path.join(output_dir, input_file_name),
