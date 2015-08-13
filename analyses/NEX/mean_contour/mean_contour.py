@@ -230,8 +230,8 @@ output_dir = "/data"
 output_filepath = os.path.join(output_dir, output_file_name)
 
 if not os.path.exists(os.path.join(output_dir, input_file_name)):
-    with timer("Downloading %s to %s" % (fileId, output_dir)):
-        client.downloadFile(fileId, output_filepath)
+    with timer("Downloading %s to %s" % (fileId, os.path.join(output_dir, input_file_name))):
+        client.downloadFile(fileId, os.path.join(output_dir, input_file_name))
         
 
 with timer("Finished running netcdf_mean"):
@@ -239,6 +239,7 @@ with timer("Finished running netcdf_mean"):
                        variable,
                        grid_chunk_size,
                        partitions)
+
 with timer("Finished converting to contour JSON"):
     contour = convert(data, variable, 0)
 
