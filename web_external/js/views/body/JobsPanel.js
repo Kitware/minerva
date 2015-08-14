@@ -12,20 +12,16 @@ minerva.views.JobsPanel = minerva.View.extend({
             triggerJobClick: true,
             parentView: this
         }).on('g:jobClicked', function (job) {
-            // TODO right way to update specific job?
-            // otherwise can get a detail that is out of sync with actual job status
-            // seems weird to update the entire collection from here
-            // another option is to refresh the job specifically
-            this.jobListWidget.collection.on('g:changed', function () {
-                job = this.jobListWidget.collection.get(job.get('id'));
+            // update the job before displaying, as the job in the collection
+            // could be stale and out of sync from the display in the job panel
+            job.once('g:fetched', function () {
                 this.jobDetailsWidgetModalWrapper = new minerva.views.JobDetailsWidgetModalWrapper({
                     job: job,
                     el: $('#g-dialog-container'),
                     parentView: this
                 });
                 this.jobDetailsWidgetModalWrapper.render();
-            }, this);
-            this.jobListWidget.collection.fetch({}, true);
+            }, this).fetch();
         }, this);
 
         girder.events.on('m:job.created', function () {
