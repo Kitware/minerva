@@ -1,6 +1,5 @@
 import os
 import sys
-# import shutil
 import tempfile
 import numpy as np
 from bson import json_util
@@ -99,9 +98,6 @@ def toNetCDFDataset(source, variable, data):
         data_type = data.dtype
 
     output.createVariable(variable, data_type, ('time', lat_name, lon_name))
-
-#    print data.shape
-#    print output.variables[variable][:].shape
 
     if type(data) == list:
         for i in xrange(len(data)):
