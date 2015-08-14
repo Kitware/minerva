@@ -28,7 +28,13 @@ module.exports = function (grunt) {
     var configureMinerva = function () {
         var pluginName = 'minerva';
         var pluginDir = 'plugins/' + pluginName;
+        // load our dependent plugins
+        var pluginJson = pluginDir + '/plugin.json';
+        var pluginDescription = grunt.file.readYAML(pluginJson);
+        var pluginDependencies = pluginDescription.dependencies;
+
         var rootStaticDir = 'clients/web/static/built';
+        var pluginsStaticDir = 'clients/web/static/built/plugins';
         var rootStaticLibDir = 'clients/web/static/lib';
         var staticDir = rootStaticDir + '/' + pluginDir;
         var sourceDir = "web_external";
@@ -137,8 +143,8 @@ module.exports = function (grunt) {
         }
 
         grunt.registerTask('test-env-html:' + pluginName, 'Build the phantom test html page for '+pluginName, function () {
+            var i, plugin, pluginJs, pluginCss;
             var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
-
             var dependencies = [
                 '/clients/web/test/testUtils.js',
                 '/clients/web/static/built/libs.min.js',
@@ -146,14 +152,24 @@ module.exports = function (grunt) {
                 // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
                 '/' + staticDir + '/jquery.gridster.js',
                 '/' + staticDir + '/geo.min.js',
-                '/' + rootStaticDir + '/app.min.js',
-                '/' + rootStaticDir + '/plugins/gravatar/plugin.min.js',
+                '/' + rootStaticDir + '/app.min.js'
+            ];
+            // if any plugin dependencies have js, add them
+            for(i = 0; i < pluginDependencies.length; i = i + 1) {
+                plugin = pluginDependencies[i];
+                pluginJs = pluginsStaticDir + '/' + plugin + '/plugin.min.js';
+                if (fs.existsSync(pluginJs)) {
+                    dependencies.push('/' + pluginJs);
+                }
+            }
+            dependencies.concat([
                 'http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js',
                 'http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js',
                 'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js',
                 '/' + staticDir + '/papaparse.min.js',
                 '/' + staticDir + '/jsonpath.min.js'
-            ];
+            ]);
+
             var globs = grunt.config('uglify.' + pluginName + '.files')[staticDir + '/minerva.min.js'];
             var jsFiles = [];
             globs.forEach(function (glob) {
@@ -167,19 +183,30 @@ module.exports = function (grunt) {
                 client: false,
                 pretty: true
             });
+
+            var cssFiles =  [
+                // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
+                '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
+                'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
+                '/' + rootStaticLibDir + '/fontello/css/fontello.css',
+                '/' + rootStaticLibDir + '/fontello/css/animation.css',
+                '/' + staticDir + '/jquery.gridster.min.css',
+                '/' + rootStaticDir + '/app.min.css',
+                'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
+                'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
+            ];
+            // if any plugin dependencies have css, add them
+            for(i = 0; i < pluginDependencies.length; i = i + 1) {
+                plugin = pluginDependencies[i];
+                pluginCss = pluginsStaticDir + '/' + plugin + '/plugin.min.css';
+                if (fs.existsSync(pluginCss)) {
+                    cssFiles.push('/' + pluginCss);
+                }
+            }
+            cssFiles.push('/' + staticDir + '/minerva.min.css');
+
             fs.writeFileSync(rootStaticDir + '/testEnvMinerva.html', fn({
-                cssFiles: [
-                    // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
-                    '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
-                    'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
-                    '/' + rootStaticLibDir + '/fontello/css/fontello.css',
-                    '/' + rootStaticLibDir + '/fontello/css/animation.css',
-                    '/' + staticDir + '/jquery.gridster.min.css',
-                    '/' + rootStaticDir + '/app.min.css',
-                    '/' + staticDir + '/minerva.min.css',
-                    'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
-                    'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
-                ],
+                cssFiles: cssFiles,
                 jsFilesUncovered: dependencies,
                 jsFilesCovered: jsFiles,
                 staticRoot: grunt.config('serverConfig.staticRoot'),
