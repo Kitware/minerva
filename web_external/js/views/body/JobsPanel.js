@@ -28,7 +28,7 @@ minerva.views.JobsPanel = minerva.View.extend({
             this.jobListWidget.collection.fetch({}, true);
         }, this);
 
-        girder.events.once('m:job.created', function () {
+        girder.events.on('m:job.created', function () {
             this.jobListWidget.collection.fetch({}, true);
         }, this);
 
