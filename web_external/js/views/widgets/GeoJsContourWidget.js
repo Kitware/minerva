@@ -65,6 +65,7 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
                     contentType: 'application/json'
                 }).done(_.bind(function () {
                     this.$el.modal('hide');
+                    girder.events.trigger('m:job.created');
                 }, this));
             }, this));
         }
