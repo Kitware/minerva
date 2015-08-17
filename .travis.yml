@@ -29,13 +29,13 @@ before_install:
     - mv $HOME/build/girder/node_modules $HOME/build/girder_node_modules_cache
     - mv $HOME/build/girder/plugins/minerva/node_modules $HOME/build/minerva_node_modules_cache
 
-    # minerva has been cloned to OpenGeoscience/minerva by travis
+    # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
     - cd "${HOME}"/build
     # remove existing girder dir, it remains from caching operations
     - rm -rf girder
     - git clone https://github.com/girder/girder.git
-    - mv OpenGeoscience/minerva girder/plugins
+    - mv Kitware/minerva girder/plugins
 
     # move the node_modules caches
     - mv $HOME/build/girder_node_modules_cache $HOME/build/girder/node_modules
