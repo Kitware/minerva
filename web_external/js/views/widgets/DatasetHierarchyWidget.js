@@ -28,6 +28,12 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
     },
 
     updateModelWithSelectedItems: function () {
+        // if we already have something checked because of selectedItems
+        // then itemListView.checked will be out of date,  recompute it here.
+        // We have a one source of truth problem that needs to be resolved between
+        // itemListView.checked and DataModel.attributes.meta.minerva.selectedItems
+        this.hierarchyWidget.itemListView.recomputeChecked();
+
         var resources = this.hierarchyWidget.getCheckedResources();
         this.dataset.get('meta').minerva.selectedItems = resources.item || [];
         this.dataset.save();
