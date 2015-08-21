@@ -25,6 +25,9 @@ from tests import base
 
 def setUpModule():  # noqa
     """Enable the minerva plugin and start the server."""
+    base.enabledPlugins.append('jobs')
+    base.enabledPlugins.append('romanesco')
+    base.enabledPlugins.append('gravatar')
     base.enabledPlugins.append('minerva')
     base.startServer()
 

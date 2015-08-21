@@ -42,5 +42,5 @@ add_javascript_style_test(
 
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/minervaSpec.js"
-    ENABLEDPLUGINS "minerva" "gravatar" "jobs" "romanesco"
+    ENABLEDPLUGINS "gravatar" "jobs" "romanesco" "minerva"
     BASEURL "/static/built/testEnvMinerva.html")
