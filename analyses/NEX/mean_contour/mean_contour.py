@@ -111,7 +111,7 @@ def toNetCDFDataset(source, variable, data):
 def netcdf_mean(filepath, parameter, grid_chunk_size, partitions):
     data = Dataset(filepath)
     pr = data.variables[parameter]
-    
+
     # Get the number of timesteps
     num_timesteps = data.variables['time'].size
 
@@ -257,5 +257,5 @@ with timer("Finished uploading item from %s" % (output_filepath)):
 output_item_id = output_item['_id']
 
 # Finally promote item to dataset
-with timer("Promited item %s to dataset" % output_item_id):
+with timer("Promoted item %s to dataset" % output_item_id):
     client.post('minerva_dataset/%s/dataset' % output_item_id)
