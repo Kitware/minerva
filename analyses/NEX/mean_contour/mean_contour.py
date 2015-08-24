@@ -222,13 +222,14 @@ output_file_name = input_file_name.replace('.nc', '.json')
 # (fd, filepath) = tempfile.mkstemp()
 # os.close(fd)
 
-output_dir = "/data"
+#output_dir = "/data"
+output_dir = tempfile.mkdtemp()
 output_filepath = os.path.join(output_dir, output_file_name)
 
 if not os.path.exists(os.path.join(output_dir, input_file_name)):
     with timer("Downloading %s to %s" % (fileId, os.path.join(output_dir, input_file_name))):
         client.downloadFile(fileId, os.path.join(output_dir, input_file_name))
-        
+
 
 with timer("Finished running netcdf_mean"):
     data = netcdf_mean(os.path.join(output_dir, input_file_name),
