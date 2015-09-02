@@ -9,6 +9,7 @@ cache:
   - $HOME/.cache/pip
   - $HOME/build/girder/node_modules
   - $HOME/build/girder/plugins/minerva/node_modules
+  - $HOME/spark-1.3.1-bin-hadoop2.4
 
 sudo: false
 
@@ -31,11 +32,16 @@ before_install:
 
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
-    - cd "${HOME}"/build
+    - cd $HOME/build
     # remove existing girder dir, it remains from caching operations
     - rm -rf girder
     - git clone https://github.com/girder/girder.git
     - mv Kitware/minerva girder/plugins
+
+    # clone romanesco
+    - cd $HOME/build/girder/plugins
+    - git clone https://github.com/Kitware/romanesco.git
+    - cd $HOME/build
 
     # move the node_modules caches
     - mv $HOME/build/girder_node_modules_cache $HOME/build/girder/node_modules
@@ -52,35 +58,55 @@ before_install:
     - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
     - if [ -n "${PY3}" ]; then export MONGO_VERSION=3.0.2; export PY_COVG="OFF"; else export MONGO_VERSION=2.6.9; export PY_COVG="ON"; export DEPLOY=true; fi
 
+    # mongo
     - pushd "${HOME}"
     - curl "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGO_VERSION}.tgz" | gunzip -c | tar x
     - cd mongodb-*/bin && export PATH="${PWD}:${PATH}"
     - popd
     - mkdir /tmp/db
     - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
-
     - mongod --version
-    - pushd "${HOME}"
+
+    # cmake
+    - cd $HOME
     - curl "http://www.cmake.org/files/v3.1/cmake-3.1.0-Linux-x86_64.tar.gz" | gunzip -c | tar x
     - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
-    - popd
     - cmake --version
 
+    # install spark
+    - cd $HOME
+    - wget http://www.scala-lang.org/files/archive/scala-2.10.5.tgz
+    - tar xzvf scala-2.10.5.tgz -C ~
+    - export SCALA_HOME=$HOME/scala-2.10.5
+    - export PATH=$PATH:$SCALA_HOME/bin
+    # spark may be cached
+    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz; fi
+    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
+    - export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
+    - export SPARK_MASTER_IP=localhost
+    - $SPARK_HOME/sbin/start-master.sh
+    - sleep 3
+    - $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
+
+    # global npm install
     - npm install -g npm@next
     - npm --version
 
 install:
+    - cd $HOME/build/girder
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     - npm install grunt grunt-cli
     - pushd plugins/minerva
+
+    # install minerva npm dependencies
     - npm install
     - popd
+
+    # install girder npm dependencies and grunt at top level
     - npm install
-    # Create symlink for romanesco plugin
-    - ln -s `python -c "import romanesco;import os;print os.path.dirname(romanesco.__file__)"` "${HOME}"/build/girder/plugins/romanesco
 
 script:
     - mkdir _build
     - cd _build
-    - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} ..
+    - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} -D SPARK_TEST_MASTER_URL:STRING="spark://localhost:7077" ..
     - JASMINE_TIMEOUT=15000 ctest -R minerva -VV

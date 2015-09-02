@@ -15,9 +15,13 @@ def import_analyses(client, analyses_path):
 
     minerva_analyses_folder = minerva_analyses_folder['folder']
 
+    # Note:  this will clobber any analyses that have the same name
+    items = {v['name']: v for v in
+             client.listItem(minerva_analyses_folder['_id'])}
+
+
     # look for specific analysis subfolders
     # e.g. analyses/bsve
-
     for analysis_subfolder in os.listdir(analyses_path):
         analysis_path = os.path.join(analyses_path, analysis_subfolder)
 
@@ -39,16 +43,12 @@ def import_analyses(client, analyses_path):
                 minerva_metadata = json.load(minerva_metadata_file)
                 analysis_name = minerva_metadata['analysis_name']
 
-        # See if we already have an analysis with that name
-        items = client.listItem(minerva_analyses_folder['_id'], analysis_name)
+        if analysis_name not in items.keys():
+            items[analysis_name] = client.createItem(minerva_analyses_folder['_id'],
+                                                     analysis_name,
+                                                     analysis_name)
 
-        if len(items) == 0:
-            analysis_item = client.createItem(minerva_analyses_folder['_id'], analysis_name, analysis_name)
-        elif len(items) > 1:
-            raise Exception('More than one item found with name: %s' % analysis_name)
-        else:
-            analysis_item = items[0]
-
+        analysis_item = items[analysis_name]
         # Set the minerva metadata
         # add the item_id as the analysis_id
         minerva_metadata['analysis_id'] = analysis_item['_id']
@@ -77,4 +77,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

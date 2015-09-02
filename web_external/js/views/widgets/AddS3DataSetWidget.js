@@ -27,6 +27,7 @@
                 this.model.on('m:saved', function () {
                     this.$el.modal('hide');
                     this.collection.add(this.model);
+                    girder.events.trigger('m:job.created');
                 }, this).on('m:error', function (err) {
                     var message = 'An unexpected error occurred. Please check the console form more details';
 
@@ -35,7 +36,7 @@
                     }
 
                     this.$('.g-validation-failed-message').text(err.responseJSON.message);
-
+                    girder.events.trigger('m:job.created');
                 }, this).save();
             }
         },

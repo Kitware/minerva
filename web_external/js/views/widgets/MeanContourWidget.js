@@ -1,7 +1,7 @@
 /**
 * This widget is used to edit params for GeoJs contour analysis.
 */
-minerva.views.GeoJsContourWidget = minerva.View.extend({
+minerva.views.MeanContourWidget = minerva.View.extend({
 
     events: {
         'submit #m-geojs-contour-form': function (e) {
@@ -10,7 +10,6 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
 
             var datasetId = this.$('#m-geojs-contour-input-dataset').val();
             var parameter = this.$('#m-geojs-contour-parameter').val();
-            var timestep = this.$('#m-geojs-contour-timestep').val();
             var dataset = this.datasetsCollection.get(datasetId);
             var itemId = this.analysis.get('_id');
             var selectedDatasetItem = dataset.getMinervaMetadata().selectedItems[0];
@@ -45,11 +44,8 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
                             variable: {
                                 format: 'json',
                                 data: parameter
-                            },
-                            timestep: {
-                                format: 'number',
-                                data: Number.parseInt(timestep)
                             }
+
                         },
                         outputs: {
                             result: {
@@ -77,7 +73,7 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.geoJsContourWidget({
+        var modal = this.$el.html(minerva.templates.meanContourWidget({
             datasets: this.datasetsCollection.models
         })).girderModal(this).on('ready.girder.modal', _.bind(function () {
         }, this));
