@@ -54,6 +54,15 @@ def findDatasetFolder(currentUser, user, create=False):
                                PluginSettings.DATASET_FOLDER, create)
 
 
+def findSourceFolder(currentUser, user, create=False):
+    minervaFolder = findMinervaFolder(currentUser, user, create)
+    if minervaFolder is None:
+        return minervaFolder
+    else:
+        return findNamedFolder(currentUser, user, minervaFolder, 'folder',
+                               PluginSettings.SOURCE_FOLDER, create)
+
+
 def findSessionFolder(currentUser, user, create=False):
     minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
