@@ -5,7 +5,7 @@ import numpy as np
 from bson import json_util
 import time
 from contextlib import contextmanager
-
+from romanesco.utils import tmpdir
 from netCDF4 import Dataset
 from girder_client import GirderClient
 
@@ -223,40 +223,37 @@ output_file_name = input_file_name.replace('.nc', '.json')
 # os.close(fd)
 
 #output_dir = "/data"
-output_dir = tempfile.mkdtemp()
-output_filepath = os.path.join(output_dir, output_file_name)
+with tmpdir(cleanup=True) as output_dir:
+    output_filepath = os.path.join(output_dir, output_file_name)
 
-if not os.path.exists(os.path.join(output_dir, input_file_name)):
-    with timer("Downloading %s to %s" % (fileId, os.path.join(output_dir, input_file_name))):
-        client.downloadFile(fileId, os.path.join(output_dir, input_file_name))
+    if not os.path.exists(os.path.join(output_dir, input_file_name)):
+        with timer("Downloading %s to %s" % (fileId, os.path.join(output_dir, input_file_name))):
+            client.downloadFile(fileId, os.path.join(output_dir, input_file_name))
 
+    with timer("Finished running netcdf_mean"):
+        data = netcdf_mean(os.path.join(output_dir, input_file_name),
+                           variable,
+                           grid_chunk_size,
+                           partitions)
 
-with timer("Finished running netcdf_mean"):
-    data = netcdf_mean(os.path.join(output_dir, input_file_name),
-                       variable,
-                       grid_chunk_size,
-                       partitions)
+    with timer("Finished converting to contour JSON"):
+        contour = convert(data, variable, 0)
 
-with timer("Finished converting to contour JSON"):
-    contour = convert(data, variable, 0)
+    with open(output_filepath, 'w') as fp:
+        fp.write(json_util.dumps(contour))
 
+    # Create an item for this file
+    with timer("Created item"):
+        output_item = client.createItem(dataset_folder_id,
+                                        output_file_name,
+                                        output_file_name)
 
-with open(output_filepath, 'w') as fp:
-    fp.write(json_util.dumps(contour))
+    # Now upload the result
+    with timer("Finished uploading item from %s" % (output_filepath)):
+        client.uploadFileToItem(output_item['_id'], output_filepath)
 
+    output_item_id = output_item['_id']
 
-# Create an item for this file
-with timer("Created item"):
-    output_item = client.createItem(dataset_folder_id,
-                                    output_file_name,
-                                    output_file_name)
-
-# Now upload the result
-with timer("Finished uploading item from %s" % (output_filepath)):
-    client.uploadFileToItem(output_item['_id'], output_filepath)
-
-output_item_id = output_item['_id']
-
-# Finally promote item to dataset
-with timer("Promoted item %s to dataset" % output_item_id):
-    client.post('minerva_dataset/%s/dataset' % output_item_id)
+    # Finally promote item to dataset
+    with timer("Promoted item %s to dataset" % output_item_id):
+        client.post('minerva_dataset/%s/dataset' % output_item_id)
