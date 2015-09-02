@@ -24,7 +24,8 @@ from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
 
-from girder.plugins.minerva.utility.minerva_utility import findSourceFolder
+from girder.plugins.minerva.utility.minerva_utility import findSourceFolder, \
+    updateMinervaMetadata
 
 
 class Source(Resource):
@@ -33,6 +34,7 @@ class Source(Resource):
         self.route('GET', (), self.listSources)
         self.route('GET', ('folder',), self.getSourceFolder)
         self.route('POST', ('folder',), self.createSourceFolder)
+        self.route('POST', ('wms_source',), self.createWmsSource)
 
     # REST Endpoints
 
@@ -82,3 +84,29 @@ class Source(Resource):
         Description('Create the minerva source folder owned by a user.')
         .param('userId', 'User is the owner of minerva sources.',
                required=True))
+
+    @access.user
+    def createWmsSource(self, params):
+        # assuming to create in the user space of the current user
+        user = self.getCurrentUser()
+        folder = findSourceFolder(user, user)
+        name = params['name'],
+        baseURL = params['baseURL']
+        projection = params['projection']
+        desc = 'wms source for  %s' % name
+        item = self.model('item').createItem(name, user, folder, desc)
+        minerva_metadata = {
+            'source_id': item['_id'],
+            'source_type': 'wms',
+            'wms_params': {
+                'baseURL': baseURL,
+                'projection': projection
+            }
+        }
+        return updateMinervaMetadata(item, minerva_metadata)
+    createWmsSource.description = (
+        Description('Create a source from an external wms server.')
+        .param('name', 'The name of the wms source', required=True)
+        .param('baseURL', 'URL where the wms is served', required=True)
+        .param('projection', 'Projection of the wms source.', required=True)
+        .errorResponse('Write permission denied on the source folder.', 403))

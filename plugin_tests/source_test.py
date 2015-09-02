@@ -65,7 +65,7 @@ class SourceTestCase(base.TestCase):
 
     def testSource(self):
         """
-        Test the minerva source API enppoints.
+        Test the minerva source API endpoints.
         """
 
         # at first the source folder is None
@@ -147,3 +147,34 @@ class SourceTestCase(base.TestCase):
         sourceIds = [d['_id'] for d in response.json]
         self.assertTrue(item1Id in sourceIds, "expected item1Id in sources")
         self.assertTrue(item2Id in sourceIds, "expected item2Id in sources")
+
+
+    def testCreateWmsSource(self):
+        """
+        Test the minerva WMS source API endpoints.
+        """
+
+        # at first the source folder is None
+
+        path = '/minerva_source/folder'
+        params = {
+            'userId': self._user['_id'],
+        }
+        response = self.request(path=path, method='POST', params=params, user=self._user)
+        self.assertStatusOk(response)
+        folder = response.json['folder']
+
+        path = '/minerva_source/wms_source'
+        baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
+        projection = 'EPSG:3857'
+        params = {
+            'name': 'testWMS',
+            'baseURL': baseURL,
+            'projection': projection
+        }
+        response = self.request(path=path, method='POST', params=params, user=self._user)
+        self.assertStatusOk(response)
+        wmsSource = response.json
+        self.assertEquals(wmsSource['source_type'], 'wms', 'incorrect wms source type')
+        self.assertEquals(wmsSource['wms_params']['baseURL'], baseURL, 'incorrect wms source baseURL')
+        self.assertEquals(wmsSource['wms_params']['projection'], projection, 'incorrect wms source projection')

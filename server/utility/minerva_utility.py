@@ -118,3 +118,11 @@ def findAnalysisByName(currentUser, name):
         return analyses[0]
     else:
         return None
+
+
+def updateMinervaMetadata(item, minerva_metadata):
+    if 'meta' not in item:
+        item['meta'] = {}
+    item['meta']['minerva'] = minerva_metadata
+    ModelImporter.model('item').setMetadata(item, item['meta'])
+    return item['meta']['minerva']
