@@ -80,9 +80,9 @@ before_install:
     - export SCALA_HOME=$HOME/scala-2.10.5
     - export PATH=$PATH:$SCALA_HOME/bin
     # spark may be cached
-    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz; fi
-    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
     - export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
+    - if [ ! -d $SPARK_HOME/sbin/start-master.sh ]; then wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz; fi
+    - if [ ! -d $SPARK_HOME/sbin/start-master.sh ]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
     - export SPARK_MASTER_IP=localhost
     - $SPARK_HOME/sbin/start-master.sh
     - sleep 3
