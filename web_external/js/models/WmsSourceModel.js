@@ -2,9 +2,9 @@ minerva.models.WmsSourceModel = minerva.models.SourceModel.extend({
 
     createSource: function (name, baseURL, projection) {
         var params = {
-            'name': name,
-            'baseURL': baseURL,
-            'projection': projection
+            name: name,
+            baseURL: baseURL,
+            projection: projection
         };
         girder.restRequest({
             path: '/minerva_source/wms_source',
@@ -19,7 +19,5 @@ minerva.models.WmsSourceModel = minerva.models.SourceModel.extend({
         }, this));
 
         return this;
-    },
-
-
+    }
 });
