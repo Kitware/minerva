@@ -1,0 +1,65 @@
+---
+# defaults file for geonode
+
+# app_name should be a shorthand, lowercase, no spaces version of the
+# application name since this variable will be used as a directory name
+# Also, it would be the name of the branch in the worldmap repo.
+# For example worldmap, my_geonode, master, feature1.
+app_name: GeoNode
+
+# github user who owns the repository
+github_user: GeoNode
+
+# version
+app_version: master
+
+# remote git repository to pull application code from, for example:
+code_repository: "https://github.com/{{ github_user }}/{{ app_name }}.git"
+
+# TODO: Allow for branch name
+
+# Server name for nginx.
+server_name: 54.157.187.117
+
+db_data_instance: "{{ app_name }}"
+db_metadata_instance: "{{ app_name }}_app"
+db_password: "{{ app_name }}"
+db_user: "{{ app_name }}"
+db_region: us-east-1
+db_engine: postgres
+db_instance_type: db.t2.medium
+db_storage_type: gp2
+db_multi_zone: yes
+db_publicly_accessible: yes
+db_data_size: 200
+db_metadata_size: 10
+db_maint_window: mon:05:00-mon:06:00
+db_backup_retention: 35
+db_backup_window: 07:00-07:30
+db_license_model: postgresql-license
+
+# Django settings module to use when running Manage commands
+# for example, txt2react.settings
+main_module: "{{ app_name }}"
+
+# name of the user created by the Fabric script that Ansible will use to
+# handle server tasks
+deploy_user: vagrant
+
+# server directory for the virtualenv that will be created to run the web app
+virtualenv_dir: /home/{{deploy_user}}/venvs
+
+# server directory to put the code into that is pulled from the code
+# repository
+app_code_dir: /home/{{deploy_user}}
+
+# location of the requirements.txt flie in the code
+requirements_file: "{{app_code_dir}}/requirements.txt"
+
+# root domain name the server should run as. do not include a subdomain,
+# for example, txt2react.com
+site_url: "{{ app_name }}"
+
+ssh_dir: ~/.ssh/
+
+geoserver_url: http://build.geonode.org/geoserver/latest/geoserver.war

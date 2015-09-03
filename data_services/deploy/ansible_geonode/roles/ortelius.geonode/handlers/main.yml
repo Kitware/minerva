@@ -1,0 +1,11 @@
+---
+# handlers file for ansible-geonode
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  sudo: yes
+
+- name: restart uwsgi
+  service: name=uwsgi state=restarted
+  sudo: yes
+

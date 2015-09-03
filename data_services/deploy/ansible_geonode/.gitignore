@@ -1,0 +1,10 @@
+/.vagrant
+/build
+/riskinfo_lk/downloaded
+/riskinfo_lk/geoserver
+debug.log
+*.egg-info
+*.sublime*
+.DS_Store
+settings_secret.py
+*.pyc

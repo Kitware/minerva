@@ -1,0 +1,9 @@
+##
+# these scripts set up a complete web application stack that is connected
+# to the remote database backend the other deployment scripts set up
+#
+---
+
+- include: nginx.yml
+- include: uwsgi.yml
+- include: geonode.yml

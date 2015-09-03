@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: GeoNode Developers 
+  description: An Ansible Role for Installing GeoNode 
+  company: GeoNode Developers
+  issue_tracker_url: http://github.com/jj0hns0n/ansible-geonode/issues
+  license: license (Apache)
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty
+  # Below are all categories currently available. Just as with
+  # the platforms above, uncomment those that apply to your role.
+  #
+  categories:
+  - web
+dependencies: []

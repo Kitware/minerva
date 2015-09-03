@@ -1,0 +1,6 @@
+---
+# Tasks file for geonode
+
+- include: postgres_postgis.yml
+- include: geoserver.yml
+- include: web.yml
