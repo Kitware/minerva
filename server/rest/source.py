@@ -21,7 +21,7 @@ import pymongo
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel
+from girder.api.rest import Resource, loadmodel, RestException
 from girder.constants import AccessType
 
 from girder.plugins.minerva.utility.minerva_utility import findSourceFolder, \
@@ -69,9 +69,10 @@ class Source(Resource):
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getSourceFolder(self, user, params):
         folder = findSourceFolder(self.getCurrentUser(), user)
-        return {'folder': folder}
+        return folder
     getSourceFolder.description = (
         Description('Get the minerva source folder owned by a user.')
+        .responseClass('Folder')
         .param('userId', 'User is the owner of minerva sources.',
                required=True))
 
@@ -79,9 +80,10 @@ class Source(Resource):
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
     def createSourceFolder(self, user, params):
         folder = findSourceFolder(self.getCurrentUser(), user, create=True)
-        return {'folder': folder}
+        return folder
     createSourceFolder.description = (
         Description('Create the minerva source folder owned by a user.')
+        .responseClass('Folder')
         .param('userId', 'User is the owner of minerva sources.',
                required=True))
 
@@ -90,7 +92,9 @@ class Source(Resource):
         # assuming to create in the user space of the current user
         user = self.getCurrentUser()
         folder = findSourceFolder(user, user)
-        name = params['name'],
+        if folder is None:
+            raise RestException('User has no Minerva Source folder.')
+        name = params['name']
         baseURL = params['baseURL']
         projection = params['projection']
         desc = 'wms source for  %s' % name
@@ -103,7 +107,8 @@ class Source(Resource):
                 'projection': projection
             }
         }
-        return updateMinervaMetadata(item, minerva_metadata)
+        updateMinervaMetadata(item, minerva_metadata)
+        return item
     createWmsSource.description = (
         Description('Create a source from an external wms server.')
         .param('name', 'The name of the wms source', required=True)

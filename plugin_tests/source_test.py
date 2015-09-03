@@ -17,11 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 
-#import json
 import os
-#import zipfile
-
-#import geojson
 
 # Need to set the environment variable before importing girder
 os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
@@ -76,7 +72,7 @@ class SourceTestCase(base.TestCase):
         }
         response = self.request(path=path, method='GET', params=params)
         self.assertStatusOk(response)
-        folder = response.json['folder']
+        folder = response.json
         self.assertEquals(folder, None)
 
         # create a source folder
@@ -87,7 +83,7 @@ class SourceTestCase(base.TestCase):
         response = self.request(path=path, method='POST', params=params, user=self._user)
 
         self.assertStatusOk(response)
-        folder = response.json['folder']
+        folder = response.json
         self.assertNotEquals(folder, None)
         self.assertEquals(folder['baseParentType'], 'user')
         self.assertEquals(folder['baseParentId'], str(self._user['_id']))
@@ -98,7 +94,7 @@ class SourceTestCase(base.TestCase):
         self.assertStatusOk(response)
         # response should be Null b/c we don't have permissions to see anything
         # TODO is it better to always make it private and just throw a 401 in this case ?
-        folder = response.json['folder']
+        folder = response.json
         self.assertEquals(folder, None)
 
         # get the folder passing in the user
@@ -106,7 +102,7 @@ class SourceTestCase(base.TestCase):
         response = self.request(path=path, method='GET', params=params, user=self._user)
 
         self.assertStatusOk(response)
-        folder = response.json['folder']
+        folder = response.json
         self.assertNotEquals(folder, None)
         self.assertEquals(folder['baseParentType'], 'user')
         self.assertEquals(folder['baseParentId'], str(self._user['_id']))
@@ -155,6 +151,19 @@ class SourceTestCase(base.TestCase):
         """
 
         # at first the source folder is None
+        path = '/minerva_source/wms_source'
+        name = 'testWMS'
+        baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
+        projection = 'EPSG:3857'
+        params = {
+            'name': name,
+            'baseURL': baseURL,
+            'projection': projection
+        }
+        response = self.request(path=path, method='POST', params=params, user=self._user)
+        self.assertStatus(response, 400)
+
+        # create the source folder
 
         path = '/minerva_source/folder'
         params = {
@@ -162,19 +171,22 @@ class SourceTestCase(base.TestCase):
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
-        folder = response.json['folder']
+        folder = response.json
 
         path = '/minerva_source/wms_source'
+        name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
         projection = 'EPSG:3857'
         params = {
-            'name': 'testWMS',
+            'name': name,
             'baseURL': baseURL,
             'projection': projection
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
-        self.assertEquals(wmsSource['source_type'], 'wms', 'incorrect wms source type')
-        self.assertEquals(wmsSource['wms_params']['baseURL'], baseURL, 'incorrect wms source baseURL')
-        self.assertEquals(wmsSource['wms_params']['projection'], projection, 'incorrect wms source projection')
+        minerva_metadata = wmsSource['meta']['minerva']
+        self.assertEquals(wmsSource['name'], name, 'incorrect wms source name')
+        self.assertEquals(minerva_metadata['source_type'], 'wms', 'incorrect wms source type')
+        self.assertEquals(minerva_metadata['wms_params']['baseURL'], baseURL, 'incorrect wms source baseURL')
+        self.assertEquals(minerva_metadata['wms_params']['projection'], projection, 'incorrect wms source projection')
