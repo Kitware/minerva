@@ -154,11 +154,9 @@ class SourceTestCase(base.TestCase):
         path = '/minerva_source/wms_source'
         name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
-        projection = 'EPSG:3857'
         params = {
             'name': name,
-            'baseURL': baseURL,
-            'projection': projection
+            'baseURL': baseURL
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatus(response, 400)
@@ -176,11 +174,9 @@ class SourceTestCase(base.TestCase):
         path = '/minerva_source/wms_source'
         name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
-        projection = 'EPSG:3857'
         params = {
             'name': name,
-            'baseURL': baseURL,
-            'projection': projection
+            'baseURL': baseURL
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
@@ -189,4 +185,3 @@ class SourceTestCase(base.TestCase):
         self.assertEquals(wmsSource['name'], name, 'incorrect wms source name')
         self.assertEquals(minerva_metadata['source_type'], 'wms', 'incorrect wms source type')
         self.assertEquals(minerva_metadata['wms_params']['baseURL'], baseURL, 'incorrect wms source baseURL')
-        self.assertEquals(minerva_metadata['wms_params']['projection'], projection, 'incorrect wms source projection')

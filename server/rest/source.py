@@ -96,15 +96,13 @@ class Source(Resource):
             raise RestException('User has no Minerva Source folder.')
         name = params['name']
         baseURL = params['baseURL']
-        projection = params['projection']
         desc = 'wms source for  %s' % name
         item = self.model('item').createItem(name, user, folder, desc)
         minerva_metadata = {
             'source_id': item['_id'],
             'source_type': 'wms',
             'wms_params': {
-                'baseURL': baseURL,
-                'projection': projection
+                'baseURL': baseURL
             }
         }
         updateMinervaMetadata(item, minerva_metadata)
@@ -113,5 +111,4 @@ class Source(Resource):
         Description('Create a source from an external wms server.')
         .param('name', 'The name of the wms source', required=True)
         .param('baseURL', 'URL where the wms is served', required=True)
-        .param('projection', 'Projection of the wms source.', required=True)
         .errorResponse('Write permission denied on the source folder.', 403))
