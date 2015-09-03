@@ -102,13 +102,14 @@ class Source(Resource):
             'source_id': item['_id'],
             'source_type': 'wms',
             'wms_params': {
-                'baseURL': baseURL
+                'base_url': baseURL
             }
         }
         updateMinervaMetadata(item, minerva_metadata)
         return item
     createWmsSource.description = (
         Description('Create a source from an external wms server.')
+        .responseClass('Item')
         .param('name', 'The name of the wms source', required=True)
         .param('baseURL', 'URL where the wms is served', required=True)
         .errorResponse('Write permission denied on the source folder.', 403))

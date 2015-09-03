@@ -22,6 +22,7 @@ add_python_test(geonames PLUGIN minerva)
 add_python_test(s3_dataset PLUGIN minerva)
 add_python_test(import_analyses PLUGIN minerva)
 add_python_test(contour_analysis PLUGIN minerva)
+add_python_test(wms PLUGIN minerva)
 
 
 set(SPARK_TEST_MASTER_URL  "" CACHE STRING "Spark master URL")
