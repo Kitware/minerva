@@ -9,21 +9,6 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
-    is_renderable: function () {
-        // Really this function should be defined in each data model subclass,
-        // OR - based on whether or not geoFileReader is defined (better because
-        // then readability is based on whether GeoJS has a reader for this type)
-        // but to do that we would have to be persisting geoFileReader to the server
-        // which would require some things being rearranged.
-
-        // For now we know that if original_type is 'json' its ACTUALLY contour json,
-        // and if its'geojson'  its actually geojson - and for now these are the only
-        // two renderable data types.
-        return this.getMinervaMetadata().original_type === 'json' ||
-            this.getMinervaMetadata().original_type === 'geojson' ||
-            this.getMinervaMetadata().original_type === 'shapefile';
-    },
-
     getMinervaMetadata: function () {
         // for now assume that keys exists and allow exceptions to happen if they don't
         var meta = this.get('meta');
