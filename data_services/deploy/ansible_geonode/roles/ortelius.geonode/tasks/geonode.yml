@@ -50,7 +50,7 @@
   git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}}
 
 - name: copy the local_settings.py file in place
-  template: src=local_settings.py.j2 dest={{ app_code_dir}}/{{app_name}}/{{ app_name}}/local_settings.py
+  template: src=local_settings.py.j2 dest={{ app_code_dir}}/{{app_name}}/local_settings.py
 
 - name: check if virtualenv already exists
   stat: path={{virtualenv_dir}}/{{app_name}}
