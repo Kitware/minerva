@@ -548,6 +548,7 @@ class Dataset(Resource):
         minerva_metadata = {
             'dataset_id': item['_id'],
             'original_type': 'wms',
+            'dataset_type': 'wms',
             'source_id': wmsSource['_id'],
             'wms_params': wmsParams,
             'base_url': wmsSource['meta']['minerva']['wms_params']['base_url']

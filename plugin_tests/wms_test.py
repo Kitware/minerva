@@ -167,5 +167,6 @@ class WmsTestCase(base.TestCase):
         minerva_metadata = wmsDataset['meta']['minerva']
         self.assertEquals(wmsDataset['name'], name, 'incorrect wms dataset name')
         self.assertEquals(minerva_metadata['source_id'], wmsSource['_id'], 'incorrect wms source_id')
-        self.assertEquals(minerva_metadata['original_type'], 'wms', 'incorrect wms dataset type')
+        self.assertEquals(minerva_metadata['original_type'], 'wms', 'incorrect wms original type')
+        self.assertEquals(minerva_metadata['dataset_type'], 'wms', 'incorrect wms dataset type')
         self.assertEquals(minerva_metadata['base_url'], wmsSource['meta']['minerva']['wms_params']['base_url'],'incorrect wms dataset baseURL')
