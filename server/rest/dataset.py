@@ -560,6 +560,7 @@ class Dataset(Resource):
         .responseClass('Item')
         .param('name', 'The name of the wms source', required=True)
         .param('wmsSourceId', 'Item ID of the WMS Source', required=True)
-        .param('wmsParams', 'JSON object specifying WMS layer params', required=True)
+        .param('wmsParams', 'JSON object specifying WMS layer params',
+               required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))

@@ -5,8 +5,7 @@ minerva.collections.DatasetCollection = minerva.collections.MinervaCollection.ex
         if (attrs.meta && ('minerva' in attrs.meta)) {
             if (attrs.meta.minerva.dataset_type === 'wms') {
                 return new minerva.models.WmsDatasetModel(attrs, options);
-            }
-            else if (attrs.meta.minerva.original_type === 's3') {
+            } else if (attrs.meta.minerva.original_type === 's3') {
                 return new minerva.models.S3DatasetModel(attrs, options);
             }
         }
