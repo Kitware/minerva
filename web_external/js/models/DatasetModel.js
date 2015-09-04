@@ -99,7 +99,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     getDatasetType: function () {
         // this is the start of trying to build an interface around the minerva metadata
         var minervaMetadata = this.getMinervaMetadata();
-        return _.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null;
+        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
+            (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type: null);
     },
 
     // functions dealing with json type
