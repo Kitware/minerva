@@ -27,9 +27,9 @@
    - postgresql-contrib-9.4
    - postgresql-9.4-postgis-2.1
 
-- name: write the pg_hba.conf file
-  template: src=pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
-  sudo: yes
+# - name: write the pg_hba.conf file
+#   template: src=pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
+#   sudo: yes
 
 # - name: check if postgres cluster is created already
 #   shell: "psql postgres -c 'select 1'"
@@ -42,6 +42,16 @@
   sudo: yes
   shell: "pg_dropcluster --stop 9.4 main && pg_createcluster --start -e UTF-8 9.4 main"
 
+- name: update postgres client configuration
+  action: copy src=roles/ortelius.geonode/templates/pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
+  # notify:
+  #   - restart postgresql
+  sudo: yes
+
+- name: restart postgres1
+  command: /etc/init.d/postgresql restart
+  sudo: yes
+
 - name: create database user
   postgresql_user: name={{db_user}}
                    password={{db_password}}
@@ -52,3 +62,7 @@
 - name: restart postgres
   command: /etc/init.d/postgresql restart
   sudo: yes
+
+# handlers:
+#   - name: restart postgresql
+#     action: service name=postgresql state=restarted
