@@ -48,7 +48,7 @@
   #   - restart postgresql
   sudo: yes
 
-- name: restart postgres1
+- name: restart postgres_post_configuration
   command: /etc/init.d/postgresql restart
   sudo: yes
 
