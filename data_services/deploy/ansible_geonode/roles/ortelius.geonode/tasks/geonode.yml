@@ -171,3 +171,6 @@
 
 - name: create the db datastore in geoserver
   command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_db_store.py"
+
+- name: run geonode app
+  command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/manage.py runserver 0.0.0.0:8000"
