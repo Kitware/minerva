@@ -34,12 +34,12 @@
   sudo: yes
   shell: "pg_dropcluster --stop 9.4 main && pg_createcluster --start -e UTF-8 9.4 main"
 
-# - name: create database user
-#   postgresql_user: name={{db_user}}
-#                    password={{db_password}}
-#                    role_attr_flags=LOGIN,CREATEDB,NOSUPERUSER
-#   sudo: yes
-#   sudo_user: postgres
+- name: create database user
+  postgresql_user: name={{db_user}}
+                   password={{db_password}}
+                   role_attr_flags=LOGIN,CREATEDB,NOSUPERUSER
+  sudo: yes
+  sudo_user: postgres
 
 - name: restart postgres
   command: /etc/init.d/postgresql restart

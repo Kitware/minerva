@@ -1,5 +1,13 @@
 ---
 # Tasks file for geonode
+# Workabound for sudo without password: @Aashish
+- name: configure 30-dev sudoers
+  lineinfile: dest=/etc/sudoers.d/vagrant owner=root group=root mode=0440
+              line="%vagrant ALL=(postgres) NOPASSWD:ALL"
+              state=present
+              create=yes
+              validate='visudo -cf %s'
+  sudo: yes
 
 - include: postgres_postgis.yml
 - include: geoserver.yml

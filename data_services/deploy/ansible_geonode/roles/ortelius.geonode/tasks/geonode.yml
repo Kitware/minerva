@@ -97,30 +97,40 @@
   file: path=/var/log/uwsgi state=directory mode=0777 owner=www-data group=www-data
   sudo: yes
 
-# - name: create {{db_metadata_instance}} db
-#   postgresql_db: name={{db_metadata_instance}}
-#                  encoding='UTF-8'
-#                  lc_collate='en_US.UTF-8'
-#                  lc_ctype='en_US.UTF-8'
-#                  owner=postgres
-#                  template='template0'
+# Moved to tasks/main.yml
+# # Workabound for sudo without password: @Aashish
+# - name: configure 30-dev sudoers
+#   lineinfile: dest=/etc/sudoers.d/vagrant owner=root group=root mode=0440
+#               line="%vagrant ALL=(postgres) NOPASSWD:ALL"
+#               state=present
+#               create=yes
+#               validate='visudo -cf %s'
 #   sudo: yes
-#   sudo_user: postgres
+
+- name: create {{db_metadata_instance}} db
+  postgresql_db: name={{db_metadata_instance}}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 owner=postgres
+                 template='template0'
+  sudo: yes
+  sudo_user: postgres
 
 #- name: add postgis to the {{db_metadata_instance}} db
   #postgresql_ext: name=postgis db={{db_metadata_instance}}
   #sudo: yes
   #sudo_user: postgres
 
-# - name: create {{db_data_instance}} db
-#   postgresql_db: name={{db_data_instance}}
-#                  encoding='UTF-8'
-#                  lc_collate='en_US.UTF-8'
-#                  lc_ctype='en_US.UTF-8'
-#                  owner={{db_user}}
-#                  template='template0'
-#   sudo: yes
-#   sudo_user: postgres
+- name: create {{db_data_instance}} db
+  postgresql_db: name={{db_data_instance}}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 owner={{db_user}}
+                 template='template0'
+  sudo: yes
+  sudo_user: postgres
 
 #- name: add postgis to the {{db_data_instance}} db
 #  postgresql_ext: name=postgis db={{db_data_instance}}
