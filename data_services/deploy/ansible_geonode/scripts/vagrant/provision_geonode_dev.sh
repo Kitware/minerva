@@ -11,16 +11,18 @@ export C_INCLUDE_PATH=/usr/include/gdal
 sudo pip install virtualenvwrapper
 source /usr/local/bin/virtualenvwrapper.sh
 
-mkvirtualenv riskinfo_lk
+#mkvirtualenv riskinfo_lk
+mkvirtualenv geonode_local
 
 pip install GDAL==1.10.0
 
-git clone https://github.com/riskinfo-lk/riskinfo_lk.git
-cd riskinfo_lk/
+#git clone https://github.com/riskinfo-lk/riskinfo_lk.git
+#cd riskinfo_lk/
+cd geonode_local/
 
 pip install -e . 
 
 paver setup # install geonode and downloads geoserver
 paver start_geoserver
 paver sync
-python manage.py runserver 0.0.0.0:8000 &
+#python manage.py runserver 0.0.0.0:8000 &
