@@ -1,0 +1,3 @@
+* Have ansible run the geonode app
+* Fix creation of superuser (current we have to do it post install)
+* Layers don't show up in preview in geonode:

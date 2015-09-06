@@ -19,7 +19,8 @@ code_repository: "https://github.com/{{ github_user }}/{{ app_name }}.git"
 # TODO: Allow for branch name
 
 # Server name for nginx.
-server_name: 54.157.187.117
+# TODO: Production IP address
+server_name: localhost:8080
 
 db_data_instance: "{{ app_name }}"
 db_metadata_instance: "{{ app_name }}_app"
