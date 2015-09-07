@@ -1,3 +1,2 @@
-* Have ansible run the geonode app
 * Fix creation of superuser (current we have to do it post install)
-* Layers don't show up in preview in geonode:
+* Layers preview does not show up in layer's list for some layer
