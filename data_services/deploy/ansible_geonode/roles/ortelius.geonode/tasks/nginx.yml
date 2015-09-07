@@ -1,5 +1,5 @@
 ###
-# Installs nginx 
+# Installs nginx
 #
 ---
 - name: add repository for latest nginx stable
@@ -7,11 +7,11 @@
   sudo: yes
 
 - name: ensure apt cache is up to date
-  apt: update_cache=yes 
+  apt: update_cache=yes
   sudo: yes
 
 - name: ensure nginx is installed
-  apt: name=nginx
+  apt: name=nginx 
   sudo: yes
 
 - name: write nginx configuration for multiple subdomains

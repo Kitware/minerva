@@ -1,4 +1,4 @@
-- hosts: dev
+- hosts: production
   remote_user: vagrant
   roles:
      - { role: ortelius.geonode }
