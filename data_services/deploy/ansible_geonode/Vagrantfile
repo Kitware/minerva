@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   	production.vm.network :public_network, :bridge => 'eth0', :auto_config => false
     config.vm.network "forwarded_port", guest: 80, host: 8000
     production.vm.provider :virtualbox do |vb|
-        vb.customize [ "modifyvm", :id, "--name", "RiskInfo-Production","--memory", 4096 ]
+        vb.customize [ "modifyvm", :id, "--name", "Minerva-Production","--memory", 4096 ]
   	end
     production.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbook.yml"
@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     config.vm.network "forwarded_port", guest: 8080, host: 8080
     config.vm.network "forwarded_port", guest: 8000, host: 8000
   	dev.vm.provider :virtualbox do |vb|
-       vb.customize [ "modifyvm", :id, "--name", "RiskInfo-Dev","--memory", 4096 ]
+       vb.customize [ "modifyvm", :id, "--name", "Minerva-Dev","--memory", 4096 ]
   	end
     dev.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbook.yml"
