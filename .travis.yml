@@ -80,9 +80,9 @@ before_install:
     - export SCALA_HOME=$HOME/scala-2.10.5
     - export PATH=$PATH:$SCALA_HOME/bin
     # spark may be cached
-    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz; fi
-    - if [[ ! -d spark-1.3.1-bin-hadoop2.4 ]]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
     - export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
+    - if [ ! -f $SPARK_HOME/sbin/start-master.sh ]; then wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz; fi
+    - if [ ! -f $SPARK_HOME/sbin/start-master.sh ]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
     - export SPARK_MASTER_IP=localhost
     - $SPARK_HOME/sbin/start-master.sh
     - sleep 3
@@ -95,6 +95,9 @@ before_install:
 install:
     - cd $HOME/build/girder
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
+    # create the Romanesco config and enable spark plugin
+    - cp /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.dist.cfg /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
+    - sed -i 's/plugins_enabled=/plugins_enabled=spark/' /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
     - npm install grunt grunt-cli
     - pushd plugins/minerva
 
