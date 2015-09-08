@@ -30,8 +30,7 @@ from girder.utility import config
 
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.libs.carmen import get_resolver
-from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
-    updateMinervaMetadata
+from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, JsonMapper, GeoJsonMapper, jsonObjectReader
 
@@ -53,7 +52,6 @@ class Dataset(Resource):
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
         self.route('POST', (':id', 'geocode_tweets'), self.createTweetGeocodes)
-        self.route('POST', ('wms_dataset',), self.createWmsDataset)
         self.client = None
 
     def _initClient(self):
@@ -532,35 +530,3 @@ class Dataset(Resource):
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
-
-    @access.public
-    @loadmodel(map={'wmsSourceId': 'wmsSource'}, model='item',
-               level=AccessType.READ)
-    def createWmsDataset(self, wmsSource, params):
-        self.requireParams(('name', 'wmsParams'), params)
-        user = self.getCurrentUser()
-        folder = findDatasetFolder(user, user)
-        if folder is None:
-            raise RestException('User has no Minerva Dataset folder.')
-        name = params['name']
-        item = self.model('item').createItem(name, user, folder)
-        wmsParams = params['wmsParams']
-        minerva_metadata = {
-            'dataset_id': item['_id'],
-            'original_type': 'wms',
-            'dataset_type': 'wms',
-            'source_id': wmsSource['_id'],
-            'wms_params': wmsParams,
-            'base_url': wmsSource['meta']['minerva']['wms_params']['base_url']
-        }
-        updateMinervaMetadata(item, minerva_metadata)
-        return item
-    createWmsDataset.description = (
-        Description('Create a WMS Dataset from a WMS Source.')
-        .responseClass('Item')
-        .param('name', 'The name of the wms source', required=True)
-        .param('wmsSourceId', 'Item ID of the WMS Source', required=True)
-        .param('wmsParams', 'JSON object specifying WMS layer params',
-               required=True)
-        .errorResponse('ID was invalid.')
-        .errorResponse('Read permission denied on the Item.', 403))

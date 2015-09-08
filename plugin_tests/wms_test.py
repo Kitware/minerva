@@ -64,27 +64,6 @@ class WmsTestCase(base.TestCase):
         Test the minerva WMS source API endpoints.
         """
 
-        # at first the source folder is None
-        path = '/minerva_source/wms_source'
-        name = 'testWMS'
-        baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
-        params = {
-            'name': name,
-            'baseURL': baseURL
-        }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatus(response, 400)
-
-        # create the source folder
-
-        path = '/minerva_source/folder'
-        params = {
-            'userId': self._user['_id'],
-        }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatusOk(response)
-        folder = response.json
-
         path = '/minerva_source/wms_source'
         name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
@@ -106,16 +85,6 @@ class WmsTestCase(base.TestCase):
         Test the minerva WMS dataset API endpoints.
         """
 
-        # create the source folder
-
-        path = '/minerva_source/folder'
-        params = {
-            'userId': self._user['_id'],
-        }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatusOk(response)
-        folder = response.json
-
         # create the source
 
         path = '/minerva_source/wms_source'
@@ -129,31 +98,9 @@ class WmsTestCase(base.TestCase):
         self.assertStatusOk(response)
         wmsSource = response.json
 
-        # at first the dataset folder is None
-        path = '/minerva_dataset/wms_dataset'
-        name = 'testWMSdataset'
-        wmsParams = {}
-        params = {
-            'name': name,
-            'wmsSourceId': wmsSource['_id'],
-            'wmsParams': wmsParams
-        }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatus(response, 400)
-
-        # create the dataset folder
-
-        path = '/minerva_dataset/folder'
-        params = {
-            'userId': self._user['_id'],
-        }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatusOk(response)
-        datasetFolder = response.json
-
         # create the dataset
 
-        path = '/minerva_dataset/wms_dataset'
+        path = '/minerva_dataset_wms'
         name = 'testWMSdataset'
         wmsParams = {}
         params = {
