@@ -1,0 +1,13 @@
+.navbar-brand {
+  background: url(../img/geonodegp_white.png) 15px 0 no-repeat;
+  background-size: contain;
+  height: 40px;
+  margin-right: 15px;
+  margin-top: 10px;
+  text-indent: -9999em;
+  width: 140px;
+}
+
+.x-btn .gradient {
+    background-image: url(../img/gradient.png);
+}

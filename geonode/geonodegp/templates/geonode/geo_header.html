@@ -1,0 +1,65 @@
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/externals/geoext/resources/css/geoext-all.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/externals/geoext/resources/css/gxtheme-gray.css">
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/theme/ux/colorpicker/color-picker.ux.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/externals/printpreview/resources/css/printpreview.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/externals/openlayers/theme/default/style.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/externals/gxp/src/theme/all.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/theme/app/geoexplorer.css " />
+<!--[if IE]><link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}geoexplorer/theme/app/ie.css"/><![endif]-->
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}ux/spinner/spinner.ux.css" />
+<script src="{{STATIC_URL}}js/GeoExplorer.js" type="text/javascript"></script>
+<script type="text/javascript">
+    OpenLayers.ImgPath = "{{ STATIC_URL }}geoexplorer/externals/openlayers/theme/default/img";
+    OpenLayers.Request.DEFAULT_CONFIG.headers = {
+        'X-CSRFToken': '{{ csrf_token|escapejs }}'
+    };
+
+    var layerConfigCompleteOriginal = gxp.plugins.WMSSource.prototype.layerConfigComplete;
+
+    gxp.plugins.WMSSource.prototype.layerConfigComplete = function(config) {
+        var lazy = true;
+        if ("source_only" in config) {
+            return lazy;
+        }
+        else return layerConfigCompleteOriginal.apply(this, arguments);
+    };
+
+    var createLazyLayerRecordOriginal = gxp.plugins.WMSSource.prototype.createLazyLayerRecord;
+
+    gxp.plugins.WMSSource.prototype.createLazyLayerRecord = function(config) {
+        if ("source_only" in config) {
+            var record;
+            return false;
+        } else {
+            return createLazyLayerRecordOriginal.apply(this, arguments);
+        }
+    };
+
+
+/**
+ *  Add GetFeedFeatureInfo tool to GeoExplorer.Viewer
+ */
+GeoExplorer.Viewer.prototype.loadConfig = function(config) {
+        config.viewerTools.push( {
+            ptype: "gxp_getfeedfeatureinfo",
+            checked: true
+        });
+
+    // Do not include the layer styler on the map-detail view.
+    {% if not map %}
+        {% if user.is_authenticated %}
+        config.viewerTools.splice(5, 0, {
+            id: "styler",
+            ptype: "gxp_styler",
+            checked: true
+        });
+        {% endif %}
+    {% endif %}
+
+    GeoExplorer.Viewer.superclass.loadConfig.call(this, config);
+};
+
+
+
+</script>
