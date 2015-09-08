@@ -91,7 +91,7 @@ class Source(Resource):
     def createWmsSource(self, params):
         # assuming to create in the user space of the current user
         user = self.getCurrentUser()
-        folder = findSourceFolder(user, user)
+        folder = findSourceFolder(user, user, create=True)
         if folder is None:
             raise RestException('User has no Minerva Source folder.')
         name = params['name']
