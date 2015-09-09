@@ -3,9 +3,6 @@
 # creates a virtualenv, and collects static assets
 #
 ---
-- name: ensure apt cache is up to date
-  apt: update_cache=yes
-  sudo: yes
 
 - name: ensure web server packages are installed
   apt: name={{item}}

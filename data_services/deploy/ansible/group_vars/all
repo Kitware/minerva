@@ -26,18 +26,6 @@ db_data_instance: "{{ app_name }}"
 db_metadata_instance: "{{ app_name }}_app"
 db_password: "{{ app_name }}"
 db_user: "{{ app_name }}"
-db_region: us-east-1
-db_engine: postgres
-db_instance_type: db.t2.medium
-db_storage_type: gp2
-db_multi_zone: yes
-db_publicly_accessible: yes
-db_data_size: 200
-db_metadata_size: 10
-db_maint_window: mon:05:00-mon:06:00
-db_backup_retention: 35
-db_backup_window: 07:00-07:30
-db_license_model: postgresql-license
 
 # Django settings module to use when running Manage commands
 # for example, txt2react.settings

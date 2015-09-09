@@ -1,7 +1,0 @@
----
-# Tasks file for geonode
-# Workabound for sudo without password: @Aashish
-
-- include: postgres_postgis.yml
-- include: geoserver.yml
-- include: web.yml

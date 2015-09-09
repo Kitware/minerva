@@ -43,10 +43,10 @@
   shell: "pg_dropcluster --stop 9.4 main && pg_createcluster --start -e UTF-8 9.4 main"
 
 - name: update postgres client configuration
-  action: copy src=roles/ortelius.geonode/templates/pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
-  # notify:
-  #   - restart postgresql
+  template: src=pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
   sudo: yes
+  notify:
+    - restart postgres_postgis
 
 - name: restart postgres_post_configuration
   command: /etc/init.d/postgresql restart
@@ -58,11 +58,5 @@
                    role_attr_flags=LOGIN,CREATEDB,NOSUPERUSER
   sudo: yes
   sudo_user: postgres
-
-- name: restart postgres
-  command: /etc/init.d/postgresql restart
-  sudo: yes
-
-# handlers:
-#   - name: restart postgresql
-#     action: service name=postgresql state=restarted
+  notify:
+    - restart postgres_postgis

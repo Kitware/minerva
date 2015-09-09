@@ -1,2 +1,0 @@
-* Fix creation of superuser (current we have to do it post install)
-* Layers preview does not show up in layer's list for some layer
