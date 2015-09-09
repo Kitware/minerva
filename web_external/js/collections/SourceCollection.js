@@ -5,8 +5,7 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             if (attrs.meta.minerva.source_type === 'wms') {
                 return new minerva.models.WmsSourceModel(attrs, options);
             }
-        }
-        else {
+        } else {
             console.error('Source collection includes unknown source type');
             console.error(attrs);
             girder.events.trigger('g:alert', {
@@ -17,8 +16,6 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             });
         }
     },
-
-    model: minerva.models.SourceModel,
     path: 'minerva_source'
 
 });
