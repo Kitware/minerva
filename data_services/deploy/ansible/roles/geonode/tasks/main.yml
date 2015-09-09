@@ -94,21 +94,6 @@
   file: path=/var/log/uwsgi state=directory mode=0777 owner=www-data group=www-data
   sudo: yes
 
-# - name: ensure template_postgis database exists
-#   sudo_user: postgres
-#   postgresql_db: name=template_postgis state=present
-#   register: createdb_template_postgis
-#
-# - name: make template_postgis a template
-#   sudo_user: postgres
-#   command: psql -d template_postgis -c "UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';"
-#   when: createdb_template_postgis.changed
-#
-# - name: enable postgis extension
-#   sudo_user: postgres
-#   command: psql -d template_postgis -c "CREATE EXTENSION postgis;"
-#   when: createdb_template_postgis.changed
-
 - name: create {{db_metadata_instance}} db
   postgresql_db: name={{db_metadata_instance}}
                  encoding='UTF-8'
