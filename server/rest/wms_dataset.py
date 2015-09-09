@@ -23,7 +23,6 @@ from girder.api.rest import loadmodel
 from girder.constants import AccessType
 
 from girder.plugins.minerva.rest.dataset import Dataset
-from girder.plugins.minerva.utility.minerva_utility import createDataset
 
 
 class WmsDataset(Dataset):
@@ -46,7 +45,7 @@ class WmsDataset(Dataset):
             'wms_params': wmsParams,
             'base_url': wmsSource['meta']['minerva']['wms_params']['base_url']
         }
-        dataset = createDataset(user, name, minerva_metadata)
+        dataset = self.constructDataset(user, name, minerva_metadata)
         return dataset
     createWmsDataset.description = (
         Description('Create a WMS Dataset from a WMS Source.')

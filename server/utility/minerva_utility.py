@@ -126,13 +126,3 @@ def updateMinervaMetadata(item, minerva_metadata):
     item['meta']['minerva'] = minerva_metadata
     ModelImporter.model('item').setMetadata(item, item['meta'])
     return item['meta']['minerva']
-
-
-def createDataset(user, name, minerva_metadata, description=''):
-    folder = findDatasetFolder(user, user, create=True)
-    if folder is None:
-        raise Exception('User has no Minerva Dataset folder.')
-    dataset = ModelImporter.model('item').createItem(name, user, folder,
-                                                     description)
-    updateMinervaMetadata(dataset, minerva_metadata)
-    return dataset
