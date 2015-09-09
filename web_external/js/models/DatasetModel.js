@@ -6,14 +6,19 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         files: null
     },
 
-    // TODO put in a toJson method ignoring displayed and other state
+    isRenderable: function () {
+        // Really this function should be defined in each data model subclass,
+        // OR - based on whether or not geoFileReader is defined (better because
+        // then readability is based on whether GeoJS has a reader for this type)
+        // but to do that we would have to be persisting geoFileReader to the server
+        // which would require some things being rearranged.
 
-    initialize: function () {
-        // populate the dataset with minerva metadata
-        var minervaMetadata = this.getMinervaMetadata();
-        if (minervaMetadata) {
-            this.setMinervaMetadata(minervaMetadata);
-        }
+        // For now we know that if original_type is 'json' its ACTUALLY contour json,
+        // and if its'geojson'  its actually geojson - and for now these are the only
+        // two renderable data types.
+        return this.getMinervaMetadata().original_type === 'json' ||
+            this.getMinervaMetadata().original_type === 'geojson' ||
+            this.getMinervaMetadata().original_type === 'shapefile';
     },
 
     createDataset: function () {
@@ -91,61 +96,11 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         }, this));
     },
 
-    //
-    // this is the start of trying to build an interface around the minerva metadata
-    // TODO what assumptions/error handling to make for minerva metadata
-    //
-    //
-
-    getMinervaMetadata: function () {
-        // for now assume that keys exists and allow exceptions to happen if they don't
-        var meta = this.get('meta');
-        if (meta) {
-            var minervaMetadata = meta.minerva;
-            return minervaMetadata;
-        } else {
-            return false;
-        }
-    },
-
-    setMinervaMetadata: function (minervaMetadata) {
-        this.set('meta', _.extend(this.get('meta') || {}, {minerva: minervaMetadata}));
-        // TODO may want an extend minervaMetadata, this one replaces
-        if (minervaMetadata.geojson_file || minervaMetadata.geojson) {
-            this.geoJsonAvailable = true;
-        }
-        if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
-            this.fileData = minervaMetadata.geojson.data;
-        }
-        return minervaMetadata;
-    },
-
-    saveMinervaMetadata: function (minervaMetadata) {
-        if (minervaMetadata) {
-            this.setMinervaMetadata(minervaMetadata);
-        }
-        girder.restRequest({
-            path: 'item/' + this.get('_id') + '/metadata',
-            type: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(this.get('meta'))
-        }).done(_.bind(function () {
-            this.trigger('m:minervaMetadataSaved', this);
-        }, this)).error(_.bind(function (err) {
-            console.error(err);
-            girder.events.trigger('g:alert', {
-                icon: 'cancel',
-                text: 'Could not update Minera metadata in dataset item.',
-                type: 'error',
-                timeout: 4000
-            });
-        }, this));
-    },
-
     getDatasetType: function () {
         // this is the start of trying to build an interface around the minerva metadata
         var minervaMetadata = this.getMinervaMetadata();
-        return _.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null;
+        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
+            (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
     },
 
     // functions dealing with json type

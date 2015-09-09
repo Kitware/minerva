@@ -30,7 +30,8 @@ from girder.utility import config
 
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.libs.carmen import get_resolver
-from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
+from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
+    updateMinervaMetadata
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, JsonMapper, GeoJsonMapper, jsonObjectReader
 
@@ -323,6 +324,17 @@ class Dataset(Resource):
         mongo_fields[field] = {'min': minVal, 'max': maxVal}
         minerva_metadata['mongo_fields'] = mongo_fields
         return minerva_metadata
+
+    # TODO rename to createDataset once the existing createDataset
+    # endpoint method is removed.
+    def constructDataset(self, name, minerva_metadata, desc=''):
+        user = self.getCurrentUser()
+        folder = findDatasetFolder(user, user, create=True)
+        if folder is None:
+            raise Exception('User has no Minerva Dataset folder.')
+        dataset = self.model('item').createItem(name, user, folder, desc)
+        updateMinervaMetadata(dataset, minerva_metadata)
+        return dataset
 
     # REST Endpoints
 
