@@ -64,7 +64,7 @@ class WmsTestCase(base.TestCase):
         Test the minerva WMS source API endpoints.
         """
 
-        path = '/minerva_source/wms_source'
+        path = '/minerva_source_wms'
         name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
         params = {
@@ -87,7 +87,7 @@ class WmsTestCase(base.TestCase):
 
         # create the source
 
-        path = '/minerva_source/wms_source'
+        path = '/minerva_source_wms'
         name = 'testWMS'
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
         params = {

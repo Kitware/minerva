@@ -26,7 +26,7 @@ from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
-        wms_dataset
+        wms_dataset, wms_source
 
 
 class CustomAppRoot(object):
@@ -173,4 +173,5 @@ def load(info):
     info['apiRoot'].minerva_session = session.Session()
     info['apiRoot'].minerva_dataset_s3 = s3_dataset.S3Dataset()
     info['apiRoot'].minerva_source = source.Source()
+    info['apiRoot'].minerva_source_wms = wms_source.WmsSource()
     info['apiRoot'].minerva_dataset_wms = wms_dataset.WmsDataset()

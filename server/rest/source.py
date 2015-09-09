@@ -34,7 +34,15 @@ class Source(Resource):
         self.route('GET', (), self.listSources)
         self.route('GET', ('folder',), self.getSourceFolder)
         self.route('POST', ('folder',), self.createSourceFolder)
-        self.route('POST', ('wms_source',), self.createWmsSource)
+
+    def createSource(self, name, minerva_metadata, desc=''):
+        user = self.getCurrentUser()
+        folder = findSourceFolder(user, user, create=True)
+        if folder is None:
+            raise RestException('User has no Minerva Source folder.')
+        source = self.model('item').createItem(name, user, folder, desc)
+        updateMinervaMetadata(source, minerva_metadata)
+        return source
 
     # REST Endpoints
 
@@ -86,30 +94,3 @@ class Source(Resource):
         .responseClass('Folder')
         .param('userId', 'User is the owner of minerva sources.',
                required=True))
-
-    @access.user
-    def createWmsSource(self, params):
-        # assuming to create in the user space of the current user
-        user = self.getCurrentUser()
-        folder = findSourceFolder(user, user, create=True)
-        if folder is None:
-            raise RestException('User has no Minerva Source folder.')
-        name = params['name']
-        baseURL = params['baseURL']
-        desc = 'wms source for  %s' % name
-        item = self.model('item').createItem(name, user, folder, desc)
-        minerva_metadata = {
-            'source_id': item['_id'],
-            'source_type': 'wms',
-            'wms_params': {
-                'base_url': baseURL
-            }
-        }
-        updateMinervaMetadata(item, minerva_metadata)
-        return item
-    createWmsSource.description = (
-        Description('Create a source from an external wms server.')
-        .responseClass('Item')
-        .param('name', 'The name of the wms source', required=True)
-        .param('baseURL', 'URL where the wms is served', required=True)
-        .errorResponse('Write permission denied on the source folder.', 403))
