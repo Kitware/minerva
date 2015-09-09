@@ -37,6 +37,13 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
                     collection: this.collection,
                     parentView: this.parentView
                 }).render();
+            } else if (dataSetType === 'm-mws-service') {
+                this.WMSServiceWidget = new minerva.views.AddWmsServiceWidget({
+                    el: container,
+                    title: 'Enter WMS Service details',
+                    collection: this.collection,
+                    parentView: this.parentView
+                }).render();
             }
         }
     },
