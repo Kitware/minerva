@@ -1,0 +1,40 @@
+{
+    "inputs":[
+       {
+          "format":"json",
+          "name":"host",
+          "type":"string"
+       },
+       {
+          "format":"json",
+          "name":"port",
+          "type":"number"
+       },
+       {
+          "format":"json",
+          "name":"token",
+          "type":"string"
+       },
+       {
+          "format":"json",
+          "name":"fileId",
+          "type":"string"
+       },
+       {
+          "format":"json",
+          "name":"variable",
+          "type":"string"
+       }
+    ],
+    "mode":"spark.python",
+    "name":"mean contour",
+    "outputs":[
+       {
+          "format":"json",
+          "name":"output_item_id",
+          "type":"string"
+       }
+    ],
+    "script_uri":"file://mean_contour.py"
+}
+

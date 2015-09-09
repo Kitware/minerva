@@ -15,12 +15,23 @@
 ###############################################################################
 
 add_python_test(dataset PLUGIN minerva)
+add_python_test(source PLUGIN minerva)
 add_python_test(session PLUGIN minerva)
 add_python_test(analysis PLUGIN minerva)
 add_python_test(geonames PLUGIN minerva)
 add_python_test(s3_dataset PLUGIN minerva)
 add_python_test(import_analyses PLUGIN minerva)
 add_python_test(contour_analysis PLUGIN minerva)
+add_python_test(wms PLUGIN minerva)
+
+
+set(SPARK_TEST_MASTER_URL  "" CACHE STRING "Spark master URL")
+if (SPARK_TEST_MASTER_URL)
+    add_python_test(mean_contour_analysis PLUGIN minerva)
+    set_property(TEST server_minerva.mean_contour_analysis APPEND PROPERTY ENVIRONMENT "SPARK_TEST_MASTER_URL=${SPARK_TEST_MASTER_URL}")
+endif()
+
+
 
 add_python_style_test(pep8_style_minerva_constants
                       "${PROJECT_SOURCE_DIR}/plugins/minerva/server/constants.py")
@@ -42,5 +53,5 @@ add_javascript_style_test(
 
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/minervaSpec.js"
-    ENABLEDPLUGINS "minerva" "gravatar" "jobs" "romanesco"
+    ENABLEDPLUGINS "gravatar" "jobs" "romanesco" "minerva"
     BASEURL "/static/built/testEnvMinerva.html")

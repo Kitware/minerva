@@ -54,6 +54,15 @@ def findDatasetFolder(currentUser, user, create=False):
                                PluginSettings.DATASET_FOLDER, create)
 
 
+def findSourceFolder(currentUser, user, create=False):
+    minervaFolder = findMinervaFolder(currentUser, user, create)
+    if minervaFolder is None:
+        return minervaFolder
+    else:
+        return findNamedFolder(currentUser, user, minervaFolder, 'folder',
+                               PluginSettings.SOURCE_FOLDER, create)
+
+
 def findSessionFolder(currentUser, user, create=False):
     minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
@@ -109,3 +118,11 @@ def findAnalysisByName(currentUser, name):
         return analyses[0]
     else:
         return None
+
+
+def updateMinervaMetadata(item, minerva_metadata):
+    if 'meta' not in item:
+        item['meta'] = {}
+    item['meta']['minerva'] = minerva_metadata
+    ModelImporter.model('item').setMetadata(item, item['meta'])
+    return item['meta']['minerva']

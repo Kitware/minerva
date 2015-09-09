@@ -34,9 +34,10 @@ def setUpModule():
     """
     Enable the minerva plugin and start the server.
     """
-    base.enabledPlugins.append('minerva')
     base.enabledPlugins.append('jobs')
     base.enabledPlugins.append('romanesco')
+    base.enabledPlugins.append('gravatar')
+    base.enabledPlugins.append('minerva')
     base.startServer(False)
 
 
