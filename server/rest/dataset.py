@@ -325,7 +325,10 @@ class Dataset(Resource):
         minerva_metadata['mongo_fields'] = mongo_fields
         return minerva_metadata
 
-    def constructDataset(self, user, name, minerva_metadata, desc=''):
+    # TODO rename to createDataset once the existing createDataset
+    # endpoint method is removed.
+    def constructDataset(self, name, minerva_metadata, desc=''):
+        user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
             raise Exception('User has no Minerva Dataset folder.')

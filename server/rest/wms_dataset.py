@@ -35,7 +35,6 @@ class WmsDataset(Dataset):
                level=AccessType.READ)
     def createWmsDataset(self, wmsSource, params):
         self.requireParams(('name', 'wmsParams'), params)
-        user = self.getCurrentUser()
         name = params['name']
         wmsParams = params['wmsParams']
         minerva_metadata = {
@@ -45,7 +44,7 @@ class WmsDataset(Dataset):
             'wms_params': wmsParams,
             'base_url': wmsSource['meta']['minerva']['wms_params']['base_url']
         }
-        dataset = self.constructDataset(user, name, minerva_metadata)
+        dataset = self.constructDataset(name, minerva_metadata)
         return dataset
     createWmsDataset.description = (
         Description('Create a WMS Dataset from a WMS Source.')
