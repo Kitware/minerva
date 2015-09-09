@@ -13,17 +13,7 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
                 password: this.$('#m-wms-password').val()
             };
 
-            console.log(params);
-
-            // var datasetName = this.$('#m-dataset-name').val();
-            // var mongoUri = this.$('#m-mongo-uri').val();
-            // var mongoCollection = this.$('#m-mongo-collection').val();
-
-            // var dataset = new minerva.models.DatasetModel({});
-            // dataset.on('m:externalMongoDatasetCreated', function () {
-            //     this.$el.modal('hide');
-            //     this.collection.add(dataset);
-            // }, this).createExternalMongoDataset(datasetName, mongoUri, mongoCollection);
+            var wmsService = new minerva.models.WmsModel({ params: params });
         }
     },
 
