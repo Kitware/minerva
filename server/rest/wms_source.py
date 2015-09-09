@@ -20,6 +20,9 @@
 from girder.api import access
 from girder.api.describe import Description
 
+# A Quick implementation to call GetCapabilities
+from owslib.wms import WebMapService
+
 from girder.plugins.minerva.rest.source import Source
 
 
@@ -32,8 +35,13 @@ class WmsSource(Source):
     def createWmsSource(self, params):
         name = params['name']
         baseURL = params['baseURL']
+        username = params['username']
+        password = params['password']
+        wms = WebMapService(baseURL, version='1.1.1', username=username,password=password)
+        layers = list(wms.contents)
         minerva_metadata = {
             'source_type': 'wms',
+            'layers': layers,
             'wms_params': {
                 'base_url': baseURL
             }

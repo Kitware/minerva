@@ -8,12 +8,12 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
             e.preventDefault();
             var params = {
                 name: this.$('#m-wms-name').val(),
-                baseUri: this.$('#m-wms-uri').val(),
+                baseURL: this.$('#m-wms-uri').val(),
                 username: this.$('#m-wms-username').val(),
                 password: this.$('#m-wms-password').val()
             };
 
-            var wmsService = new minerva.models.WmsModel({ params: params });
+            var wmsService = new minerva.models.WmsSourceModel({ params: params });
         }
     },
 
