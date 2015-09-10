@@ -47,7 +47,7 @@ requirements_file: "{{app_code_dir}}/requirements.txt"
 
 # root domain name the server should run as. do not include a subdomain,
 # for example, txt2react.com
-site_url: "http://127.0.0.1/"
+site_url: "http://192.168.33.12/"
 
 ssh_dir: ~/.ssh/
 
