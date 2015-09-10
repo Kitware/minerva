@@ -7,6 +7,8 @@ This Ansible Role will install GeoNode and required dependencies onto an Ubuntu
  to be used with a GeoNode template project by following the workflow
  described here http://github.com/geonode/geonode-project
 
+Tested with a known minimal working Ansible version of 1.9.3.
+
 Role Variables
 --------------
 
