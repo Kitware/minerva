@@ -1,0 +1,9 @@
+- hosts: production
+  remote_user: vagrant
+  roles:
+     - common
+     - postgres_postgis
+     - geoserver
+     - nginx
+     - uwsgi
+     - geonode

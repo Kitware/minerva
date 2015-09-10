@@ -1,0 +1,6 @@
+from geoserver.catalog import Catalog
+
+cat = Catalog('http://localhost:8080/geoserver/rest')
+ds = cat.create_datastore('{{ app_name }}','geonode')
+ds.connection_parameters.update(host='localhost', port='5432', database='{{ db_data_instance }}', user='{{ db_user }}', passwd='{{ db_password }}', dbtype='postgis', schema='public')
+cat.save(ds)

@@ -1,0 +1,155 @@
+###
+# Pulls the code from a remote Git repository, configures the web application,
+# creates a virtualenv, and collects static assets
+#
+---
+
+- name: ensure web server packages are installed
+  apt: name={{item}}
+  sudo: yes
+  with_items:
+    - git
+    - python-dev
+    - python-pip
+    - libpq-dev
+    - python-virtualenv
+    - postgresql-client-common
+    - postgresql-client
+    - python-dev
+    - python-imaging
+    - python-lxml
+    - python-pyproj
+    - python-shapely
+    - python-gdal
+    - python-nose
+    - python-httplib2
+    - python-psycopg2
+    - python-software-properties
+    - gettext
+    - build-essential
+    - libxml2-dev
+    - libxslt1-dev
+    - zlib1g-dev
+    - gdal-bin
+    - libgeos-dev
+    - libproj-dev
+    - unzip
+    - zip
+    - libjpeg-dev
+    - libpng-dev
+    - libxslt-dev
+
+
+- name: install known_hosts file to access GitHub
+  copy: src=known_hosts dest={{ssh_dir}}/known_hosts
+
+- name: checkout latest web app code
+  git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}}
+
+- name: copy the local_settings.py file in place
+  template: src=local_settings.py.j2 dest={{ app_code_dir}}/{{app_name}}/local_settings.py
+
+- name: check if virtualenv already exists
+  stat: path={{virtualenv_dir}}/{{app_name}}
+  register: venv_dir
+
+- name: create virtualenv for Django web application
+  shell: virtualenv --system-site-packages {{virtualenv_dir}}/{{app_name}}
+  when: venv_dir.stat.isdir is not defined
+
+- name: check if requirements file exists
+  stat: path={{app_code_dir}}/{{app_name}}/shared/requirements.txt
+  register: requirements_file
+
+- name: install web application dependencies listed in requirements.txt
+  pip: requirements={{app_code_dir}}/{{app_name}}/shared/requirements.txt virtualenv={{virtualenv_dir}}/{{app_name}}
+  when: requirements_file.stat.exists
+
+- name: install web application
+  pip: name=file:///{{app_code_dir}}/{{app_name}}
+       virtualenv={{virtualenv_dir}}/{{app_name}}
+       extra_args='-e'
+
+- name: create static directory for Django app if it does not exist
+  file: path=/var/www/{{app_name}}/static state=directory mode=0777 owner=www-data group=www-data
+  sudo: yes
+
+- name: create uploaded directory for Django app if it does not exist
+  file: path=/var/www/{{app_name}}/uploaded state=directory mode=0777 owner=www-data group=www-data
+  sudo: yes
+
+- name: create uploaded/layers directory for Django app if it does not exist
+  file: path=/var/www/{{app_name}}/uploaded/layers/ state=directory mode=0777 owner=www-data group=www-data
+  sudo: yes
+
+- name: create uploaded/thumbs directory for Django app if it does not exist
+  file: path=/var/www/{{app_name}}/uploaded/thumbs/ state=directory mode=0777 owner=www-data group=www-data
+  sudo: yes
+
+- name: rename the vassals-default.ini file to the app name
+  file: src=/etc/uwsgi/vassals-default.skel dest=/etc/uwsgi/{{app_name}}.ini owner=www-data group=www-data state=link
+  sudo: yes
+
+- name: create uwsgi log directory
+  file: path=/var/log/uwsgi state=directory mode=0777 owner=www-data group=www-data
+  sudo: yes
+
+- name: create {{db_metadata_instance}} db
+  postgresql_db: name={{db_metadata_instance}}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 owner=postgres
+                 template='template0'
+  sudo: yes
+  sudo_user: postgres
+
+- name: create {{db_data_instance}} db
+  postgresql_db: name={{db_data_instance}}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 owner={{db_user}}
+                 template='template0'
+  sudo: yes
+  sudo_user: postgres
+
+- name: add postgis to the {{db_data_instance}} db
+  postgresql_ext: name=postgis db={{db_data_instance}}
+  sudo: yes
+  sudo_user: postgres
+
+- name: Django collectstatic
+  django_manage: command=collectstatic
+                 app_path={{app_code_dir}}/{{app_name}}
+                 virtualenv={{virtualenv_dir}}/{{app_name}}
+                 settings={{main_module}}.settings
+
+- name: Django syncdb
+  django_manage: command=syncdb
+                 app_path={{app_code_dir}}/{{app_name}}
+                 virtualenv={{virtualenv_dir}}/{{app_name}}
+                 settings={{main_module}}.settings
+
+- name: Copy initial fixtures in place
+  template: src=fixtures.json.j2 dest={{ app_code_dir}}/{{app_name}}/fixtures.json
+
+- name: Load the fixtures (Create the superuser)
+  django_manage: command="loaddata"
+                 app_path={{app_code_dir}}/{{app_name}}
+                 virtualenv={{virtualenv_dir}}/{{app_name}}
+                 settings={{main_module}}.settings
+                 fixtures={{ app_code_dir}}/{{app_name}}/fixtures.json
+
+- name: wait for geoserver to be up
+  shell: curl --head --silent http://localhost:8080/geoserver/web/
+  register: result
+  until: result.stdout.find('200 OK') != -1
+  retries: 5
+  delay: 60
+
+- name: Copy create_db_store script in place
+  template: src=create_db_store.py.j2 dest={{ app_code_dir}}/{{app_name}}/create_db_store.py
+
+- name: create the db datastore in geoserver
+  command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_db_store.py"

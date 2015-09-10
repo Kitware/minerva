@@ -1,0 +1,51 @@
+###
+# Install PostGIS and Postgres 9.4 from the main apt repo.
+#
+---
+- name: configure 30-dev sudoers
+  lineinfile: dest=/etc/sudoers.d/vagrant owner=root group=root mode=0440
+              line="%vagrant ALL=(postgres) NOPASSWD:ALL"
+              state=present
+              create=yes
+              validate='visudo -cf %s'
+  sudo: yes
+
+- name: configure the PostgreSQL APT key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+  sudo: yes
+
+- name: configure the PostgreSQL APT repositories
+  apt_repository: repo="deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" state=present
+  sudo: yes
+
+- name: install PostGIS
+  apt: pkg={{ item }} state=present
+  sudo: yes
+  with_items:
+   - python-psycopg2
+   - postgresql-9.4
+   - postgresql-contrib-9.4
+   - postgresql-9.4-postgis-2.1
+
+- name: setup postgres cluster to default to utf8
+  sudo: yes
+  shell: "pg_dropcluster --stop 9.4 main && pg_createcluster --start -e UTF-8 9.4 main"
+
+- name: update postgres client configuration
+  template: src=pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
+  sudo: yes
+  notify:
+    - restart postgres_postgis
+
+- name: restart postgres_post_configuration
+  command: /etc/init.d/postgresql restart
+  sudo: yes
+
+- name: create database user
+  postgresql_user: name={{db_user}}
+                   password={{db_password}}
+                   role_attr_flags=LOGIN,CREATEDB,NOSUPERUSER
+  sudo: yes
+  sudo_user: postgres
+  notify:
+    - restart postgres_postgis
