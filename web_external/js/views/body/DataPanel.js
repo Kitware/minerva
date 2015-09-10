@@ -52,9 +52,18 @@ minerva.views.DataPanel = minerva.View.extend({
     addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        // TODO maybe this check is unnecessary, how can we get into this state?
-        if (!dataset.get('displayed')) {
-            dataset.set('displayed', true);
+        // Dealing with WMS layers list
+        if (dataset.attributes.meta.minerva.layers) {
+            this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
+                el: $('#g-dialog-container'),
+                parentView: this,
+                dataset: dataset
+            }).render();
+        } else {
+            // TODO maybe this check is unnecessary, how can we get into this state?
+            if (!dataset.get('displayed')) {
+                dataset.set('displayed', true);
+            }
         }
     },
 

@@ -172,6 +172,7 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
      */
     uploadFinished: function () {
         this.newDataset.on('m:datasetCreated', function (dataset) {
+            console.log('*** sample ***',dataset);
             this.collection.add(dataset);
         }, this).createDataset();
     }

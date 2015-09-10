@@ -14,7 +14,7 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
             };
 
             var wmsService = new minerva.models.WmsSourceModel({ params: params });
-            wmsService.on('m:saved', function () {
+            wmsService.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
                 this.collection.add(wmsService);
             }, this);

@@ -1,0 +1,20 @@
+.modal-dialog
+  .modal-content
+    form#m-add-dataset-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Select a layer
+      .modal-body
+        each layer in dataset.attributes.meta.minerva.layers
+          .form-group
+            .checkbox
+              input#m-upload-dataset(type="checkbox", name="m-dataset-add-method", checked=false)
+              label
+                i.icon-layers.m-add-dataset-type-icon
+                | #{layer}
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-add-dataset-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Add Layer
