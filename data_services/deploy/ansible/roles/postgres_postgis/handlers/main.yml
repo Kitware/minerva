@@ -1,0 +1,5 @@
+---
+
+- name: restart postgres_postgis
+  service: name=postgresql state=restarted
+  sudo: yes
