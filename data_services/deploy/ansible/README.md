@@ -1,5 +1,4 @@
-Introduction
---------------
+### Introduction
 
 This Ansible Role will install GeoNode and required dependencies onto an Ubuntu
 14.04 (Trusty) host. It includes tasks for PostgreSQL+PostGIS, GeoServer, GeoNode,
@@ -9,8 +8,7 @@ This Ansible Role will install GeoNode and required dependencies onto an Ubuntu
 
 Tested with a known minimal working Ansible version of 1.9.3.
 
-Role Variables
---------------
+### Role Variables
 
 * `app_name` - GeoNode project name (default: `geonode`)
 * `github_user` - GitHub username that owns the project (default: `GeoNode`)
@@ -27,12 +25,12 @@ You can also change the war used to deploy geoserver with the following variable
 
 * `geoserver_url` - GeoServer war URL (default: `http://build.geonode.org/geoserver/latest/geoserver.war`)
 
-Setting up a vagrant box
-------------------------
+### Setting up a vagrant box
+
 To configure a local development virtual machine, you will need to have virtualbox and vagrant installed.
 Note: You may need to change the IP configuration in the VagrantFile to a valid ip on the local network
 
-  $ vagrant up production
-  $ vagrant ssh production
-  $ source venvs/geonode/bin/activate
-  $ django-admin.py createsuperuser --settings=geonode.settings
+    $ vagrant up minerva_dataservices
+    $ vagrant ssh minerva_dataservices
+    $ source venvs/geonode/bin/activate
+    $ django-admin.py createsuperuser --settings=geonode.settings
