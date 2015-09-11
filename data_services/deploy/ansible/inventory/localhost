@@ -1,2 +1,2 @@
-[minerva-dataservices]
+[minerva_dataservices]
 localhost ansible_connection=local

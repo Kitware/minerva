@@ -6,15 +6,15 @@ Vagrant.configure("2") do |config|
   config.ssh.username = 'vagrant'
   config.ssh.forward_agent = true
 
-  config.vm.define :dataservices do |dataservices|
-    dataservices.vm.network :public_network, :bridge => 'eth0', :auto_config => false
+  config.vm.define :minerva_dataservices do |minerva_dataservices|
+    minerva_dataservices.vm.network :public_network, :bridge => 'eth0', :auto_config => false
     # Using private network fixes the thumbnail issue
     # Ref: https://github.com/Kitware/minerva/pull/98#issuecomment-139023062
     config.vm.network "private_network", ip: "192.168.33.12"
-    dataservices.vm.provider :virtualbox do |vb|
-       vb.customize [ "modifyvm", :id, "--name", "minerva-dataservices","--memory", 4096 ]
+    minerva_dataservices.vm.provider :virtualbox do |vb|
+       vb.customize [ "modifyvm", :id, "--name", "minerva_dataservices","--memory", 4096 ]
   	end
-    dataservices.vm.provision "ansible" do |ansible|
+    minerva_dataservices.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbook.yml"
         ansible.verbose = "vvvv"
         ansible.host_key_checking = false
