@@ -1,4 +1,4 @@
-- hosts: production
+- hosts: minerva-dataservices
   remote_user: vagrant
   roles:
      - common
