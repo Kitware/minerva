@@ -1,6 +1,6 @@
 .modal-dialog
   .modal-content
-    form#m-add-dataset-form.modal-form(role="form")
+    form#m-add-dataset-form.modal-form.add-layers-form(role="form")
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
@@ -9,7 +9,7 @@
         each layer in dataset.attributes.meta.minerva.layers
           .form-group
             .checkbox
-              input#m-upload-dataset(type="checkbox", name="m-dataset-add-method", checked=false)
+              input.m-layer-dataset(type="checkbox", name="#{layer}", checked=false)
               label
                 i.icon-layers.m-add-dataset-type-icon
                 | #{layer}

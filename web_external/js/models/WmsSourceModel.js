@@ -5,7 +5,7 @@ minerva.models.WmsSourceModel = minerva.models.SourceModel.extend({
         this.createSource(params);
     },
 
-    // TODO: This is a temp solution to display the list of WMS layers
+    // TODO: This is a temp solution to display list of WMS layers inside `Available Datasets`
     isRenderable: function () {
         return true;
     },

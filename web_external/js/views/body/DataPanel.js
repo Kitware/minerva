@@ -52,7 +52,7 @@ minerva.views.DataPanel = minerva.View.extend({
     addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        // Dealing with WMS layers list
+        // Handling with WMS layers list
         if (dataset.attributes.meta.minerva.layers) {
             this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
                 el: $('#g-dialog-container'),

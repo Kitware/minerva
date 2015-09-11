@@ -4,21 +4,19 @@
 minerva.views.WmsLayersListWidget = minerva.View.extend({
 
     events: {
-        // 'submit #m-add-wms-service-form': function (e) {
-        //     e.preventDefault();
-        //     var params = {
-        //         name: this.$('#m-wms-name').val(),
-        //         baseURL: this.$('#m-wms-uri').val(),
-        //         username: this.$('#m-wms-username').val(),
-        //         password: this.$('#m-wms-password').val()
-        //     };
+        'submit .add-layers-form': function (e) {
+            e.preventDefault();
+            var listOfLayers = [];
+            $('.add-layers-form input:checked').each(function (input) {
+                listOfLayers.push($(this).attr('name'));
+            });
 
-        //     var wmsService = new minerva.models.WmsSourceModel({ params: params });
-        //     wmsService.on('m:sourceReceived', function () {
-        //         this.$el.modal('hide');
-        //         this.collection.add(wmsService);
-        //     }, this);
-        // }
+            var wmsDataset = new minerva.models.WmsDatasetModel({ listOfLayers: listOfLayers });
+            // wmsService.on('m:sourceReceived', function () {
+            //     this.$el.modal('hide');
+            //     this.collection.add(wmsService);
+            // }, this);
+        }
     },
 
     initialize: function (settings) {
