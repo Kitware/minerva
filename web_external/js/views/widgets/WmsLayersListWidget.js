@@ -11,6 +11,9 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                 listOfLayers.push($(this).attr('name'));
             });
 
+            console.log(listOfLayers);
+            girder.events.trigger('m:layerDatasetLoaded', listOfLayers);
+
             var wmsDataset = new minerva.models.WmsDatasetModel({ listOfLayers: listOfLayers });
             // wmsService.on('m:sourceReceived', function () {
             //     this.$el.modal('hide');
