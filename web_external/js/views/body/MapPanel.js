@@ -17,14 +17,15 @@ minerva.views.MapPanel = minerva.View.extend({
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
         if( dataset.get('meta').minerva.original_type === 'wms' ) {
+            var layerId = dataset.get('id');
             var baseUrl = dataset.get('meta').minerva.base_url;
             var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
-            var wms = this.map.createLayer('osm');
+            this.wmsLayers[layerId] = this.map.createLayer('osm');
             // TODO: Adding projection as a param ??
             var projection = 'EPSG:3857';
-            wms.gcs(projection);
+            this.wmsLayers[layerId].gcs(projection);
 
-            wms.tileUrl(
+            this.wmsLayers[layerId].tileUrl(
                 function (zoom, x, y) {
 
                   var xLowerLeft = geo.mercator.tilex2long(x, zoom);
@@ -78,12 +79,15 @@ minerva.views.MapPanel = minerva.View.extend({
 
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
+        var layerId = dataset.get('id');
         var layer = this.datasets[datasetId];
         if (layer) {
             layer.clear();
             layer.draw();
             delete this.datasets[datasetId];
         }
+        // Remove WMS layer, if any
+        this.map.deleteLayer(this.wmsLayers[layerId]);
     },
 
     initialize: function (settings) {
@@ -98,6 +102,7 @@ minerva.views.MapPanel = minerva.View.extend({
             }
         });
         this.datasets = {};
+        this.wmsLayers = {};
     },
 
     renderMap: function () {
