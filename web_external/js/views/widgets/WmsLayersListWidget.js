@@ -4,31 +4,41 @@
 minerva.views.WmsLayersListWidget = minerva.View.extend({
 
     events: {
-        'submit .add-layers-form': function (e) {
+        'submit #m-add-layers-form': function (e) {
             e.preventDefault();
-            var listOfLayers = [];
-            $('.add-layers-form input:checked').each(function (input) {
-                listOfLayers.push($(this).attr('name'));
+            var wmsSource = this.dataset;
+            var that = this;
+            $('#m-add-layers-form input:checked').each(function () {
+
+                var layerName = $(this).attr('name');
+
+                var wmsParams = {};
+                wmsParams.layerName = layerName;
+
+                var params = {
+                    'name': layerName,
+                    'wmsSourceId': wmsSource['id'],
+                    'wmsParams': JSON.stringify(wmsParams)
+                };
+
+                var wmsDataset = new minerva.models.WmsDatasetModel({});
+
+                wmsDataset.on('m:layerSentToMap', function () {
+                    that.$el.modal('hide');
+                    that.collection.add(wmsDataset);
+                }, that).createWmsDataset(params);
             });
-
-            console.log(listOfLayers);
-            girder.events.trigger('m:layerDatasetLoaded', listOfLayers);
-
-            var wmsDataset = new minerva.models.WmsDatasetModel({ listOfLayers: listOfLayers });
-            // wmsService.on('m:sourceReceived', function () {
-            //     this.$el.modal('hide');
-            //     this.collection.add(wmsService);
-            // }, this);
         }
     },
 
     initialize: function (settings) {
-        console.log('>>>>>>>', settings);
         this.dataset = settings.dataset;
+        this.collection = settings.collection;
+        this.layers = this.dataset.get('meta').minerva.layers;
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.wmsLayersListWidget({ dataset: this.dataset }));
+        var modal = this.$el.html(minerva.templates.wmsLayersListWidget({ layers: this.layers }));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         this.$el.modal('show');
         return this;

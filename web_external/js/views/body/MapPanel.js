@@ -9,7 +9,6 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     addDataset: function (dataset) {
-        console.log('data sent to the map', dataset);
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
         //this.map.deleteLayer(this.uiLayer);
@@ -17,45 +16,42 @@ minerva.views.MapPanel = minerva.View.extend({
         // so for now it is commented out
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
-        if( Array.isArray(dataset) ) {
-            var that = this;
-            dataset.forEach(function (layer) {
-                layer = layer.slice(8);
-                var wms = that.map.createLayer('osm');
-                var projection = 'EPSG:3857';
-                wms.gcs(projection);
+        if( dataset.get('meta').minerva.original_type === 'wms' ) {
+            var baseUrl = dataset.get('meta').minerva.base_url;
+            var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
+            var wms = this.map.createLayer('osm');
+            // TODO: Adding projection as a param ??
+            var projection = 'EPSG:3857';
+            wms.gcs(projection);
 
-                wms.tileUrl(
-                    function (zoom, x, y) {
+            wms.tileUrl(
+                function (zoom, x, y) {
 
-                      var xLowerLeft = geo.mercator.tilex2long(x, zoom);
-                      var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
-                      var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
-                      var yUpperRight = geo.mercator.tiley2lat(y, zoom);
+                  var xLowerLeft = geo.mercator.tilex2long(x, zoom);
+                  var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
+                  var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
+                  var yUpperRight = geo.mercator.tiley2lat(y, zoom);
 
-                      var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
-                      var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
-                      var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
-                      var params = {
-                        'SERVICE': 'WMS',
-                        'VERSION': '1.3.0',
-                        'REQUEST': 'GetMap',
-                        'LAYERS': layer,  // US Population
-                        'STYLES': '',
-                        'BBOX': bbox_mercator,
-                        'WIDTH': 256, //Use 256x256 tiles
-                        'HEIGHT': 256,
-                        'FORMAT': 'image/png',
-                        'TRANSPARENT': true,
-                        'SRS': projection,
-                        'TILED': true
-                      };
-
-                      var baseUrl = 'http://geodata.epidemico.com/geoserver/wms';  // OpenGeo Demo Web Map Service
-                      return baseUrl + '?' + $.param(params);
-                    }
-                );
-            });
+                  var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
+                  var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
+                  var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+                  var params = {
+                    'SERVICE': 'WMS',
+                    'VERSION': '1.3.0',
+                    'REQUEST': 'GetMap',
+                    'LAYERS': layer,
+                    'STYLES': '',
+                    'BBOX': bbox_mercator,
+                    'WIDTH': 256,
+                    'HEIGHT': 256,
+                    'FORMAT': 'image/png',
+                    'TRANSPARENT': true,
+                    'SRS': projection,
+                    'TILED': true
+                  };
+                  return baseUrl + '?' + $.param(params);
+                }
+            );
         } else {
             if (!_.contains(this.datasets, dataset.id)) {
 

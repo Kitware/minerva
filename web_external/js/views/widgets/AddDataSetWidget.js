@@ -41,7 +41,7 @@ minerva.views.AddDataSetWidget = minerva.View.extend({
                 this.WMSServiceWidget = new minerva.views.AddWmsServiceWidget({
                     el: container,
                     title: 'Enter WMS Service details',
-                    collection: this.collection,
+                    noParent: true,
                     parentView: this.parentView
                 }).render();
             }

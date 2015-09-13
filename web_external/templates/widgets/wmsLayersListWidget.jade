@@ -1,20 +1,20 @@
 .modal-dialog
   .modal-content
-    form#m-add-dataset-form.modal-form.add-layers-form(role="form")
+    form#m-add-layers-form.modal-form(role="form")
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
           | Select a layer
       .modal-body
-        each layer in dataset.attributes.meta.minerva.layers
+        each layer in layers
           .form-group
             .checkbox
-              input.m-layer-dataset(type="checkbox", name="#{layer}", checked=false)
+              input.m-layer-layers(type="checkbox", name="#{layer}", checked=false)
               label
-                i.icon-layers.m-add-dataset-type-icon
+                i.icon-layers.m-add-layers-type-icon
                 | #{layer}
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-        button.m-add-dataset-button.btn.btn-small.btn-primary
+        button.m-add-layers-button.btn.btn-small.btn-primary
             i.icon-plus-squared
             | Add Layer

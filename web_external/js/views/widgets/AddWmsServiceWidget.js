@@ -7,22 +7,21 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
         'submit #m-add-wms-service-form': function (e) {
             e.preventDefault();
             var params = {
-                name: this.$('#m-wms-name').val(),
-                baseURL: this.$('#m-wms-uri').val(),
+                name:     this.$('#m-wms-name').val(),
+                baseURL:  this.$('#m-wms-uri').val(),
                 username: this.$('#m-wms-username').val(),
                 password: this.$('#m-wms-password').val()
             };
-
-            var wmsService = new minerva.models.WmsSourceModel({ params: params });
-            wmsService.on('m:sourceReceived', function () {
+            var wmsSource = new minerva.models.WmsSourceModel({});
+            wmsSource.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
-                this.collection.add(wmsService);
-            }, this);
+                this.collection.add(wmsSource);
+            }, this).createSource(params);
         }
     },
 
     initialize: function (settings) {
-        this.collection = settings.collection;
+        this.collection = settings.parentView.collection;
     },
 
     render: function () {

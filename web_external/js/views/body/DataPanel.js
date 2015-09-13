@@ -2,6 +2,7 @@ minerva.views.DataPanel = minerva.View.extend({
     events: {
         'click .m-add-dataset-button': 'addDataSetDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
+        'click .show-wms-layer': 'showWmsLayers',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .s3-bucket-menu': 'selectS3Files',
@@ -52,18 +53,9 @@ minerva.views.DataPanel = minerva.View.extend({
     addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        // Handling with WMS layers list
-        if (dataset.attributes.meta.minerva.layers) {
-            this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
-                el: $('#g-dialog-container'),
-                parentView: this,
-                dataset: dataset
-            }).render();
-        } else {
-            // TODO maybe this check is unnecessary, how can we get into this state?
-            if (!dataset.get('displayed')) {
-                dataset.set('displayed', true);
-            }
+        // TODO maybe this check is unnecessary, how can we get into this state?
+        if (!dataset.get('displayed')) {
+            dataset.set('displayed', true);
         }
     },
 
@@ -141,5 +133,18 @@ minerva.views.DataPanel = minerva.View.extend({
             el: container,
             parentView: this
         }).render();
+    },
+
+    // Handling with WMS layers list
+    showWmsLayers: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
+            el: $('#g-dialog-container'),
+            dataset: dataset,
+            collection: this.collection,
+            parentView: this
+        });
+        this.wmsLayersListWidget.render();
     }
 });
