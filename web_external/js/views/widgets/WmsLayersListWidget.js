@@ -8,6 +8,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         'submit #m-add-layers-form': function (e) {
             e.preventDefault();
             var wmsSource = this.dataset;
+            var hostName = (wmsSource.get('meta').minerva.wms_params.base_url).slice(0, 28);
             var that = this;
             $('input[type=checkbox]').each(function () {
 
@@ -19,12 +20,15 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
 
                     var wmsParams = {};
                     wmsParams.layerName = layerName;
+                    wmsParams.hostName = hostName;
 
                     var params = {
                         'name': layerName,
                         'wmsSourceId': wmsSource.id,
                         'wmsParams': JSON.stringify(wmsParams)
                     };
+
+                    console.log(params);
 
                     var wmsDataset = new minerva.models.WmsDatasetModel({});
 
@@ -44,7 +48,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     render: function () {
-        // TODO: [bug] wmultiple msLayersListWidget are being created
+        // TODO: [bug] multiple msLayersListWidget are being created
         this.$el.children().detach();
         var modal = this.$el.html(minerva.templates.wmsLayersListWidget({ layers: this.layers }));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));

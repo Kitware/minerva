@@ -21,7 +21,7 @@ minerva.views.MapPanel = minerva.View.extend({
             var baseUrl = dataset.get('meta').minerva.base_url;
             var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
             this.wmsLayers[layerId] = this.map.createLayer('osm');
-            // TODO: Adding projection as a param ??
+            // TODO: inclued projection in params ??
             var projection = 'EPSG:3857';
             this.wmsLayers[layerId].gcs(projection);
 
