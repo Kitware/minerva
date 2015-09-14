@@ -153,3 +153,11 @@
 
 - name: create the db datastore in geoserver
   command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_db_store.py"
+  # ignore errors when the db store already exists
+  ignore_errors: True
+
+- name: Copy create_django_admin script in place
+  template: src=create_django_admin.py.j2 dest={{ app_code_dir}}/{{app_name}}/create_django_admin.py
+
+- name: Run create_django_admin script
+  command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_django_admin.py"

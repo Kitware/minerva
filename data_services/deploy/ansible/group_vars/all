@@ -52,3 +52,12 @@ site_url: "http://192.168.33.12/"
 ssh_dir: ~/.ssh/
 
 geoserver_url: http://build.geonode.org/geoserver/latest/geoserver.war
+
+# geoserver admin user
+geoserver_user: admin
+geoserver_password: geoserver
+
+# geonode admin user
+geonode_admin_user: admin
+geonode_admin_email: "{{ geonode_admin_user }}@geonode.com"
+geonode_admin_password: geonode
