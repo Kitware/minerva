@@ -1,10 +1,11 @@
+'use strict';
 /**
 * This widget displays a form for adding WMS services
 */
-minerva.views.AddWmsServiceWidget = minerva.View.extend({
+minerva.views.AddWmsSourceWidget = minerva.View.extend({
 
     events: {
-        'submit #m-add-wms-service-form': function (e) {
+        'submit #m-add-wms-source-form': function (e) {
             e.preventDefault();
             var params = {
                 name:     this.$('#m-wms-name').val(),
@@ -15,6 +16,7 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
             var wmsSource = new minerva.models.WmsSourceModel({});
             wmsSource.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
+                // TODO: might need to be added to a new panel/data sources ?
                 this.collection.add(wmsSource);
             }, this).createSource(params);
         }
@@ -25,7 +27,7 @@ minerva.views.AddWmsServiceWidget = minerva.View.extend({
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addWmsServiceWidget({}));
+        var modal = this.$el.html(minerva.templates.addWmsSourceWidget({}));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }

@@ -9,7 +9,7 @@
         each layer in layers
           .form-group
             .checkbox
-              input.m-layer-layers(type="checkbox", name="#{layer}", checked=false)
+              input#m-add-layers(type="checkbox", name="#{layer}")
               label
                 i.icon-layers.m-add-layers-type-icon
                 | #{layer}

@@ -20,7 +20,7 @@
                             i(class=classes)&attributes(attributes)
                         if dataset.isWmsSource()
                             //- list icon to open the list of WMS layers
-                            - var classes = (dataset.get('displayed') ? 'icon-list icon-disabled dataset-in-session' : 'icon-list icon-enabled show-wms-layer')
+                            - var classes = (dataset.get('displayed') ? 'icon-list icon-disabled dataset-in-session' : 'icon-list icon-enabled show-wms-layers-list')
                             i(class=classes)&attributes(attributes)
                         //- trash icon to delete dataset
                         - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')

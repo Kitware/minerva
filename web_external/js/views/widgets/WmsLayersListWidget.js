@@ -1,3 +1,4 @@
+'use strict';
 /**
 * This widget displays the list of WMS layers
 */
@@ -8,25 +9,30 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             e.preventDefault();
             var wmsSource = this.dataset;
             var that = this;
-            $('#m-add-layers-form input:checked').each(function () {
+            $('input[type=checkbox]').each(function () {
 
-                var layerName = $(this).attr('name');
+                console.log('called');
 
-                var wmsParams = {};
-                wmsParams.layerName = layerName;
+                if (this.checked) {
+                    console.log(this);
+                    var layerName = $(this).attr('name');
 
-                var params = {
-                    'name': layerName,
-                    'wmsSourceId': wmsSource['id'],
-                    'wmsParams': JSON.stringify(wmsParams)
-                };
+                    var wmsParams = {};
+                    wmsParams.layerName = layerName;
 
-                var wmsDataset = new minerva.models.WmsDatasetModel({});
+                    var params = {
+                        'name': layerName,
+                        'wmsSourceId': wmsSource.id,
+                        'wmsParams': JSON.stringify(wmsParams)
+                    };
 
-                wmsDataset.on('m:layerSentToMap', function () {
-                    that.$el.modal('hide');
-                    that.collection.add(wmsDataset);
-                }, that).createWmsDataset(params);
+                    var wmsDataset = new minerva.models.WmsDatasetModel({});
+
+                    wmsDataset.on('m:wmsDatasetAdded', function () {
+                        that.$el.modal('hide');
+                        that.collection.add(wmsDataset);
+                    }, that).createWmsDataset(params);
+                }
             });
         }
     },
@@ -38,6 +44,8 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     render: function () {
+        // TODO: [bug] wmultiple msLayersListWidget are being created
+        this.$el.children().detach();
         var modal = this.$el.html(minerva.templates.wmsLayersListWidget({ layers: this.layers }));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         this.$el.modal('show');

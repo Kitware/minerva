@@ -2,7 +2,7 @@ minerva.views.DataPanel = minerva.View.extend({
     events: {
         'click .m-add-dataset-button': 'addDataSetDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
-        'click .show-wms-layer': 'showWmsLayers',
+        'click .show-wms-layers-list': 'showWmsLayersList',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .s3-bucket-menu': 'selectS3Files',
@@ -135,8 +135,8 @@ minerva.views.DataPanel = minerva.View.extend({
         }).render();
     },
 
-    // Handling with WMS layers list
-    showWmsLayers: function (event) {
+    // Handling WMS layers list
+    showWmsLayersList: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({

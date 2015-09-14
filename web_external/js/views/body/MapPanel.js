@@ -26,17 +26,17 @@ minerva.views.MapPanel = minerva.View.extend({
             this.wmsLayers[layerId].gcs(projection);
 
             this.wmsLayers[layerId].tileUrl(
+
                 function (zoom, x, y) {
+                    var xLowerLeft = geo.mercator.tilex2long(x, zoom);
+                    var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
+                    var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
+                    var yUpperRight = geo.mercator.tiley2lat(y, zoom);
 
-                  var xLowerLeft = geo.mercator.tilex2long(x, zoom);
-                  var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
-                  var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
-                  var yUpperRight = geo.mercator.tiley2lat(y, zoom);
-
-                  var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
-                  var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
-                  var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
-                  var params = {
+                    var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
+                    var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
+                    var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+                    var params = {
                     'SERVICE': 'WMS',
                     'VERSION': '1.3.0',
                     'REQUEST': 'GetMap',
@@ -49,8 +49,8 @@ minerva.views.MapPanel = minerva.View.extend({
                     'TRANSPARENT': true,
                     'SRS': projection,
                     'TILED': true
-                  };
-                  return baseUrl + '?' + $.param(params);
+                    };
+                    return baseUrl + '?' + $.param(params);
                 }
             );
         } else {
