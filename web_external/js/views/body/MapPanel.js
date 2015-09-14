@@ -17,15 +17,24 @@ minerva.views.MapPanel = minerva.View.extend({
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
         if( dataset.get('meta').minerva.original_type === 'wms' ) {
-            var layerId = dataset.get('id');
+            var datasetId = dataset.get('id');
             var baseUrl = dataset.get('meta').minerva.base_url;
             var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
-            this.wmsLayers[layerId] = this.map.createLayer('osm');
+            this.legend = "data:image/png;base64,"+ dataset.get('meta').minerva.legend;
+            this.legendWidget[datasetId] = new minerva.views.LegendWidget({
+                el: $('.legend-container'),
+                parentView: this,
+                id: datasetId,
+                legend: this.legend
+            });
+            this.legendWidget[datasetId].render();
+            this.legendWidget[datasetId].show();
+            this.wmsLayers[datasetId] = this.map.createLayer('osm');
             // TODO: inclued projection in params ??
             var projection = 'EPSG:3857';
-            this.wmsLayers[layerId].gcs(projection);
+            this.wmsLayers[datasetId].gcs(projection);
 
-            this.wmsLayers[layerId].tileUrl(
+            this.wmsLayers[datasetId].tileUrl(
 
                 function (zoom, x, y) {
                     var xLowerLeft = geo.mercator.tilex2long(x, zoom);
@@ -79,7 +88,6 @@ minerva.views.MapPanel = minerva.View.extend({
 
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
-        var layerId = dataset.get('id');
         var layer = this.datasets[datasetId];
         if (layer) {
             layer.clear();
@@ -87,7 +95,9 @@ minerva.views.MapPanel = minerva.View.extend({
             delete this.datasets[datasetId];
         }
         // Remove WMS layer, if any
-        this.map.deleteLayer(this.wmsLayers[layerId]);
+        this.map.deleteLayer(this.wmsLayers[datasetId]);
+        // Remove the legend
+        this.legendWidget[datasetId].hide(datasetId);
     },
 
     initialize: function (settings) {
@@ -103,6 +113,7 @@ minerva.views.MapPanel = minerva.View.extend({
         });
         this.datasets = {};
         this.wmsLayers = {};
+        this.legendWidget = {};
     },
 
     renderMap: function () {
@@ -120,7 +131,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     render: function () {
-        this.$el.html(minerva.templates.mapPanel());
+        this.$el.html(minerva.templates.mapPanel({}));
         this.renderMap();
         var tooltipProperties = {
             placement: 'left',
