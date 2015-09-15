@@ -9,7 +9,7 @@ minerva.views.LegendWidget = minerva.View.extend({
     },
 
     remove: function (id) {
-        $('#'+id).detach();
+        $('#' + id).detach();
     },
 
     initialize: function (settings) {

@@ -37,7 +37,10 @@ class WmsSource(Source):
         baseURL = params['baseURL']
         username = params['username']
         password = params['password']
-        wms = WebMapService(baseURL, version='1.1.1', username=username,password=password)
+        wms = WebMapService(baseURL, version='1.1.1',
+                            username=username,
+                            password=password
+                            )
         layers = list(wms.contents)
         minerva_metadata = {
             'source_type': 'wms',

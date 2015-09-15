@@ -20,9 +20,9 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                     wmsParams.hostName = hostName;
 
                     var params = {
-                        'name': layerName,
-                        'wmsSourceId': wmsSource.id,
-                        'wmsParams': JSON.stringify(wmsParams)
+                        name: layerName,
+                        wmsSourceId: wmsSource.id,
+                        wmsParams: JSON.stringify(wmsParams)
                     };
 
                     var wmsDataset = new minerva.models.WmsDatasetModel({});

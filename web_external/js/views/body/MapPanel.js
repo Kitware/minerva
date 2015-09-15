@@ -16,11 +16,11 @@ minerva.views.MapPanel = minerva.View.extend({
         // so for now it is commented out
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
-        if( dataset.get('meta').minerva.original_type === 'wms' ) {
+        if (dataset.get('meta').minerva.original_type === 'wms') {
             var datasetId = dataset.id;
             var baseUrl = dataset.get('meta').minerva.base_url;
             var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
-            this.legend = "data:image/png;base64,"+ dataset.get('meta').minerva.legend;
+            this.legend = 'data:image/png;base64,' + dataset.get('meta').minerva.legend;
             this.legendWidget[datasetId] = new minerva.views.LegendWidget({
                 el: $('.legend-container'),
                 parentView: this,
@@ -46,18 +46,18 @@ minerva.views.MapPanel = minerva.View.extend({
                     var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
                     var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
                     var params = {
-                    'SERVICE': 'WMS',
-                    'VERSION': '1.3.0',
-                    'REQUEST': 'GetMap',
-                    'LAYERS': layer,
-                    'STYLES': '',
-                    'BBOX': bbox_mercator,
-                    'WIDTH': 256,
-                    'HEIGHT': 256,
-                    'FORMAT': 'image/png',
-                    'TRANSPARENT': true,
-                    'SRS': projection,
-                    'TILED': true
+                        SERVICE: 'WMS',
+                        VERSION: '1.3.0',
+                        REQUEST: 'GetMap',
+                        LAYERS: layer,
+                        STYLES: '',
+                        BBOX: bbox_mercator,
+                        WIDTH: 256,
+                        HEIGHT: 256,
+                        FORMAT: 'image/png',
+                        TRANSPARENT: true,
+                        SRS: projection,
+                        TILED: true
                     };
                     return baseUrl + '?' + $.param(params);
                 }
