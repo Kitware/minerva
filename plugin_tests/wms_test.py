@@ -65,14 +65,14 @@ class WmsTestCase(base.TestCase):
         """
 
         path = '/minerva_source_wms'
-        name = 'testWMS',
+        name = 'testWMS'
         username = ''
         password = ''
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
         params = {
             'name': name,
-            'username': username,
-            'password': password,
+            'username': username
+            'password': password
             'baseURL': baseURL
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)

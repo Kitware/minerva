@@ -27,6 +27,7 @@ from girder.plugins.minerva.rest.dataset import Dataset
 
 
 class WmsDataset(Dataset):
+
     def __init__(self):
         self.resourceName = 'minerva_dataset_wms'
         self.route('POST', (), self.createWmsDataset)
@@ -42,11 +43,11 @@ class WmsDataset(Dataset):
         layerName = params['name']
         conn = httplib.HTTPConnection(hostName)
         conn.request("GET",
-                        "/geoserver/ows?service=WMS&request=" +
-                        "GetLegendGraphic&format=image" +
-                        "%2Fpng&width=20&height=20&layer=" +
-                        layerName
-                    )
+                     "/geoserver/ows?service=WMS&request=" +
+                     "GetLegendGraphic&format=image" +
+                     "%2Fpng&width=20&height=20&layer=" +
+                     layerName
+                     )
         response = conn.getresponse()
         legend = binascii.b2a_base64(response.read())
 
