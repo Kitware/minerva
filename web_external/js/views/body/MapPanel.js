@@ -17,7 +17,7 @@ minerva.views.MapPanel = minerva.View.extend({
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
         if( dataset.get('meta').minerva.original_type === 'wms' ) {
-            var datasetId = dataset.get('id');
+            var datasetId = dataset.id;
             var baseUrl = dataset.get('meta').minerva.base_url;
             var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
             this.legend = "data:image/png;base64,"+ dataset.get('meta').minerva.legend;
@@ -89,15 +89,15 @@ minerva.views.MapPanel = minerva.View.extend({
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
         var layer = this.datasets[datasetId];
+        // Remove WMS layer, if any
+        this.map.deleteLayer(this.wmsLayers[datasetId]);
+        // Remove the legend, if any
+        this.legendWidget[datasetId].remove(datasetId);
         if (layer) {
             layer.clear();
             layer.draw();
             delete this.datasets[datasetId];
         }
-        // Remove WMS layer, if any
-        this.map.deleteLayer(this.wmsLayers[datasetId]);
-        // Remove the legend
-        this.legendWidget[datasetId].hide(datasetId);
     },
 
     initialize: function (settings) {

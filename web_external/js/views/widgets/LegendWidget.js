@@ -4,19 +4,19 @@
 */
 minerva.views.LegendWidget = minerva.View.extend({
 
+    show: function () {
+        this.modal[this.id].show();
+    },
+
+    remove: function (id) {
+        $('#'+id).detach();
+    },
+
     initialize: function (settings) {
         this.legend = settings.legend;
         this.modal = {};
         this.legendTag = {};
         this.id = settings.id;
-    },
-
-    show: function () {
-        this.modal[this.id].show();
-    },
-
-    hide: function (id) {
-        $('#'+id).detach();
     },
 
     render: function () {

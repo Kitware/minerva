@@ -84,6 +84,7 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        this.wmsLayersListWidget = null;
         this.session = settings.session;
         this.upload = settings.upload;
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
@@ -139,12 +140,16 @@ minerva.views.DataPanel = minerva.View.extend({
     showWmsLayersList: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
-            el: $('#g-dialog-container'),
-            dataset: dataset,
-            collection: this.collection,
-            parentView: this
-        });
-        this.wmsLayersListWidget.render();
+        if (!this.wmsLayersListWidget) {
+            this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                collection: this.collection,
+                parentView: this
+            });
+            this.wmsLayersListWidget.render();
+        } else {
+            this.wmsLayersListWidget.render();
+        }
     }
 });

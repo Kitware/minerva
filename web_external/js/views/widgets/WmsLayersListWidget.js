@@ -12,10 +12,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             var that = this;
             $('input[type=checkbox]').each(function () {
 
-                console.log('called');
-
                 if (this.checked) {
-                    console.log(this);
                     var layerName = $(this).attr('name');
 
                     var wmsParams = {};
@@ -27,8 +24,6 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                         'wmsSourceId': wmsSource.id,
                         'wmsParams': JSON.stringify(wmsParams)
                     };
-
-                    console.log(params);
 
                     var wmsDataset = new minerva.models.WmsDatasetModel({});
 

@@ -1,13 +1,13 @@
 {
-  // other settings...
-  // ENVIRONMENTS
-  // "browser": true, // Is in most configs by default
-  "node": true,
-  // others (e.g. yui, mootools, rhino, worker, etc.)
+  "browser": true,
   "globals": {
-    "$":false,
-    "jquery":false,
-    "angular":false
-    // other explicit global names to exclude
-  },
+      "$": false,
+      "jquery": false,
+      "angular": false,
+      "_": false,
+      "girder": false
+    },
+    "undef": true,
+    "unused": true
+  }
 }
