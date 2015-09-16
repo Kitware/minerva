@@ -2,10 +2,7 @@ from romanesco import specs
 import os
 import tempfile
 import numpy as np
-#from bson import json_util
-#import time
-#from contextlib import contextmanager
-#from romanesco.utils import tmpdir
+import json
 from netCDF4 import Dataset
 
 
@@ -19,7 +16,6 @@ class MinervaTask(specs.Task):
     __outputs__ = specs.PortList([])
 
     script_template = """
-import pudb; pu.db
 import sys
 sys.path.append("{module_dir}")
 from {module} import {cls}
@@ -33,6 +29,8 @@ if __name__ == "__romanesco__":
         self['mode'] = "python"
         self['write_script'] = True
 
+        # The dict passed in here is a huge hack that needs to be resolved
+        # Tasks should be importable in Minerva
         self['script'] = self.script_template.format(**{
             "module_dir": "/home/kotfic/kitware/projects/NEX/src/OpenGeoscience/minerva/analyses/NEX/",
             "module": "mean_contour_workflow",
@@ -47,7 +45,6 @@ if __name__ == "__romanesco__":
 
 class MinervaSparkTask(MinervaTask):
     script_template = """
-import pudb; pu.db
 import sys
 sys.path.append("{module_dir}")
 from {module} import {cls}
@@ -65,19 +62,6 @@ if __name__ == "__romanesco__":
         return self
 
 
-# class GetItem(Task):
-#     __inputs__ = specs.PortList([
-#         {"name": "fileId", "type": "string", "format": "json"}])
-#
-#     __outputs__ = specs.PortList([
-#         {"name": "path", "type": "string", "format": "text"}])
-#
-#     def run(self, host, port, token, fileId):
-#         # Do stuff here
-#         return "foo/bar"
-
-
-
 class NetCDFMean(MinervaSparkTask):
 
     __inputs__ = specs.PortList([
@@ -90,9 +74,8 @@ class NetCDFMean(MinervaSparkTask):
     ])
 
     __outputs__ = specs.PortList([
-        {"name": "output", "type": "string", "format": "json"},
+        {"name": "output", "type": "netcdf", "format": "dataset"},
     ])
-
 
     def toNetCDFDataset(self, source, variable, data):
         def _copy_variable(target_file, source_file, variable):
@@ -220,3 +203,45 @@ class NetCDFMean(MinervaSparkTask):
         i += 1
 
         return self.toNetCDFDataset(data, parameter, timestep_means)
+
+
+
+class NetCDFToContourJson(MinervaTask):
+
+    __inputs__  = specs.PortList([
+        {"name": "data", "type": "netcdf", "format": "dataset"},
+        {"name": "variable", "type": "string", "format": "text"},
+        {"name": "timestep", "type": "number", "format": "number",
+         "default": {"format": "number", "data": 0}}])
+
+    __outputs__ = specs.PortList([
+        {"name": "contour", "type": "string", "format": "json"}
+    ])
+
+    def run(self, data, variable, timestep):
+        variable = data.variables[variable]
+        shape = variable[timestep].shape
+
+        # For now sub select ( take about 10% of the grid )
+        lat_select_index = shape[0]
+        lon_select_index = shape[1]
+
+        # Extract out the lat lon names
+        dimensions = map(lambda d : d, data.dimensions)
+        for d in dimensions:
+            if d.startswith('lat'):
+                lat_name = d
+            elif d.startswith('lon'):
+                lon_name = d
+
+        contour_data = {
+            'gridWidth': lon_select_index,
+            'gridHeight': lat_select_index,
+            'x0': float(data.variables[lon_name][0]),
+            'y0': float(data.variables[lat_name][0]),
+            'dx': float(data.variables[lon_name][1] - data.variables[lon_name][0]),
+            'dy': float(data.variables[lat_name][1] - data.variables[lat_name][0]),
+            'values': variable[timestep][:lat_select_index, :lon_select_index].reshape(variable[timestep][:lat_select_index, :lon_select_index].size).tolist()
+        }
+
+        return json.dumps(contour_data)
