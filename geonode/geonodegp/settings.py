@@ -21,6 +21,8 @@
 # Django settings for the GeoNode project.
 import os
 from geonode.settings import *
+from celery.schedules import crontab
+
 #
 # General Django development settings
 #
@@ -55,7 +57,10 @@ LOCALE_PATHS = (
     os.path.join(LOCAL_ROOT, 'locale'),
     ) + LOCALE_PATHS
 
-INSTALLED_APPS = ('geonodegp', 'geonodegp.data_queues') + INSTALLED_APPS
+INSTALLED_APPS = ('geonodegp',
+                  'geonodegp.data_queues',
+                  'geonodegp.data_queues.forecastio',
+                  'geonodegp.data_queues.gfms') + INSTALLED_APPS
 
 TIME_ZONE = 'America/New_York'
 
@@ -73,7 +78,14 @@ CELERY_ENABLE_REMOTE_CONTROL = True
 
 # Email address for logging in to GPM FTP server
 GPM_ACCOUNT = 'Enter your GPM email address'
-GS_DATA_DIR = '/geodata'
+#Location of GeoServer data directory
+GS_DATA_DIR = '/usr/share/geoserver/data'
+#Directory where temporary data_queues geoprocessing files should be downloaded
+GS_TMP_DIR = GS_DATA_DIR + '/tmp'
+#Time to wait before updating Geoserver mosaic (keep at 0 unless Geoserver is on a different server.
+#In that case, there will need to be an automated rsync between GS_TMP_DIR where celery is running and
+#GS_DATA_DIR where GeoServer is running.
+RSYNC_WAIT_TIME = 0
 
 #MongoDB data connection for data_queues processors
 MONGODB = {
@@ -83,6 +95,20 @@ MONGODB = {
 }
 
 HEALTHMAP_AUTH = 'Enter_your_API_key'
+
+#Add more scheduled geoprocessors here (ideally in local_settings.py file)
+CELERYBEAT_SCHEDULE = {
+    'gfms': {
+        'task': 'geonodegp.data_queues.gfms.tasks.gfms_task',
+        'schedule': crontab(minute='*/3'),
+        'args': ()
+    },
+    'forecast_io': {
+        'task': 'geonodegp.data_queues.forecastio.tasks.forecast_io_task',
+        'schedule': crontab(minute='*/2'),
+        'args': ()
+    },
+}
 
 # Load more settings from a file called local_settings.py if it exists
 try:
