@@ -473,21 +473,19 @@ class Dataset(Resource):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
+
         if not minerva_metadata:
             raise RestException('No valid dataset type found in Item Files.')
-        minerva_metadata['dataset_id'] = item['_id']
-        if 'meta' in item:
-            metadata = item['meta']
-        else:
-            metadata = {}
 
-        return metadata
+        minerva_metadata['dataset_id'] = item['_id']
+
+        return minerva_metadata
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
     def createDataset(self, item, params):
 
-        metadata = Dataset.datasetMetadataFromItem(item, params)
+        metadata = self.datasetMetadataFromItem(item, params)
         updateMinervaMetadata(item, metadata)
 
         return metadata

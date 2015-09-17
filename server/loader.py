@@ -164,8 +164,9 @@ def post_upload(event):
 
     if item['folderId'] == folder['_id']:
         # call dataset.createDataset
-        metadata = dataset.Dataset.datasetMetaDataFromItem(item, None)
-        updateMinervaMetadata(item, metadata)
+        if 'meta' not in item or 'minerva' not in item['meta']:
+            metadata = dataset.Dataset.datasetMetadataFromItem(item, None)
+            updateMinervaMetadata(item, metadata)
 
 
 
