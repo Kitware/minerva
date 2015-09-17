@@ -28,6 +28,8 @@ from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
         wms_dataset, wms_source
 
+from girder.plugins.minerva.utility.minerva_utility import \
+    findDatasetFolder, updateMinervaMetadata
 
 class CustomAppRoot(object):
     """
@@ -148,6 +150,25 @@ def validate_settings(event):
         event.preventDefault().stopPropagation()
 
 
+def post_upload(event):
+
+    # Get the file's item id
+    file_info = event.info['file']
+
+    ## get the user model who created this item/file
+    user = ModelImporter.model('user').load(file_info['creatorId'], force=True)
+    # print ModelImporter.model('user').load(file_info['creatorId'], exc=True)
+
+    item = ModelImporter.model('item').load(file_info['itemId'], user=user)
+    folder = findDatasetFolder(user, user)
+
+    if item['folderId'] == folder['_id']:
+        # call dataset.createDataset
+        metadata = dataset.Dataset.datasetMetaDataFromItem(item, None)
+        updateMinervaMetadata(item, metadata)
+
+
+
 def load(info):
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
@@ -167,6 +188,8 @@ def load(info):
     info['apiRoot'].geonames.route('GET', ('geocode',),
                                    geocodeREST.geocode)
     events.bind('model.setting.validate', 'minerva', validate_settings)
+
+    events.bind('data.process', 'post_process_dataset', post_upload)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
     info['apiRoot'].minerva_analysis = analysis.Analysis()

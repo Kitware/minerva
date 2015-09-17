@@ -15,31 +15,21 @@ if __name__ == "__main__":
     c.authenticate("kotfic", "letmein")
 
     output = romanesco.run(
-        wf,
+        {
+            "inputs": [{"name": "input", "type": "string", "format": "text"}],
+            "outputs": [{"name": "out", "type": "string", "format": "json"}],
+            "script": "with open (input, 'rb') as fh:\n    out = fh.read()",
+            "mode": "python"
+        },
         inputs={
-            "file_path": {
-                'mode': 'girder',
-                'host': 'localhost',
-                'scheme': 'http',
-                'port': 8081,
-                'api_root': '/api/v1',
-                'resource_type': 'file',
-                'id': "55df4fbaf4b1496693a3c464",
-                'type': 'string',
+            "input": {
                 'format': 'text',
-                "name": "test.nc",
-                'token': c.token
-            },
-            "m.variable": {
-                "format": "text",
-                "data": "pr"},
-            "c.variable": {
-                "format": "text",
-                "data": "pr"}},
+                'data': "/home/kotfic/kitware/projects/NEX/data/points.csv"},
+        },
         outputs={
-            'contour': {
+            'out': {
                 'mode': 'girder',
-                'name': 'test.json',
+                'name': 'points.csv',
                 'host': 'localhost',
                 'scheme': 'http',
                 'port': 8081,
@@ -49,7 +39,49 @@ if __name__ == "__main__":
                 'format': 'json',
                 'type': 'string',
                 'token': c.token
-            }})
+            }
+        }
+
+    )
+
+
+#    output = romanesco.run(
+#        wf,
+#        inputs={
+#            "file_path": {
+#                'mode': 'girder',
+#                'host': 'localhost',
+#                'scheme': 'http',
+#                'port': 8081,
+#                'api_root': '/api/v1',
+#                'resource_type': 'file',
+#                'id': "55df4fbaf4b1496693a3c464",
+#                'type': 'string',
+#                'format': 'text',
+#                "name": "test.nc",
+#                'token': c.token
+#            },
+#            "m.variable": {
+#                "format": "text",
+#                "data": "pr"},
+#            "c.variable": {
+#                "format": "text",
+#                "data": "pr"}},
+#        outputs={
+#            'contour': {
+#                'mode': 'girder',
+#                'name': 'test.json',
+#                'host': 'localhost',
+#                'scheme': 'http',
+#                'port': 8081,
+#                'api_root': '/api/v1',
+#                'parent_type': 'folder',
+#                'parent_id': "55b13466f4b149110f800aa1",
+#                'format': 'json',
+#                'type': 'string',
+#                'token': c.token
+#            }})
+
 #    "file_path": {
 #        'format': 'text',
 #        'data': "/home/kotfic/kitware/projects/NEX/data/test.nc"},

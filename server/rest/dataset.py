@@ -30,10 +30,14 @@ from girder.utility import config
 
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.libs.carmen import get_resolver
-from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
-    updateMinervaMetadata
+
+from girder.plugins.minerva.utility.minerva_utility import \
+    findDatasetFolder, updateMinervaMetadata
+
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, JsonMapper, GeoJsonMapper, jsonObjectReader
+
+from girder.utility.model_importer import ModelImporter
 
 import girder_client
 
@@ -421,9 +425,8 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
 
-    @access.public
-    @loadmodel(model='item', level=AccessType.WRITE)
-    def createDataset(self, item, params):
+    @staticmethod
+    def datasetMetadataFromItem(item, params):
         # assuming we have an existing item
         # create the minerva metadata to make it a dataset
         # this is likely an intermediate step to making a new model for
@@ -445,7 +448,7 @@ class Dataset(Resource):
         # fairly brittle and should only be called after first upload
         # perhaps check if this metadata already exists and don't run if so?
         minerva_metadata = {}
-        for file in self.model('item').childFiles(item=item, limit=0):
+        for file in ModelImporter.model('item').childFiles(item=item, limit=0):
             if 'geojson' in file['exts']:
                 # we found a geojson, assume this is geojson original
                 minerva_metadata['original_type'] = 'geojson'
@@ -477,9 +480,18 @@ class Dataset(Resource):
             metadata = item['meta']
         else:
             metadata = {}
-        metadata['minerva'] = minerva_metadata
-        self.model('item').setMetadata(item, metadata)
-        return minerva_metadata
+
+        return metadata
+
+    @access.public
+    @loadmodel(model='item', level=AccessType.WRITE)
+    def createDataset(self, item, params):
+
+        metadata = Dataset.datasetMetadataFromItem(item, params)
+        updateMinervaMetadata(item, metadata)
+
+        return metadata
+
     createDataset.description = (
         Description('Create metadata for an Item, promoting it to a Dataset.')
         .param('id', 'The Item ID', paramType='path')
