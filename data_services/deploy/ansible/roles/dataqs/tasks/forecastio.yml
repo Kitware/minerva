@@ -1,5 +1,3 @@
-###
-# Install forecastio data scraper
 ---
 - name: Create the forecastio coverage store
   uri:
@@ -11,12 +9,13 @@
       - 200
       - 201
     HEADER_Content-Type: application/json
-    body: '{"coverageStore": {"enabled": true, "name": "forecastio", "type": "ImageMosaic", "workspace": "{{db_data_instance}}"}}'
+    body: '{"coverageStore": {"enabled": true, "name": "forecast_io_airtemp", "type": "ImageMosaic", "workspace": "{{db_data_instance}}"}}'
     body_format: json
   ignore_errors: true
+  notify: reset geoserver permissions
 
 - name: Copy airtemp tif
-  copy: src=forecast_io_airtemp_20150810T130000000Z.tif dest={{app_code_dir}}/{{app_name}}/forecastio/
+  copy: src=forecast_io_airtemp_20150810T130000000Z.tif dest={{app_code_dir}}/{{app_name}}/
 
 - name: Copy indexer properties
   copy: src=indexer.properties dest={{app_code_dir}}/{{app_name}}/
@@ -33,14 +32,10 @@
     chdir: "{{app_code_dir}}/{{app_name}}"
 
 - name: Use curl to add forecastio image mosaic
-  command: curl --data-binary @forecastio.zip -XPUT -u {{geoserver_user}}:{{geoserver_password}} -H "Content-Type:application/zip" {{geoserver_rest}}/workspaces/{{db_data_instance}}/coveragestores/forecastio/file.imagemosaic 
+  command: curl -v --data-binary @forecastio.zip -XPUT -u {{geoserver_user}}:{{geoserver_password}} -H "Content-Type:application/zip" {{geoserver_rest}}/workspaces/{{db_data_instance}}/coveragestores/forecast_io_airtemp/file.imagemosaic
   args:
     chdir: "{{app_code_dir}}/{{app_name}}"
+  notify: reset geoserver permissions
 
 - name: Generate coverage configuration
   template: src=coverage.json.j2 dest={{app_code_dir}}/{{app_name}}/coverage.json
-
-- name: Create coverage
-  command: curl --data @coverage.json -XPUT -u {{geoserver_user}}:{{geoserver_password}} -H Content-Type:application/json {{geoserver_rest}}/workspaces/{{db_data_instance}}/coveragestores/forecastio/coverages/forecastio.json
-  args:
-    chdir: "{{app_code_dir}}/{{app_name}}"

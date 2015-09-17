@@ -44,10 +44,10 @@
   copy: src=known_hosts dest={{ssh_dir}}/known_hosts
 
 - name: checkout latest web app code
-  git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}}
+  git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}} force=yes
 
 - name: copy the local_settings.py file in place
-  template: src=local_settings.py.j2 dest={{ app_code_dir}}/{{app_name}}/local_settings.py
+  template: src=local_settings.py.j2 dest={{geonode_root}}/local_settings.py
 
 - name: check if virtualenv already exists
   stat: path={{virtualenv_dir}}/{{app_name}}
@@ -99,10 +99,12 @@
                  encoding='UTF-8'
                  lc_collate='en_US.UTF-8'
                  lc_ctype='en_US.UTF-8'
-                 owner=postgres
+                 owner={{db_user}}
                  template='template0'
   sudo: yes
   sudo_user: postgres
+  retries: 2
+  delay: 5
 
 - name: create {{db_data_instance}} db
   postgresql_db: name={{db_data_instance}}
@@ -113,6 +115,8 @@
                  template='template0'
   sudo: yes
   sudo_user: postgres
+  retries: 2
+  delay: 5
 
 - name: add postgis to the {{db_data_instance}} db
   postgresql_ext: name=postgis db={{db_data_instance}}

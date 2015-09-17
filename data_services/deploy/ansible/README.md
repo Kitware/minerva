@@ -8,6 +8,15 @@ This Ansible Role will install GeoNode and required dependencies onto an Ubuntu
 
 Tested with a known minimal working Ansible version of 1.9.3.
 
+### Installing roles from ansible galaxy
+
+The ansible playbook that performs the provisioning depends on a few roles provided in the
+ansible galaxy.  You can install these rolls with the following command in this directory:
+
+```
+ansible-galaxy install -r requirements.txt
+```
+
 ### Role Variables
 
 * `app_name` - GeoNode project name (default: `geonode`)

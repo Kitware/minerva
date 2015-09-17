@@ -10,6 +10,7 @@ DATABASES = {
          'NAME': '{{db_metadata_instance}}',
          'USER': '{{db_user}}',
          'PASSWORD': '{{db_password}}',
+         'PORT': '5432'
      },
     # vector datastore for uploads
     '{{ app_name }}' : {
@@ -37,7 +38,7 @@ OGC_SERVER = {
         'WMST_ENABLED' : False,
         'BACKEND_WRITE_ENABLED': True,
         'WPS_ENABLED' : False,
-        'LOG_FILE': '%s/geoserver/data/logs/geoserver.log' % os.path.abspath(os.path.join(PROJECT_ROOT, os.pardir)),
+        'LOG_FILE': '/tmp/geoserver.log',
         # Set to name of database in DATABASES dictionary to enable
         'DATASTORE': '{{ app_name }}', #'datastore',
     }
