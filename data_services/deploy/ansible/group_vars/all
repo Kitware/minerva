@@ -22,6 +22,15 @@ code_repository: "https://github.com/{{ github_user }}/{{ app_name }}.git"
 # TODO: Production IP address
 server_name: localhost:8080
 
+# geoserver url
+geoserver_root_url: http://localhost:8080/geoserver
+
+# geoserver rest endpoint
+geoserver_rest: "{{ geoserver_root_url }}/rest"
+
+# geonode workspace (probably shouldn't change this)
+geonode_workspace: geonode
+
 db_data_instance: "{{ app_name }}"
 db_metadata_instance: "{{ app_name }}_app"
 db_password: "{{ app_name }}"

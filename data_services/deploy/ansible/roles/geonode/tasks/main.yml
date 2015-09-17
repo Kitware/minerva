@@ -142,7 +142,7 @@
                  fixtures={{ app_code_dir}}/{{app_name}}/fixtures.json
 
 - name: wait for geoserver to be up
-  shell: curl --head --silent http://localhost:8080/geoserver/web/
+  shell: curl --head --silent {{geoserver_root_url}}/web/
   register: result
   until: result.stdout.find('200 OK') != -1
   retries: 5

@@ -87,13 +87,6 @@ GS_TMP_DIR = GS_DATA_DIR + '/tmp'
 #GS_DATA_DIR where GeoServer is running.
 RSYNC_WAIT_TIME = 0
 
-#MongoDB data connection for data_queues processors
-MONGODB = {
-        'HOST': 'localhost',
-        'PORT': 27017,
-        'NAME': 'geonodemongo'
-}
-
 HEALTHMAP_AUTH = 'Enter_your_API_key'
 
 #Add more scheduled geoprocessors here (ideally in local_settings.py file)
