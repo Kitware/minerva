@@ -100,12 +100,12 @@ HEALTHMAP_AUTH = 'Enter_your_API_key'
 CELERYBEAT_SCHEDULE = {
     'gfms': {
         'task': 'geonodegp.data_queues.gfms.tasks.gfms_task',
-        'schedule': crontab(minute='*/3'),
+        'schedule': crontab(minute='3'),
         'args': ()
     },
     'forecast_io': {
         'task': 'geonodegp.data_queues.forecastio.tasks.forecast_io_task',
-        'schedule': crontab(minute='*/2'),
+        'schedule': crontab(minute='1'),
         'args': ()
     },
 }
