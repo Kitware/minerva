@@ -21,10 +21,9 @@ if __name__ == "__main__":
 
         inputs={
 # Cached file
-#           "file_path": {
-#               'format': 'text',
-#               'data': "/home/kotfic/kitware/projects/NEX/data/test.nc"},
-
+#            "file_path": {
+#                'format': 'text',
+#                'data': "/home/kotfic/kitware/projects/NEX/data/test.nc"},
             "file_path": {
                 'mode': 'girder',
                 'host': 'localhost',

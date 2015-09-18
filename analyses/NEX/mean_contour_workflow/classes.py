@@ -172,8 +172,8 @@ class NetCDFMean(MinervaSparkTask):
             pr = data.variables[parameter]
 
             (lat, lon) = grid_chunk
-
             values = []
+
             for timestep_range in timestep_chunks:
                 (start_timesteps, end_timesteps) = timestep_range
 
@@ -200,7 +200,7 @@ class NetCDFMean(MinervaSparkTask):
                     chunk = means[i][j]
                     timestep_means[j][lat:lat+chunk.shape[0], lon:lon+chunk.shape[1]] = chunk
 
-        i += 1
+                i += 1
 
         return self.toNetCDFDataset(data, parameter, timestep_means)
 
@@ -222,7 +222,6 @@ class NetCDFToContourJson(MinervaTask):
         variable = data.variables[variable]
         shape = variable[timestep].shape
 
-        # For now sub select ( take about 10% of the grid )
         lat_select_index = shape[0]
         lon_select_index = shape[1]
 

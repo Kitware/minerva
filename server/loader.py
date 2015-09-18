@@ -160,7 +160,7 @@ def post_upload(event):
     # print ModelImporter.model('user').load(file_info['creatorId'], exc=True)
 
     item = ModelImporter.model('item').load(file_info['itemId'], user=user)
-    folder = findDatasetFolder(user, user)
+    folder = findDatasetFolder(user, user, create=True)
 
     if item['folderId'] == folder['_id']:
         # call dataset.createDataset
