@@ -44,6 +44,10 @@ if __name__ == "__main__":
                 "format": "text",
                 "data": "pr"}},
         outputs={
+# Output to disk
+#            "contour": {
+#                'format': 'text',
+#                'data': "/tmp/tmp.json"},
             'contour': {
                 'mode': 'girder',
                 'name': 'test.json',
@@ -57,35 +61,3 @@ if __name__ == "__main__":
                 'type': 'string',
                 'token': c.token
             }})
-####
-#  For testing upload and item=>dataset promotion
-#
-#     output = romanesco.run(
-#         {
-#             "inputs": [{"name": "input", "type": "string", "format": "text"}],
-#             "outputs": [{"name": "out", "type": "string", "format": "json"}],
-#             "script": "with open (input, 'rb') as fh:\n    out = fh.read()",
-#             "mode": "python"
-#         },
-#         inputs={
-#             "input": {
-#                 'format': 'text',
-#                 'data': "/home/kotfic/kitware/projects/NEX/data/points.csv"},
-#         },
-#         outputs={
-#             'out': {
-#                 'mode': 'girder',
-#                 'name': 'points.csv',
-#                 'host': 'localhost',
-#                 'scheme': 'http',
-#                 'port': 8081,
-#                 'api_root': '/api/v1',
-#                 'parent_type': 'folder',
-#                 'parent_id': "55b13466f4b149110f800aa1",
-#                 'format': 'json',
-#                 'type': 'string',
-#                 'token': c.token
-#             }
-#         }
-#
-#     )
