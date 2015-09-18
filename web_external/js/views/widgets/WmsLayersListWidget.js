@@ -1,4 +1,3 @@
-'use strict';
 /**
 * This widget displays the list of WMS layers
 */
@@ -8,18 +7,18 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         'submit #m-add-layers-form': function (e) {
             e.preventDefault();
             var wmsSource = this.dataset;
-            var hostName = (wmsSource.get('meta').minerva.wms_params.base_url).slice(0, 28);
-            var that = this;
-            $('input[type=checkbox]').each(function () {
+            var hostName = wmsSource.get('meta').minerva.wms_params.hostName;
 
-                if (this.checked) {
-                    var layerName = $(this).attr('name');
-
+            $('input[type=checkbox]').each(_.bind(function (index, layer) {
+                if (layer.checked) {
+                    var typeName = $(layer).attr('typeName');
+                    var layerName = $(layer).attr('name');
                     var wmsParams = {};
-                    wmsParams.layerName = layerName;
+                    wmsParams.typeName = typeName;
                     wmsParams.hostName = hostName;
 
                     var params = {
+                        type_name: typeName,
                         name: layerName,
                         wmsSourceId: wmsSource.id,
                         wmsParams: JSON.stringify(wmsParams)
@@ -28,11 +27,11 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                     var wmsDataset = new minerva.models.WmsDatasetModel({});
 
                     wmsDataset.on('m:wmsDatasetAdded', function () {
-                        that.$el.modal('hide');
-                        that.collection.add(wmsDataset);
-                    }, that).createWmsDataset(params);
+                        this.$el.modal('hide');
+                        this.collection.add(wmsDataset);
+                    }, this).createWmsDataset(params);
                 }
-            });
+            }, this));
         }
     },
 

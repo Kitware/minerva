@@ -1,4 +1,3 @@
-'use strict';
 /**
 * This widget displays the list of WMS layers
 */

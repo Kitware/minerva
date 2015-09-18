@@ -9,10 +9,10 @@
         each layer in layers
           .form-group
             .checkbox
-              input#m-add-layers(type="checkbox", name="#{layer}")
+              input#m-add-layers(type="checkbox", name="#{layer.layer_title}" typeName="#{layer.layer_type}")
               label
                 i.icon-layers.m-add-layers-type-icon
-                | #{layer}
+                | #{layer.layer_title}
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-layers-button.btn.btn-small.btn-primary

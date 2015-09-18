@@ -1,4 +1,3 @@
-'use strict';
 /**
 * This widget displays a form for adding WMS services
 */

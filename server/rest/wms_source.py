@@ -19,6 +19,7 @@
 
 from girder.api import access
 from girder.api.describe import Description
+from girder.api.rest import getUrlParts
 
 # A Quick implementation to call GetCapabilities
 from owslib.wms import WebMapService
@@ -34,21 +35,31 @@ class WmsSource(Source):
 
     @access.user
     def createWmsSource(self, params):
-        print params
         name = params['name']
         baseURL = params['baseURL']
+        parsedUrl = getUrlParts(baseURL)
+        hostName = parsedUrl.netloc
         username = params['username'] if 'username' in params else None
         password = params['password'] if 'password' in params else None
         wms = WebMapService(baseURL, version='1.1.1',
                             username=username,
                             password=password
                             )
-        layers = list(wms.contents)
+        layersType = list(wms.contents)
+        layers = []
+        for layerType in layersType:
+            layer = {
+                'layer_title': wms[layerType].title,
+                'layer_type': layerType
+            }
+            layers.append(layer)
+
         minerva_metadata = {
             'source_type': 'wms',
             'layers': layers,
             'wms_params': {
-                'base_url': baseURL
+                'base_url': baseURL,
+                'host_name': hostName
             }
         }
         desc = 'wms source for  %s' % name

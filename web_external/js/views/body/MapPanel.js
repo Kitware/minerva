@@ -19,7 +19,7 @@ minerva.views.MapPanel = minerva.View.extend({
         if (dataset.get('meta').minerva.original_type === 'wms') {
             var datasetId = dataset.id;
             var baseUrl = dataset.get('meta').minerva.base_url;
-            var layer = JSON.parse(dataset.get('meta').minerva.wms_params).layerName.slice(8);
+            var layer = JSON.parse(dataset.get('meta').minerva.wms_params).typeName.slice(8);
             this.legend = 'data:image/png;base64,' + dataset.get('meta').minerva.legend;
             this.legendWidget[datasetId] = new minerva.views.LegendWidget({
                 el: $('.legend-container'),
