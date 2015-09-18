@@ -1,5 +1,5 @@
 import romanesco
-from classes import NetCDFMean, NetCDFToContourJson
+from NEX import NetCDFMean, NetCDFToContourJson
 from romanesco.specs import Workflow
 from girder_client import GirderClient
 
@@ -21,22 +21,22 @@ if __name__ == "__main__":
 
         inputs={
 # Cached file
-#            "file_path": {
-#                'format': 'text',
-#                'data': "/home/kotfic/kitware/projects/NEX/data/test.nc"},
             "file_path": {
-                'mode': 'girder',
-                'host': 'localhost',
-                'scheme': 'http',
-                'port': 8081,
-                'api_root': '/api/v1',
-                'resource_type': 'file',
-                'id': "55df4fbaf4b1496693a3c464",
-                'type': 'string',
                 'format': 'text',
-                "name": "test.nc",
-                'token': c.token
-            },
+                'data': "/home/kotfic/kitware/projects/NEX/data/test.nc"},
+#             "file_path": {
+#                 'mode': 'girder',
+#                 'host': 'localhost',
+#                 'scheme': 'http',
+#                 'port': 8081,
+#                 'api_root': '/api/v1',
+#                 'resource_type': 'file',
+#                 'id': "55df4fbaf4b1496693a3c464",
+#                 'type': 'string',
+#                 'format': 'text',
+#                 "name": "test.nc",
+#                 'token': c.token
+#             },
             "m.variable": {
                 "format": "text",
                 "data": "pr"},
