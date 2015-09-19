@@ -16,6 +16,12 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             });
         }
     },
-    path: 'minerva_source'
+
+    path: 'minerva_source',
+    getInitData: function () {
+        var initData = { userId: girder.currentUser.get('_id') };
+        return initData;
+    }
+
 
 });
