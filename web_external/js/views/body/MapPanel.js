@@ -16,13 +16,13 @@ minerva.views.MapPanel = minerva.View.extend({
         // so for now it is commented out
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
-        if (!_.contains(this.datasets, dataset.id)) {
+        if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
                 // Allow the dataset to specify the tile layer.
                 // TODO: Showing a WMS layer hides the slider.
                 var datasetId = dataset.id;
-                this.datasets[datasetId] = this.map.createLayer('osm');
-                dataset.specifyTileLayer(this.datasets[datasetId]);
+                this.datasetLayers[datasetId] = this.map.createLayer('osm');
+                dataset.specifyTileLayer(this.datasetLayers[datasetId]);
                 this.legendWidget[datasetId] = new minerva.views.LegendWidget({
                     el: $('.legend-container'),
                     parentView: this,
@@ -44,7 +44,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     var layer = this.map.createLayer('feature');
 
                     var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
-                    this.datasets[datasetId] = layer;
+                    this.datasetLayers[datasetId] = layer;
 
                     layer.clear();
 
@@ -63,7 +63,7 @@ minerva.views.MapPanel = minerva.View.extend({
 
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
-        var layer = this.datasets[datasetId];
+        var layer = this.datasetLayers[datasetId];
         if (_.has(this.legendWidget, datasetId)) {
             this.legendWidget[datasetId].remove(datasetId);//hide();
             delete this.legendWidget[datasetId];
@@ -71,7 +71,7 @@ minerva.views.MapPanel = minerva.View.extend({
         if (layer) {
             layer.clear();
             layer.draw();
-            delete this.datasets[datasetId];
+            delete this.datasetLayers[datasetId];
         }
     },
 
@@ -86,7 +86,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.map.center(this.session.sessionJsonContents.center);
             }
         });
-        this.datasets = {};
+        this.datasetLayers = {};
         this.legendWidget = {};
     },
 
