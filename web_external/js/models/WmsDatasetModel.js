@@ -24,9 +24,9 @@ minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
         var minervaMetadata = this.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
         // WMS returns lists of layers prefixed with 'geonode:'.
-        var wmsPrefix = 'geonode:'
+        var wmsPrefix = 'geonode:';
         var wmsParams = JSON.parse(minervaMetadata.wms_params);
-        var layer = JSON.parse(minervaMetadata.wms_params).typeName.slice(wmsPrefix.length);
+        var layer = wmsParams.typeName.slice(wmsPrefix.length);
         // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         mapLayer.gcs(projection);
@@ -60,7 +60,7 @@ minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
     },
 
     getLegend: function () {
-        return'data:image/png;base64,' + this.getMinervaMetadata().legend;
+        return 'data:image/png;base64,' + this.getMinervaMetadata().legend;
     }
 
 });
