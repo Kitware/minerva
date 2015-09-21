@@ -65,10 +65,12 @@ minerva.views.MapPanel = minerva.View.extend({
         var datasetId = dataset.id;
         var layer = this.datasetLayers[datasetId];
         if (_.has(this.legendWidget, datasetId)) {
-            this.legendWidget[datasetId].remove(datasetId);//hide();
+            this.legendWidget[datasetId].remove(datasetId);
             delete this.legendWidget[datasetId];
         }
-        if (layer) {
+        if (dataset.getDatasetType() === 'wms') {
+            this.map.deleteLayer(layer);
+        } else if (layer) {
             layer.clear();
             layer.draw();
             delete this.datasetLayers[datasetId];
