@@ -8,6 +8,45 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
+    _specifyWmsDatasetLayer: function (dataset, layer) {
+        var minervaMetadata = dataset.getMinervaMetadata();
+        var baseUrl = minervaMetadata.base_url;
+        // WMS returns lists of layers prefixed with 'geonode:'.
+        var wmsPrefix = 'geonode:';
+        var wmsParams = JSON.parse(minervaMetadata.wms_params);
+        var layerName = wmsParams.typeName.slice(wmsPrefix.length);
+        // TODO: inclued projection in params ??
+        var projection = 'EPSG:3857';
+        layer.gcs(projection);
+        layer.tileUrl(
+            function (zoom, x, y) {
+                var xLowerLeft = geo.mercator.tilex2long(x, zoom);
+                var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
+                var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
+                var yUpperRight = geo.mercator.tiley2lat(y, zoom);
+
+                var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
+                var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
+                var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+                var params = {
+                    SERVICE: 'WMS',
+                    VERSION: '1.3.0',
+                    REQUEST: 'GetMap',
+                    LAYERS: layerName,
+                    STYLES: '',
+                    BBOX: bbox_mercator,
+                    WIDTH: 256,
+                    HEIGHT: 256,
+                    FORMAT: 'image/png',
+                    TRANSPARENT: true,
+                    SRS: projection,
+                    TILED: true
+                };
+                return baseUrl + '?' + $.param(params);
+            }
+        );
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -18,19 +57,20 @@ minerva.views.MapPanel = minerva.View.extend({
         // added as a feature layer, which is even more of a HACK
         if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
-                // Allow the dataset to specify the tile layer.
-                // TODO: Showing a WMS layer hides the slider.
                 var datasetId = dataset.id;
-                this.datasetLayers[datasetId] = this.map.createLayer('osm');
-                dataset.specifyTileLayer(this.datasetLayers[datasetId]);
+                var layer = this.map.createLayer('osm');
+                this.datasetLayers[datasetId] = layer;
+                this._specifyWmsDatasetLayer(dataset, layer);
+
                 this.legendWidget[datasetId] = new minerva.views.LegendWidget({
                     el: $('.legend-container'),
                     parentView: this,
                     id: datasetId,
-                    legend: dataset.getLegend()
+                    legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
                 });
                 this.legendWidget[datasetId].render();
                 this.legendWidget[datasetId].show();
+
                 // Add the UI slider back
                 this.uiLayer = this.map.createLayer('ui');
                 this.uiLayer.createWidget('slider');
