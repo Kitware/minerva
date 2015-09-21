@@ -6,7 +6,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     events: {
         'submit #m-add-layers-form': function (e) {
             e.preventDefault();
-            var wmsSource = this.dataset;
+            var wmsSource = this.source;
             var hostName = wmsSource.get('meta').minerva.wms_params.hostName;
 
             $('input[type=checkbox]').each(_.bind(function (index, layer) {
@@ -36,9 +36,9 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.dataset = settings.dataset;
+        this.source = settings.source;
         this.collection = settings.collection;
-        this.layers = this.dataset.get('meta').minerva.layers;
+        this.layers = this.source.getMinervaMetadata().layers;
     },
 
     render: function () {
