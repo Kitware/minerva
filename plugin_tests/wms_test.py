@@ -44,6 +44,7 @@ def tearDownModule():
 
 
 class WmsTestCase(base.TestCase):
+
     """
     Tests of the minerva source API endpoints.
     """
@@ -57,7 +58,6 @@ class WmsTestCase(base.TestCase):
         self._user = self.model('user').createUser(
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
-
 
     def testCreateWmsSource(self):
         """
@@ -83,7 +83,6 @@ class WmsTestCase(base.TestCase):
         self.assertEquals(minerva_metadata['source_type'], 'wms', 'incorrect wms source type')
         self.assertEquals(minerva_metadata['wms_params']['base_url'], baseURL, 'incorrect wms source baseURL')
 
-
     def testCreateWmsDataset(self):
         """
         Test the minerva WMS dataset API endpoints.
@@ -93,6 +92,7 @@ class WmsTestCase(base.TestCase):
 
         path = '/minerva_source_wms'
         name = 'testWMS'
+        typeName = 'geonode:global_temp'
         username = ''
         password = ''
         baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
@@ -114,6 +114,7 @@ class WmsTestCase(base.TestCase):
         params = {
             'name': name,
             'wmsSourceId': wmsSource['_id'],
+            'typeName': typeName,
             'wmsParams': wmsParams
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)

@@ -42,7 +42,7 @@ class WmsDataset(Dataset):
         baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         hostName = parsedUrl.netloc
-        typeName = params['type_name']
+        typeName = params['typeName']
         conn = httplib.HTTPConnection(hostName)
         conn.request("GET",
                      "/geoserver/ows?service=WMS&request=" +
@@ -73,5 +73,6 @@ class WmsDataset(Dataset):
         .param('wmsSourceId', 'Item ID of the WMS Source', required=True)
         .param('wmsParams', 'JSON object specifying WMS layer params',
                required=True)
+        .param('typeName', 'The type name of the WMS layer', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
