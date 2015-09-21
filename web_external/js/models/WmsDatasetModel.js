@@ -18,6 +18,6 @@ minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
         }, this));
 
         return this;
-    },
+    }
 
 });
