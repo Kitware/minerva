@@ -11,10 +11,8 @@ minerva.views.MapPanel = minerva.View.extend({
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
-        // WMS returns lists of layers prefixed with 'geonode:'.
-        var wmsPrefix = 'geonode:';
         var wmsParams = JSON.parse(minervaMetadata.wms_params);
-        var layerName = wmsParams.typeName.slice(wmsPrefix.length);
+        var layerName = wmsParams.typeName;
         // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         layer.gcs(projection);
