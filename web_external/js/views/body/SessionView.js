@@ -158,7 +158,7 @@ minerva.views.SessionView = minerva.View.extend({
             this.layersPanel.setElement(this.$('.layersPanel')).render();
             this.jobsPanel.setElement(this.$('.jobsPanel')).render();
             this.analysisPanel.setElement(this.$('.analysisPanel')).render();
-            this.sourcePanel.setElement(this.$('.sourcePanel')).render();
+            this.sourcePanel.setElement(this.$('.m-source-panel')).render();
 
         }, this));
 
