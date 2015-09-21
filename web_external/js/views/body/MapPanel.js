@@ -61,7 +61,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 this._specifyWmsDatasetLayer(dataset, layer);
 
                 this.legendWidget[datasetId] = new minerva.views.LegendWidget({
-                    el: $('.legend-container'),
+                    el: $('.m-map-legend-container'),
                     parentView: this,
                     id: datasetId,
                     legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
