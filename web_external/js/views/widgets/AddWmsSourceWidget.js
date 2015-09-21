@@ -22,7 +22,8 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.collection = settings.parentView.collection;
+        console.log(settings);
+        this.collection = settings.collection;
     },
 
     render: function () {

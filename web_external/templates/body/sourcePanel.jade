@@ -1,0 +1,20 @@
+.m-sourcePanelContainer
+  .panelTitle
+    | Sources
+    i.m-add-source.icon-plus-squared(title="Add new source")
+  .m-sourceList
+    .m-sources
+        each source in sources
+            if source.getMinervaMetadata()
+                .m-source
+                    span(title=source.get('name'))= source.get('name').length > 13 ? source.get('name').slice(0,13) + "..." : source.get('name')
+                        - var attributes = {'cid': source.cid}
+                        if source.getSourceType() === 'wms'
+                            //- list icon to open the list of WMS layers
+                            - var classes = 'icon-list m-icon-enabled m-show-wms-layers-list'
+                            i(class=classes)&attributes(attributes)
+                            //- trash icon to delete source
+                            - var classes = 'icon-trash m-icon-enabled m-delete-source'
+                            i(title='delete source', class=classes)&attributes(attributes)
+                            //- info icon for minerva metadata display
+                            i(title='display source info').icon-info-circled.m-icon-info.m-icon-enabled&attributes(attributes)

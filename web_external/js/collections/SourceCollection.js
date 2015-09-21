@@ -23,5 +23,4 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
         return initData;
     }
 
-
 });
