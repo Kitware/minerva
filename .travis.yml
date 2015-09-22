@@ -7,8 +7,6 @@ cache:
   directories:
   - $HOME/virtualenv/python2.7.9
   - $HOME/.cache/pip
-  - $HOME/build/girder/node_modules
-  - $HOME/build/girder/plugins/minerva/node_modules
   - $HOME/spark-1.3.1-bin-hadoop2.4
 
 sudo: false
@@ -26,10 +24,6 @@ addons:
     - libnetcdf-dev
 
 before_install:
-    # move node_modules caches so that git clone girder completes
-    - mv $HOME/build/girder/node_modules $HOME/build/girder_node_modules_cache
-    - mv $HOME/build/girder/plugins/minerva/node_modules $HOME/build/minerva_node_modules_cache
-
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
     - cd $HOME/build
@@ -42,10 +36,6 @@ before_install:
     - cd $HOME/build/girder/plugins
     - git clone https://github.com/Kitware/romanesco.git
     - cd $HOME/build
-
-    # move the node_modules caches
-    - mv $HOME/build/girder_node_modules_cache $HOME/build/girder/node_modules
-    - mv $HOME/build/minerva_node_modules_cache $HOME/build/girder/plugins/minerva/node_modules
 
     - cd girder
     # copy the placeholder bsve credentials, needed even though we mock bsve api calls

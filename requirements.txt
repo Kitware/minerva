@@ -4,4 +4,5 @@ jsonpath-rw==1.4.0
 geojson==1.1.0
 ijson==2.2.0
 geopy==1.10.0
+owslib==0.9.1
 -e git+https://github.com/Kitware/romanesco.git#egg=romanesco[spark]

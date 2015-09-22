@@ -18,6 +18,10 @@
                             //- right arrow icon to move dataset into current session
                             - var classes = (dataset.get('displayed') ? 'icon-right-circled icon-disabled dataset-in-session' : 'icon-right-circled icon-enabled add-dataset-to-session')
                             i(class=classes)&attributes(attributes)
+                        if dataset.isWmsSource()
+                            //- list icon to open the list of WMS layers
+                            - var classes = (dataset.get('displayed') ? 'icon-list icon-disabled dataset-in-session' : 'icon-list icon-enabled show-wms-layers-list')
+                            i(class=classes)&attributes(attributes)
                         //- trash icon to delete dataset
                         - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
                         i(class=classes)&attributes(attributes)

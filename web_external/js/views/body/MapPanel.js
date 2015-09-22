@@ -8,6 +8,43 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
+    _specifyWmsDatasetLayer: function (dataset, layer) {
+        var minervaMetadata = dataset.getMinervaMetadata();
+        var baseUrl = minervaMetadata.base_url;
+        var wmsParams = JSON.parse(minervaMetadata.wms_params);
+        var layerName = wmsParams.typeName;
+        // TODO: inclued projection in params ??
+        var projection = 'EPSG:3857';
+        layer.gcs(projection);
+        layer.tileUrl(
+            function (zoom, x, y) {
+                var xLowerLeft = geo.mercator.tilex2long(x, zoom);
+                var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
+                var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
+                var yUpperRight = geo.mercator.tiley2lat(y, zoom);
+
+                var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
+                var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
+                var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+                var params = {
+                    SERVICE: 'WMS',
+                    VERSION: '1.3.0',
+                    REQUEST: 'GetMap',
+                    LAYERS: layerName,
+                    STYLES: '',
+                    BBOX: bbox_mercator,
+                    WIDTH: 256,
+                    HEIGHT: 256,
+                    FORMAT: 'image/png',
+                    TRANSPARENT: true,
+                    SRS: projection,
+                    TILED: true
+                };
+                return baseUrl + '?' + $.param(params);
+            }
+        );
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -16,35 +53,65 @@ minerva.views.MapPanel = minerva.View.extend({
         // so for now it is commented out
         // this means we keep re-adding the ui layer each time a dataset is
         // added as a feature layer, which is even more of a HACK
-        if (!_.contains(this.datasets, dataset.id)) {
+        if (!_.contains(this.datasetLayers, dataset.id)) {
+            if (dataset.getDatasetType() === 'wms') {
+                var datasetId = dataset.id;
+                var layer = this.map.createLayer('osm');
+                this.datasetLayers[datasetId] = layer;
+                this._specifyWmsDatasetLayer(dataset, layer);
 
-            dataset.once('m:dataLoaded', function (datasetId) {
-                var dataset = this.collection.get(datasetId);
-                var layer = this.map.createLayer('feature');
+                this.legendWidget[datasetId] = new minerva.views.LegendWidget({
+                    el: $('.legend-container'),
+                    parentView: this,
+                    id: datasetId,
+                    legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
+                });
+                this.legendWidget[datasetId].render();
+                this.legendWidget[datasetId].show();
 
-                var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
-                this.datasets[datasetId] = layer;
+                // Add the UI slider back
+                this.uiLayer = this.map.createLayer('ui');
+                this.uiLayer.createWidget('slider');
+                this.map.draw();
+            } else {
+                // Assume the dataset provides a reader, so load the data
+                // and adapt the dataset to the map with the reader.
+                dataset.once('m:dataLoaded', function (datasetId) {
+                    // TODO: allow these datasets to specify a legend.
+                    var dataset = this.collection.get(datasetId);
+                    var layer = this.map.createLayer('feature');
 
-                layer.clear();
+                    var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
+                    this.datasetLayers[datasetId] = layer;
 
-                reader.read(dataset.fileData, _.bind(function () {
-                    this.uiLayer = this.map.createLayer('ui');
-                    this.uiLayer.createWidget('slider');
-                    this.map.draw();
-                }, this));
-            }, this);
+                    layer.clear();
 
-            dataset.loadData();
+                    reader.read(dataset.fileData, _.bind(function () {
+                        // Add the UI slider back
+                        this.uiLayer = this.map.createLayer('ui');
+                        this.uiLayer.createWidget('slider');
+                        this.map.draw();
+                    }, this));
+                }, this);
+
+                dataset.loadData();
+            }
         }
     },
 
     removeDataset: function (dataset) {
         var datasetId = dataset.id;
-        var layer = this.datasets[datasetId];
-        if (layer) {
+        var layer = this.datasetLayers[datasetId];
+        if (_.has(this.legendWidget, datasetId)) {
+            this.legendWidget[datasetId].remove(datasetId);
+            delete this.legendWidget[datasetId];
+        }
+        if (dataset.getDatasetType() === 'wms') {
+            this.map.deleteLayer(layer);
+        } else if (layer) {
             layer.clear();
             layer.draw();
-            delete this.datasets[datasetId];
+            delete this.datasetLayers[datasetId];
         }
     },
 
@@ -59,7 +126,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.map.center(this.session.sessionJsonContents.center);
             }
         });
-        this.datasets = {};
+        this.datasetLayers = {};
+        this.legendWidget = {};
     },
 
     renderMap: function () {
@@ -77,7 +145,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     render: function () {
-        this.$el.html(minerva.templates.mapPanel());
+        this.$el.html(minerva.templates.mapPanel({}));
         this.renderMap();
         var tooltipProperties = {
             placement: 'left',

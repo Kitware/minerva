@@ -2,6 +2,7 @@ minerva.views.DataPanel = minerva.View.extend({
     events: {
         'click .m-add-dataset-button': 'addDataSetDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
+        'click .show-wms-layers-list': 'showWmsLayersList',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .s3-bucket-menu': 'selectS3Files',
@@ -83,6 +84,7 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        this.wmsLayersListWidget = null;
         this.session = settings.session;
         this.upload = settings.upload;
         this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
@@ -132,5 +134,22 @@ minerva.views.DataPanel = minerva.View.extend({
             el: container,
             parentView: this
         }).render();
+    },
+
+    // Handling WMS layers list
+    showWmsLayersList: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        if (!this.wmsLayersListWidget) {
+            this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                collection: this.collection,
+                parentView: this
+            });
+            this.wmsLayersListWidget.render();
+        } else {
+            this.wmsLayersListWidget.render();
+        }
     }
 });
