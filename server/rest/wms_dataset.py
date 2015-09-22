@@ -33,7 +33,7 @@ class WmsDataset(Dataset):
         self.resourceName = 'minerva_dataset_wms'
         self.route('POST', (), self.createWmsDataset)
 
-    @access.public
+    @access.user
     @loadmodel(map={'wmsSourceId': 'wmsSource'}, model='item',
                level=AccessType.READ)
     def createWmsDataset(self, wmsSource, params):
