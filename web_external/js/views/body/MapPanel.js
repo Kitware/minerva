@@ -110,8 +110,8 @@ minerva.views.MapPanel = minerva.View.extend({
         } else if (layer) {
             layer.clear();
             layer.draw();
-            delete this.datasetLayers[datasetId];
         }
+        delete this.datasetLayers[datasetId];
     },
 
     initialize: function (settings) {
