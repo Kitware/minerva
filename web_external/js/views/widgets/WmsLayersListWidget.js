@@ -8,7 +8,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             e.preventDefault();
             var wmsSource = this.source;
 
-            $('input[type=checkbox]').each(_.bind(function (index, layer) {
+            this.$('form#m-add-layers-form :input.m-add-layers').each(_.bind(function (index, layer) {
                 if (layer.checked) {
                     var typeName = $(layer).attr('typeName');
                     var layerName = $(layer).attr('name');
@@ -21,7 +21,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
 
                     var wmsDataset = new minerva.models.WmsDatasetModel({});
 
-                    wmsDataset.on('m:wmsDatasetAdded', function () {
+                    wmsDataset.once('m:wmsDatasetAdded', function () {
                         this.$el.modal('hide');
                         this.collection.add(wmsDataset);
                     }, this).createWmsDataset(params);
@@ -41,6 +41,17 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         this.$el.modal('show');
         return this;
+    },
+
+    /**
+     * Change the current wmsSource whose layers will be displayed, and render.
+     *
+     * @param  wmsSource  The wmsSource to display.
+     */
+    setCurrentSource: function (wmsSource) {
+        this.source = wmsSource;
+        this.layers = this.source.getMinervaMetadata().layers;
+        this.render();
     }
 
 });

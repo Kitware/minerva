@@ -20,13 +20,17 @@ minerva.views.SourcePanel = minerva.View.extend({
     showWmsLayersList: function (evt) {
         var el = $(evt.currentTarget);
         var wmsSource = this.sourceCollection.get(el.attr('cid'));
-        var wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
-            el: $('#g-dialog-container'),
-            source: wmsSource,
-            collection: this.datasetCollection,
-            parentView: this
-        });
-        wmsLayersListWidget.render();
+        if (!this.wmsLayersListWidget) {
+            this.wmsLayersListWidget = new minerva.views.WmsLayersListWidget({
+                el: $('#g-dialog-container'),
+                source: wmsSource,
+                collection: this.datasetCollection,
+                parentView: this
+            });
+            this.wmsLayersListWidget.render();
+        } else {
+            this.wmsLayersListWidget.setCurrentSource(wmsSource);
+        }
     },
 
     displaySourceInfo: function (evt) {
