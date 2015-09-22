@@ -6,10 +6,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         files: null
     },
 
-    isWmsSource: function () {
-        return false;
-    },
-
     isRenderable: function () {
         // Really this function should be defined in each data model subclass,
         // OR - based on whether or not geoFileReader is defined (better because
