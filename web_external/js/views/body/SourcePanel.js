@@ -2,7 +2,7 @@ minerva.views.SourcePanel = minerva.View.extend({
 
     events: {
         'click .m-add-source': 'addSourceDialog',
-        'click .m-show-wms-layers-list': 'showWmsLayersList',
+        'click .m-display-wms-layers-list': 'displayWmsLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource'
     },
@@ -17,7 +17,7 @@ minerva.views.SourcePanel = minerva.View.extend({
         }).render();
     },
 
-    showWmsLayersList: function (evt) {
+    displayWmsLayersList: function (evt) {
         var el = $(evt.currentTarget);
         var wmsSource = this.sourceCollection.get(el.attr('cid'));
         if (!this.wmsLayersListWidget) {
