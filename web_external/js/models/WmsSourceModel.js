@@ -1,13 +1,5 @@
 minerva.models.WmsSourceModel = minerva.models.SourceModel.extend({
 
-    isRenderable: function () {
-        return false;
-    },
-
-    isWmsSource: function () {
-        return true;
-    },
-
     createSource: function (params) {
         girder.restRequest({
             path: '/minerva_source_wms',

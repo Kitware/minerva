@@ -77,7 +77,7 @@ class Source(Resource):
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getSourceFolder(self, user, params):
         folder = findSourceFolder(self.getCurrentUser(), user)
-        return folder
+        return {'folder': folder}
     getSourceFolder.description = (
         Description('Get the minerva source folder owned by a user.')
         .responseClass('Folder')
@@ -88,7 +88,7 @@ class Source(Resource):
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
     def createSourceFolder(self, user, params):
         folder = findSourceFolder(self.getCurrentUser(), user, create=True)
-        return folder
+        return {'folder': folder}
     createSourceFolder.description = (
         Description('Create the minerva source folder owned by a user.')
         .responseClass('Folder')

@@ -33,7 +33,7 @@ class WmsDataset(Dataset):
         self.resourceName = 'minerva_dataset_wms'
         self.route('POST', (), self.createWmsDataset)
 
-    @access.public
+    @access.user
     @loadmodel(map={'wmsSourceId': 'wmsSource'}, model='item',
                level=AccessType.READ)
     def createWmsDataset(self, wmsSource, params):
@@ -53,15 +53,13 @@ class WmsDataset(Dataset):
         response = conn.getresponse()
         legend = binascii.b2a_base64(response.read())
 
-        self.requireParams(('name', 'wmsParams'), params)
+        self.requireParams(('name'), params)
         name = params['name']
-        wmsParams = params['wmsParams']
         minerva_metadata = {
-            'original_type': 'wms',
             'dataset_type': 'wms',
             'legend': legend,
             'source_id': wmsSource['_id'],
-            'wms_params': wmsParams,
+            'type_name': typeName,
             'base_url': baseURL
         }
         dataset = self.constructDataset(name, minerva_metadata)
@@ -71,8 +69,6 @@ class WmsDataset(Dataset):
         .responseClass('Item')
         .param('name', 'The name of the wms source', required=True)
         .param('wmsSourceId', 'Item ID of the WMS Source', required=True)
-        .param('wmsParams', 'JSON object specifying WMS layer params',
-               required=True)
         .param('typeName', 'The type name of the WMS layer', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))

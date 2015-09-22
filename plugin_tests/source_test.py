@@ -72,7 +72,7 @@ class SourceTestCase(base.TestCase):
         }
         response = self.request(path=path, method='GET', params=params)
         self.assertStatusOk(response)
-        folder = response.json
+        folder = response.json['folder']
         self.assertEquals(folder, None)
 
         # create a source folder
@@ -83,7 +83,7 @@ class SourceTestCase(base.TestCase):
         response = self.request(path=path, method='POST', params=params, user=self._user)
 
         self.assertStatusOk(response)
-        folder = response.json
+        folder = response.json['folder']
         self.assertNotEquals(folder, None)
         self.assertEquals(folder['baseParentType'], 'user')
         self.assertEquals(folder['baseParentId'], str(self._user['_id']))
@@ -94,7 +94,7 @@ class SourceTestCase(base.TestCase):
         self.assertStatusOk(response)
         # response should be Null b/c we don't have permissions to see anything
         # TODO is it better to always make it private and just throw a 401 in this case ?
-        folder = response.json
+        folder = response.json['folder']
         self.assertEquals(folder, None)
 
         # get the folder passing in the user
@@ -102,7 +102,7 @@ class SourceTestCase(base.TestCase):
         response = self.request(path=path, method='GET', params=params, user=self._user)
 
         self.assertStatusOk(response)
-        folder = response.json
+        folder = response.json['folder']
         self.assertNotEquals(folder, None)
         self.assertEquals(folder['baseParentType'], 'user')
         self.assertEquals(folder['baseParentId'], str(self._user['_id']))

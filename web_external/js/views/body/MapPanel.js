@@ -11,8 +11,7 @@ minerva.views.MapPanel = minerva.View.extend({
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
-        var wmsParams = JSON.parse(minervaMetadata.wms_params);
-        var layerName = wmsParams.typeName;
+        var layerName = minervaMetadata.type_name;
         // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         layer.gcs(projection);
@@ -61,7 +60,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 this._specifyWmsDatasetLayer(dataset, layer);
 
                 this.legendWidget[datasetId] = new minerva.views.LegendWidget({
-                    el: $('.legend-container'),
+                    el: $('.m-map-legend-container'),
                     parentView: this,
                     id: datasetId,
                     legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
@@ -111,8 +110,8 @@ minerva.views.MapPanel = minerva.View.extend({
         } else if (layer) {
             layer.clear();
             layer.draw();
-            delete this.datasetLayers[datasetId];
         }
+        delete this.datasetLayers[datasetId];
     },
 
     initialize: function (settings) {
