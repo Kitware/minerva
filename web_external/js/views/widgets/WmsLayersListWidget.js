@@ -7,21 +7,16 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         'submit #m-add-layers-form': function (e) {
             e.preventDefault();
             var wmsSource = this.source;
-            var hostName = wmsSource.getMinervaMetadata().wms_params.hostName;
 
             $('input[type=checkbox]').each(_.bind(function (index, layer) {
                 if (layer.checked) {
                     var typeName = $(layer).attr('typeName');
                     var layerName = $(layer).attr('name');
-                    var wmsParams = {};
-                    wmsParams.typeName = typeName;
-                    wmsParams.hostName = hostName;
 
                     var params = {
                         typeName: typeName,
                         name: layerName,
-                        wmsSourceId: wmsSource.id,
-                        wmsParams: JSON.stringify(wmsParams)
+                        wmsSourceId: wmsSource.get('_id')
                     };
 
                     var wmsDataset = new minerva.models.WmsDatasetModel({});

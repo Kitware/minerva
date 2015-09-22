@@ -132,6 +132,6 @@ minerva.views.DataPanel = minerva.View.extend({
             el: container,
             parentView: this
         }).render();
-    },
+    }
 
 });

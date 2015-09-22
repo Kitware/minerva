@@ -39,6 +39,6 @@ minerva.views.AddSourceWidget = minerva.View.extend({
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
         return this;
-    },
+    }
 
 });

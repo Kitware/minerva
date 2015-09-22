@@ -11,8 +11,7 @@ minerva.views.MapPanel = minerva.View.extend({
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
-        var wmsParams = JSON.parse(minervaMetadata.wms_params);
-        var layerName = wmsParams.typeName;
+        var layerName = minervaMetadata.type_name;
         // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         layer.gcs(projection);

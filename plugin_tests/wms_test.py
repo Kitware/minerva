@@ -123,6 +123,9 @@ class WmsTestCase(base.TestCase):
         minerva_metadata = wmsDataset['meta']['minerva']
         self.assertEquals(wmsDataset['name'], name, 'incorrect wms dataset name')
         self.assertEquals(minerva_metadata['source_id'], wmsSource['_id'], 'incorrect wms source_id')
-        self.assertEquals(minerva_metadata['original_type'], 'wms', 'incorrect wms original type')
         self.assertEquals(minerva_metadata['dataset_type'], 'wms', 'incorrect wms dataset type')
         self.assertEquals(minerva_metadata['base_url'], wmsSource['meta']['minerva']['wms_params']['base_url'],'incorrect wms dataset baseURL')
+        self.assertEquals(minerva_metadata['type_name'], typeName, 'incorrect wms dataset typeName')
+        legend = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48U2VydmljZUV4Y2VwdGlvblJlcG9ydCB2ZXJzaW9uPSIxLjMuMCIgeG1sbnM9Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4c2k6c2NoZW1hTG9jYXRpb249Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIGh0dHA6Ly9kZW1vLmJvdW5kbGVzc2dlby5jb206ODAvZ2Vvc2VydmVyL3NjaGVtYXMvd21zLzEuMy4wL2V4Y2VwdGlvbnNfMV8zXzAueHNkIj4gICA8U2VydmljZUV4Y2VwdGlvbj4KICAgICAgQ2FuJmFwb3M7dCBvYnRhaW4gdGhlIHNjaGVtYSBmb3IgdGhlIHJlcXVpcmVkIGxheWVyLgpnZW9ub2RlOmdsb2JhbF90ZW1wIGxheWVyIGRvZXMgbm90IGV4aXN0Lgo8L1NlcnZpY2VFeGNlcHRpb24+PC9TZXJ2aWNlRXhjZXB0aW9uUmVwb3J0Pg==\n'
+        # TODO determine if legend is stable, if not, needs to be mocked
+        self.assertEquals(minerva_metadata['legend'], legend, 'incorrect wms dataset legend')
