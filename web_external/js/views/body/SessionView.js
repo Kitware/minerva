@@ -93,12 +93,6 @@ minerva.views.SessionView = minerva.View.extend({
             this._disableSave();
         });
 
-        this.dataPanel = new minerva.views.DataPanel({
-            session: this.model,
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
         this.mapPanel = new minerva.views.MapPanel({
             session: this.model,
             collection: this.datasetsCollection,
@@ -142,7 +136,6 @@ minerva.views.SessionView = minerva.View.extend({
                 }
             });
 
-            this.dataPanel.setElement(this.$('.dataPanel')).render();
             this.mapPanel.setElement(this.$('.mapPanel')).render();
             this.layersPanel.setElement(this.$('.layersPanel')).render();
             this.analysisPanel.setElement(this.$('.analysisPanel')).render();
