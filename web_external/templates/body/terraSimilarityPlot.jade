@@ -1,0 +1,14 @@
+.terraSimilarityPlot
+  .panelTitle
+        | Terra Similarity
+
+  #ts-analysis-overlay
+    #ts-analysis-overlay-options
+      form#ts-analysis-grouping
+        input(type="radio", name="grouping", value="monthly", checked="1")
+        | Monthly
+        input(type="radio", name="grouping", value="weekly")
+        | Weekly
+        input(type="radio", name="grouping", value="daily")
+        | Daily
+    .plot

@@ -9,10 +9,16 @@ minerva.views.TerraSimilarityWidget = minerva.View.extend({
             this.$('.g-validation-failed-message').text('');
             var location = this.$('#m-terra-similarity-input-location').val();
             var covars = $('#m-terra-similarity-input-covars').val().join('|');
-
-            this.fetchTimeSeriesData(location, covars);
-
             this.$el.modal('hide');
+
+            this.terraSimilarityPlot = new minerva.views.TerraSimilarityPlot({
+                el: '.terraSimilarityPlot',
+                model: new minerva.models.TSDatasetModel({
+                    location: location,
+                    covars: covars
+                }),
+                parentView: this
+            });
         }
     },
 
@@ -29,77 +35,6 @@ minerva.views.TerraSimilarityWidget = minerva.View.extend({
         });
 
         return covars;
-    },
-
-    fetchTimeSeriesData: function(location, covars) {
-        var _this = this;
-
-        $.ajax({
-            url: 'https://tempus-demo.ngrok.com/api/series',
-            data: {
-                table: 'escort_ads',
-                sort: 1,
-                response_col: 'price_per_hour',
-                group_col: 'msaname',
-                group: location
-            },
-            async: false,
-            dataType: 'json',
-            success: function(data) {
-                _this.tsData = [{
-                    label: 'raw',
-                    data: data.result
-                }];
-
-                $.ajax({
-                    url: 'https://tempus-demo.ngrok.com/api/comparison',
-                    data: {
-                        table: 'escort_ads',
-                        sort: 1,
-                        response_col: 'price_per_hour',
-                        group_col: 'msaname',
-                        group: location,
-                        covs: covars
-                    },
-                    async: false,
-                    dataType: 'json',
-                    success: function(compData) {
-                        var similarModels = [],
-                            tsData = _this.tsData;
-
-                        compData.groups = _.map(compData.groups, function(s) {
-                            return s.replace(/ MSA$/, '');
-                        });
-
-                        similarModels = _.map(compData.groups, function(group) {
-                            //return terra.msaCollection.get(group);
-                        });
-
-                        tsData.push({
-                            label: 'comp',
-                            groups: compData.groups,
-                            data: compData.result
-                        });
-
-                        _this.tsData = tsData;
-                        _this.similarModels = similarModels;
-                    }
-                });
-            }
-        });
-
-        // Postprocess data
-        var dateParser = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
-        _.each(this.tsData, function(dataset) {
-            dataset.data = _.map(dataset.data, function(datum) {
-                datum[0] = dateParser(datum[0]);
-
-                return {
-                    date: datum[0],
-                    value: datum[1]
-                };
-            });
-        });
     },
 
     render: function () {
