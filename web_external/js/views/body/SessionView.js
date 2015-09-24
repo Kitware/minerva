@@ -110,21 +110,10 @@ minerva.views.SessionView = minerva.View.extend({
             parentView: this
         });
 
-        this.jobsPanel = new minerva.views.JobsPanel({
-            parentView: this
-        });
-
         this.analysisPanel = new minerva.views.AnalysisPanel({
             parentView: this,
             collection: this.analysisCollection,
             datasetsCollection: this.datasetsCollection
-        });
-
-        this.sourcePanel = new minerva.views.SourcePanel({
-            session: this.model,
-            sourceCollection: this.sourceCollection,
-            datasetCollection: this.datasetsCollection,
-            parentView: this
         });
 
         this.render();
@@ -156,9 +145,7 @@ minerva.views.SessionView = minerva.View.extend({
             this.dataPanel.setElement(this.$('.dataPanel')).render();
             this.mapPanel.setElement(this.$('.mapPanel')).render();
             this.layersPanel.setElement(this.$('.layersPanel')).render();
-            this.jobsPanel.setElement(this.$('.jobsPanel')).render();
             this.analysisPanel.setElement(this.$('.analysisPanel')).render();
-            this.sourcePanel.setElement(this.$('.m-source-panel')).render();
 
         }, this));
 
