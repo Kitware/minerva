@@ -11,4 +11,16 @@
         | Weekly
         input(type="radio", name="grouping", value="daily")
         | Daily
+
+        input(type="text", name="daterangepicker")
+
+      if !similarMsas
+        span No similarity data found
+      else
+        span #{msa} is similar to:
+
+        ul
+          each msa in similarMsas
+            li= msa
+
     .plot

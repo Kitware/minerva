@@ -52,9 +52,28 @@ minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
         return grouper;
     },
 
+    // Gets the min/max date from the displayed time series data
+    dateExtent: function() {
+        var minDate, maxDate;
+
+        _.each(this.get('tsDisplayData'), function(dataset) {
+            _.each(dataset.data, function(datum) {
+                if (_.isUndefined(minDate) || datum.date < minDate) {
+                    minDate = datum.date;
+                }
+
+                if (_.isUndefined(maxDate) || datum.date > maxDate) {
+                    maxDate = datum.date;
+                }
+            });
+        });
+
+        return [minDate, maxDate];
+    },
+
     groupedBy: function(type, datasets) {
         var grouper = this._grouper(type);
-        datasets = datasets || _.map(this.get('tsData'), _.clone);
+        datasets = datasets || _.map(this.get('tsDisplayData'), _.clone);
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.map(d3.nest()
@@ -74,6 +93,25 @@ minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
         });
 
         this.set('tsDisplayData', datasets);
+    },
+
+    // @todo shouldn't groupby be optional?
+    spanningDate: function(start, end, groupBy) {
+        var datasets = _.map(this.get('tsData'), _.clone);
+
+        datasets = _.map(datasets, function(dataset) {
+            dataset.data = _.filter(dataset.data, function(datum) {
+                return start.toDate() <= datum.date && datum.date <= end.toDate();
+            });
+
+            return dataset;
+        });
+
+        // groupedBy takes datasets (or operates on tsData)
+        // Since grouping has to happen after filtering by time, pass it our now
+        // filtered data
+        this.set('tsDisplayData', datasets);
+        this.groupedBy(groupBy, datasets);
     },
 
     fetchTimeSeriesData: function() {
@@ -116,9 +154,7 @@ minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
                             return s.replace(/ MSA$/, '');
                         });
 
-                        similarModels = _.map(compData.groups, function(group) {
-                            //return terra.msaCollection.get(group);
-                        });
+                        similarModels = compData.groups;
 
                         tsData.push({
                             label: 'comp',

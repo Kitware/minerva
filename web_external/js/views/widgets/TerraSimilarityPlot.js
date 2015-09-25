@@ -8,10 +8,9 @@ minerva.views.TerraSimilarityPlot = minerva.View.extend({
         this.model = options.model;
         this.groupedBy = 'monthly';
         this.model.groupedBy(this.groupedBy);
-        this.$el.html(minerva.templates.terraSimilarityPlot());
-        this.render();
+        this.model.on('change:tsDisplayData', this.renderPlot, this);
 
-        this.model.on('change:tsDisplayData', this.render, this);
+        this.render();
     },
 
     changeGrouping: function (event) {
@@ -20,23 +19,25 @@ minerva.views.TerraSimilarityPlot = minerva.View.extend({
     },
 
     render: function () {
+        this.$el.html(minerva.templates.terraSimilarityPlot({
+            msa: this.model.get('location'),
+            similarMsas: this.model.get('similarModels')
+        }));
+        this.renderPlot();
+    },
 
-
+    renderPlot: function () {
+        var _this = this;
 
         if (!_.isEmpty(this.model.get('tsDisplayData'))) {
             // Setup group picker, time range picker
-            // this.$el.find('#ts-analysis-overlay-options').html(
-            //     _.template($('#ts-analysis-overlay-options-template').html())({
-            //         selected: this.groupedBy
-            // }));
-
-            // var dateExtent = this.model.dateExtent();
-            // this.dateRangePicker = $('#ts-analysis-overlay input[name="daterangepicker"]').daterangepicker({
-            //     startDate: dateExtent[0],
-            //     endDate: dateExtent[1]
-            // }, function(start, end) {
-            //     _this.model.spanningDate(start, end, _this.groupedBy);
-            // });
+            var dateExtent = this.model.dateExtent();
+            this.dateRangePicker = $('#ts-analysis-overlay input[name="daterangepicker"]').daterangepicker({
+                startDate: dateExtent[0],
+                endDate: dateExtent[1]
+            }, function(start, end) {
+                _this.model.spanningDate(start, end, _this.groupedBy);
+            });
 
             // Draw (or redraw) graph
             if (_.isFunction(this.redraw)) {
