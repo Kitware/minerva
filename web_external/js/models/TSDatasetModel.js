@@ -1,55 +1,11 @@
-minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
+minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
     initialize: function (options) {
         this.set('location', options.location);
         this.set('covars', options.covars);
 
         this.fetchTimeSeriesData();
 
-        this.set('tsDisplayData', _.map(this.get('tsData'), _.clone));
-    },
-
-    _grouper: function(groupBy) {
-        // Defaults to group by month
-        var grouper = {
-            keyFunc: function(d) {
-                return new Date(d.date.getUTCFullYear(), d.date.getUTCMonth());
-            },
-            dateToKeyFunc: function(d) {
-                return new Date(d);
-            }
-        };
-
-        if (groupBy === 'yearly') {
-            grouper.keyFunc = function(d) {
-                return d.date.getUTCFullYear();
-            };
-
-            grouper.dateToKeyFunc = function(d) {
-                return new Date(d, 0);
-            };
-        } else if (groupBy === 'weekly') {
-            grouper.keyFunc = function(d) {
-                return [d.date.getUTCFullYear(), d3.time.format("%U")(d.date)];
-            };
-
-            grouper.dateToKeyFunc = function(d) {
-                // d3 can not parse the week number without the day of week,
-                // so we always pass 0 as the day of week.
-                // see https://github.com/mbostock/d3/issues/1914
-                d += ",0";
-                return d3.time.format("%Y,%U,%w").parse(d);
-            };
-        } else if (groupBy === 'daily') {
-            grouper.keyFunc = function(d) {
-                return new Date(d.date.getUTCFullYear(), d.date.getUTCMonth(), d.date.getUTCDate());
-            };
-
-            grouper.dateToKeyFunc = function(d) {
-                return new Date(d);
-            };
-        }
-
-        return grouper;
+        this.set('tsDisplayData', JSON.parse(JSON.stringify(this.get('tsData'))));
     },
 
     // Gets the min/max date from the displayed time series data
@@ -73,7 +29,7 @@ minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
 
     groupedBy: function(type, datasets) {
         var grouper = this._grouper(type);
-        datasets = datasets || _.map(this.get('tsDisplayData'), _.clone);
+        datasets = datasets || JSON.parse(JSON.stringify(this.get('tsDisplayData')));
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.map(d3.nest()
@@ -97,7 +53,7 @@ minerva.models.TSDatasetModel = minerva.models.DatasetModel.extend({
 
     // @todo shouldn't groupby be optional?
     spanningDate: function(start, end, groupBy) {
-        var datasets = _.map(this.get('tsData'), _.clone);
+        var datasets = JSON.parse(JSON.stringify(this.get('tsData')));
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.filter(dataset.data, function(datum) {

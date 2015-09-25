@@ -1,0 +1,14 @@
+.terraDiffInDiffPlot
+  .panelTitle
+        | Terra Diff In Diff
+
+  #dd-analysis-overlay
+    #dd-analysis-overlay-options
+      form#dd-analysis-grouping
+        input(type="radio", name="grouping", value="yearly", checked="1")
+        | Yearly
+        input(type="radio", name="grouping", value="monthly")
+        | Monthly
+        input(type="radio", name="grouping", value="daily")
+        | Daily
+    .plot

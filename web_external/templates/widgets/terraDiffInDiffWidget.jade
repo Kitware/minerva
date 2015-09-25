@@ -1,0 +1,27 @@
+.modal-dialog
+  .modal-content
+    form#m-terra-diff-in-diff-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Diff in Diff Analysis
+        .modal-body
+          .form-group.m-terra-diff-in-diff-input-dataset
+            label.control-label(for="m-terra-diff-in-diff-input-location") Target
+            select.form-control.input-sm#m-terra-diff-in-diff-input-location
+              each location in locations
+                  option(value=location) #{location}
+
+            label.control-label(for="m-terra-diff-in-diff-input-comparison-locations") Comparison
+            select.form-control.input-sm#m-terra-diff-in-diff-input-comparison-locations(multiple="multiple", name="comparison-locations")
+              each location in locations
+                  option(value=location) #{location}
+
+            label.control-label(for="m-terra-diff-in-diff-event-date") Event Date
+            input(type="text", name="daterangepicker")
+            .g-validation-failed-message
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-run-terra-diff-in-diff.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run

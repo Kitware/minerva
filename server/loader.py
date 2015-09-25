@@ -61,6 +61,8 @@ class CustomAppRoot(object):
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
         <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/minerva/c3.min.css">
+        <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
         % for plugin in pluginCss:
             <link rel="stylesheet"
@@ -102,6 +104,8 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/c3.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
