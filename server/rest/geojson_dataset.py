@@ -33,13 +33,10 @@ class GeojsonDataset(Dataset):
         self.resourceName = 'minerva_dataset_geojson'
         self.route('POST', (), self.createGeojsonDataset)
 
-    @access.public
+    @access.user
     @loadmodel(map={'itemId': 'item'}, model='item',
                level=AccessType.WRITE)
     def createGeojsonDataset(self, item, params):
-        # TESTS:
-        # create one with an item in the wrong folder
-        # create one with an item without a geojson
         user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
