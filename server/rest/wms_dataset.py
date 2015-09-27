@@ -80,7 +80,7 @@ class WmsDataset(Dataset):
     createWmsDataset.description = (
         Description('Create a WMS Dataset from a WMS Source.')
         .responseClass('Item')
-        .param('name', 'The name of the wms source', required=True)
+        .param('name', 'The name of the wms dataset', required=True)
         .param('wmsSourceId', 'Item ID of the WMS Source', required=True)
         .param('typeName', 'The type name of the WMS layer', required=True)
         .errorResponse('ID was invalid.')
