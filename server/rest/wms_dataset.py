@@ -43,7 +43,6 @@ class WmsDataset(Dataset):
         # Legend to be included in the metadata?
         baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
-        hostName = parsedUrl.netloc
         typeName = params['typeName']
 
         if 'credentials' in wmsSource['meta']['minerva']['wms_params']:
