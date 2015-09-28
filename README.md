@@ -20,6 +20,12 @@ will already be satisfied.
 - curl -sL https://deb.nodesource.com/setup | sudo bash -
 - sudo apt-get install nodejs
 
+##### Fedora 22
+
+- sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-devel geos-devel gdal-devel netcdf-devel hdf5-devel
+- See [installing mongo on Red Hat](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-red-hat/#install-mongodb)
+- See [installing node.js on Red Hat](https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora)
+
 #### Install of Minerva as a Girder plugin
 
 - clone Minerva into the Girder plugins dir
