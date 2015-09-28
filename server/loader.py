@@ -20,13 +20,16 @@
 import mako
 import json
 import os
-
+import requests
+import cherrypy
+from base64 import b64encode
 from girder import constants, events
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
         wms_dataset, wms_source
+from girder.plugins.minerva.constants import PluginSettings
 
 
 class CustomAppRoot(object):
@@ -138,6 +141,20 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         return self.indexHtml
 
 
+class WmsProxy(object):
+    exposed = True
+
+    def GET(self, url, credentials, **params):
+        from cryptography.fernet import Fernet
+        key = PluginSettings.CRYPTO_KEY
+        f = Fernet(key)
+        credentials = 'Basic ' + b64encode(f.decrypt(bytes(credentials)))
+        headers = {'Authorization': credentials}
+        r = requests.get(url, params=params, headers=headers)
+        cherrypy.response.headers['Content-Type'] = r.headers['content-type']
+        return r.content
+
+
 def validate_settings(event):
     """Validate minerva specific settings."""
     key = event.info['key']
@@ -175,3 +192,4 @@ def load(info):
     info['apiRoot'].minerva_source = source.Source()
     info['apiRoot'].minerva_source_wms = wms_source.WmsSource()
     info['apiRoot'].minerva_dataset_wms = wms_dataset.WmsDataset()
+    info['serverRoot'].wms_proxy = WmsProxy()
