@@ -13,12 +13,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         // but to do that we would have to be persisting geoFileReader to the server
         // which would require some things being rearranged.
 
-        // For now we know that if original_type is 'json' its ACTUALLY contour json,
-        // and if its'geojson'  its actually geojson - and for now these are the only
-        // two renderable data types.
-        return this.getMinervaMetadata().original_type === 'json' ||
-            this.getMinervaMetadata().original_type === 'geojson' ||
-            this.getMinervaMetadata().original_type === 'shapefile';
+        // For now we know that if original_type is 'json' it's ACTUALLY contour json,
+        // which is the only renderable type of DatasetModel.
+        return this.getMinervaMetadata().original_type === 'json';
     },
 
     createDataset: function () {
@@ -318,21 +315,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     loadGeoJsonData: function () {
         if (this.geoJsonAvailable) {
             var minervaMeta = this.getMinervaMetadata();
-            if (minervaMeta.geojson_file) {
-                // just download from the endpoint
-                $.ajax({
-                    url: girder.apiRoot + '/file/' + minervaMeta.geojson_file._id + '/download',
-                    contentType: 'application/json',
-                    success: _.bind(function (data) {
-                        this.fileData = data;
-                        this.geoFileReader = 'jsonReader';
-                    }, this),
-                    complete: _.bind(function () {
-                        this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-                        this.trigger('m:dataLoaded', this.get('_id'));
-                    }, this)
-                });
-            } else if (minervaMeta.original_type === 'mongo') {
+            if (minervaMeta.original_type === 'mongo') {
                 // TODO search params
                 // if mongo, we'll need to pass down some search params to a new
                 // endpoint that will pull out of mongo and convert into geojson
