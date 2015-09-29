@@ -25,6 +25,7 @@ from girder.api.rest import getUrlParts
 from owslib.wms import WebMapService
 
 from girder.plugins.minerva.rest.source import Source
+from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 
 class WmsSource(Source):
@@ -62,6 +63,10 @@ class WmsSource(Source):
                 'host_name': hostName
             }
         }
+        if username and password:
+            credentials = encryptCredentials("{}:{}".format(
+                username, password))
+            minerva_metadata['wms_params']['credentials'] = credentials
         desc = 'wms source for  %s' % name
         return self.createSource(name, minerva_metadata, desc)
     createWmsSource.description = (

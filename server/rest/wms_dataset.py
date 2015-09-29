@@ -16,6 +16,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
+from base64 import b64encode
 import httplib
 import binascii
 from girder.api import access
@@ -25,6 +26,7 @@ from girder.api.rest import getUrlParts
 from girder.constants import AccessType
 
 from girder.plugins.minerva.rest.dataset import Dataset
+from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
 class WmsDataset(Dataset):
@@ -37,18 +39,27 @@ class WmsDataset(Dataset):
     @loadmodel(map={'wmsSourceId': 'wmsSource'}, model='item',
                level=AccessType.READ)
     def createWmsDataset(self, wmsSource, params):
-        # Get layer legend (TODO// Include authentication in the future)
-        # Legend to be included in the metadata?
         baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
-        hostName = parsedUrl.netloc
         typeName = params['typeName']
-        conn = httplib.HTTPConnection(hostName)
+
+        if 'credentials' in wmsSource['meta']['minerva']['wms_params']:
+            credentials = (
+                wmsSource['meta']['minerva']['wms_params']['credentials']
+            )
+            basic_auth = 'Basic ' + b64encode(decryptCredentials(credentials))
+            headers = {'Authorization': basic_auth}
+        else:
+            headers = {}
+            credentials = None
+
+        conn = httplib.HTTPConnection(parsedUrl.netloc)
         conn.request("GET",
-                     "/geoserver/ows?service=WMS&request=" +
+                     parsedUrl.path +
+                     "?service=WMS&request=" +
                      "GetLegendGraphic&format=image" +
                      "%2Fpng&width=20&height=20&layer=" +
-                     typeName
+                     typeName, headers=headers
                      )
         response = conn.getresponse()
         legend = binascii.b2a_base64(response.read())
@@ -62,6 +73,8 @@ class WmsDataset(Dataset):
             'type_name': typeName,
             'base_url': baseURL
         }
+        if credentials:
+            minerva_metadata['credentials'] = credentials
         dataset = self.constructDataset(name, minerva_metadata)
         return dataset
     createWmsDataset.description = (

@@ -16,7 +16,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-
+from cryptography.fernet import Fernet
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.constants import PluginSettings
@@ -126,3 +126,15 @@ def updateMinervaMetadata(item, minerva_metadata):
     item['meta']['minerva'] = minerva_metadata
     ModelImporter.model('item').setMetadata(item, item['meta'])
     return item['meta']['minerva']
+
+
+def decryptCredentials(credentials):
+    key = PluginSettings.CRYPTO_KEY
+    f = Fernet(key)
+    return f.decrypt(bytes(credentials))
+
+
+def encryptCredentials(credentials):
+    key = PluginSettings.CRYPTO_KEY
+    f = Fernet(key)
+    return f.encrypt(bytes(credentials))
