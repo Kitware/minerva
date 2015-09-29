@@ -16,7 +16,6 @@ minerva.views.MapPanel = minerva.View.extend({
                     minervaMetadata.credentials;
         }
         var layerName = minervaMetadata.type_name;
-        // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         layer.gcs(projection);
         layer.tileUrl(

@@ -39,8 +39,6 @@ class WmsDataset(Dataset):
     @loadmodel(map={'wmsSourceId': 'wmsSource'}, model='item',
                level=AccessType.READ)
     def createWmsDataset(self, wmsSource, params):
-        # Get layer legend (TODO// Include authentication in the future)
-        # Legend to be included in the metadata?
         baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
