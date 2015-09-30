@@ -46,6 +46,16 @@ sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-
 
     grunt
 
+- change the encrypt_key value in Minerva's `minerva.dist.cfg` file, located in the server/conf directory.
+The key needs to be a 32 byte url-safe base-64 encoded string.  You can either replace the existing string
+with one of equal length, using letters and numbers, and ending with an '=', or generate one within python
+with the following code::
+
+```
+from cryptography.fernet import Fernet
+Fernet.generate_key()
+```
+
 - enable the Minerva plugin through the Girder Admin console
 - restart Girder through the Girder Admin console
 
