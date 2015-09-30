@@ -16,8 +16,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-
 import loader
+import os
+from girder.utility.config import _mergeConfig
+
+PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Read the configuration files
+_cfgs = ('minerva.dist.cfg', 'minerva.local.cfg')
+for f in _cfgs:
+    _mergeConfig(os.path.join(PACKAGE_DIR, 'conf', f))
 
 def load(info):
     loader.load(info)
