@@ -11,18 +11,23 @@ Assumes you have a running version of Girder.
 This includes all system dependencies necessary for running Girder.  So if you have a running Girder installation, many of these
 will already be satisfied.
 
-- sudo apt-get update
-- sudo apt-get install curl g++ git libffi-dev make python-dev python-pip libfreetype6-dev libpng12-dev pkg-config libgdal-dev
-- sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-- echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'     | sudo tee /etc/apt/sources.list.d/mongodb.list
-- sudo apt-get update
-- sudo apt-get install mongodb-org-server
-- curl -sL https://deb.nodesource.com/setup | sudo bash -
-- sudo apt-get install nodejs
+```
+sudo apt-get update
+sudo apt-get install curl g++ git libffi-dev make python-dev python-pip libfreetype6-dev libpng12-dev pkg-config libgdal-dev
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'     | sudo tee /etc/apt/sources.list.d/mongodb.list
+sudo apt-get update
+sudo apt-get install mongodb-org-server
+curl -sL https://deb.nodesource.com/setup | sudo bash -
+sudo apt-get install nodejs
+```
 
 ##### Fedora 22
 
-- sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-devel geos-devel gdal-devel netcdf-devel hdf5-devel
+```
+sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-devel geos-devel gdal-devel netcdf-devel hdf5-devel
+```
+
 - See [installing mongo on Red Hat](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-red-hat/#install-mongodb)
 - See [installing node.js on Red Hat](https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora)
 
