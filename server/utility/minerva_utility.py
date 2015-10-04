@@ -131,13 +131,13 @@ def updateMinervaMetadata(item, minerva_metadata):
 
 def decryptCredentials(credentials):
     cur_config = config.getConfig()
-    key = cur_config['auth']['crypto_key']
+    key = cur_config['minerva']['crypto_key']
     f = Fernet(key)
     return f.decrypt(bytes(credentials))
 
 
 def encryptCredentials(credentials):
     cur_config = config.getConfig()
-    key = cur_config['auth']['crypto_key']
+    key = cur_config['minerva']['crypto_key']
     f = Fernet(key)
     return f.encrypt(bytes(credentials))
