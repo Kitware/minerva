@@ -11,8 +11,7 @@ from girder.utility.model_importer import ModelImporter
 from girder.plugins.jobs.constants import JobStatus
 from girder.plugins.minerva.utility.bsve.bsve_utility import BsveUtility
 from girder.plugins.minerva.utility.dataset_utility import \
-    jsonArrayHead
-
+    jsonArrayHead, GeoJsonMapper, jsonObjectReader
 
 import girder_client
 
@@ -87,6 +86,40 @@ def run(job):
 
         jsonRow = jsonArrayHead(humanFilepath, limit=1)[0]
         minerva_metadata['json_row'] = jsonRow
+
+        # Generate the geojson for this dataset and set
+        # dataset_type = geojson
+
+        geojsonFilename = 'search.geojson'
+        geojsonFilepath = os.path.join(tmpdir, geojsonFilename)
+
+        mapping = {
+            "dateKeypath": "",
+            "latitudeKeypath": "data.Latitude",
+            "longitudeKeypath": "data.Longitude"
+        }
+
+        geojsonMapper = GeoJsonMapper(objConverter=None, mapping=mapping)
+        objects = jsonObjectReader(humanFilepath)
+        geojsonMapper.mapToJsonFile(tmpdir, objects, geojsonFilepath)
+
+        client.uploadFileToItem(datasetId, geojsonFilepath)
+
+        minerva_metadata['mapper'] = mapping
+        minerva_metadata['dataset_type'] = 'geojson'
+
+        existing = file_model.findOne({
+            'itemId': dataset['_id'],
+            'name': geojsonFilename
+        })
+        if existing:
+            minerva_metadata['geojson_file'] = {
+                '_id': existing['_id'],
+                'name': geojsonFilename
+            }
+        else:
+            raise (Exception('Cannot find file %s in dataset %s' %
+                   (geojsonFilename, datasetId)))
 
         shutil.rmtree(tmpdir)
 
