@@ -23,7 +23,7 @@ minerva.views.PointRenderWidget = minerva.View.extend({
             this.$el.modal('hide');
         },
 
-        'change .m-points-render-mode': function (e) {
+        'change .m-points-render-mode': function () {
             var renderMode = $('input:radio:checked.m-points-render-mode').attr('id');
             if (renderMode === 'm-display-points-separate') {
                 this.$('#m-cluster-colors').hide();

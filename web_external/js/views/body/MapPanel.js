@@ -49,7 +49,7 @@ minerva.views.MapPanel = minerva.View.extend({
 
     // TODO this is not general enough, should be considered technical debt
     // probably should be moved to some specific geojson rendering helper
-    _geojsonSpecializedRendering: function(dataset, layer) {
+    _geojsonSpecializedRendering: function (dataset, layer) {
         var features = (JSON.parse(dataset.fileData)).features;
         var points = layer.createFeature('point');
 
@@ -62,16 +62,16 @@ minerva.views.MapPanel = minerva.View.extend({
 
         // TODO centralize definitions of color schemes, currently repeated
         var colorRanges = {
-            'YlGnBu': ['#a1dab4', '#41b6c4', '#2c7fb8', '#253494'],
-            'YlGn': ['#c2e699', '#78c679', '#31a354', '#006837'],
-            'YlOrBr': ['#fed98e', '#fe9929', '#d95f0e', '#993404']
+            YlGnBu: ['#a1dab4', '#41b6c4', '#2c7fb8', '#253494'],
+            YlGn: ['#c2e699', '#78c679', '#31a354', '#006837'],
+            YlOrBr: ['#fed98e', '#fe9929', '#d95f0e', '#993404']
         };
         // TODO should be some specific geojson rendering properties managed
         // perhaps by the geojson dataset, though they determine the view
         var minervaMetadata = dataset.getMinervaMetadata();
         var colorScheme;
         if (!minervaMetadata.geojson_file.color_scheme) {
-            colorScheme = colorRanges['YlGnBu'];
+            colorScheme = colorRanges.YlGnBu;
         } else {
             colorScheme = colorRanges[minervaMetadata.geojson_file.color_scheme];
         }
@@ -170,7 +170,7 @@ minerva.views.MapPanel = minerva.View.extend({
                         this.uiLayer = this.map.createLayer('ui');
                         this.uiLayer.createWidget('slider');
                         this.map.draw();
-                     } else {
+                    } else {
                         var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
                         reader.read(dataset.fileData, _.bind(function () {
                             // Add the UI slider back

@@ -87,7 +87,7 @@ minerva.views.DataPanel = minerva.View.extend({
         var datasetId = $(evt.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         if (!this.pointRenderWidget) {
-           this.pointRenderWidget = new minerva.views.PointRenderWidget({
+            this.pointRenderWidget = new minerva.views.PointRenderWidget({
                 el: $('#g-dialog-container'),
                 dataset: dataset,
                 parentView: this
