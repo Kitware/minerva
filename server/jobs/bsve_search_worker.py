@@ -115,7 +115,9 @@ def run(job):
         if existing:
             minerva_metadata['geojson_file'] = {
                 '_id': existing['_id'],
-                'name': geojsonFilename
+                'name': geojsonFilename,
+                'feature_type': 'points',
+                'render_type': 'point'
             }
         else:
             raise (Exception('Cannot find file %s in dataset %s' %
