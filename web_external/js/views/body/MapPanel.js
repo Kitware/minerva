@@ -47,6 +47,81 @@ minerva.views.MapPanel = minerva.View.extend({
         );
     },
 
+    // TODO this is not general enough, should be considered technical debt
+    // probably should be moved to some specific geojson rendering helper
+    _geojsonSpecializedRendering: function(dataset, layer) {
+        var features = (JSON.parse(dataset.fileData)).features;
+        var points = layer.createFeature('point');
+
+        function radius(d) {
+            if (d.__cluster) {
+                return 6 + Math.ceil(Math.sqrt(2 * d.__data.length));
+            }
+            return 4;
+        }
+
+        // TODO centralize definitions of color schemes, currently repeated
+        var colorRanges = {
+            'YlGnBu': ['#a1dab4', '#41b6c4', '#2c7fb8', '#253494'],
+            'YlGn': ['#c2e699', '#78c679', '#31a354', '#006837'],
+            'YlOrBr': ['#fed98e', '#fe9929', '#d95f0e', '#993404']
+        };
+        // TODO should be some specific geojson rendering properties managed
+        // perhaps by the geojson dataset, though they determine the view
+        var minervaMetadata = dataset.getMinervaMetadata();
+        var colorScheme;
+        if (!minervaMetadata.geojson_file.color_scheme) {
+            colorScheme = colorRanges['YlGnBu'];
+        } else {
+            colorScheme = colorRanges[minervaMetadata.geojson_file.color_scheme];
+        }
+
+        function fillColor(d) {
+            var i = 0, sum = 0;
+            if (d.__cluster) {
+                for (i = 0; i < d.__data.length; i += 1) {
+                    sum += 1;
+                }
+                if (sum > 20) {
+                    return colorScheme[3];
+                } else if (sum > 5) {
+                    return colorScheme[2];
+                } else {
+                    return colorScheme[1];
+                }
+            } else {
+                return colorScheme[0];
+            }
+        }
+
+        function strokeColor(d) {
+            if (d.__cluster) {
+                return 'black';
+            } else {
+                return 'white';
+            }
+        }
+
+        points
+        .clustering({radius: 0.015})
+        .position(function (d) {
+            if (d.__cluster) {
+                return {x:d.x, y:d.y};
+            }
+            return {
+                x: d.geometry.coordinates[0],
+                y: d.geometry.coordinates[1]
+            };
+        }).style('radius', radius)
+            .style('fillColor', fillColor)
+            .style('strokeColor', strokeColor)
+            .data(features);
+
+        this.uiLayer = this.map.createLayer('ui');
+        this.uiLayer.createWidget('slider');
+        this.map.draw();
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -82,18 +157,28 @@ minerva.views.MapPanel = minerva.View.extend({
                     // TODO: allow these datasets to specify a legend.
                     var dataset = this.collection.get(datasetId);
                     var layer = this.map.createLayer('feature');
-
-                    var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
+                    layer.clear();
                     this.datasetLayers[datasetId] = layer;
 
-                    layer.clear();
-
-                    reader.read(dataset.fileData, _.bind(function () {
-                        // Add the UI slider back
+                    var cluster = (dataset.getMinervaMetadata().geojson_file &&
+                                   dataset.getMinervaMetadata().geojson_file.render_type &&
+                                   dataset.getMinervaMetadata().geojson_file.render_type === 'cluster');
+                    if (dataset.getDatasetType() === 'geojson' &&
+                        dataset.requireSpecializedRendering() &&
+                        cluster) {
+                        this._geojsonSpecializedRendering(dataset, layer);
                         this.uiLayer = this.map.createLayer('ui');
                         this.uiLayer.createWidget('slider');
                         this.map.draw();
-                    }, this));
+                     } else {
+                        var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
+                        reader.read(dataset.fileData, _.bind(function () {
+                            // Add the UI slider back
+                            this.uiLayer = this.map.createLayer('ui');
+                            this.uiLayer.createWidget('slider');
+                            this.map.draw();
+                        }, this));
+                    }
                 }, this);
 
                 dataset.loadData();
