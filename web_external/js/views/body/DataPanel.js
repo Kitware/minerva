@@ -5,7 +5,8 @@ minerva.views.DataPanel = minerva.View.extend({
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .s3-bucket-menu': 'selectS3Files',
-        'click .dataset-info': 'displayDatasetInfo'
+        'click .dataset-info': 'displayDatasetInfo',
+        'click .dataset-colormap': 'setPointRendering'
     },
 
     selectS3Files: function (event) {
@@ -80,6 +81,21 @@ minerva.views.DataPanel = minerva.View.extend({
             parentView: this
         });
         this.datasetInfoWidget.render();
+    },
+
+    setPointRendering: function (evt) {
+        var datasetId = $(evt.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        if (!this.pointRenderWidget) {
+           this.pointRenderWidget = new minerva.views.PointRenderWidget({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                parentView: this
+            });
+            this.pointRenderWidget.render();
+        } else {
+            this.pointRenderWidget.setCurrentDataset(dataset);
+        }
     },
 
     initialize: function (settings) {

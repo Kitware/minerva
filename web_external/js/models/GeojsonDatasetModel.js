@@ -4,6 +4,12 @@ minerva.models.GeojsonDatasetModel = minerva.models.DatasetModel.extend({
         return true;
     },
 
+    requireSpecializedRendering: function () {
+        var minervaMeta = this.getMinervaMetadata();
+        return (minervaMeta.geojson_file &&
+                minervaMeta.geojson_file.feature_type === 'points');
+    },
+
     createGeojsonDataset: function (params) {
         girder.restRequest({
             path: '/minerva_dataset_geojson',
