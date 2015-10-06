@@ -1,0 +1,36 @@
+.modal-dialog
+  .modal-content
+    form#m-point-render-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Point feature rendering options
+      .modal-body
+        .form-group
+          .radio
+            input.m-points-render-mode#m-display-points-separate(type="radio", name="m-display-points", checked=!cluster)
+            label
+              i.icon-unlink
+              | Individual points
+          .radio
+            input.m-points-render-mode#m-display-points-clustered(type="radio", name="m-display-points", checked=cluster)
+            label
+              i.icon-link
+              | Clustered
+
+        #m-cluster-colors
+            h5.modal-title
+                | Cluster color scheme
+                .form-group
+                    each colorRange, id in colorRanges
+                        .m-cluster-color-radio.radio
+                            input.m-cluster-color-scheme(type="radio", id=id, name="m-display-colors", checked=(id === clusterColor))
+                            label(style="margin-left: 20px")
+                                each color in colorRange
+                                    span.m-cluster-color-range(style="background: #{color};")
+                            
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-point-render-button.btn.btn-small.btn-primary
+            i.icon-check
+            | Save
