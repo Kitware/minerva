@@ -46,7 +46,7 @@ minerva.views.SessionsView = minerva.View.extend({
     render: function () {
         this.$el.html(minerva.templates.sessionList({
             sessions: this.collection.models,
-            admin: !!(girder.currentUser && girder.currentUser.get('admin'))
+            currentUser: girder.currentUser
         }));
 
         this.paginateWidget.setElement(this.$('.m-session-pagination')).render();
