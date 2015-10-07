@@ -197,7 +197,7 @@ module.exports = function (grunt) {
                 '/' + rootStaticLibDir + '/fontello/css/fontello.css',
                 '/' + rootStaticLibDir + '/fontello/css/animation.css',
                 '/' + staticDir + '/jquery.gridster.min.css',
-                '/' + pluginDir + '/node_modules/c3/c3.css',
+                '/' + staticDir + '/c3.min.css',
                 '/' + rootStaticDir + '/app.min.css',
                 'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
                 'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
