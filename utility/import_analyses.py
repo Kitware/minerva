@@ -1,6 +1,6 @@
 import os
 import json
-#import glob
+import ConfigParser
 import argparse
 import romanesco
 
@@ -36,6 +36,21 @@ def import_analyses(client, analyses_path):
             # set the analysis_type based on folder name
             minerva_metadata['analysis_type'] = analysis_path.split('/')[-1]
             minerva_metadata['analysis_name'] = analysis_name
+
+            if os.path.exists(os.path.join(analysis_path, 'analysis.cfg')):
+                config = ConfigParser.ConfigParser()
+                config.read(os.path.join(analysis_path, 'analysis.cfg'))
+
+                for task_input in analysis['inputs']:
+                    try:
+                        default = config.get('inputs', task_input['name'])
+                    except ConfigParser.NoOptionError:
+                        continue
+
+                    task_input['default'] = {
+                        'format': task_input['format'],
+                        'data': default
+                    }
         else:
             # look for a minerva.json
             minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
