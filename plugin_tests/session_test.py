@@ -52,6 +52,9 @@ class SessionTestCase(base.TestCase):
         self._user = self.model('user').createUser(
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
+        self._nonAdminUser = self.model('user').createUser(
+            'nonadmin', 'password', 'minerva', 'user',
+            'nonadmin@example.com')
 
 
     def testSession(self):
@@ -130,3 +133,20 @@ class SessionTestCase(base.TestCase):
         sessionIds = [d['_id'] for d in response.json]
         self.assertTrue(item1Id in sessionIds, "expected item1Id in sessions")
         self.assertTrue(item2Id in sessionIds, "expected item2Id in sessions")
+
+        # Test getting the session folder for a non admin user, which should create the folder.
+
+        path = '/minerva_session/folder'
+        params = {
+            'userId': self._nonAdminUser['_id'],
+        }
+        response = self.request(path=path, method='GET', params=params, user=self._nonAdminUser)
+        self.assertStatusOk(response)
+
+        # Test listing the session folder for a non admin user.
+        path = '/minerva_session'
+        params = {
+            'userId': self._nonAdminUser['_id'],
+        }
+        response = self.request(path=path, method='GET', params=params, user=self._nonAdminUser)
+        self.assertStatusOk(response)
