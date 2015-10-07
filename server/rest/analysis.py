@@ -37,7 +37,7 @@ class Analysis(Resource):
 
     @access.user
     def getAnalysisFolder(self, params):
-        folder = findAnalysisFolder(self.getCurrentUser())
+        folder = findAnalysisFolder(self.getCurrentUser(), create=True)
         return {'folder': folder}
     getAnalysisFolder.description = (
         Description('Get the minerva analysis folder.'))

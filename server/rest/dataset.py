@@ -341,7 +341,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def listDatasets(self, user, params):
-        folder = findDatasetFolder(self.getCurrentUser(), user)
+        folder = findDatasetFolder(self.getCurrentUser(), user, create=True)
         if folder is None:
             return []
         else:
@@ -368,7 +368,7 @@ class Dataset(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getDatasetFolder(self, user, params):
-        folder = findDatasetFolder(self.getCurrentUser(), user)
+        folder = findDatasetFolder(self.getCurrentUser(), user, create=True)
         return {'folder': folder}
     getDatasetFolder.description = (
         Description('Get the minerva dataset folder owned by a user.')
