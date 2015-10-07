@@ -6,3 +6,4 @@ ijson==2.2.0
 geopy==1.10.0
 owslib==0.9.1
 -e git+https://github.com/Kitware/romanesco.git#egg=romanesco[spark]
+elasticsearch==1.7.0
