@@ -36,7 +36,7 @@ class Session(Resource):
         self.route('POST', ('folder',), self.createSessionFolder)
         self.route('GET', (':id', 'session'), self.getSessionJson)
 
-    @access.public
+    @access.user
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def listSessions(self, user, params):
         folder = findSessionFolder(self.getCurrentUser(), user)
@@ -63,7 +63,7 @@ class Session(Resource):
         .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
                required=False, dataType='int'))
 
-    @access.public
+    @access.user
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getSessionFolder(self, user, params):
         folder = findSessionFolder(self.getCurrentUser(), user)
@@ -73,7 +73,7 @@ class Session(Resource):
         .param('userId', 'User is the owner of minerva sessions.',
                required=True))
 
-    @access.public
+    @access.user
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.WRITE)
     def createSessionFolder(self, user, params):
         folder = findSessionFolder(self.getCurrentUser(), user, create=True)
@@ -83,7 +83,7 @@ class Session(Resource):
         .param('userId', 'User is the owner of minerva sessions.',
                required=True))
 
-    @access.public
+    @access.user
     @loadmodel(model='item', level=AccessType.READ)
     def getSessionJson(self, item, params):
         itemSessionJson = PluginSettings.SESSION_FILENAME
