@@ -22,8 +22,23 @@ minerva.views.LayersPanel = minerva.View.extend({
         var displayedDatasets = _.filter(this.collection.models, function (dataset) {
             return dataset.get('displayed');
         });
+
+        // TODO technical debt centralize color schemes
+        // YlGnBu
+        var colorRange = ['#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
+        // YlGn
+        var colorRange2 = ['#c2e699', '#78c679', '#31a354', '#006837'];
+        // YlOrBr
+        var colorRange3 = ['#fed98e', '#fe9929', '#d95f0e', '#993404'];
+        var colorRanges = {
+            'YlGnBu': colorRange,
+            'YlGn': colorRange2,
+            'YlOrBr': colorRange3
+        };
+
         this.$el.html(minerva.templates.layersPanel({
-            datasets: displayedDatasets
+            datasets: displayedDatasets,
+            colorRanges: colorRanges
         }));
 
         return this;

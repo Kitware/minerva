@@ -4,5 +4,12 @@
   .layersList
     ul.datasets
       each dataset in datasets
-        li.dataset= dataset.get('name')
-          i.icon-cancel-circled.remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+          if dataset.getMinervaMetadata()
+              li.dataset= dataset.get('name')
+                  i.icon-cancel-circled.remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+                  - var geojson = dataset.getMinervaMetadata().geojson_file
+                  if geojson && geojson.render_type === 'cluster'
+                      - var colorRange = colorRanges[geojson.color_scheme]
+                      .m-layer-color-scheme
+                          each color in colorRange
+                             span.m-layer-color-band(style="background: #{color};")
