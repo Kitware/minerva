@@ -32,8 +32,10 @@ def findNamedFolder(currentUser, user, parent, parentType, name, create=False):
     # user folder for a folder with a certain name
     if len(folders) == 0:
         if create:
-            return ModelImporter.model('folder').createFolder(
-                parent, name, parentType=parentType, public=False)
+            folder = ModelImporter.model('folder').createFolder(
+                parent, name, parentType=parentType, public=False,
+                creator=currentUser)
+            return folder
         else:
             return None
     else:
