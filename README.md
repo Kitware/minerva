@@ -46,6 +46,17 @@ sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-
 
     grunt
 
+- copy the `minerva.dist.cfg` file, located in the server/conf directory, to `minerva.local.cfg` in that same directory.
+Any property in `minerva.local.cfg` will take precedent over any property with the same name in `minerva.dist.cfg`.
+Change the `encrypt_key` value in `minerva.local.cfg` file; the value should be a 32 byte url-safe base-64 encoded string.
+You can either replace the existing string with one of equal length, using letters and numbers, and ending with an '=', or generate one within python
+with the following code::
+
+```
+from cryptography.fernet import Fernet
+Fernet.generate_key()
+```
+
 - enable the Minerva plugin through the Girder Admin console
 - restart Girder through the Girder Admin console
 

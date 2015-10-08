@@ -31,6 +31,7 @@ before_install:
     - rm -rf girder
     - git clone https://github.com/girder/girder.git
     - mv Kitware/minerva girder/plugins
+    - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
 
     # clone romanesco
     - cd $HOME/build/girder/plugins

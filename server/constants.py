@@ -26,4 +26,3 @@ class PluginSettings():
     SESSION_FOLDER = 'session'
     GEOJSON_EXTENSION = '.geojson'
     SESSION_FILENAME = 'session.json'
-    CRYPTO_KEY = 'CHANGEME-EykxwRhz0BKiF8-Frc0D1VtBUntKyTrcTk='

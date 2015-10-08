@@ -30,6 +30,7 @@ from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
         wms_dataset, wms_source, geojson_dataset
 from girder.plugins.minerva.constants import PluginSettings
+from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
 class CustomAppRoot(object):
@@ -145,11 +146,8 @@ class WmsProxy(object):
     exposed = True
 
     def GET(self, url, credentials, **params):
-        from cryptography.fernet import Fernet
-        key = PluginSettings.CRYPTO_KEY
-        f = Fernet(key)
-        credentials = 'Basic ' + b64encode(f.decrypt(bytes(credentials)))
-        headers = {'Authorization': credentials}
+        auth = 'Basic ' + b64encode(decryptCredentials(bytes(credentials)))
+        headers = {'Authorization': auth}
         r = requests.get(url, params=params, headers=headers)
         cherrypy.response.headers['Content-Type'] = r.headers['content-type']
         return r.content
