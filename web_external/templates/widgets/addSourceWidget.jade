@@ -12,6 +12,11 @@
             label
               i.icon-layers.m-add-source-type-icon
               | WMS Source
+          .radio
+            input#m-elasticsearch-source(type="radio", name="m-source-add-method")
+            label
+              i.icon-search.m-add-source-type-icon
+              | Elasticsearch Source
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-source-button.btn.btn-small.btn-primary

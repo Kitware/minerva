@@ -81,3 +81,18 @@ You're welcome.
 ### Add a new source model
 
 Add a new model like web_external/js/models/ElasticsearchSourceModel.js.
+
+### Add the source to AddSourceWidget
+
+Add your new source type as an option in web_external/templates/widgets/addSourceWidget.jade
+and deal with the new option in the `submit #m-add-source-form` event handler in
+web_external/js/views/widgets/AddSourceWidget.js by creating a new add widget specific
+to your source, e.g. `AddElasticsearchSourceWidget`.
+
+Test that when you click on the add new source icon in the source panel, your
+new source type is displayed as an option.
+
+Create the widget to add your new source type, e.g. in
+
+    web_external/js/views/widgets/AddElasticsearchSourceWidget.js
+    web_external/templates/widgets/addElasticsearchSourceWidget.jade
