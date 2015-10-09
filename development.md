@@ -24,6 +24,11 @@ Add the endpoint to server/loader.py
 
     info['apiRoot'].minerva_source_elasticsearch = elasticsearch_source.ElasticsearchSource()
 
+You should now be able to see your endpoint through the swagger api page, and
+test it there.  Usually
+
+    http://localhost:8080/api
+
 ### Testing the source api
 
 Create a test, copy plugin_tests/wms_test.py to plugin_tests/elasticsearch_test.py.
