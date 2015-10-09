@@ -37,9 +37,10 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.wmsLayersListWidget({ layers: this.layers }));
+        var modal = this.$el.html(minerva.templates.wmsLayersListWidget({
+            layers: this.layers
+        })).girderModal(this);
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
-        this.$el.modal('show');
         return this;
     },
 

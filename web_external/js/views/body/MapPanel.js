@@ -11,8 +11,11 @@ minerva.views.MapPanel = minerva.View.extend({
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
+        if (minervaMetadata.hasOwnProperty('credentials')) {
+            baseUrl = '/wms_proxy/' + encodeURIComponent(baseUrl) + '/' +
+                    minervaMetadata.credentials;
+        }
         var layerName = minervaMetadata.type_name;
-        // TODO: inclued projection in params ??
         var projection = 'EPSG:3857';
         layer.gcs(projection);
         layer.tileUrl(
@@ -27,7 +30,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
                 var params = {
                     SERVICE: 'WMS',
-                    VERSION: '1.3.0',
+                    VERSION: '1.1.1',
                     REQUEST: 'GetMap',
                     LAYERS: layerName,
                     STYLES: '',
@@ -55,7 +58,7 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
-                var layer = this.map.createLayer('osm');
+                var layer = this.map.createLayer('osm', {attribution: null});
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
@@ -105,7 +108,7 @@ minerva.views.MapPanel = minerva.View.extend({
             this.legendWidget[datasetId].remove(datasetId);
             delete this.legendWidget[datasetId];
         }
-        if (dataset.getDatasetType() === 'wms') {
+        if (dataset.getDatasetType() === 'wms' && layer) {
             this.map.deleteLayer(layer);
         } else if (layer) {
             layer.clear();
@@ -115,8 +118,6 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        girder.events.on('m:layerDatasetLoaded', this.addDataset, this);
-        girder.events.on('m:layerDatasetRemoved', this.removeDataset, this);
         this.session = settings.session;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
@@ -127,6 +128,21 @@ minerva.views.MapPanel = minerva.View.extend({
         });
         this.datasetLayers = {};
         this.legendWidget = {};
+
+        this.collection = settings.collection;
+        this.listenTo(this.collection, 'change:displayed', function (dataset) {
+            // There is a slight danger of a user trying to add a dataset
+            // to a session while the map is not yet created.  If the map isn't
+            // created, we don't need to add/remove the datasets here because
+            // they will be taken care of in the renderMap initialization block.
+            if (this.mapCreated) {
+                if (dataset.get('displayed')) {
+                    this.addDataset(dataset);
+                } else {
+                    this.removeDataset(dataset);
+                }
+            }
+        }, this);
     },
 
     renderMap: function () {
@@ -139,6 +155,12 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
             this.uiLayer.createWidget('slider');
+            this.mapCreated = true;
+            _.each(this.collection.models, function (dataset) {
+                if (dataset.get('displayed')) {
+                    this.addDataset(dataset);
+                }
+            }, this);
         }
         this.map.draw();
     },
