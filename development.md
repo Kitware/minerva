@@ -1,5 +1,22 @@
 # Minerva developers guide
 
+## Glossary
+
+### Source
+
+A source produces data.  A source itself cannot be visualized, but a source
+can create a dataset that can be visualized, or it can be the input to an analysis,
+which then creates a dataset that can be visualized.
+
+### Dataset
+
+A dataset contains data and can be visualized, either on a map or through some other means.
+
+### Analysis
+
+An analysis creates a dataset, but running some client side or server side process, and
+potentially using datasets and sources as inputs.
+
 ## Adding a source
 
 I think it's easier to work on the backend first, as you can test the api
