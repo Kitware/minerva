@@ -100,6 +100,8 @@ module.exports = function (grunt) {
                 jsDir + '/utilities.js',
                 jsDir + '/MinervaModel.js',
                 jsDir + '/MinervaCollection.js',
+                jsDir + '/models/DatasetModel.js',
+                jsDir + '/models/SourceModel.js',
                 jsDir + '/models/**/*.js',
                 jsDir + '/collections/**/*.js',
                 jsDir + '/views/**/*.js'
