@@ -62,3 +62,13 @@ Now you should see the new test in your build directory
 You can run the test, with extra verbosity
 
     ctest -R server_minerva.elasticsearch -VV
+
+
+### Add the source to client side collection
+
+Add the new source type to web/external/js/collections/SourceCollection.js,
+this will prevent mysterious backbone errors later on like
+
+    `a.on is not a function`
+
+You're welcome.

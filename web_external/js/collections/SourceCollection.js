@@ -5,16 +5,19 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             if (attrs.meta.minerva.source_type === 'wms') {
                 return new minerva.models.WmsSourceModel(attrs, options);
             }
-        } else {
-            console.error('Source collection includes unknown source type');
-            console.error(attrs);
-            girder.events.trigger('g:alert', {
-                icon: 'cancel',
-                text: 'Unknown source type in collection.',
-                type: 'error',
-                timeout: 4000
-            });
+            else if (attrs.meta.minerva.source_type === 'elasticsearch') {
+                return new minerva.models.ElasticsearchSourceModel(attrs, options);
+            }
         }
+
+        console.error('Source collection includes unknown source type');
+        console.error(attrs);
+        girder.events.trigger('g:alert', {
+            icon: 'cancel',
+            text: 'Unknown source type in collection.',
+            type: 'error',
+            timeout: 4000
+        });
     },
 
     path: 'minerva_source',
