@@ -77,3 +77,7 @@ this will prevent mysterious backbone errors later on like
     `a.on is not a function`
 
 You're welcome.
+
+### Add a new source model
+
+Add a new model like web_external/js/models/ElasticsearchSourceModel.js.
