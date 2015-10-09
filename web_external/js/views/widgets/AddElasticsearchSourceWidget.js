@@ -16,7 +16,6 @@ minerva.views.AddElasticsearchSourceWidget = minerva.View.extend({
             var elasticsearchSource = new minerva.models.ElasticsearchSourceModel({});
             elasticsearchSource.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
-                // TODO: might need to be added to a new panel/data sources ?
                 this.collection.add(elasticsearchSource);
             }, this).createSource(params);
         }

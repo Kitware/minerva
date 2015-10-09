@@ -68,6 +68,9 @@ You can run the test, with extra verbosity
 
     ctest -R server_minerva.elasticsearch -VV
 
+Also check your python style, and fix any errors
+
+    ctest -R pep8_style_minerva_rest -VV
 
 ### Add the source to client side collection
 
@@ -103,3 +106,10 @@ Update the necessary in
 
     web_external/templates/body/sourcePanel.jade
     web_external/stylesheets/body/sourcePanel.styl
+
+### Comply with javascript styles
+
+Because it's the law of the land.
+
+    ctest -R jshint_minerva -VV
+    ctest -R jsstyle_minerva -VV
