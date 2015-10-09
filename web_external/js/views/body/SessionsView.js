@@ -77,3 +77,7 @@ minerva.router.route('', 'index', function () {
 minerva.router.route('sessions', 'sessions', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
 });
+
+girder.events.on('g:login', function () {
+    girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
+});
