@@ -1,5 +1,5 @@
 /**
-* This widget displays a form for adding WMS services
+* This widget displays a form for adding a WMS source.
 */
 minerva.views.AddWmsSourceWidget = minerva.View.extend({
 
