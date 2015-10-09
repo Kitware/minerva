@@ -96,3 +96,10 @@ Create the widget to add your new source type, e.g. in
 
     web_external/js/views/widgets/AddElasticsearchSourceWidget.js
     web_external/templates/widgets/addElasticsearchSourceWidget.jade
+
+### Display the new source in the source panel
+
+Update the necessary in
+
+    web_external/templates/body/sourcePanel.jade
+    web_external/stylesheets/body/sourcePanel.styl
