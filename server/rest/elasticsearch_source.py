@@ -42,8 +42,8 @@ class ElasticsearchSource(Source):
         password = params['password'] if 'password' in params else None
         minerva_metadata = {
             'source_type': 'elasticsearch',
-            'table': table,
             'elasticsearch_params': {
+                'table': table,
                 'base_url': baseURL,
                 'host_name': hostName
             }
