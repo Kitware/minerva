@@ -9,7 +9,7 @@ minerva.views.AddElasticsearchSourceWidget = minerva.View.extend({
             var params = {
                 name:     this.$('#m-elasticsearch-name').val(),
                 baseURL:  this.$('#m-elasticsearch-uri').val(),
-                table:  this.$('#m-elasticsearch-table').val(),
+                index:  this.$('#m-elasticsearch-index').val(),
                 username: this.$('#m-elasticsearch-username').val(),
                 password: this.$('#m-elasticsearch-password').val()
             };

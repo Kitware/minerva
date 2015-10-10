@@ -37,13 +37,13 @@ class ElasticsearchSource(Source):
         baseURL = params['baseURL']
         parsedUrl = getUrlParts(baseURL)
         hostName = parsedUrl.netloc
-        table = params['table']
+        index = params['index']
         username = params['username'] if 'username' in params else None
         password = params['password'] if 'password' in params else None
         minerva_metadata = {
             'source_type': 'elasticsearch',
             'elasticsearch_params': {
-                'table': table,
+                'index': index,
                 'base_url': baseURL,
                 'host_name': hostName
             }
@@ -59,7 +59,7 @@ class ElasticsearchSource(Source):
         .responseClass('Item')
         .param('name', 'The name of the elasticsearch source', required=True)
         .param('baseURL', 'URL of the elasticsearch service', required=True)
-        .param('table', 'Table of interest', required=True)
+        .param('index', 'Index of interest', required=True)
         .param('username', 'Elasticsearch username', required=False)
         .param('password', 'Elasticsearch password', required=False)
         .errorResponse('Write permission denied on the source folder.', 403))

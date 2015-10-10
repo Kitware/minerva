@@ -69,12 +69,12 @@ class ElasticsearchTestCase(base.TestCase):
         username = ''
         password = ''
         baseURL = 'http://elasticsearch.com'
-        table = 'mytable'
+        index = 'myindex'
         params = {
             'name': name,
             'username': username,
             'password': password,
-            'table': table,
+            'index': index,
             'baseURL': baseURL
         }
         response = self.request(path=path, method='POST', params=params, user=self._user)
@@ -85,4 +85,4 @@ class ElasticsearchTestCase(base.TestCase):
         self.assertEquals(elasticsearchSource['name'], name, 'incorrect elasticsearch source name')
         self.assertEquals(minerva_metadata['source_type'], 'elasticsearch', 'incorrect elasticsearch source type')
         self.assertEquals(minerva_metadata['elasticsearch_params']['base_url'], baseURL, 'incorrect elasticsearch source baseURL')
-        self.assertEquals(minerva_metadata['elasticsearch_params']['table'], table, 'incorrect elasticsearch source table')
+        self.assertEquals(minerva_metadata['elasticsearch_params']['index'], index, 'incorrect elasticsearch source index')
