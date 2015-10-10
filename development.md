@@ -124,6 +124,24 @@ Update the necessary in
     web_external/templates/body/sourcePanel.jade
     web_external/stylesheets/body/sourcePanel.styl
 
+### Add an action to the source displayed in the source panel
+
+If it makes sense for your source to have an action, as when there is a natural
+path to create a dataset from your source, add an action to the source displayed
+in the source panel.
+
+E.g., a WMS source naturally creates datasets by exposing a set of WMS layers
+and allowing one or more to be created as a dataset.  An Elasticsearch source naturally
+creates datasets by running an analysis which is a search query, resulting in a
+JSON dataset with a default visualization as GeoJson.
+
+Add an event handler for your source icon in web_external/js/views/body/SourcePanel.js .
+
+Add the widget constructed and rendered by the event handler
+
+    web_external/js/views/widgets/ElasticsearchWidget.js
+    web_external/templates/widgets/elasticsearchWidget.jade
+
 ### Comply with javascript styles
 
 Because it's the law of the land.
