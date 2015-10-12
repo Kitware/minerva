@@ -29,11 +29,12 @@ minerva.views.ElasticsearchWidget = minerva.View.extend({
 
             var data = {
                 datasetName: datasetName,
-                searchParams: searchParams
+                searchParams: searchParams,
+                sourceId: this.source.get('id')
             };
 
             girder.restRequest({
-                path: 'minerva_elasticsearch_query',
+                path: 'minerva_query_elasticsearch',
                 type: 'POST',
                 data: data
             }).done(_.bind(function () {
@@ -44,7 +45,8 @@ minerva.views.ElasticsearchWidget = minerva.View.extend({
         }
     },
 
-    initialize: function () {
+    initialize: function (settings) {
+        this.source = settings.source;
     },
 
     render: function () {

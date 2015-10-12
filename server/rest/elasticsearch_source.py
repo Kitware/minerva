@@ -19,10 +19,14 @@
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import getUrlParts
+from girder.api.rest import getUrlParts, Resource
 
 from girder.plugins.minerva.rest.source import Source
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
+
+from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
+                                                            findAnalysisByName,
+                                                            findDatasetFolder)
 
 
 class ElasticsearchSource(Source):
@@ -63,3 +67,64 @@ class ElasticsearchSource(Source):
         .param('username', 'Elasticsearch username', required=False)
         .param('password', 'Elasticsearch password', required=False)
         .errorResponse('Write permission denied on the source folder.', 403))
+
+
+class ElasticsearchQuery(Resource):
+
+    def __init__(self):
+        self.resourceName = 'minerva_query_elasticsearch'
+        self.route('POST', (), self.queryElasticsearch)
+
+    @access.user
+    def queryElasticsearch(self, params):
+        currentUser = self.getCurrentUser()
+        datasetName = params['datasetName']
+        elasticsearchParams = params['searchParams']
+
+        datasetFolder = findDatasetFolder(currentUser, currentUser)
+        dataset = (self.model('item').createItem(datasetName,
+                                                 currentUser,
+                                                 datasetFolder,
+                                                 'created by elasticsearch query'))
+
+        user, token = self.getCurrentUser(returnToken=True)
+        kwargs = {
+            'params': params,
+            'user': currentUser,
+            'dataset': dataset,
+            'token': token,
+            'sourceId': params['sourceId']
+        }
+
+        job = self.model('job', 'jobs').createLocalJob(
+            title='elasticsearch: %s' % datasetName,
+            user=currentUser,
+            type='elasticsearch',
+            public=False,
+            kwargs=kwargs,
+            module='girder.plugins.minerva.jobs.elasticsearch_worker',
+            async=True)
+
+        if 'meta' in dataset:
+            metadata = dataset['meta']
+        else:
+            metadata = {}
+
+        minerva_metadata = {
+            'dataset_id': dataset['_id'],
+            'source': 'elasticsearch',
+            'elasticsearch_params': elasticsearchParams,
+            'original_type': 'json'
+        }
+        metadata['minerva'] = minerva_metadata
+        self.model('item').setMetadata(dataset, metadata)
+
+        self.model('job', 'jobs').scheduleJob(job)
+
+        return minerva_metadata
+
+    queryElasticsearch.description = (
+        Description('Query an elasticsearch source.')
+        .param('sourceId', 'Item id of the elasticsearch source to query')
+        .param('datasetName', 'The name of the resulting dataset')
+        .param('query', 'JSON Body of an elasticsearch query'))

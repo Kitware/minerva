@@ -196,6 +196,8 @@ def load(info):
 
     info['apiRoot'].minerva_source_elasticsearch = \
         elasticsearch_source.ElasticsearchSource()
+    info['apiRoot'].minerva_query_elasticsearch = \
+        elasticsearch_source.ElasticsearchQuery()
     info['apiRoot'].minerva_dataset_elasticsearch = \
         elasticsearch_dataset.ElasticsearchDataset()
 
