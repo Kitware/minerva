@@ -24,9 +24,7 @@ from girder.api.rest import getUrlParts, Resource
 from girder.plugins.minerva.rest.source import Source
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
-from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
-                                                            findAnalysisByName,
-                                                            findDatasetFolder)
+from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 
 
 class ElasticsearchSource(Source):
@@ -77,15 +75,20 @@ class ElasticsearchQuery(Resource):
 
     @access.user
     def queryElasticsearch(self, params):
+        """
+        Creates a dataset to store the results for an elastic search query,
+        then calls a local job running the elasticsearch_worker.
+        """
         currentUser = self.getCurrentUser()
         datasetName = params['datasetName']
         elasticsearchParams = params['searchParams']
 
         datasetFolder = findDatasetFolder(currentUser, currentUser)
-        dataset = (self.model('item').createItem(datasetName,
-                                                 currentUser,
-                                                 datasetFolder,
-                                                 'created by elasticsearch query'))
+        dataset = (self.model('item').createItem(
+            datasetName,
+            currentUser,
+            datasetFolder,
+            'created by elasticsearch query'))
 
         user, token = self.getCurrentUser(returnToken=True)
         kwargs = {

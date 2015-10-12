@@ -39,14 +39,11 @@ class ElasticsearchDataset(Dataset):
     def createElasticsearchDataset(self, elasticsearchSource, params):
         minerva_meta = elasticsearchSource['meta']['minerva']
         baseURL = minerva_meta['elasticsearch_params']['base_url']
-        parsedUrl = getUrlParts(baseURL)
 
         if 'credentials' in minerva_meta['elasticsearch_params']:
             credentials = (
                 minerva_meta['elasticsearch_params']['credentials']
             )
-            basic_auth = 'Basic ' + b64encode(decryptCredentials(credentials))
-            headers = {'Authorization': basic_auth}
         else:
             credentials = None
 
