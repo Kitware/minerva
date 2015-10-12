@@ -16,15 +16,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-from base64 import b64encode
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import loadmodel
-from girder.api.rest import getUrlParts
 from girder.constants import AccessType
 
 from girder.plugins.minerva.rest.dataset import Dataset
-from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
 class ElasticsearchDataset(Dataset):
@@ -41,9 +38,7 @@ class ElasticsearchDataset(Dataset):
         baseURL = minerva_meta['elasticsearch_params']['base_url']
 
         if 'credentials' in minerva_meta['elasticsearch_params']:
-            credentials = (
-                minerva_meta['elasticsearch_params']['credentials']
-            )
+            credentials = (minerva_meta['elasticsearch_params']['credentials'])
         else:
             credentials = None
 

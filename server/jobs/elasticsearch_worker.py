@@ -41,9 +41,8 @@ def run(job):
         source = client.getItem(kwargs['params']['sourceId'])
         esUrl = 'https://%s@%s' % (decryptCredentials(
             source['meta']['minerva']['elasticsearch_params']['credentials']),
-                                   source['meta']['minerva']['elasticsearch_params']['host_name'])
+            source['meta']['minerva']['elasticsearch_params']['host_name'])
         es = Elasticsearch([esUrl])
-
 
         # TODO sleeping in async thread, probably starving other tasks
         # would be better to split this into two or more parts, creating
@@ -64,7 +63,6 @@ def run(job):
         outFilename = 'search.json'
         humanFilepath = os.path.join(tmpdir, outFilename)
         shutil.move(outFilepath, humanFilepath)
-
 
         client.uploadFileToItem(datasetId, humanFilepath)
 
