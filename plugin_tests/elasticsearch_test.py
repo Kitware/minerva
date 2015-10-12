@@ -61,7 +61,7 @@ class ElasticsearchTestCase(base.TestCase):
 
     def testCreateElasticsearchSource(self):
         """
-        Test the minerva ELASTICSEARCH source API endpoints.
+        Test the minerva Elasticsearch source API endpoints.
         """
 
         path = '/minerva_source_elasticsearch'
@@ -86,3 +86,30 @@ class ElasticsearchTestCase(base.TestCase):
         self.assertEquals(minerva_metadata['source_type'], 'elasticsearch', 'incorrect elasticsearch source type')
         self.assertEquals(minerva_metadata['elasticsearch_params']['base_url'], baseURL, 'incorrect elasticsearch source baseURL')
         self.assertEquals(minerva_metadata['elasticsearch_params']['index'], index, 'incorrect elasticsearch source index')
+
+        return elasticsearchSource
+
+    def testCreateElasticsearchDataset(self):
+        """
+        Test the minerva Elasticsearch dataset API endpoints.
+        """
+        elasticsearchSource = self.testCreateElasticsearchSource()
+
+        name = 'testElasticsearch'
+        datasetName = 'testElasticsearchDataset'
+        params = {
+            'name': name,
+            'elasticsearchSourceId': elasticsearchSource['_id'],
+            'datasetName': datasetName
+        }
+
+        response = self.request(path='/minerva_dataset_elasticsearch',
+                                method='POST',
+                                params=params,
+                                user=self._user)
+        self.assertStatusOk(response)
+        elasticsearchDataset = response.json
+        minerva_metadata = elasticsearchDataset['meta']['minerva']
+        self.assertEquals(elasticsearchDataset['name'], name, 'incorrect elasticsearch dataset name')
+        self.assertEquals(minerva_metadata['source_id'], elasticsearchSource['_id'], 'incorrect elasticsearch source_id')
+        self.assertEquals(minerva_metadata['datasetName'], datasetName, 'incorrect elasticsearch datasetName')
