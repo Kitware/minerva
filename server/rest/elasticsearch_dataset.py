@@ -34,26 +34,27 @@ class ElasticsearchDataset(Dataset):
         self.route('POST', (), self.createElasticsearchDataset)
 
     @access.user
-    @loadmodel(map={'elasticsearchSourceId': 'elasticsearchSource'}, model='item',
-               level=AccessType.READ)
+    @loadmodel(map={'elasticsearchSourceId': 'elasticsearchSource'},
+               model='item', level=AccessType.READ)
     def createElasticsearchDataset(self, elasticsearchSource, params):
-        baseURL = elasticsearchSource['meta']['minerva']['elasticsearch_params']['base_url']
+        minerva_meta = elasticsearchSource['meta']['minerva']
+        baseURL = minerva_meta['elasticsearch_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
 
-        if 'credentials' in elasticsearchSource['meta']['minerva']['elasticsearch_params']:
+        if 'credentials' in minerva_meta['elasticsearch_params']:
             credentials = (
-                elasticsearchSource['meta']['minerva']['elasticsearch_params']['credentials']
+                minerva_meta['elasticsearch_params']['credentials']
             )
             basic_auth = 'Basic ' + b64encode(decryptCredentials(credentials))
             headers = {'Authorization': basic_auth}
         else:
-            headers = {}
             credentials = None
 
         self.requireParams(('name'), params)
         name = params['name']
         minerva_metadata = {
             'dataset_type': 'elasticsearch',
+            'datasetName': params['datasetName'],
             'source_id': elasticsearchSource['_id'],
             'base_url': baseURL
         }
@@ -62,9 +63,11 @@ class ElasticsearchDataset(Dataset):
         dataset = self.constructDataset(name, minerva_metadata)
         return dataset
     createElasticsearchDataset.description = (
-        Description('Create an Elasticsearch Dataset from an Elasticsearch Source.')
+        Description(('Create an Elasticsearch Dataset from '
+                     'an Elasticsearch Source.'))
         .responseClass('Item')
         .param('name', 'The name of the Elasticsearch dataset', required=True)
-        .param('elasticsearchSourceId', 'Item ID of the Elasticsearch Source', required=True)
+        .param('elasticsearchSourceId',
+               'Item ID of the Elasticsearch Source', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
