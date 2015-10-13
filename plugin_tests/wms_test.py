@@ -23,6 +23,8 @@ import os
 os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
 
 from tests import base
+from cryptography.fernet import Fernet
+from girder.utility import config
 
 
 def setUpModule():
@@ -129,3 +131,40 @@ class WmsTestCase(base.TestCase):
         legend = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48U2VydmljZUV4Y2VwdGlvblJlcG9ydCB2ZXJzaW9uPSIxLjMuMCIgeG1sbnM9Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4c2k6c2NoZW1hTG9jYXRpb249Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIGh0dHA6Ly9kZW1vLmJvdW5kbGVzc2dlby5jb206ODAvZ2Vvc2VydmVyL3NjaGVtYXMvd21zLzEuMy4wL2V4Y2VwdGlvbnNfMV8zXzAueHNkIj4gICA8U2VydmljZUV4Y2VwdGlvbj4KICAgICAgQ2FuJmFwb3M7dCBvYnRhaW4gdGhlIHNjaGVtYSBmb3IgdGhlIHJlcXVpcmVkIGxheWVyLgpnZW9ub2RlOmdsb2JhbF90ZW1wIGxheWVyIGRvZXMgbm90IGV4aXN0Lgo8L1NlcnZpY2VFeGNlcHRpb24+PC9TZXJ2aWNlRXhjZXB0aW9uUmVwb3J0Pg==\n'
         # TODO determine if legend is stable, if not, needs to be mocked
         self.assertEquals(minerva_metadata['legend'], legend, 'incorrect wms dataset legend')
+
+    def testCreateWmsSourceWithAuthentication(self):
+        """
+        Enter a username and password for a WMS source and ensure that they
+        are correctly encrypted/decrypted.
+        """
+
+        # create the source
+        path = '/minerva_source_wms'
+        name = 'testWMSAuth'
+        username = 'admin'
+        password = 'admin'
+        baseURL = 'http://demo.geonode.org/geoserver/wms'
+        params = {
+            'name': name,
+            'username': username,
+            'password': password,
+            'baseURL': baseURL
+        }
+        response = self.request(path=path, method='POST',
+                                params=params, user=self._user)
+        self.assertStatusOk(response)
+        wmsSource = response.json
+        credentials = wmsSource['meta']['minerva']['wms_params']['credentials']
+        #Make sure credentials were encrypted
+        self.assertNotEqual(credentials, '{}:{}'.format(username, password),
+                            "Credentials were not encrypted!")
+        #Redo the decryptCredentials function here because importing from
+        #minerva_utility breaks on 'from girder.plugins.minerva.constants'
+        cur_config = config.getConfig()
+        key = cur_config['minerva']['crypto_key']
+        f = Fernet(key)
+        decrypted = f.decrypt(bytes(credentials))
+        #Make sure credentials were correctly decrypted
+        self.assertEquals(decrypted, '{}:{}'.format(username,password),
+                          'Credentials could not be correctly decrypted')
+
