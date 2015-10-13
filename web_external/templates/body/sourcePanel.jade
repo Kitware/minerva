@@ -11,10 +11,14 @@
                         - var attributes = {'cid': source.cid}
                         if source.getSourceType() === 'wms'
                             //- list icon to open the list of WMS layers
-                            - var classes = 'icon-list m-icon-enabled m-display-wms-layers-list'
+                            - var classes = 'icon-layers m-icon-enabled m-display-wms-layers-list'
                             i(class=classes)&attributes(attributes)
-                            //- trash icon to delete source
-                            - var classes = 'icon-trash m-icon-enabled m-delete-source'
-                            i(title='delete source', class=classes)&attributes(attributes)
-                            //- info icon for minerva metadata display
-                            i(title='display source info').icon-info-circled.m-icon-info.m-icon-enabled&attributes(attributes)
+                        else if source.getSourceType() === 'elasticsearch'
+                            //- list icon to run an elasticsearch query
+                            - var classes = 'icon-search m-icon-enabled m-display-elasticsearch-query'
+                            i(class=classes)&attributes(attributes)
+                        //- trash icon to delete source
+                        - var classes = 'icon-trash m-icon-enabled m-delete-source'
+                        i(title='delete source', class=classes)&attributes(attributes)
+                        //- info icon for minerva metadata display
+                        i(title='display source info').icon-info-circled.m-icon-info.m-icon-enabled&attributes(attributes)

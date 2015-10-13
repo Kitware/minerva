@@ -4,7 +4,8 @@ minerva.views.SourcePanel = minerva.View.extend({
         'click .m-add-source': 'addSourceDialog',
         'click .m-display-wms-layers-list': 'displayWmsLayersList',
         'click .m-icon-info': 'displaySourceInfo',
-        'click .m-delete-source': 'deleteSource'
+        'click .m-delete-source': 'deleteSource',
+        'click .m-display-elasticsearch-query': 'displayElasticsearchQuery'
     },
 
     addSourceDialog: function () {
@@ -49,6 +50,20 @@ minerva.views.SourcePanel = minerva.View.extend({
         var source = this.sourceCollection.get(el.attr('cid'));
         this.sourceCollection.remove(source);
         source.destroy();
+    },
+
+    displayElasticsearchQuery: function (evt) {
+        var el = $(evt.currentTarget);
+        var source = this.sourceCollection.get(el.attr('cid'));
+        if (!this.elasticsearchWidget) {
+            this.elasticsearchWidget = new minerva.views.ElasticsearchWidget({
+                el: $('#g-dialog-container'),
+                source: source,
+                collection: this.datasetCollection,
+                parentView: this
+            });
+        }
+        this.elasticsearchWidget.render();
     },
 
     initialize: function (settings) {

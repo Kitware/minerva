@@ -17,6 +17,14 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                     collection: this.collection,
                     parentView: this.parentView
                 }).render();
+            } else if (sourceType === 'm-elasticsearch-source') {
+                this.elasticsearchSourceWidget = new minerva.views.AddElasticsearchSourceWidget({
+                    el: container,
+                    title: 'Enter Elasticsearch Source details',
+                    noParent: true,
+                    collection: this.collection,
+                    parentView: this.parentView
+                }).render();
             } else {
                 console.error('Unknown source type');
             }
