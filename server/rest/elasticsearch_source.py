@@ -22,9 +22,8 @@ from girder.api.describe import Description
 from girder.api.rest import getUrlParts, Resource
 
 from girder.plugins.minerva.rest.source import Source
-from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
-
-from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
+from girder.plugins.minerva.utility.minerva_utility import \
+    encryptCredentials, findDatasetFolder, updateMinervaMetadata
 
 
 class ElasticsearchSource(Source):
@@ -76,8 +75,8 @@ class ElasticsearchQuery(Resource):
     @access.user
     def queryElasticsearch(self, params):
         """
-        Creates a dataset to store the results for an elastic search query,
-        then calls a local job running the elasticsearch_worker.
+        Creates a local job to run the elasticsearch_worker, the job will store
+        the results of the elastic search query in a dataset.
         """
         currentUser = self.getCurrentUser()
         datasetName = params['datasetName']
@@ -108,23 +107,17 @@ class ElasticsearchQuery(Resource):
             module='girder.plugins.minerva.jobs.elasticsearch_worker',
             async=True)
 
-        if 'meta' in dataset:
-            metadata = dataset['meta']
-        else:
-            metadata = {}
-
         minerva_metadata = {
-            'dataset_id': dataset['_id'],
+            'dataset_type': 'json',
+            'source_id': params['sourceId'],
             'source': 'elasticsearch',
-            'elasticsearch_params': elasticsearchParams,
-            'original_type': 'json'
+            'elasticsearch_params': elasticsearchParams
         }
-        metadata['minerva'] = minerva_metadata
-        self.model('item').setMetadata(dataset, metadata)
+        updateMinervaMetadata(dataset, minerva_metadata)
 
         self.model('job', 'jobs').scheduleJob(job)
 
-        return minerva_metadata
+        return job
 
     queryElasticsearch.description = (
         Description('Query an elasticsearch source.')
