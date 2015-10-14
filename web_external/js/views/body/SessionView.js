@@ -117,7 +117,8 @@ minerva.views.SessionView = minerva.View.extend({
         this.analysisPanel = new minerva.views.AnalysisPanel({
             parentView: this,
             collection: this.analysisCollection,
-            datasetsCollection: this.datasetsCollection
+            datasetsCollection: this.datasetsCollection,
+            sourceCollection: this.sourceCollection
         });
 
         this.sourcePanel = new minerva.views.SourcePanel({
