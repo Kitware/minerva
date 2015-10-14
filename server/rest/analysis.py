@@ -34,6 +34,7 @@ class Analysis(Resource):
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
+        self.route('POST', ('elastic_geospace',), self.elasticGeospaceAnalysis)
 
     @access.user
     def getAnalysisFolder(self, params):
@@ -120,3 +121,64 @@ class Analysis(Resource):
         Description('Create the minerva analysis folder, a global resource.')
         .param('datasetName', 'Name of the dataset created by this analysis.')
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
+
+    @access.user
+    def elasticGeospaceAnalysis(self, params):
+        currentUser = self.getCurrentUser()
+        datasetName = params['datasetName']
+        elasticSearchParams = params['elasticSearchParams']
+        analysis = findAnalysisByName(currentUser, 'elastic geospace')
+
+        try:
+            elasticSearchParams = json.loads(params['elasticSearchParams'])
+        except ValueError:
+            raise RestException('elasticSearchParams is invalid JSON.')
+
+        datasetFolder = findDatasetFolder(currentUser, currentUser)
+        dataset = self.model('item').createItem(datasetName, currentUser,
+                                                datasetFolder,
+                                                'created by elastic geospace')
+
+        params['elasticSearchParams'] = elasticSearchParams
+
+        user, token = self.getCurrentUser(returnToken=True)
+        kwargs = {
+            'params': params,
+            'user': currentUser,
+            'dataset': dataset,
+            'analysis': analysis,
+            'token': token
+        }
+
+        job = self.model('job', 'jobs').createLocalJob(
+            title='elastic geospace: %s' % datasetName,
+            user=currentUser,
+            type='elastic_geospace.search',
+            public=False,
+            kwargs=kwargs,
+            module='girder.plugins.minerva.jobs.elastic_geospace_worker',
+            async=True)
+
+        if 'meta' in dataset:
+            metadata = dataset['meta']
+        else:
+            metadata = {}
+
+        minerva_metadata = {
+            'dataset_id': dataset['_id'],
+            'source': 'elastic_geospace',
+            'elastic_search_params': elasticSearchParams,
+            'original_type': 'json'
+        }
+        metadata['minerva'] = minerva_metadata
+        self.model('item').setMetadata(dataset, metadata)
+
+        self.model('job', 'jobs').scheduleJob(job)
+
+        return minerva_metadata
+
+    elasticGeospaceAnalysis.description = (
+        Description('Create the minerva analysis folder, a global resource.')
+        .param('datasetName', 'Name of the dataset created by this analysis.')
+        .param('elasticSearchParams',
+               'JSON search parameters to send to elastic_geospace.'))

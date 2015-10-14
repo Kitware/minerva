@@ -1,0 +1,32 @@
+.modal-dialog
+  .modal-content
+    form#m-elastic-geospace-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Elastic Geospace
+        .modal-body
+          .form-group.m-elastic-geospace-input-es-source
+            label.control-label(for="m-elastic-geospace-input-es-source") Input ES Source
+            select.form-control.input-sm#m-elastic-geospace-input-es-source
+              each source in sources
+                if source.getMinervaMetadata().source_type === "elasticsearch"
+                  option(value=source.get("_id"))= source.get('name')
+          .form-group.m-elastic-geospace-input-pg-source
+            label.control-label(for="m-elastic-geospace-input-pg-source") Input PG Source
+            select.form-control.input-sm#m-elastic-geospace-input-pg-source
+              each source in sources
+                if source.getMinervaMetadata().source_type === "postgres"
+                  option(value=source.get("_id"))= source.get('name')
+            .g-validation-failed-message
+          .form-group
+            label.control-label(for="m-elastic-geospace-query") Query
+            input.input-sm#m-elastic-geospace-query.form-control(type="text", placeholder="Italian")
+          .form-group
+            label.control-label(for="m-elastic-geospace-daterange") Date Range
+            input.input-sm#m-elastic-geospace-daterange.form-control(type="text", name="daterangepicker", placeholder="All")
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-run-elastic-geospace.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run
