@@ -1,13 +1,18 @@
 minerva.views.LayersPanel = minerva.View.extend({
 
     events: {
-        'click .remove-dataset-from-layer': 'removeDatasetEvent'
+        'click .remove-dataset-from-layer': 'removeDatasetEvent',
+        'change .opacity-range': 'changeLayerOpacity'
     },
 
     removeDatasetEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         dataset.set('displayed', false);
+    },
+
+    changeLayerOpacity: function (event) {
+      console.log('called', event.target.value);
     },
 
     initialize: function (settings) {
