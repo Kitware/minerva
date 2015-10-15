@@ -20,9 +20,8 @@ A source produces data. A source itself cannot be visualized, but a source can c
 
 .. seealso::
 
-   Information on creating a source can be found `here`_.
+   Information on how to create a Minerva source can be found in :doc:`/creating-a-source`.
 
-.. _here: https://google.com
 
 Dataset
 ~~~~~~~

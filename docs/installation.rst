@@ -110,9 +110,3 @@ From here, you are just following the geojs build instructions.
    
 At this point geojs/dist/built/geo.min.js should be rebuilt, and this will be included the next time minerva is built by grunt-ing at the top level of girder. Note that if geojs/dist/* exists geojs/dist/built/geo.min.js will be used rather than geojs/geo.min.js
 
-.. toctree::
-   :maxdepth: 2
-
-   installation
-   api-documentation
-   creating-a-source
