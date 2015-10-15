@@ -59,6 +59,8 @@ minerva.views.MapPanel = minerva.View.extend({
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
                 var layer = this.map.createLayer('osm', {attribution: null});
+                layer.mapOpacity(0.3);
+                console.log(layer.mapOpacity());
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
