@@ -27,7 +27,27 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                     }, this).createWmsDataset(params);
                 }
             }, this));
+        },
+
+        'keyup #filter-layers': function (e) {
+          var text = $(e.target).val();
+          this.filterLayers(text);
         }
+    },
+
+    filterLayers: function (text) {
+      var data = this.layers;
+      var pattern = new RegExp(text,'gi');
+  		var filteredData =  _.filter(data, function(layer) {
+  		  return pattern.test(layer.layer_title);
+  		});
+      $('.item-list').html('');
+      filteredData.forEach(_.bind(function (layer) {
+        var layerView = minerva.templates.layersListWidget({
+            layer: layer
+        });
+        $('.item-list').append(layerView);
+      }, this));
     },
 
     initialize: function (settings) {
@@ -41,6 +61,14 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             layers: this.layers
         })).girderModal(this);
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+
+        this.layers.forEach(_.bind(function (layer) {
+          var layerView = minerva.templates.layersListWidget({
+              layer: layer
+          });
+          $('.item-list').append(layerView);
+        }, this));
+
         return this;
     },
 
