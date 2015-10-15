@@ -6,13 +6,16 @@ minerva.views.LayersPanel = minerva.View.extend({
     },
 
     removeDatasetEvent: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        dataset.set('displayed', false);
+      var datasetId = $(event.currentTarget).attr('m-dataset-id');
+      var dataset = this.collection.get(datasetId);
+      dataset.set('displayed', false);
     },
 
     changeLayerOpacity: function (event) {
-      console.log('called', event.target.value);
+      var datasetId = $(event.currentTarget).attr('m-dataset-id');
+      var dataset = this.collection.get(datasetId);
+      var opacity = event.target.value;
+      dataset.set('opacity', parseFloat(opacity));
     },
 
     initialize: function (settings) {

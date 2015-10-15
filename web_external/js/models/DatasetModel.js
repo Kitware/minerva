@@ -3,7 +3,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     defaults: {
         geojsonFileId: null,
         displayed: false,
-        files: null
+        files: null,
+        opacity: 1
     },
 
     isRenderable: function () {
