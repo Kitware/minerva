@@ -19,11 +19,14 @@
   sudo: yes
 
 - name: create work directory
-  file: path=/home/{{deploy_user}}/epigeonode state=directory mode=1775
+  file: path=/home/{{deploy_user}}/epigeonode state=directory mode=1775 owner={{deploy_user}} group=tomcat7
+  sudo: yes
 
-- name: reset geoserver permissions
+- name: create geoserver data directory
   file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
   sudo: yes
+
+- include: geoserver_permissions.yml
 
 - name: patch geonode application
   patch: >
@@ -52,17 +55,13 @@
   notify:
     - restart supervisor for celery
 
-- name: reset geoserver permissions
-  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
-  sudo: yes
+- include: geoserver_permissions.yml
 
 - name: Create the gfms coverage store
   command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/gfms/gfms.py"
   ignore_errors: yes
 
-- name: reset geoserver permissions
-  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
-  sudo: yes
+- include: geoserver_permissions.yml
 
 - name: Create the forecastio coverage store
   command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/forecastio/forecastio_air.py"
