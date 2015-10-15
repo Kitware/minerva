@@ -52,4 +52,24 @@
   notify:
     - restart supervisor for celery
 
-- include: forecastio.yml
+- name: reset geoserver permissions
+  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
+  sudo: yes
+
+- name: Create the gfms coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/gfms/gfms.py"
+  ignore_errors: yes
+
+- name: reset geoserver permissions
+  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
+  sudo: yes
+
+- name: Create the forecastio coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/forecastio/forecastio_air.py"
+  ignore_errors: yes
+
+- name: Django updatelayers
+  django_manage: command=updatelayers
+                 app_path={{app_code_dir}}/{{app_name}}
+                 virtualenv={{virtualenv_dir}}/{{app_name}}
+                 settings={{main_module}}.settings

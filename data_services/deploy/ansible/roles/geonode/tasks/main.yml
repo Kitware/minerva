@@ -135,16 +135,6 @@
                  virtualenv={{virtualenv_dir}}/{{app_name}}
                  settings={{main_module}}.settings
 
-- name: Copy initial fixtures in place
-  template: src=fixtures.json.j2 dest={{ app_code_dir}}/{{app_name}}/fixtures.json
-
-- name: Load the fixtures (Create the superuser)
-  django_manage: command="loaddata"
-                 app_path={{app_code_dir}}/{{app_name}}
-                 virtualenv={{virtualenv_dir}}/{{app_name}}
-                 settings={{main_module}}.settings
-                 fixtures={{ app_code_dir}}/{{app_name}}/fixtures.json
-
 - name: wait for geoserver to be up
   shell: curl --head --silent {{geoserver_root_url}}/web/
   register: result

@@ -41,5 +41,3 @@ Note: You may need to change the IP configuration in the VagrantFile to a valid 
 
     $ vagrant up minerva_dataservices
     $ vagrant ssh minerva_dataservices
-    $ source venvs/geonode/bin/activate
-    $ django-admin.py createsuperuser --settings=geonode.settings
