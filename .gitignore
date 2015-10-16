@@ -5,3 +5,4 @@ npm-debug.log
 .tern-*
 src
 /analyses/*/*/analysis.cfg
+/docs/_build/
