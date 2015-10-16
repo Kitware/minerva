@@ -19,11 +19,10 @@
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import getUrlParts, Resource
+from girder.api.rest import getUrlParts
 
 from girder.plugins.minerva.rest.source import Source
-from girder.plugins.minerva.utility.minerva_utility import \
-    encryptCredentials, findDatasetFolder, updateMinervaMetadata
+from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 
 class PostgresSource(Source):
