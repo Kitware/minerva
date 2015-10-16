@@ -10,6 +10,8 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
                 return new minerva.models.ElasticsearchSourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 's3') {
                 return new minerva.models.S3SourceModel(attrs, options);
+            } else if (attrs.meta.minerva.source_type === 'postgres') {
+                return new minerva.models.PostgresSourceModel(attrs, options);
             }
         }
 
