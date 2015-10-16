@@ -25,6 +25,14 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                     collection: this.collection,
                     parentView: this.parentView
                 }).render();
+            } else if (sourceType === 'm-postgres-source') {
+                this.postgresSourceWidget = new minerva.views.AddPostgresSourceWidget({
+                    el: container,
+                    title: 'Enter Postgres Source details',
+                    noParent: true,
+                    collection: this.collection,
+                    parentView: this.parentView
+                }).render();
             } else {
                 console.error('Unknown source type');
             }
