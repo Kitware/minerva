@@ -9,8 +9,8 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     changeLayerOpacity: function (dataset) {
-      this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
-      this.map.draw();
+        this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
+        this.map.draw();
     },
 
     _specifyWmsDatasetLayer: function (dataset, layer) {

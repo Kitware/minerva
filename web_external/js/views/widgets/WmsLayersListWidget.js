@@ -36,18 +36,18 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     filterLayers: function (text) {
-      var data = this.layers;
-      var pattern = new RegExp(text,'gi');
-  		var filteredData =  _.filter(data, function(layer) {
-  		  return pattern.test(layer.layer_title);
-  		});
-      $('.item-list').html('');
-      filteredData.forEach(_.bind(function (layer) {
-        var layerView = minerva.templates.layersListWidget({
-            layer: layer
+        var data = this.layers;
+        var pattern = new RegExp(text, 'gi');
+        var filteredData = _.filter(data, function (layer) {
+            return pattern.test(layer.layer_title);
         });
-        $('.item-list').append(layerView);
-      }, this));
+        $('.item-list').html('');
+        filteredData.forEach(_.bind(function (layer) {
+            var layerView = minerva.templates.layersListWidget({
+                layer: layer
+            });
+            $('.item-list').append(layerView);
+        }, this));
     },
 
     initialize: function (settings) {
