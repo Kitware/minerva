@@ -9,7 +9,7 @@ Minerva: A Girder plugin for geospatial visualization
 What is Minerva?
 ----------------
 
-Minerva is an open source platform for geospatial visualization using `Girder`_ as it's datastore.
+Minerva is an open source platform for geospatial visualization using `Girder`_ as its datastore.
 
 Glossary
 --------
