@@ -30,8 +30,8 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         },
 
         'keyup #filter-layers': function (e) {
-          var text = $(e.target).val();
-          this.filterLayers(text);
+            var text = $(e.target).val();
+            this.filterLayers(text);
         }
     },
 
