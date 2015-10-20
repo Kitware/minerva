@@ -71,15 +71,14 @@ def run(job):
         searchResult = searchBodyJson \
             .using(client=es) \
             .index(source['meta']['minerva']['elasticsearch_params']['index']) \
-            .filter('terms', id=ad_ids) \
-            .execute() \
-            .to_dict()
+            .filter('terms', id=ads.keys()) \
+            .scan()
 
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()
         outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
         writer = open(outFilepath, 'w')
-        writer.write(json.dumps(searchResult))
+        writer.write(json.dumps([res.to_dict() for res in searchResult]))
         writer.close()
 
         # rename the file so it will have the right name when uploaded
