@@ -2,37 +2,7 @@ minerva.views.DataPanel = minerva.View.extend({
     events: {
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
-        'click .csv-mapping': 'mapTableDataset',
         'click .dataset-info': 'displayDatasetInfo'
-    },
-
-    mapTableDataset: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        // TODO may want to split out json from csv at some point
-        // TODO standardize on callback or else dual calls of getX and getXData
-
-        var datasetType = dataset.getDatasetType();
-        if (datasetType === 'json' || datasetType === 'mongo') {
-            this.keymapWidget = new minerva.views.KeymapWidget({
-                el: $('#g-dialog-container'),
-                dataset: dataset,
-                parentView: this
-            });
-            this.keymapWidget.render();
-        } else {
-            // assuming csv
-            // list the files of this item
-            var filesCallback = _.bind(function () {
-                this.tableWidget = new minerva.views.TableWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.tableWidget.render();
-            }, this);
-            dataset.getCSVFile(filesCallback);
-        }
     },
 
     addDatasetToSessionEvent: function (event) {
@@ -69,9 +39,6 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.session = settings.session;
-        this.upload = settings.upload;
-        this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
