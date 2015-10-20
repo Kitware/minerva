@@ -31,8 +31,3 @@
                                 - displayed = true
                             - var classes = (displayed ? 'icon-table csv-mapping icon-disabled dataset-in-session' : 'icon-table csv-mapping icon-enabled')
                             i(class=classes)&attributes(attributes)
-
-
-                         //- icon for s3 menu
-                        if dataset.get('meta').minerva.original_type === 's3'
-                            i(class='icon-menu s3-bucket-menu icon-enabled')&attributes(attributes)

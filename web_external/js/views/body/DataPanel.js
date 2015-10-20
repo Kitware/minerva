@@ -4,20 +4,7 @@ minerva.views.DataPanel = minerva.View.extend({
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
-        'click .s3-bucket-menu': 'selectS3Files',
         'click .dataset-info': 'displayDatasetInfo'
-    },
-
-    selectS3Files: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-
-        this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
-            el: $('#g-dialog-container'),
-            dataset: dataset,
-            parentView: this
-        });
-
     },
 
     mapTableDataset: function (event) {
