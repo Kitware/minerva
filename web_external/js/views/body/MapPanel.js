@@ -13,7 +13,7 @@ minerva.views.MapPanel = minerva.View.extend({
         var baseUrl = minervaMetadata.base_url;
         if (minervaMetadata.hasOwnProperty('credentials')) {
             baseUrl = '/wms_proxy/' + encodeURIComponent(baseUrl) + '/' +
-                    minervaMetadata.credentials;
+                minervaMetadata.credentials;
         }
         var layerName = minervaMetadata.type_name;
         var projection = 'EPSG:3857';
@@ -75,6 +75,59 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.uiLayer = this.map.createLayer('ui');
                 this.uiLayer.createWidget('slider');
                 this.map.draw();
+            } else if (dataset.get('meta').minerva.source === 'elastic_geospace') { // epic errors
+                dataset.once('m:dataLoaded', function (datasetId) {
+                    var dataset = this.collection.get(datasetId),
+                        data = JSON.parse(dataset.fileData);
+
+                    if (_.has(data, 'hits') && _.has(data.hits, 'hits')) {
+                        var layer = this.map.createLayer('feature', {
+                            renderer: 'vgl'
+                        });
+
+                        layer.createFeature('point', {selectionAPI: true})
+                            .data(data.hits.hits)
+                            .style({
+                                fillColor: 'black',
+                                fillOpacity: 0.85,
+                                stroke: false,
+                                radius: 5
+                            })
+                            .position(function (d) {
+                                return {
+                                    x: Number(d._source.longitude),
+                                    y: Number(d._source.latitude)
+                                };
+                            })
+                            .geoOn(geo.event.feature.mouseover, _.bind(function (evt) {
+                                $('#es-geospace-overlay').remove();
+
+                                var sliderLayer = this.map.node().children()[1];
+                                $(sliderLayer).append(
+                                    '<div id="es-geospace-overlay">' + evt.data._source.title  + '</div>');
+
+                                var pos = this.map.gcsToDisplay({
+                                    x: Number(evt.data._source.longitude),
+                                    y: Number(evt.data._source.latitude)
+                                });
+
+                                $('#es-geospace-overlay').css('position', 'absolute');
+                                $('#es-geospace-overlay').css('left', pos.x + 'px');
+                                $('#es-geospace-overlay').css('top', pos.y + 'px');
+                            }, this))
+                            .geoOn(geo.event.feature.mouseout, function (evt) {
+                                $('#es-geospace-overlay').remove();
+                            })
+                            .geoOn(geo.event.pan, function (evt) {
+                                console.log('pan');
+                            });
+
+
+                        this.map.draw();
+                    }
+                }, this);
+
+                dataset.loadData();
             } else {
                 // Assume the dataset provides a reader, so load the data
                 // and adapt the dataset to the map with the reader.
@@ -143,6 +196,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 }
             }
         }, this);
+
+        window.minerva_map = this;
     },
 
     renderMap: function () {
