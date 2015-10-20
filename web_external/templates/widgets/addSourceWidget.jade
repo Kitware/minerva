@@ -7,18 +7,19 @@
           | Select source type to add
       .modal-body
         .form-group
-          .radio
-            input#m-wms-source(type="radio", name="m-source-add-method", checked=true)
-            label
-              i.icon-layers.m-add-source-type-icon
-              | WMS Source
-          .radio
-            input#m-elasticsearch-source(type="radio", name="m-source-add-method")
-            label
-              i.icon-search.m-add-source-type-icon
-              | Elasticsearch Source
+          - var checked = true
+          each properties, sourceType in sourceTypes
+            .radio
+              - var id = 'm-' + sourceType + '-source'
+              - var iconClasses = properties.icon + ' m-add-source-type-icon'
+              input(type="radio", id=id, name="m-source-add-method", checked=checked)
+              label
+                i(class=iconClasses)
+                | #{properties.label}
+              if checked === true
+                - checked = false
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-source-button.btn.btn-small.btn-primary
-            i.icon-plus-squared
-            | Add Source
+          i.icon-plus-squared
+          | Add source

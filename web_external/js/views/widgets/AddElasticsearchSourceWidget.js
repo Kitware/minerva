@@ -23,6 +23,7 @@ minerva.views.AddElasticsearchSourceWidget = minerva.View.extend({
 
     initialize: function (settings) {
         this.collection = settings.collection;
+        this.title = 'Enter Elasticsearch Source details';
     },
 
     render: function () {

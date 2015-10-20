@@ -6,25 +6,23 @@ minerva.views.AddSourceWidget = minerva.View.extend({
         'submit #m-add-source-form': function (e) {
             e.preventDefault();
 
+            // TODO better to have single buttons instead of radio?
+            // That way user only has to click once instead of radio + Add
             var sourceType = $('#m-add-source-form input:radio:checked').attr('id');
+            // get sourcetype from m-sourcetype-source
+            sourceType = sourceType.split('-')[1];
             var container = $('#g-dialog-container');
 
-            if (sourceType === 'm-wms-source') {
-                this.wmsSourceWidget = new minerva.views.AddWmsSourceWidget({
-                    el: container,
-                    title: 'Enter WMS Source details',
-                    noParent: true,
-                    collection: this.collection,
-                    parentView: this.parentView
-                }).render();
-            } else if (sourceType === 'm-elasticsearch-source') {
-                this.elasticsearchSourceWidget = new minerva.views.AddElasticsearchSourceWidget({
-                    el: container,
-                    title: 'Enter Elasticsearch Source details',
-                    noParent: true,
-                    collection: this.collection,
-                    parentView: this.parentView
-                }).render();
+            var settings = {
+                el: container,
+                noParent: true,
+                collection: this.collection,
+                parentView: this.parentView
+            };
+
+            if (_.has(this.sourceTypes, sourceType)) {
+                var widget = new this.sourceTypes[sourceType].widget(settings);
+                widget.render();
             } else {
                 console.error('Unknown source type');
             }
@@ -33,12 +31,35 @@ minerva.views.AddSourceWidget = minerva.View.extend({
 
     initialize: function (settings) {
         this.collection = settings.collection;
+        // TODO would be nice if new source types could register themselves,
+        // perhaps with a method on the minerva object, that we could then
+        // query here.  All the source types register themselves upon definition,
+        // and we query here upon instantation.  This registration process
+        // should also add them to the SourceCollection model function.
+        this.sourceTypes = {
+            wms: {
+                label: 'WMS source',
+                icon: 'icon-layers',
+                widget: minerva.views.AddWmsSourceWidget
+            },
+            elasticsearch: {
+                label: 'Elasticsearch source',
+                icon: 'icon-search',
+                widget: minerva.views.AddElasticsearchSourceWidget
+            },
+            s3: {
+                label: 'S3 bucket source',
+                icon: 'icon-cloud',
+                widget: minerva.views.AddS3SourceWidget
+            }
+        };
     },
 
     render: function () {
         var view = this;
         var modal = this.$el.html(minerva.templates.addSourceWidget({
-            session: this.model
+            session: this.model,
+            sourceTypes: this.sourceTypes
         })).girderModal(this).on('shown.bs.modal', function () {
             view.$('#m-wms-name').focus();
         }).on('hidden.bs.modal', function () {
