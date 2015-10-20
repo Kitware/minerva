@@ -1,6 +1,5 @@
 minerva.views.DataPanel = minerva.View.extend({
     events: {
-        'click .m-add-dataset-button': 'addDataSetDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
@@ -79,7 +78,6 @@ minerva.views.DataPanel = minerva.View.extend({
         }, this).listenTo(this.collection, 'change', function () {
             this.render();
         }, this).listenTo(this.collection, 'change:meta', function () {
-            console.log('meta change');
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function () {
             this.render();
@@ -105,20 +103,7 @@ minerva.views.DataPanel = minerva.View.extend({
 
         // TODO pagination and search?
 
-        if (this.upload) {
-            this.uploadDialog();
-        }
-
         return this;
-    },
-
-    addDataSetDialogEvent: function () {
-        var container = $('#g-dialog-container');
-
-        this.addDataSetWidget = new minerva.views.AddDataSetWidget({
-            el: container,
-            parentView: this
-        }).render();
     }
 
 });
