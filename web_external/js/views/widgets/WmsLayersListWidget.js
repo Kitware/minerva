@@ -63,10 +63,10 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
         this.layers.forEach(_.bind(function (layer) {
-          var layerView = minerva.templates.layersListWidget({
-              layer: layer
-          });
-          $('.item-list').append(layerView);
+            var layerView = minerva.templates.layersListWidget({
+                layer: layer
+            });
+            $('.item-list').append(layerView);
         }, this));
 
         return this;
