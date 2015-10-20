@@ -22,14 +22,12 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
     },
 
     destroy: function () {
-        var meta = this.get('meta');
+        var folderId = this.mM().folder_id;
+        this.on('g:deleted', _.bind(function () {
 
-        // First call the superclass to delete the item
-        minerva.models.DatasetModel.prototype.destroy.call(this).on('g:deleted', _.bind(function () {
-
-            if (meta) {
+            if (folderId) {
                 var args = {
-                    path: '/folder/' + meta.minerva.folderId,
+                    path: '/folder/' + folderId,
                     type: 'DELETE'
                 };
 
@@ -41,6 +39,8 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
             }
 
         }, this));
+        // First call the superclass to delete the item
+        minerva.models.SourceModel.prototype.destroy.call(this);
 
         return this;
     }
