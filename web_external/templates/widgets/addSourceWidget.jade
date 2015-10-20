@@ -9,7 +9,7 @@
         .form-group
           - var checked = true
           each properties, sourceType in sourceTypes
-            .radio
+            .radio.m-add-source-radio
               - var id = 'm-' + sourceType + '-source'
               - var iconClasses = properties.icon + ' m-add-source-type-icon'
               input(type="radio", id=id, name="m-source-add-method", checked=checked)

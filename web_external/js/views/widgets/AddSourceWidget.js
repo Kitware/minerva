@@ -26,6 +26,9 @@ minerva.views.AddSourceWidget = minerva.View.extend({
             } else {
                 console.error('Unknown source type');
             }
+        },
+        'click .m-add-source-radio': function (e) {
+            $(e.currentTarget).find('input:radio').first().prop('checked', true);
         }
     },
 
