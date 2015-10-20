@@ -9,6 +9,14 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
+    mM: function(minervaMetadata) {
+        if (minervaMetadata) {
+            this.setMinervaMetadata(minervaMetadata);
+        } else {
+            return this.getMinervaMetadata();
+        }
+    },
+
     getMinervaMetadata: function () {
         // for now assume that keys exists and allow exceptions to happen if they don't
         var meta = this.get('meta');
