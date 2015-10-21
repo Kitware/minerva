@@ -3,8 +3,8 @@ Minerva is an application framework that provides client/server/services
 capabilities using [Girder](http://www.github.com/Girder/girder), [GeoJS]
 (http://www.github.com/OpenGeoscience/geojs) and other open source tools.
 Jointly developed by  [Kitware](http://www.kitware.com) and
-[Epidemico](http://epidemico.com), Minerva focus is big data and cloud
-enabled data data analysis and visualization.
+[Epidemico](http://epidemico.com), Minerva is designed for big data and cloud
+enabled data analysis and visualization.
 
 #### Documentation
 
