@@ -9,6 +9,8 @@ minerva.collections.DatasetCollection = minerva.collections.MinervaCollection.ex
                 return new minerva.models.GeojsonDatasetModel(attrs, options);
             } else if (attrs.meta.minerva.original_type === 's3') {
                 return new minerva.models.S3DatasetModel(attrs, options);
+            } else if (attrs.meta.minerva.original_type === 'elasticsearch') {
+                return new minerva.models.ElasticsearchDatasetModel(attrs, options);
             }
         }
         return new minerva.models.DatasetModel(attrs, options);

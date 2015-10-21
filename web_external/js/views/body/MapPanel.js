@@ -75,7 +75,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.uiLayer = this.map.createLayer('ui');
                 this.uiLayer.createWidget('slider');
                 this.map.draw();
-            } else if (dataset.get('meta').minerva.source === 'elastic_geospace') { // epic errors
+            } else if (dataset.getDatasetType() === 'elasticsearch') {
                 dataset.once('m:dataLoaded', function (datasetId) {
                     var dataset = this.collection.get(datasetId),
                         data = JSON.parse(dataset.fileData);
@@ -84,49 +84,44 @@ minerva.views.MapPanel = minerva.View.extend({
                         renderer: 'vgl'
                     });
 
-                    var numUniqueLocs = _.uniq(_.map(data, function (datum) {
-                        return datum.latitude[0] + datum.longitude[0];
-                    })).length;
+                    this.datasetLayers[datasetId] = featureLayer;
 
-                    console.log('rendering ' + data.length + ' points in ' + numUniqueLocs + ' locations.');
+
+                    console.log('rendering ' + data.features.length + ' points');
+
+                    var coordCounts = _.countBy(data.features, function(feature) {
+                        return feature.geometry.coordinates;
+                    });
 
                     featureLayer.createFeature('point', {selectionAPI: true})
-                        .data(data)
+                        .clustering({radius: 0.0})
                         .style({
                             fillColor: 'black',
                             fillOpacity: 0.85,
                             stroke: false,
                             radius: function (d) {
-                                return 6;
+                                if (d.__cluster) {
+                                    // @todo Fix this indexing
+                                    return 5 + Math.log(coordCounts[d.x + ',' + d.y]);
+                                }
+
+                                return 5;
                             }
                         })
                         .position(function (d) {
                             return {
-                                x: Number(d.longitude),
-                                y: Number(d.latitude)
+                                x: d.geometry.coordinates[0],
+                                y: d.geometry.coordinates[1]
                             };
                         })
                         .geoOn(geo.event.feature.mouseover, _.bind(function (evt) {
-                            console.log(evt.data);
-
-                            $('#es-geospace-overlay').remove();
-
-                            $(this.uiLayer.node()).append(
-                                '<div id="es-geospace-overlay">' + evt.data.title  + '</div>'
-                            );
-
-                            var pos = this.map.gcsToDisplay({
-                                x: Number(evt.data.longitude),
-                                y: Number(evt.data.latitude)
-                            });
-
-                            $('#es-geospace-overlay').css('position', 'absolute');
-                            $('#es-geospace-overlay').css('left', pos.x + 'px');
-                            $('#es-geospace-overlay').css('top', pos.y + 'px');
+                            if (evt.data.__cluster) {
+                                console.log('Cluster containing ' + evt.data.__data.length + ' points.');
+                            } else {
+                                console.log(evt.data.properties);
+                            }
                         }, this))
-                        .geoOn(geo.event.feature.mouseout, function (evt) {
-                            $('#es-geospace-overlay').remove();
-                        });
+                        .data(data.features);
 
                     this.map.draw();
                 }, this);
@@ -165,7 +160,7 @@ minerva.views.MapPanel = minerva.View.extend({
             this.legendWidget[datasetId].remove(datasetId);
             delete this.legendWidget[datasetId];
         }
-        if (dataset.getDatasetType() === 'wms' && layer) {
+        if (_.contains(['wms', 'elasticsearch'], dataset.getDatasetType()) && layer) {
             this.map.deleteLayer(layer);
         } else if (layer) {
             layer.clear();

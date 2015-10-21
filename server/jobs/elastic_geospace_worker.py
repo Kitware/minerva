@@ -7,7 +7,7 @@ import tempfile
 import traceback
 
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Index
+from elasticsearch_dsl import Search, Index, F
 
 from girder.constants import AccessType
 from girder.utility import config
@@ -59,6 +59,8 @@ def run(job):
         assert elasticSearchParams['msa'] in [row[0] for row in cursor.fetchall()]
 
         # Find all ads within that MSA
+        # todo - utilize the geojson querying
+        # see: http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html
         cursor.execute(("select als.ad_id, ST_AsGeoJSON(location) "
                         "from ad_locations_sample als, msas "
                         "where msas.name = '%s' "
@@ -71,12 +73,15 @@ def run(job):
             source['meta']['minerva']['elasticsearch_params']['host_name'])
         es = Elasticsearch([esUrl])
 
-        # Grab fields from elasticsearch where ad ids must be in relevant MSA
+        # Grab fields from elasticsearch where ad ids must be in relevant MSA,
+        # and lat/long fields must exist
         searchResult = Search() \
             .using(client=es) \
             .index(source['meta']['minerva']['elasticsearch_params']['index']) \
             .fields(['id', 'latitude', 'longitude', 'text']) \
-            .filter('terms', id=ads.keys())
+            .filter('terms', id=ads.keys()) \
+            .filter(~F('missing', field='latitude')) \
+            .filter(~F('missing', field='longitude'))
 
         # If they provided an ES query - pass the text into a match query
         if elasticSearchParams['query']:
@@ -85,11 +90,31 @@ def run(job):
         # Create generator for streaming results
         searchResult = searchResult.scan()
 
+        finalResult = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+
+        for result in searchResult:
+            result = result.to_dict()
+
+            finalResult['features'].append({
+                'type': 'Feature',
+                'properties': result,
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [
+                        float(result['longitude'][0]),
+                        float(result['latitude'][0])
+                    ]
+                }
+            })
+
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()
         outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
         writer = open(outFilepath, 'w')
-        writer.write(json.dumps([res.to_dict() for res in searchResult]))
+        writer.write(json.dumps(finalResult))
         writer.close()
 
         # rename the file so it will have the right name when uploaded

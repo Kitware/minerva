@@ -168,7 +168,7 @@ class Analysis(Resource):
             'dataset_id': dataset['_id'],
             'source': 'elastic_geospace',
             'elastic_search_params': elasticSearchParams,
-            'original_type': 'json'
+            'original_type': 'elasticsearch'
         }
         metadata['minerva'] = minerva_metadata
         self.model('item').setMetadata(dataset, metadata)

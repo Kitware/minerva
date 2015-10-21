@@ -108,7 +108,7 @@ class ElasticsearchQuery(Resource):
             async=True)
 
         minerva_metadata = {
-            'dataset_type': 'json',
+            'dataset_type': 'elasticsearch',
             'source_id': params['sourceId'],
             'source': 'elasticsearch',
             'elasticsearch_params': elasticsearchParams
