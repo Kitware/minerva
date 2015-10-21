@@ -30,6 +30,7 @@ def run(job):
         # TODO better to create a job token rather than a user token?
         token = kwargs['token']
         datasetId = str(kwargs['dataset']['_id'])
+        elasticSearchParams = kwargs['params']['elasticSearchParams']
 
         # connect to girder and upload the file
         # TODO will probably have to change this from local to romanesco
@@ -40,8 +41,8 @@ def run(job):
         client.token = token['_id']
 
         # Get datasource
-        source = client.getItem(kwargs['params']['elasticSearchParams']['sourceId'])
-        pgSource = client.getItem(kwargs['params']['elasticSearchParams']['pgSourceId'])
+        source = client.getItem(elasticSearchParams['sourceId'])
+        pgSource = client.getItem(elasticSearchParams['pgSourceId'])
 
         dbuser, dbpass = decryptCredentials(
             pgSource['meta']['minerva']['postgres_params']['credentials']).split(':')
@@ -51,28 +52,38 @@ def run(job):
             pgSource['meta']['minerva']['postgres_params']['base_url'],
             dbpass
         ))
-
         cursor = conn.cursor()
-        cursor.execute("""SELECT ad_id FROM ad_locations WHERE ST_Contains((%s), location)""" % (
-            "SELECT region FROM msas WHERE name = 'Greeley, CO' LIMIT 1"
-        ))
-        ad_ids = [row[0] for row in cursor.fetchall()]
+
+        # Validate MSA name before injecting..
+        cursor.execute("select name from msas")
+        assert elasticSearchParams['msa'] in [row[0] for row in cursor.fetchall()]
+
+        # Find all ads within that MSA
+        cursor.execute(("select als.ad_id, ST_AsGeoJSON(location) "
+                        "from ad_locations_sample als, msas "
+                        "where msas.name = '%s' "
+                        "and ST_Contains(msas.region, als.location)" %
+                        elasticSearchParams['msa']))
+        ads = {k:v for (k, v) in cursor.fetchall()}
 
         esUrl = 'https://%s@%s' % (decryptCredentials(
             source['meta']['minerva']['elasticsearch_params']['credentials']),
             source['meta']['minerva']['elasticsearch_params']['host_name'])
         es = Elasticsearch([esUrl])
 
-        # TODO sleeping in async thread, probably starving other tasks
-        # would be better to split this into two or more parts, creating
-        # additional jobs as needed
-        searchBodyJson = Search.from_dict(
-            kwargs['params']['elasticSearchParams']['searchParams'])
-        searchResult = searchBodyJson \
+        # Grab fields from elasticsearch where ad ids must be in relevant MSA
+        searchResult = Search() \
             .using(client=es) \
             .index(source['meta']['minerva']['elasticsearch_params']['index']) \
-            .filter('terms', id=ads.keys()) \
-            .scan()
+            .fields(['id', 'latitude', 'longitude', 'text']) \
+            .filter('terms', id=ads.keys())
+
+        # If they provided an ES query - pass the text into a match query
+        if elasticSearchParams['query']:
+            searchResult = searchResult.query('match', _all=elasticSearchParams['query'])
+
+        # Create generator for streaming results
+        searchResult = searchResult.scan()
 
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()

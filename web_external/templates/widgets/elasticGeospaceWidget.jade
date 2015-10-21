@@ -19,12 +19,20 @@
                 if source.getMinervaMetadata().source_type === "postgres"
                   option(value=source.get("_id"))= source.get('name')
             .g-validation-failed-message
+          .form-group.m-elastic-geospace-input-msa
+            label.control-label(for="m-elastic-geospace-input-msa") MSA
+            select.form-control.input-sm#m-elastic-geospace-input-msa
+              each msa in msas
+                option(value=msa)= msa
           .form-group
             label.control-label(for="m-elastic-geospace-query") Query
             input.input-sm#m-elastic-geospace-query.form-control(type="text", placeholder="Italian")
           .form-group
             label.control-label(for="m-elastic-geospace-daterange") Date Range
             input.input-sm#m-elastic-geospace-daterange.form-control(type="text", name="daterangepicker", placeholder="All")
+          .form-group
+            label.control-label(for="m-elastic-geospace-dataset-name") Dataset Name
+            input.input-sm#m-elastic-geospace-dataset-name.form-control(type="text", name="dataset-name", placeholder="My Dataset")
         .modal-footer
             a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
             button.m-run-elastic-geospace.btn.btn-small.btn-primary(type="submit")
