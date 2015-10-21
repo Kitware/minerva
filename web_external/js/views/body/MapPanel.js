@@ -80,51 +80,55 @@ minerva.views.MapPanel = minerva.View.extend({
                     var dataset = this.collection.get(datasetId),
                         data = JSON.parse(dataset.fileData);
 
-                    if (_.has(data, 'hits') && _.has(data.hits, 'hits')) {
-                        var layer = this.map.createLayer('feature', {
-                            renderer: 'vgl'
-                        });
+                    var featureLayer = this.map.createLayer('feature', {
+                        renderer: 'vgl'
+                    });
 
-                        layer.createFeature('point', {selectionAPI: true})
-                            .data(data.hits.hits)
-                            .style({
-                                fillColor: 'black',
-                                fillOpacity: 0.85,
-                                stroke: false,
-                                radius: 5
-                            })
-                            .position(function (d) {
-                                return {
-                                    x: Number(d._source.longitude),
-                                    y: Number(d._source.latitude)
-                                };
-                            })
-                            .geoOn(geo.event.feature.mouseover, _.bind(function (evt) {
-                                $('#es-geospace-overlay').remove();
+                    var numUniqueLocs = _.uniq(_.map(data, function (datum) {
+                        return datum.latitude[0] + datum.longitude[0];
+                    })).length;
 
-                                var sliderLayer = this.map.node().children()[1];
-                                $(sliderLayer).append(
-                                    '<div id="es-geospace-overlay">' + evt.data._source.title  + '</div>');
+                    console.log('rendering ' + data.length + ' points in ' + numUniqueLocs + ' locations.');
 
-                                var pos = this.map.gcsToDisplay({
-                                    x: Number(evt.data._source.longitude),
-                                    y: Number(evt.data._source.latitude)
-                                });
+                    featureLayer.createFeature('point', {selectionAPI: true})
+                        .data(data)
+                        .style({
+                            fillColor: 'black',
+                            fillOpacity: 0.85,
+                            stroke: false,
+                            radius: function (d) {
+                                return 6;
+                            }
+                        })
+                        .position(function (d) {
+                            return {
+                                x: Number(d.longitude),
+                                y: Number(d.latitude)
+                            };
+                        })
+                        .geoOn(geo.event.feature.mouseover, _.bind(function (evt) {
+                            console.log(evt.data);
 
-                                $('#es-geospace-overlay').css('position', 'absolute');
-                                $('#es-geospace-overlay').css('left', pos.x + 'px');
-                                $('#es-geospace-overlay').css('top', pos.y + 'px');
-                            }, this))
-                            .geoOn(geo.event.feature.mouseout, function (evt) {
-                                $('#es-geospace-overlay').remove();
-                            })
-                            .geoOn(geo.event.pan, function (evt) {
-                                console.log('pan');
+                            $('#es-geospace-overlay').remove();
+
+                            $(this.uiLayer.node()).append(
+                                '<div id="es-geospace-overlay">' + evt.data.title  + '</div>'
+                            );
+
+                            var pos = this.map.gcsToDisplay({
+                                x: Number(evt.data.longitude),
+                                y: Number(evt.data.latitude)
                             });
 
+                            $('#es-geospace-overlay').css('position', 'absolute');
+                            $('#es-geospace-overlay').css('left', pos.x + 'px');
+                            $('#es-geospace-overlay').css('top', pos.y + 'px');
+                        }, this))
+                        .geoOn(geo.event.feature.mouseout, function (evt) {
+                            $('#es-geospace-overlay').remove();
+                        });
 
-                        this.map.draw();
-                    }
+                    this.map.draw();
                 }, this);
 
                 dataset.loadData();
