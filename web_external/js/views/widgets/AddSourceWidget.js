@@ -41,17 +41,17 @@ minerva.views.AddSourceWidget = minerva.View.extend({
         // should also add them to the SourceCollection model function.
         this.sourceTypes = {
             wms: {
-                label: 'WMS source',
+                label: 'WMS',
                 icon: 'icon-layers',
                 widget: minerva.views.AddWmsSourceWidget
             },
             elasticsearch: {
-                label: 'Elasticsearch source',
+                label: 'Elasticsearch',
                 icon: 'icon-search',
                 widget: minerva.views.AddElasticsearchSourceWidget
             },
             s3: {
-                label: 'S3 bucket source',
+                label: 'S3 bucket',
                 icon: 'icon-cloud',
                 widget: minerva.views.AddS3SourceWidget
             }
