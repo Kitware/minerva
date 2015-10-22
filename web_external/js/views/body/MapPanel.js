@@ -78,34 +78,36 @@ minerva.views.MapPanel = minerva.View.extend({
             } else if (dataset.getDatasetType() === 'elasticsearch') {
                 dataset.once('m:dataLoaded', function (datasetId) {
                     var dataset = this.collection.get(datasetId),
-                        data = JSON.parse(dataset.fileData);
+                        data = JSON.parse(dataset.fileData),
+                        msa = dataset.get('meta').minerva.elastic_search_params.msa,
+                        clustering = false,
+                        featureLayer = this.map.createLayer('feature', {
+                            renderer: 'vgl'
+                        }),
+                        coordCounts = _.countBy(data.features, function(feature) {
+                            return feature.geometry.coordinates;
+                        }),
+                        pointFeature = featureLayer.createFeature('point', {selectionAPI: true});
 
-                    var featureLayer = this.map.createLayer('feature', {
-                        renderer: 'vgl'
-                    });
 
                     this.datasetLayers[datasetId] = featureLayer;
 
-
                     console.log('rendering ' + data.features.length + ' points');
 
-                    var coordCounts = _.countBy(data.features, function(feature) {
-                        return feature.geometry.coordinates;
-                    });
+                    if (clustering) {
+                        pointFeature = pointFeature.clustering({radius: 0.0});
+                    }
 
-                    featureLayer.createFeature('point', {selectionAPI: true})
-                        .clustering({radius: 0.0})
+                    pointFeature
                         .style({
                             fillColor: 'black',
-                            fillOpacity: 0.85,
+                            fillOpacity: 0.65,
                             stroke: false,
                             radius: function (d) {
-                                if (d.__cluster) {
-                                    // @todo Fix this indexing
-                                    return 5 + Math.log(coordCounts[d.x + ',' + d.y]);
-                                }
+                                var x = d.geometry.coordinates[0],
+                                    y = d.geometry.coordinates[1];
 
-                                return 5;
+                                return Math.log10(coordCounts[x + ',' + y]) + 2;
                             }
                         })
                         .position(function (d) {
