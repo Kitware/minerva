@@ -55,6 +55,7 @@ def run(job):
         cursor = conn.cursor()
 
         # Validate MSA name before injecting..
+        # Should this be done as a REST-level validation?
         cursor.execute("select name from msas")
         assert elasticSearchParams['msa'] in [row[0] for row in cursor.fetchall()]
 
