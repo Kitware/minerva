@@ -60,7 +60,7 @@ Install of Minerva as a Girder plugin
    be a 32 byte url-safe base-64 encoded string. You can either replace
    the existing string with one of equal length, using letters and
    numbers, and ending with an ‘=’, or generate one within python with
-   the following code::
+   the following code
 
 ::
 
