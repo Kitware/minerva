@@ -8,6 +8,23 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
+    transitionToMsa: function (msa) {
+        if (_.has(this.boundingBoxes, msa)) {
+            var add = function (a, b) {
+                return a + b;
+            };
+
+            this.map.transition({
+                center: {
+                    x: _.reduce(this.boundingBoxes[msa][0], add) / 2,
+                    y: _.reduce(this.boundingBoxes[msa][1], add) / 2
+                },
+                zoom: 8,
+                duration: 1000
+            });
+        }
+    },
+
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
@@ -126,6 +143,8 @@ minerva.views.MapPanel = minerva.View.extend({
                         .data(data.features);
 
                     this.map.draw();
+
+                    this.transitionToMsa(msa);
                 }, this);
 
                 dataset.loadData();
@@ -172,6 +191,40 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        this.once('m:rendermap.after', _.bind(function () {
+            var getBoundingBox = _.memoize(function(coordinates) {
+                var minX = _.first(coordinates)[0],
+                    maxX = minX,
+                    minY = _.first(coordinates)[1],
+                    maxY = minY;
+
+                _.each(_.rest(coordinates), function(coordPair) {
+                    minX = (minX < coordPair[0]) ? minX : coordPair[0];
+                    maxX = (maxX > coordPair[0]) ? maxX : coordPair[0];
+                    minY = (minY < coordPair[1]) ? minY : coordPair[1];
+                    maxY = (maxY > coordPair[1]) ? maxY : coordPair[1];
+                });
+
+                return [
+                    [minX, maxX],
+                    [minY, maxY]
+                ];
+            });
+
+            // @todo - this will never work on another machine
+            girder.restRequest({
+                type: 'GET',
+                path: 'file/' + '5627fb65d2a733029f8d0ed0' + '/download'
+            }).done(_.bind(function (resp) {
+                this.boundingBoxes = {};
+
+                _.each(resp, _.bind(function (geojson, msa) {
+                    this.boundingBoxes[msa] = getBoundingBox(
+                        geojson.features[0].geometry.coordinates[0]);
+                }, this));
+            }, this));
+        }, this));
+
         this.session = settings.session;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
@@ -219,6 +272,8 @@ minerva.views.MapPanel = minerva.View.extend({
             }, this);
         }
         this.map.draw();
+
+        this.trigger('m:rendermap.after', this);
     },
 
     render: function () {
