@@ -110,3 +110,9 @@ From here, you are just following the geojs build instructions.
    
 At this point geojs/dist/built/geo.min.js should be rebuilt, and this will be included the next time minerva is built by grunt-ing at the top level of girder. Note that if geojs/dist/* exists geojs/dist/built/geo.min.js will be used rather than geojs/geo.min.js
 
+Data services
+~~~~~~~~~~~~~
+
+Several minerva components rely on having a data services server up and running.  You can
+either connect to an existing server or spin up a local server using vagrant.  See
+the :doc:`deploy-data-services` section for more details.
