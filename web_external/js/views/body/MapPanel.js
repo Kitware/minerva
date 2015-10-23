@@ -97,12 +97,8 @@ minerva.views.MapPanel = minerva.View.extend({
                     var dataset = this.collection.get(datasetId),
                         data = JSON.parse(dataset.fileData),
                         msa = dataset.get('meta').minerva.elastic_search_params.msa,
-                        clustering = false,
                         featureLayer = this.map.createLayer('feature', {
                             renderer: 'vgl'
-                        }),
-                        coordCounts = _.countBy(data.features, function(feature) {
-                            return feature.geometry.coordinates;
                         }),
                         pointFeature = featureLayer.createFeature('point', {selectionAPI: true});
 
@@ -111,20 +107,19 @@ minerva.views.MapPanel = minerva.View.extend({
 
                     console.log('rendering ' + data.features.length + ' points');
 
-                    if (clustering) {
-                        pointFeature = pointFeature.clustering({radius: 0.0});
-                    }
 
                     pointFeature
+                        .clustering({radius: 0.0})
                         .style({
                             fillColor: 'black',
                             fillOpacity: 0.65,
                             stroke: false,
                             radius: function (d) {
-                                var x = d.geometry.coordinates[0],
-                                    y = d.geometry.coordinates[1];
+                                if (d.__cluster) {
+                                    return Math.log10(d.__data.length) + 2;
+                                }
 
-                                return Math.log10(coordCounts[x + ',' + y]) + 2;
+                                return 2;
                             }
                         })
                         .position(function (d) {
