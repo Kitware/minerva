@@ -168,6 +168,7 @@ module.exports = function (grunt) {
                 '/' + staticDir + '/geo.ext.min.js',
                 // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
                 '/' + staticDir + '/jquery.gridster.js',
+                '/' + staticDir + '/jquery-ui.min.js',
                 '/' + staticDir + '/geo.min.js',
                 '/' + rootStaticDir + '/app.min.js'
             ];
@@ -208,6 +209,9 @@ module.exports = function (grunt) {
                 '/' + rootStaticLibDir + '/fontello/css/fontello.css',
                 '/' + rootStaticLibDir + '/fontello/css/animation.css',
                 '/' + staticDir + '/jquery.gridster.min.css',
+                '/' + staticDir + '/jquery-ui.min.css',
+                '/' + staticDir + '/jquery-ui.structure.min.css',
+                '/' + staticDir + '/jquery-ui.theme.min.css',
                 '/' + rootStaticDir + '/app.min.css',
                 'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
                 'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
