@@ -64,6 +64,18 @@ minerva.views.MapPanel = minerva.View.extend({
         );
     },
 
+    esToggleClustering: function (evt) {
+        if (this.esClustered) {
+            this.esPointFeature.clustering(false);
+            this.esClustered = false;
+        } else {
+            this.esPointFeature.clustering({radius: 0.0});
+            this.esClustered = true;
+        }
+
+        this.map.draw();
+    },
+
     _esMouseover: function (evt) {
         if (evt.data.__cluster) {
             console.log('Cluster containing ' + evt.data.__data.length + ' points.');
@@ -85,6 +97,7 @@ minerva.views.MapPanel = minerva.View.extend({
             selectionAPI: true,
             dynamicDraw: true
         });
+        this.esClustered = true;
         this.datasetLayers[datasetId] = this.esFeatureLayer;
 
         this.esPointFeature
