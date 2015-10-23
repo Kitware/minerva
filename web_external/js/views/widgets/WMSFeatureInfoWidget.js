@@ -1,26 +1,28 @@
 minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
    callInfo: function (layer_idx, coords) {
-        var url = this.getUrl(layer_idx, coords);
-        var panel = this;
-        $.ajax({
-            url: url,
-            jsonp: false,
-            async: false,
-            jsonpCallback: 'getLayerFeatures',
-            error: function (a, b, c) {
-                console.log(c);
-            }
-        }).done(function (data) {
-            panel.content += data;
+        if (this.layers.length > 0) {
+            var url = this.getUrl(layer_idx, coords);
+            var panel = this;
+            $.ajax({
+                url: url,
+                jsonp: false,
+                async: false,
+                jsonpCallback: 'getLayerFeatures',
+                error: function (a, b, c) {
+                    console.log(c);
+                }
+            }).done(function (data) {
+                panel.content += data;
 
-            if (layer_idx < panel.layers.length - 1) {
-                panel.callInfo(layer_idx + 1, coords);
-            } else if (panel.content != '') {
-                $('#wms_info_dialog').html(panel.content);
-                $("#wms_info_dialog").dialog("open");
-            }
-        });
+                if (layer_idx < panel.layers.length - 1) {
+                    panel.callInfo(layer_idx + 1, coords);
+                } else if (panel.content != '') {
+                    $('#wms_info_dialog').html(panel.content);
+                    $("#wms_info_dialog").dialog("open");
+                }
+            });
+        }
     },
 
     initialize: function (settings) {
@@ -29,7 +31,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         this.version = settings.version;
         this.layers = settings.layers;
         this.callback = settings.callback;
-        this.el = $('#gridster_nested');
+        this.el = $('.mapPanel');
         this.content = '';
         this.fixedParams = 'REQUEST=GetFeatureInfo&' +
             'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +
