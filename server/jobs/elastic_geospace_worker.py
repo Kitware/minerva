@@ -75,18 +75,31 @@ def run(job):
         es = Elasticsearch([esUrl])
 
         # Grab fields from elasticsearch where ad ids must be in relevant MSA,
-        # and lat/long fields must exist
+        # and lat/long/posttime fields must exist
         searchResult = Search() \
             .using(client=es) \
             .index(source['meta']['minerva']['elasticsearch_params']['index']) \
-            .fields(['id', 'latitude', 'longitude', 'text']) \
+            .fields(['id', 'latitude', 'longitude', 'title', 'posttime']) \
             .filter('terms', id=ads.keys()) \
             .filter(~F('missing', field='latitude')) \
-            .filter(~F('missing', field='longitude'))
+            .filter(~F('missing', field='longitude')) \
+            .filter(~F('missing', field='posttime'))
 
         # If they provided an ES query - pass the text into a match query
-        if elasticSearchParams['query']:
+        if 'query' in elasticSearchParams and elasticSearchParams['query']:
             searchResult = searchResult.query('match', _all=elasticSearchParams['query'])
+
+        searchRangeFilter = {}
+
+        if 'startTime' in elasticSearchParams and elasticSearchParams['startTime']:
+            searchRangeFilter['gte'] = elasticSearchParams['startTime']
+
+        if 'endTime' in elasticSearchParams and elasticSearchParams['endTime']:
+            searchRangeFilter['lte'] = elasticSearchParams['endTime']
+
+        if searchRangeFilter:
+            searchResult = searchResult.query('range',
+                                              posttime=searchRangeFilter)
 
         # Create generator for streaming results
         searchResult = searchResult.scan()
