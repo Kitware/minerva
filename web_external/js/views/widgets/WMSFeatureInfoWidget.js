@@ -1,6 +1,6 @@
 minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
-   callInfo: function (layer_idx, coords) {
+    callInfo: function (layer_idx, coords) {
         if (this.layers.length > 0) {
             var url = this.getUrl(layer_idx, coords);
             var panel = this;
@@ -17,9 +17,9 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
                 if (layer_idx < panel.layers.length - 1) {
                     panel.callInfo(layer_idx + 1, coords);
-                } else if (panel.content != '') {
+                } else if (panel.content !== '') {
                     $('#wms_info_dialog').html(panel.content);
-                    $("#wms_info_dialog").dialog("open");
+                    $('#wms_info_dialog').dialog('open');
                 }
             });
         }
@@ -68,10 +68,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         return rUrl;
     },
 
-
     render: function () {
         this.$el.append(minerva.templates.wmsFeatureInfoWidget());
     }
-
-
 });

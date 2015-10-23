@@ -89,7 +89,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
                         if (evt.modifiers.shift) {
                             this.featureInfoWidget.content = '';
-                            this.featureInfoWidget.callInfo(0, evt.geo)
+                            this.featureInfoWidget.callInfo(0, evt.geo);
                         }
                     });
                 }
@@ -131,7 +131,6 @@ minerva.views.MapPanel = minerva.View.extend({
             this.legendWidget[datasetId].remove(datasetId);
             delete this.legendWidget[datasetId];
         }
-
         var layerIndex = $.inArray(layer, this.map.featureInfoWidget.layers);
         if (layerIndex > -1) {
             this.map.featureInfoWidget.layers.splice(layerIndex, 1);
