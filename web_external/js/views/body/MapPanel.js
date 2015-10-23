@@ -64,6 +64,60 @@ minerva.views.MapPanel = minerva.View.extend({
         );
     },
 
+    _esMouseover: function (evt) {
+        if (evt.data.__cluster) {
+            console.log('Cluster containing ' + evt.data.__data.length + ' points.');
+        } else {
+            console.log(evt.data.properties);
+        }
+    },
+
+    _esMouseclick: function (evt) {},
+
+    _renderElasticDataset: function (datasetId) {
+        this.dataset = this.collection.get(datasetId);
+        this.data = JSON.parse(this.dataset.fileData);
+        this.msa = this.dataset.get('meta').minerva.elastic_search_params.msa;
+        this.esFeatureLayer = this.map.createLayer('feature', {
+            renderer: 'vgl'
+        });
+        this.esPointFeature = this.esFeatureLayer.createFeature('point', {
+            selectionAPI: true,
+            dynamicDraw: true
+        });
+        this.datasetLayers[datasetId] = this.esFeatureLayer;
+
+        this.esPointFeature
+            .clustering({radius: 0.0})
+            .style({
+                fillColor: 'black',
+                fillOpacity: 0.65,
+                stroke: false,
+                radius: function (d) {
+                    var baseRadius = 2;
+
+                    if (d.__cluster) {
+                        return baseRadius + Math.log10(d.__data.length);
+                    }
+
+                    return baseRadius;
+                }
+            })
+            .position(function (d) {
+                return {
+                    x: d.geometry.coordinates[0],
+                    y: d.geometry.coordinates[1]
+                };
+            })
+            .geoOn(geo.event.feature.mouseover, this._esMouseover)
+            .geoOn(geo.event.feature.mouseclick, this._esMouseclick)
+            .data(this.data.features);
+
+        this.map.draw();
+
+        this.transitionToMsa(this.msa);
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -93,55 +147,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.uiLayer.createWidget('slider');
                 this.map.draw();
             } else if (dataset.getDatasetType() === 'elasticsearch') {
-                dataset.once('m:dataLoaded', function (datasetId) {
-                    var dataset = this.collection.get(datasetId),
-                        data = JSON.parse(dataset.fileData),
-                        msa = dataset.get('meta').minerva.elastic_search_params.msa,
-                        featureLayer = this.map.createLayer('feature', {
-                            renderer: 'vgl'
-                        }),
-                        pointFeature = featureLayer.createFeature('point', {selectionAPI: true});
-
-
-                    this.datasetLayers[datasetId] = featureLayer;
-
-                    console.log('rendering ' + data.features.length + ' points');
-
-
-                    pointFeature
-                        .clustering({radius: 0.0})
-                        .style({
-                            fillColor: 'black',
-                            fillOpacity: 0.65,
-                            stroke: false,
-                            radius: function (d) {
-                                if (d.__cluster) {
-                                    return Math.log10(d.__data.length) + 2;
-                                }
-
-                                return 2;
-                            }
-                        })
-                        .position(function (d) {
-                            return {
-                                x: d.geometry.coordinates[0],
-                                y: d.geometry.coordinates[1]
-                            };
-                        })
-                        .geoOn(geo.event.feature.mouseover, _.bind(function (evt) {
-                            if (evt.data.__cluster) {
-                                console.log('Cluster containing ' + evt.data.__data.length + ' points.');
-                            } else {
-                                console.log(evt.data.properties);
-                            }
-                        }, this))
-                        .data(data.features);
-
-                    this.map.draw();
-
-                    this.transitionToMsa(msa);
-                }, this);
-
+                dataset.once('m:dataLoaded', _.bind(this._renderElasticDataset, this));
                 dataset.loadData();
             } else {
                 // Assume the dataset provides a reader, so load the data
