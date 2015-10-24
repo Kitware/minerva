@@ -29,7 +29,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             }, this));
         },
 
-        'keyup #filter-layers': function (e) {
+        'keyup #m-filter-layers': function (e) {
             var text = $(e.target).val();
             this.filterLayers(text);
         }
@@ -41,12 +41,12 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         var filteredData = _.filter(data, function (layer) {
             return pattern.test(layer.layer_title);
         });
-        $('.item-list').html('');
+        $('.m-layer-list').html('');
         filteredData.forEach(_.bind(function (layer) {
             var layerView = minerva.templates.layersListWidget({
                 layer: layer
             });
-            $('.item-list').append(layerView);
+            $('.m-layer-list').append(layerView);
         }, this));
     },
 
@@ -66,7 +66,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             var layerView = minerva.templates.layersListWidget({
                 layer: layer
             });
-            $('.item-list').append(layerView);
+            $('.m-layer-list').append(layerView);
         }, this));
 
         return this;
