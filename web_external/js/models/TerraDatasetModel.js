@@ -1,4 +1,28 @@
 minerva.models.TerraDatasetModel = minerva.models.DatasetModel.extend({
+    deepClone: function (value) {
+        var clonedValue = JSON.parse(JSON.stringify(value));
+
+        _.each(clonedValue, function(val) {
+            if (_.has(val, 'data')) {
+                _.each(val.data, function(datum) {
+                    if (_.has(datum, 'date')) {
+                        datum.date = new Date(datum.date);
+                    }
+                });
+            }
+        });
+
+        if (_.has(clonedValue, 'data')) {
+            _.each(clonedValue.data, function(datum) {
+                if (_.has(datum, 'date')) {
+                    datum.date = new Date(datum.date);
+                }
+            });
+        }
+
+        return clonedValue;
+    },
+
     _grouper: function(groupBy) {
         // Defaults to group by month
         var grouper = {

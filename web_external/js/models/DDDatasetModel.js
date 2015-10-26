@@ -13,10 +13,7 @@ minerva.models.DDDatasetModel = minerva.models.TerraDatasetModel.extend({
         // @todo lazy load this instead?
         this.fetchDiffInDiffData();
 
-        this.set('ddDisplayData', JSON.parse(JSON.stringify(this.get('ddData'))));
-        _.map(this.get('ddDisplayData').data, function(datum) {
-            datum.date = new Date(datum.date);
-        });
+        this.set('ddDisplayData', this.deepClone(this.get('ddData')));
     },
 
     _setData: function(data) {
@@ -32,8 +29,6 @@ minerva.models.DDDatasetModel = minerva.models.TerraDatasetModel.extend({
                 return datum;
             })
         });
-
-        console.log(this.get('ddData').data[0]);
     },
 
     getEventDateAsStr: function() {
@@ -44,7 +39,7 @@ minerva.models.DDDatasetModel = minerva.models.TerraDatasetModel.extend({
 
     groupedBy: function(type, data) {
         var grouper = this._grouper(type);
-        data = data || this.get('ddDisplayData');
+        data = data || this.deepClone(this.get('ddData'));
 
         data.data = _.map(d3.nest()
                           .key(grouper.keyFunc)

@@ -8,7 +8,7 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
         this.model = options.model;
         this.groupedBy = 'yearly';
         this.model.groupedBy(this.groupedBy);
-        //this.model.on('change:ddDisplayData', this.render, this);
+        this.model.on('change:ddDisplayData', this.render, this);
 
         this.render();
     },

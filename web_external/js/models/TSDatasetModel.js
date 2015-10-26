@@ -5,7 +5,7 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
 
         this.fetchTimeSeriesData();
 
-        this.set('tsDisplayData', JSON.parse(JSON.stringify(this.get('tsData'))));
+        this.set('tsDisplayData', this.deepClone(this.get('tsData')));
     },
 
     // Gets the min/max date from the displayed time series data
@@ -29,7 +29,7 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
 
     groupedBy: function(type, datasets) {
         var grouper = this._grouper(type);
-        datasets = datasets || JSON.parse(JSON.stringify(this.get('tsDisplayData')));
+        datasets = datasets || this.deepClone(this.get('tsDisplayData'));
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.map(d3.nest()
@@ -53,7 +53,7 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
 
     // @todo shouldn't groupby be optional?
     spanningDate: function(start, end, groupBy) {
-        var datasets = JSON.parse(JSON.stringify(this.get('tsData')));
+        var datasets = this.deepClone(this.get('tsData'));
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.filter(dataset.data, function(datum) {
