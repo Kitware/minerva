@@ -22,6 +22,7 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
         var data = this.model.get('ddDisplayData');
 
         this.$el.html(minerva.templates.terraDiffInDiffPlot({
+            groupedBy: this.groupedBy,
             msa: this.model.get('location'),
             similarMsas: this.model.get('similarModels')
         }));
