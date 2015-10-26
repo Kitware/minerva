@@ -29,7 +29,7 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
 
     groupedBy: function(type, datasets) {
         var grouper = this._grouper(type);
-        datasets = datasets || this.deepClone(this.get('tsDisplayData'));
+        datasets = datasets || this.deepClone(this.get('tsData'));
 
         datasets = _.map(datasets, function(dataset) {
             dataset.data = _.map(d3.nest()
