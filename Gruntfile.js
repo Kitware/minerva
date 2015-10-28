@@ -81,9 +81,24 @@ module.exports = function (grunt) {
         var geojsDistDir = geojsDir + '/dist/built';
         var extDir = jsDir + '/ext';
 
-        if(!fs.existsSync(geojsDistDir)) {
-            geojsDistDir = geojsDir;
-        }
+        grunt.config.set('shell.geojs-install', {
+            command: 'npm install --only=prod',
+            options: {
+                execOptions: {
+                    cwd: geojsDir
+                }
+            }
+        });
+        grunt.config.set('shell.geojs-build', {
+            command: 'npm run build',
+            options: {
+                execOptions: {
+                    cwd: geojsDir
+                }
+            }
+        });
+        defaultTasks.push('shell:geojs-install');
+        defaultTasks.push('shell:geojs-build');
 
         if (fs.existsSync(jsDir)) {
             var files = {};
