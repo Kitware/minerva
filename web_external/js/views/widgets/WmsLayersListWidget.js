@@ -64,13 +64,13 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     generateUniqueLayerName: function (layerName) {
-      return layerName + '_' + this.sourceName;
+        return layerName + '_' + this.sourceName;
     },
 
     layersInDatasets: function (collection) {
-      return collection.map(function (model) {
-          return this.generateUniqueLayerName(model.get('name'));
-      }, this);
+        return collection.map(function (model) {
+            return this.generateUniqueLayerName(model.get('name'));
+        }, this);
     },
 
     initialize: function (settings) {
