@@ -1,0 +1,84 @@
+mixin standardPanel(panel_id, content_id, title, tooltip, group)
+  .panel-group(id=panel_id, class!=attributes .class, loggroup=group || title)
+    .panel.panel-default
+      .panel-heading(logsub="header", logid=(group || panel_id) + "_panel")
+        a(data-toggle="collapse", data-parent="#"+panel_id,
+            href="#"+content_id)
+          .panel-title
+            b= title
+            i.icon-info-circled(data-placement="bottom", data-container="body",
+                title=tooltip, logid="help_icon")
+            i.icon-down-open.open-icon.toggle-icon
+            i.icon-up-open.close-icon.toggle-icon
+      .panel-collapse.collapse.in(id=content_id)
+        .panel-body
+          if block
+            block
+          else
+            p No Content
+
+.panelTitle(data-toggle='collapse', data-target='#ga-main-page')
+ | Animation
+ i(class='icon-up-open close-icon toggle-icon')
+#ga-main-page.ga-main-ui.collapse.in(style='padding:5px')
+    .ga-anim-controls(ga-section-name="anim")
+      .form-group
+        label(for="ga-cycle") Cycle
+        select#ga-cycle.form-control.input-sm(title="Animation cycle (for example, selecting Day means that all days are combined together so you can see what happens on the average day)",
+            taxifield="cycle")
+          option(value="none") Entire Range
+          //- option(value="year") Year
+          //- option(value="month") Month
+          option(value="week") Week
+          option(value="day") Day
+          //- option(value="hour") Hour
+        label(for="ga-cycle-group") Window
+        select#ga-cycle-group.form-control.input-sm(title="Show data for this time interval during each frame of the animation",
+            taxifield="cycle-group")
+          option(value="week") Week
+          option(value="day") Day
+          option(value="3-hour") 3 Hours
+          option(value="hour") Hour
+      .form-group
+        label(for="ga-cycle-duration") Duration
+        select#ga-cycle-duration.form-control.input-sm(title="Duration of complete animation cycle",
+            taxifield="cycle-duration")
+          option(value="10-s") 10 seconds
+          option(value="15-s") 15 seconds
+          option(value="30-s") 30 seconds
+          option(value="1-m") 1 minute
+          option(value="2-m") 2 minutes
+        label(for="ga-cycle-framerate") Rate
+        select#ga-cycle-framerate.form-control.input-sm(title="Maximum framerate.  Stepped shows each time group discretely.",
+            taxifield="cycle-framerate")
+          option(value="stepped") Stepped
+          option(value="5") 5 fps
+          option(value="10") 10 fps
+          option(value="30") 30 fps
+      .form-group
+        button#ga-anim-update.btn.btn-default.btn-sm
+          i.icon-cw
+          |  Update
+        button#ga-play.btn.btn-default.btn-sm(taxifield="playState", value="stop")
+          span.canplay
+            i.icon-play
+            |  Play
+          span.canpause
+            i.icon-pause
+            |  Pause
+        button#ga-anim-step-back.btn.btn-default.btn-sm(title="Step back")
+          i.icon-to-start
+        button#ga-anim-step.btn.btn-default.btn-sm(title="Step forward")
+          i.icon-to-end
+        button#ga-anim-stop.btn.btn-default.btn-sm
+          i.icon-stop
+          |  Stop
+      .form-group
+        input#ga-step-slider.form-control.input-sm.ga-slider-ctl-custom(
+            type="text", data-slider-min="0", data-slider-max="100",
+            data-slider-step="1", data-slider-value="0",
+            data-slider-handle="square", data-slider-tooltip="hide",
+            data-slider-id="ga-step-slider-ctl")
+      .form-group
+        label Current Display
+        span#ga-cycle-anim.input-sm Full Data

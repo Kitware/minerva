@@ -6,7 +6,9 @@
   "repository": "https://github.com/Kitware/minerva.git",
   "dependencies": {
     "JSONPath": "0.10.0",
+    "bootstrap-slider": "^5.2.5",
     "c3": "^0.4.11-rc4",
-    "geojs": "git+https://github.com/OpenGeoscience/geojs.git#92e447c"
+    "geojs": "git+https://github.com/OpenGeoscience/geojs.git#0e6258d55f08e923e117436535a9499d3e38ded0",
+    "moment": "^2.10.6"
   }
 }

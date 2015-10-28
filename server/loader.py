@@ -111,6 +111,8 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/c3.min.js">
         </script>
+        <script src="${staticRoot}/built/plugins/minerva/bootstrap-slider.min.js">
+        </script>
         <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>

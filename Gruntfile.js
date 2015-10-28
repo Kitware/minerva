@@ -139,6 +139,9 @@ module.exports = function (grunt) {
             files[staticDir + '/c3.min.js'] = [
                 pluginDir + '/node_modules/c3/c3.js'
             ];
+            files[staticDir + '/bootstrap-slider.min.js'] = [
+                pluginDir + '/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js'
+            ];
             grunt.config.set('uglify.' + pluginName, {
                 files: files
             });
@@ -214,6 +217,7 @@ module.exports = function (grunt) {
                 '/' + rootStaticLibDir + '/fontello/css/animation.css',
                 '/' + staticDir + '/jquery.gridster.min.css',
                 '/' + staticDir + '/c3.min.css',
+                '/' + staticDir + '/node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css',
                 '/' + rootStaticDir + '/app.min.css',
                 'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
                 'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
