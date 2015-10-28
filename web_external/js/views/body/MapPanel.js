@@ -87,10 +87,8 @@ minerva.views.MapPanel = minerva.View.extend({
                         });
                     this.map.featureInfoWidget.setElement($('.mapPanel')).render();
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
-                        if (evt.modifiers.shift) {
                             this.featureInfoWidget.content = '';
                             this.featureInfoWidget.callInfo(0, evt.geo);
-                        }
                     });
                 }
 
@@ -177,7 +175,14 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map = geo.map({
                 node: '.mapPanelMap',
                 center: this.session.sessionJsonContents.center,
-                zoom: this.session.sessionJsonContents.zoom
+                zoom: this.session.sessionJsonContents.zoom,
+                interactor: geo.mapInteractor({
+                    map: this.map,
+                    click: {
+                        enabled: true,
+                        cancelOnMove: true
+                    }
+                })
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
