@@ -94,6 +94,13 @@ install:
 
     # install minerva npm dependencies
     - npm install
+
+    # build geojs
+    - pushd node_modules/geojs
+    - npm install
+    - npm run build
+    - popd
+
     - popd
 
     # install girder npm dependencies and grunt at top level
