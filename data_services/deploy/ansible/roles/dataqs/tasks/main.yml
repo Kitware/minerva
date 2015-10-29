@@ -2,8 +2,12 @@
 # Installs geonode customizations from epidemico
 ---
 - name: get necessary apt packages
-  apt: name=libgdal-dev
+  apt: name={{item}}
   sudo: yes
+  with_items:
+    - libgdal-dev
+    - netcdf-bin
+    - cdo
 
 - name: install python dependencies
   pip: virtualenv={{virtualenv_dir}}/{{app_name}} name={{item}}
@@ -65,6 +69,30 @@
 
 - name: Create the forecastio coverage store
   command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/forecastio/forecastio_air.py"
+  ignore_errors: yes
+
+- name: Create the nasa_gpm coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/nasa_gpm/nasa_gpm.py"
+  ignore_errors: yes
+
+- name: Create the spei coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/spei/spei.py"
+  ignore_errors: yes
+
+- name: Create the airnow coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/airnow/airnow.py"
+  ignore_errors: yes
+
+- name: Create the gdacs layer store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/gdacs/gdacs.py"
+  ignore_errors: yes
+
+- name: Create the usgs_quakes layer store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/usgs_quakes/usgs_quakes.py"
+  ignore_errors: yes
+
+- name: Create the wqp layer stores
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/wqp/wqp.py"
   ignore_errors: yes
 
 - name: Django updatelayers

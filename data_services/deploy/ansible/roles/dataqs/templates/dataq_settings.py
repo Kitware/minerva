@@ -25,7 +25,13 @@ from celery.schedules import crontab
 DATAQS_APPS = (
     'dataqs',
     'dataqs.forecastio',
-    'dataqs.gfms'
+    'dataqs.gfms',
+    'dataqs.nasa_gpm',
+    'dataqs.gdacs',
+    'dataqs.usgs_quakes',
+    'dataqs.spei',
+    'dataqs.airnow',
+    'dataqs.wqp'
 )
 
 # CELERY SETTINGS
@@ -42,6 +48,7 @@ CELERY_ENABLE_REMOTE_CONTROL = True
 
 # Email address for logging in to GPM FTP server
 GPM_ACCOUNT = '{{gpm_email}}'
+AIRNOW_ACCOUNT = '{{airnow_credentials}}'
 
 # Location of GeoServer data directory
 GS_DATA_DIR = '/var/lib/tomcat7/webapps/geoserver/data'
@@ -57,18 +64,46 @@ GS_TMP_DIR = GS_DATA_DIR + '/tmp'
 # GS_DATA_DIR where GeoServer is running.
 RSYNC_WAIT_TIME = 0
 
-HEALTHMAP_AUTH = '{{healthmap_apikey}}'
-
 # Add more scheduled geoprocessors here (ideally in local_settings.py file)
 CELERYBEAT_SCHEDULE = {
     'gfms': {
         'task': 'dataqs.gfms.tasks.gfms_task',
-        'schedule': crontab(minute='3'),
+        'schedule': crontab(minute='1'),
         'args': ()
     },
     'forecast_io': {
         'task': 'dataqs.forecastio.tasks.forecast_io_task',
-        'schedule': crontab(minute='1'),
+        'schedule': crontab(minute='3'),
+        'args': ()
+    },
+    'nasa_gpm': {
+        'task': 'dataqs.nasa_gpm.tasks.nasa_gpm',
+        'schedule': crontab(minute='5'),
+        'args': ()
+    },
+    'gdacs': {
+        'task': 'dataqs.gdacs.tasks.gdacs',
+        'schedule': crontab(minute='7'),
+        'args': ()
+    },
+    'spei': {
+        'task': 'dataqs.spei.tasks.spei',
+        'schedule': crontab(minute='9'),
+        'args': ()
+    },
+    'usgs_quakes': {
+        'task': 'dataqs.usgs_quakes.tasks.usgs_quakes',
+        'schedule': crontab(minute='11'),
+        'args': ()
+    },
+    'airnow': {
+        'task': 'dataqs.airnow.tasks.airnow',
+        'schedule': crontab(minute='13'),
+        'args': ()
+    },
+    'wqp': {
+        'task': 'dataqs.wqp.tasks.wqp',
+        'schedule': crontab(minute='15'),
         'args': ()
     },
 }

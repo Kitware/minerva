@@ -78,4 +78,4 @@ geonode_admin_email: "{{ geonode_admin_user }}@geonode.com"
 geonode_admin_password: geonode
 
 gpm_email: "setme@email.com"
-healthmap_apikey: "setme"
+airnow_credentials: "username:password"
