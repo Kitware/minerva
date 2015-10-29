@@ -4,7 +4,10 @@
   "description": "An application for geospatial analytics.",
   "license": "Apache-2.0",
   "dependencies": {
-    "geojs": "0.5.0",
-    "JSONPath": "0.10.0"
+    "JSONPath": "0.10.0",
+    "geojs": "0.5.0"
+  },
+  "devDependencies": {
+    "grunt-sync": "^0.4.1"
   }
 }

@@ -220,4 +220,7 @@ module.exports = function (grunt) {
 
     configureMinerva();
     grunt.registerTask('minerva-web', defaultTasks);
+
+    // Append bsve related tasks
+    require('./bsve/configure')(grunt);
 };
