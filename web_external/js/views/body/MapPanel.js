@@ -84,7 +84,35 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
-    _esMouseclick: function (evt) {},
+    _esMouseclick: function (evt) {
+        var ads;
+
+        if (evt.data.__cluster) {
+            ads = _.pluck(evt.data.__data, 'properties');
+        } else {
+            ads = [evt.data.properties];
+        }
+
+        // Each property of each ad is an array with 1 element.. do some normalizing
+        ads = _.map(ads, function (f) {
+            return _.object(_.keys(f),
+                            _.map(_.values(f), _.first));
+        });
+
+        this.imagespacePanel().ads = ads;
+        this.imagespacePanel().render();
+    },
+
+    imagespacePanel: function () {
+        if (!this._imagespacePanel) {
+            this._imagespacePanel = new minerva.views.ImagespacePanel({
+                el: '.imagespacePanel',
+                parentView: this
+            });
+        }
+
+        return this._imagespacePanel;
+    },
 
     _renderElasticDataset: function (datasetId) {
         this.dataset = this.collection.get(datasetId);
@@ -123,7 +151,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 };
             })
             .geoOn(geo.event.feature.mouseover, this._esMouseover)
-            .geoOn(geo.event.feature.mouseclick, this._esMouseclick)
+            .geoOn(geo.event.feature.mouseclick, _.bind(this._esMouseclick, this))
             .data(this.data.features);
 
         this.map.draw();

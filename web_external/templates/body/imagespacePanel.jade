@@ -1,0 +1,10 @@
+.imagespacePanelInner
+  .panelTitle
+        | Ad Results
+
+  #ad-results
+    p Find similar images
+
+    ul
+      each ad in ads
+        li(data-ad-id=ad.id)= ad.title
