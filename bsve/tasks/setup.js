@@ -5,7 +5,7 @@ module.exports = function (grunt) {
 
     var path = require('path');
 
-    grunt.registerTask('minerva-bsve', 'Set up minerva for the BSVE.', function () {
+    grunt.registerTask('bsve-minerva-setup', 'Set up minerva for the BSVE.', function () {
 
         var config;
 

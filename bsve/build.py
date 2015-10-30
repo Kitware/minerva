@@ -24,8 +24,4 @@ if __name__ == '__main__':
 
     template = os.path.join(path, 'index.mako')
     with open(template) as f:
-        html = compile(f.read())
-
-    index = os.path.join(path, 'index.html')
-    with open(index, 'w') as f:
-        f.write(html)
+        print(compile(f.read()), file=stdout)
