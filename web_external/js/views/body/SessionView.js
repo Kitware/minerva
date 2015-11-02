@@ -142,7 +142,7 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            this.$('.gridster > ul').gridster({
+            this.$('.gridster > ul:visible').gridster({
                 widget_margins: [10, 10],
                 widget_base_dimensions: [210, 210],
                 draggable: {

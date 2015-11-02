@@ -10,5 +10,7 @@ minerva.views.ImagespacePanel = minerva.View.extend({
         this.$el.html(minerva.templates.imagespacePanel({
             ads: _.first(this.ads || [], 10)
         }));
+
+        this.$el.show();
     }
 });
