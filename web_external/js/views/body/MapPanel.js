@@ -150,7 +150,9 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map = geo.map({
                 node: '.mapPanelMap',
                 center: this.session.sessionJsonContents.center,
-                zoom: this.session.sessionJsonContents.zoom
+                zoom: this.session.sessionJsonContents.zoom,
+                parallelProjection: true,
+                discreteZoom: true
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
