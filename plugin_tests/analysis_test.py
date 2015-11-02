@@ -160,13 +160,18 @@ class AnalysisTestCase(base.TestCase):
                 },
                 user=self._user
             )
+            self.assertStatusOk(response)
+            job = response.json
 
             # wait for the async job to complete
             searchResultsFinished = False
             count = 0
+            output = job['meta']['minerva']['outputs'][0]
+            self.assertEquals(output['type'], 'dataset', 'Incorrect output type %s' % output['type'])
+
             while not searchResultsFinished and count < 5:
                 # get the dataset and check if it has been updated
-                path = '/minerva_dataset/%s/dataset' % str(response.json['dataset_id'])
+                path = '/minerva_dataset/%s/dataset' % str(output['dataset_id'])
                 response = self.request(
                     path=path,
                     method='GET',
@@ -183,32 +188,8 @@ class AnalysisTestCase(base.TestCase):
             self.assertTrue('json_row' in dataset, 'json_row expected in dataset')
             self.assertTrue('data' in dataset['json_row'], 'data should be in json_row')
             self.assertTrue('Longitude' in dataset['json_row']['data'], 'data.Longitude should be in json_row')
-
-            # ensure that we can map the Lat/Long to geojson, as this json has
-            # unicode values for Lat/Long
-
-            # update the minerva metadata with coordinate mapping
-            metadata = {'minerva': dataset}
-            metadata['minerva']['mapper'] = {
-                "latitudeKeypath": "data.Latitude",
-                "longitudeKeypath": "data.Longitude"
-            }
-
-            path = '/item/{}/metadata'.format(dataset['dataset_id'])
-            response = self.request(
-                path=path,
-                method='PUT',
-                user=self._user,
-                body=json.dumps(metadata),
-                type='application/json'
-            )
-            metadata = response.json
-
-            # create geojson in the dataset
-            path = '/minerva_dataset/{}/geojson'.format(dataset['dataset_id'])
-            response = self.request(
-                path=path,
-                method='POST',
-                user=self._user,
-            )
-            self.assertHasKeys(response.json, ['geojson_file'])
+            self.assertTrue('geojson_file' in dataset, 'geojson_file key missing')
+            self.assertTrue('dataset_type' in dataset, 'dataset_type key missing')
+            self.assertEquals(dataset['dataset_type'], 'geojson', 'expected dataset_type of geojson')
+            self.assertTrue('original_type' in dataset, 'original_type key missing')
+            self.assertEquals(dataset['original_type'], 'json', 'expected original_type of json')

@@ -121,6 +121,15 @@ def findAnalysisByName(currentUser, name):
         return None
 
 
+def mM(item, minerva_metadata=None):
+    if minerva_metadata is None:
+        if 'meta' not in item or 'minerva' not in item['meta']:
+            return {}
+        return item['meta']['minerva']
+    else:
+        return updateMinervaMetadata(item, minerva_metadata)
+
+
 def updateMinervaMetadata(item, minerva_metadata):
     if 'meta' not in item:
         item['meta'] = {}
@@ -141,3 +150,33 @@ def encryptCredentials(credentials):
     key = cur_config['minerva']['crypto_key']
     f = Fernet(key)
     return f.encrypt(bytes(credentials))
+
+
+def jobMM(job, minerva_metadata=None, save=True):
+    if minerva_metadata is None:
+        if 'meta' not in job or 'minerva' not in job['meta']:
+            return {}
+        return job['meta']['minerva']
+    else:
+        if 'meta' not in job:
+            job['meta'] = {}
+        job['meta']['minerva'] = minerva_metadata
+        if save:
+            ModelImporter.model('job', 'jobs').save(job)
+        return job['meta']['minerva']
+
+
+def addJobOutput(job, output, output_type='dataset', save=True):
+    mm = jobMM(job)
+    outputs = mm.get('outputs', [])
+    job_output = None
+    if output_type == 'dataset':
+        job_output = {
+            'type': 'dataset',
+            'dataset_id': output.get('_id')
+        }
+    else:
+        raise NotImplementedError('unknown job output %s' % output_type)
+    outputs.append(job_output)
+    mm['outputs'] = outputs
+    jobMM(job, mm, save)

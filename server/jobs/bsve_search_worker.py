@@ -12,6 +12,7 @@ from girder.plugins.jobs.constants import JobStatus
 from girder.plugins.minerva.utility.bsve.bsve_utility import BsveUtility
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, GeoJsonMapper, jsonObjectReader
+from girder.plugins.minerva.utility.minerva_utility import mM
 
 import girder_client
 
@@ -64,12 +65,10 @@ def run(job):
         user_model = ModelImporter.model('user')
         user = user_model.load(job['userId'], force=True)
         item_model = ModelImporter.model('item')
-        # TODO only works locally
-        dataset = item_model.load(datasetId, level=AccessType.WRITE, user=user)
-        metadata = dataset['meta']
-        minerva_metadata = metadata['minerva']
 
-        # TODO only works locally
+        dataset = item_model.load(datasetId, level=AccessType.WRITE, user=user)
+        minerva_metadata = mM(dataset)
+
         file_model = ModelImporter.model('file')
         existing = file_model.findOne({
             'itemId': dataset['_id'],
@@ -104,6 +103,7 @@ def run(job):
         geojsonMapper.mapToJsonFile(tmpdir, objects, geojsonFilepath)
 
         client.uploadFileToItem(datasetId, geojsonFilepath)
+        shutil.rmtree(tmpdir)
 
         minerva_metadata['mapper'] = mapping
         minerva_metadata['dataset_type'] = 'geojson'
@@ -121,12 +121,7 @@ def run(job):
             raise (Exception('Cannot find file %s in dataset %s' %
                    (geojsonFilename, datasetId)))
 
-        shutil.rmtree(tmpdir)
-
-        metadata['minerva'] = minerva_metadata
-        # TODO only works locally
-        item_model.setMetadata(dataset, metadata)
-        # TODO only works locally
+        mM(dataset, minerva_metadata)
         job_model.updateJob(job, status=JobStatus.SUCCESS)
     except Exception:
         t, val, tb = sys.exc_info()
