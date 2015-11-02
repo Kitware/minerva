@@ -83,30 +83,3 @@ Post-Minerva:
 
 http://localhost:8080 => serves Minerva http://localhost:8080/girder =>
 serves Girder
-
-Installing a specific version of GeoJs for development
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is to get around the fact that npm is for installing packages, not
-managing source repositories. So when npm installs geojs, it doesn’t
-install it as a git repo with the .git dir.
-
-Minerva currently tracks the latest released version of geojs from npm.
-
-If you need to use Minerva with a specific reference of geojs that isn't the current release version held in npm, do the following
-
-1. from the minerva top level dir, cd node_modules
-2. remove or move geojs, e.g. mv geojs geojs_fromnpm
-3. git clone https://github.com/OpenGeoscience/geojs.git
-4. cd geojs
-5. checkout from git whatever branch or reference you are interested in, e.g. git checkout experimental_branch
-
-From here, you are just following the geojs build instructions.
-
-1. git submodule init
-2. git submodule update
-3. npm install
-4. grunt
-   
-At this point geojs/dist/built/geo.min.js should be rebuilt, and this will be included the next time minerva is built by grunt-ing at the top level of girder. Note that if geojs/dist/* exists geojs/dist/built/geo.min.js will be used rather than geojs/geo.min.js
-
