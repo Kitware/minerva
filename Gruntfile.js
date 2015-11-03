@@ -127,7 +127,7 @@ module.exports = function (grunt) {
             files[staticDir + '/geo.ext.min.js'] = [
                 geojsDir + '/bower_components/gl-matrix/dist/gl-matrix.js',
                 geojsDir + '/bower_components/proj4/dist/proj4-src.js',
-                geojsDir + '/bower_components/proj4/dist/proj4-src.js'
+                geojsDir + '/node_modules/pnltri/pnltri.js'
             ];
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
