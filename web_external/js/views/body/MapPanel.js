@@ -154,7 +154,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 parallelProjection: true,
                 discreteZoom: true
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer(this.session.sessionJsonContents.basemap,
+              {baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'});
             this.uiLayer = this.map.createLayer('ui');
             this.uiLayer.createWidget('slider');
             this.mapCreated = true;
