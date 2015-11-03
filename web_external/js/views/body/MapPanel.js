@@ -8,8 +8,6 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
-
-
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         layer.layerName = minervaMetadata.type_name;
@@ -87,8 +85,8 @@ minerva.views.MapPanel = minerva.View.extend({
                         });
                     this.map.featureInfoWidget.setElement($('.mapPanel')).render();
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
-                            this.featureInfoWidget.content = '';
-                            this.featureInfoWidget.callInfo(0, evt.geo);
+                        this.featureInfoWidget.content = '';
+                        this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
 
