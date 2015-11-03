@@ -127,7 +127,7 @@ module.exports = function (grunt) {
             files[staticDir + '/geo.ext.min.js'] = [
                 geojsDir + '/bower_components/gl-matrix/dist/gl-matrix.js',
                 geojsDir + '/bower_components/proj4/dist/proj4-src.js',
-                geojsDir + '/node_modules/pnltri/pnltri.js'
+                geojsDir + '/bower_components/proj4/dist/proj4-src.js'
             ];
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
@@ -145,11 +145,14 @@ module.exports = function (grunt) {
             defaultTasks.push('uglify:' + pluginName);
         }
 
+        var jqueryUiDir  = geojsDir + '/bower_components/jquery-ui';
         var extraDir = pluginDir + '/' + sourceDir + '/extra';
         if (fs.existsSync(extraDir)) {
             var files = [
                 { expand: true, cwd: extraDir, src: ['**'], dest: staticDir },
-                { expand: true, cwd: geojsDistDir, src: ['geo.min.js'], dest: staticDir }
+                { expand: true, cwd: geojsDistDir, src: ['geo.min.js'], dest: staticDir },
+                { expand: true, cwd: jqueryUiDir, src: ['jquery-ui.min.js'], dest: staticDir },
+                { expand: true, cwd: jqueryUiDir + '/themes/smoothness', src: ['**/*'], dest: staticDir }
             ];
             grunt.config.set('copy.' + pluginName, { files: files});
             grunt.config.set('watch.copy_' + pluginName, {
