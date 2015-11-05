@@ -3,6 +3,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     callInfo: function (layer_idx, coords) {
         if (this.layers.length > 0) {
             var url = this.getUrl(layer_idx, coords);
+            var layer_name = this.layers[layer_idx].layerName;
             var panel = this;
             $.ajax({
                 url: url,
@@ -13,13 +14,47 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                     console.log(c);
                 }
             }).done(function (data) {
-                panel.content += data;
-
+                //panel.content += data;
+                if ('features' in data && data['features'].length > 0) {
+                    var layer_div = document.createElement("div");
+                    layer_div.className="accordion";
+                    var title = document.createElement("h3");
+                    title.innerHTML = layer_name;
+                    layer_div.appendChild(title);
+                    var tbl_div = document.createElement('div');
+                    var tbl_body = document.createElement("table");
+                    var odd_even = false;
+                    var header=false;
+                    $.each(data['features'], function() {
+                        if (!header) {
+                            var tbl_row = tbl_body.insertRow();
+                            tbl_row.className = "header";
+                            $.each(this.properties, function(k , v) {
+                                var cell = tbl_row.insertCell();
+                                cell.appendChild(document.createTextNode(k.toString()));
+                            });
+                            header=true;
+                        }
+                        var tbl_row = tbl_body.insertRow();
+                        tbl_row.className = odd_even ? "odd" : "even";
+                        $.each(this.properties, function(k , v) {
+                            var cell = tbl_row.insertCell();
+                            cell.appendChild(document.createTextNode(v.toString()));
+                        })
+                        odd_even = !odd_even;
+                    });
+                    tbl_div.appendChild(tbl_body);
+                    layer_div.appendChild(tbl_div);
+                    panel.content = panel.content + layer_div.outerHTML;
+                }
                 if (layer_idx < panel.layers.length - 1) {
                     panel.callInfo(layer_idx + 1, coords);
                 } else if (panel.content !== '') {
                     $('#wms_info_dialog').html(panel.content);
                     $('#wms_info_dialog').dialog('open');
+                    $('.accordion').accordion({collapsible: true});
+                } else {
+                    $('#wms_info_dialog').dialog('close');
                 }
             });
         }
@@ -36,7 +71,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         this.fixedParams = 'REQUEST=GetFeatureInfo&' +
             'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +
             'SERVICE=WMS&FEATURE_COUNT=50&styles=&' +
-            'srs=EPSG:3857&INFO_FORMAT=text/html&format=image%2Fpng';
+            'srs=EPSG:3857&INFO_FORMAT=application/json&format=image%2Fpng';
     },
 
     getUrl: function (layer_idx, coord) {
