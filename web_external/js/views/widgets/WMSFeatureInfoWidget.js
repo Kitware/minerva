@@ -15,32 +15,33 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                 }
             }).done(function (data) {
                 //panel.content += data;
-                if ('features' in data && data['features'].length > 0) {
-                    var layer_div = document.createElement("div");
-                    layer_div.className="accordion";
-                    var title = document.createElement("h3");
-                    title.innerHTML = layer_name;
-                    layer_div.appendChild(title);
+                if ('features' in data && data.features.length > 0) {
+                    var layer_div = document.createElement('div');
+                    layer_div.className = 'accordion';
+                    var layer_header = document.createElement('h3');
+                    layer_header.innerHTML = layer_name;
+                    layer_div.appendChild(layer_header);
                     var tbl_div = document.createElement('div');
-                    var tbl_body = document.createElement("table");
+                    var tbl_body = document.createElement('table');
                     var odd_even = false;
-                    var header=false;
-                    $.each(data['features'], function() {
+                    var header = false;
+                    $.each(data.features, function () {
+                        var tbl_row;
                         if (!header) {
-                            var tbl_row = tbl_body.insertRow();
-                            tbl_row.className = "header";
-                            $.each(this.properties, function(k , v) {
+                            tbl_row = tbl_body.insertRow();
+                            tbl_row.className = 'header';
+                            $.each(this.properties, function (k) {
                                 var cell = tbl_row.insertCell();
                                 cell.appendChild(document.createTextNode(k.toString()));
                             });
-                            header=true;
+                            header = true;
                         }
-                        var tbl_row = tbl_body.insertRow();
-                        tbl_row.className = odd_even ? "odd" : "even";
-                        $.each(this.properties, function(k , v) {
+                        tbl_row = tbl_body.insertRow();
+                        tbl_row.className = odd_even ? 'odd' : 'even';
+                        $.each(this.properties, function (k, v) {
                             var cell = tbl_row.insertCell();
                             cell.appendChild(document.createTextNode(v.toString()));
-                        })
+                        });
                         odd_even = !odd_even;
                     });
                     tbl_div.appendChild(tbl_body);

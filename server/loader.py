@@ -66,10 +66,6 @@ class CustomAppRoot(object):
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
         <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/jquery-ui.structure.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/jquery-ui.theme.min.css">
-        <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
         % for plugin in pluginCss:
             <link rel="stylesheet"
