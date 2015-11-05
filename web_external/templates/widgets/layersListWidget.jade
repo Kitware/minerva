@@ -1,6 +1,6 @@
 .form-group
   .checkbox.m-add-layers-checkbox
     input.m-add-layers(type="checkbox", name="#{layer.layer_title}" typeName="#{layer.layer_type}", checked=checked, disabled=checked)
-    label
+    label(class=checked ? 'm-disable-text' : '')
       i.icon-layers.m-add-layers-type-icon
       | #{layer.layer_title}
