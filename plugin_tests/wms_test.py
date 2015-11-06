@@ -17,14 +17,15 @@
 #  limitations under the License.
 ###############################################################################
 
+import gzip
+import httplib
+from httmock import urlmatch, HTTMock, response as httmockresponse
 import os
 
 # Need to set the environment variable before importing girder
 os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
 
 from tests import base
-from cryptography.fernet import Fernet
-from girder.utility import config
 
 
 def setUpModule():
@@ -43,6 +44,19 @@ def tearDownModule():
     Stop the server.
     """
     base.stopServer()
+
+
+@urlmatch(netloc=r'.*')
+def wms_mock(url, request):
+    pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+    filepath = os.path.join(pluginTestDir, 'data', 'wms_capabilities.xml.gz')
+    with gzip.open(filepath, 'rb') as bsve_search_file:
+        content = bsve_search_file.read()
+        headers = {
+            'content-length': len(content),
+            'content-type': 'application/xml'
+        }
+        return httmockresponse(200, content, headers, request=request)
 
 
 class WmsTestCase(base.TestCase):
@@ -70,14 +84,17 @@ class WmsTestCase(base.TestCase):
         name = 'testWMS'
         username = ''
         password = ''
-        baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
+        baseURL = 'http://fake.geoserver.fak/geoserver/ows'
         params = {
             'name': name,
             'username': username,
             'password': password,
             'baseURL': baseURL
         }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
+
+        with HTTMock(wms_mock):
+            response = self.request(path=path, method='POST', params=params, user=self._user)
+
         self.assertStatusOk(response)
         wmsSource = response.json
         minerva_metadata = wmsSource['meta']['minerva']
@@ -93,17 +110,19 @@ class WmsTestCase(base.TestCase):
         # Create the source.
         path = '/minerva_source_wms'
         name = 'testWMS'
-        typeName = 'geonode:global_temp'
+        typeName = 'geonode:boxes_with_date'
         username = ''
         password = ''
-        baseURL = 'http://demo.boundlessgeo.com/geoserver/ows'
+        baseURL = 'http://fake.geoserver.fak/geoserver/ows'
         params = {
             'name': name,
             'username': username,
             'password': password,
             'baseURL': baseURL
         }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
+
+        with HTTMock(wms_mock):
+            response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
 
@@ -117,8 +136,30 @@ class WmsTestCase(base.TestCase):
             'typeName': typeName,
             'wmsParams': wmsParams
         }
+
+        class MockResponse():
+            def __init__(self):
+                pass
+
+            def read(self):
+                return'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48U2VydmljZUV4Y2VwdGlvblJlcG9ydCB2ZXJzaW9uPSIxLjMuMCIgeG1sbnM9Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4c2k6c2NoZW1hTG9jYXRpb249Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIGh0dHA6Ly9kZW1vLmJvdW5kbGVzc2dlby5jb206ODAvZ2Vvc2VydmVyL3NjaGVtYXMvd21zLzEuMy4wL2V4Y2VwdGlvbnNfMV8zXzAueHNkIj4gICA8U2VydmljZUV4Y2VwdGlvbj4KICAgICAgQ2FuJmFwb3M7dCBvYnRhaW4gdGhlIHNjaGVtYSBmb3IgdGhlIHJlcXVpcmVkIGxheWVyLgpnZW9ub2RlOmdsb2JhbF90ZW1wIGxheWVyIGRvZXMgbm90IGV4aXN0Lgo8L1NlcnZpY2VFeGNlcHRpb24+PC9TZXJ2aWNlRXhjZXB0aW9uUmVwb3J0Pg==\n'
+
+        class MockHTTPConnection():
+
+            def __init__(self, url):
+                self.url = url
+
+            def request(self, method, url, headers):
+                pass
+
+            def getresponse(self):
+                return MockResponse()
+
+        httpConn = httplib.HTTPConnection
+        # Monkey patch HTTPConnection for testing legend
+        httplib.HTTPConnection = MockHTTPConnection
+
         response = self.request(path=path, method='POST', params=params, user=self._user)
-        self.assertStatusOk(response)
         wmsDataset = response.json
         minerva_metadata = wmsDataset['meta']['minerva']
         self.assertEquals(wmsDataset['name'], name, 'incorrect wms dataset name')
@@ -126,9 +167,11 @@ class WmsTestCase(base.TestCase):
         self.assertEquals(minerva_metadata['dataset_type'], 'wms', 'incorrect wms dataset type')
         self.assertEquals(minerva_metadata['base_url'], wmsSource['meta']['minerva']['wms_params']['base_url'],'incorrect wms dataset baseURL')
         self.assertEquals(minerva_metadata['type_name'], typeName, 'incorrect wms dataset typeName')
-        legend = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48U2VydmljZUV4Y2VwdGlvblJlcG9ydCB2ZXJzaW9uPSIxLjMuMCIgeG1sbnM9Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4c2k6c2NoZW1hTG9jYXRpb249Imh0dHA6Ly93d3cub3Blbmdpcy5uZXQvb2djIGh0dHA6Ly9kZW1vLmJvdW5kbGVzc2dlby5jb206ODAvZ2Vvc2VydmVyL3NjaGVtYXMvd21zLzEuMy4wL2V4Y2VwdGlvbnNfMV8zXzAueHNkIj4gICA8U2VydmljZUV4Y2VwdGlvbj4KICAgICAgQ2FuJmFwb3M7dCBvYnRhaW4gdGhlIHNjaGVtYSBmb3IgdGhlIHJlcXVpcmVkIGxheWVyLgpnZW9ub2RlOmdsb2JhbF90ZW1wIGxheWVyIGRvZXMgbm90IGV4aXN0Lgo8L1NlcnZpY2VFeGNlcHRpb24+PC9TZXJ2aWNlRXhjZXB0aW9uUmVwb3J0Pg==\n'
-        # TODO determine if legend is stable, if not, needs to be mocked.
-        self.assertEquals(minerva_metadata['legend'], legend, 'incorrect wms dataset legend')
+        legend = u'UEQ5NGJXd2dkbVZ5YzJsdmJqMGlNUzR3SWlCbGJtTnZaR2x1WnowaVZWUkdMVGdpUHo0OFUyVnlkbWxqWlVWNFkyVndkR2x2YmxKbGNHOXlkQ0IyWlhKemFXOXVQU0l4TGpNdU1DSWdlRzFzYm5NOUltaDBkSEE2THk5M2QzY3ViM0JsYm1kcGN5NXVaWFF2YjJkaklpQjRiV3h1Y3pwNGMyazlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURFdldFMU1VMk5vWlcxaExXbHVjM1JoYm1ObElpQjRjMms2YzJOb1pXMWhURzlqWVhScGIyNDlJbWgwZEhBNkx5OTNkM2N1YjNCbGJtZHBjeTV1WlhRdmIyZGpJR2gwZEhBNkx5OWtaVzF2TG1KdmRXNWtiR1Z6YzJkbGJ5NWpiMjA2T0RBdloyVnZjMlZ5ZG1WeUwzTmphR1Z0WVhNdmQyMXpMekV1TXk0d0wyVjRZMlZ3ZEdsdmJuTmZNVjh6WHpBdWVITmtJajRnSUNBOFUyVnlkbWxqWlVWNFkyVndkR2x2Ymo0S0lDQWdJQ0FnUTJGdUptRndiM003ZENCdlluUmhhVzRnZEdobElITmphR1Z0WVNCbWIzSWdkR2hsSUhKbGNYVnBjbVZrSUd4aGVXVnlMZ3BuWlc5dWIyUmxPbWRzYjJKaGJGOTBaVzF3SUd4aGVXVnlJR1J2WlhNZ2JtOTBJR1Y0YVhOMExnbzhMMU5sY25acFkyVkZlR05sY0hScGIyNCtQQzlUWlhKMmFXTmxSWGhqWlhCMGFXOXVVbVZ3YjNKMFBnPT0K'
+        self.assertEquals(minerva_metadata['legend'].strip(), legend, 'incorrect wms dataset legend')
+
+        # Reset HTTPConnection to real module.
+        httplib.HTTPConnection = httpConn
 
     def testCreateWmsSourceWithAuthentication(self):
         """
