@@ -12,9 +12,8 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                 var typeName = $(layer).attr('typeName');
                 var layerName = $(layer).attr('name');
 
-                if (layer.checked && !_.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layerName))) {
-
-                    this.currentLayersInDatasets.push(this.generateUniqueLayerName(layerName));
+                if (layer.checked && !_.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layerName, wmsSource.get('_id')))) {
+                    this.currentLayersInDatasets.push(this.generateUniqueLayerName(layerName, wmsSource.get('_id')));
 
                     var params = {
                         typeName: typeName,
@@ -57,20 +56,25 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         filteredData.forEach(_.bind(function (layer) {
             var layerView = minerva.templates.layersListWidget({
                 layer: layer,
-                checked: _.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layer.layer_title))
+                checked: _.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layer.layer_title, this.source.get('_id')))
             });
             $('.m-layer-list').append(layerView);
         }, this));
     },
 
-    generateUniqueLayerName: function (layerName) {
-        return layerName + '_' + this.sourceName;
+    generateUniqueLayerName: function (layerName, sourceId) {
+        return layerName + '_' + sourceId;
     },
 
     layersInDatasets: function (collection) {
-        return collection.map(function (model) {
-            return this.generateUniqueLayerName(model.get('name'));
+        var wmsLayers = collection.filter(function (model) {
+            return model.getDatasetType() === 'wms';
         }, this);
+        var layers = wmsLayers.map(function (model) {
+            var sourceId = model.getMinervaMetadata().source_id;
+            return this.generateUniqueLayerName(model.get('name'), sourceId);
+        }, this);
+        return layers;
     },
 
     initialize: function (settings) {
@@ -88,7 +92,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
         this.layers.forEach(_.bind(function (layer) {
             var layerView = minerva.templates.layersListWidget({
                 layer: layer,
-                checked: _.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layer.layer_title))
+                checked: _.contains(this.currentLayersInDatasets, this.generateUniqueLayerName(layer.layer_title, this.source.get('_id')))
             });
             $('.m-layer-list').append(layerView);
         }, this));
