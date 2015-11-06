@@ -75,36 +75,9 @@ class WmsTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-    def testCreateWmsSource(self):
+    def testCreateWmsSourceAndDataset(self):
         """
-        Test the minerva WMS source API endpoints.
-        """
-
-        path = '/minerva_source_wms'
-        name = 'testWMS'
-        username = ''
-        password = ''
-        baseURL = 'http://fake.geoserver.fak/geoserver/ows'
-        params = {
-            'name': name,
-            'username': username,
-            'password': password,
-            'baseURL': baseURL
-        }
-
-        with HTTMock(wms_mock):
-            response = self.request(path=path, method='POST', params=params, user=self._user)
-
-        self.assertStatusOk(response)
-        wmsSource = response.json
-        minerva_metadata = wmsSource['meta']['minerva']
-        self.assertEquals(wmsSource['name'], name, 'incorrect wms source name')
-        self.assertEquals(minerva_metadata['source_type'], 'wms', 'incorrect wms source type')
-        self.assertEquals(minerva_metadata['wms_params']['base_url'], baseURL, 'incorrect wms source baseURL')
-
-    def testCreateWmsDataset(self):
-        """
-        Test the minerva WMS dataset API endpoints.
+        Test the minerva WMS source and dataset API endpoints.
         """
 
         # Create the source.
