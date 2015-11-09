@@ -16,7 +16,6 @@
 
 /* jshint node: true */
 
-
 module.exports = function (grunt) {
 
     var path = require('path');
@@ -205,7 +204,6 @@ module.exports = function (grunt) {
             }
         }
     });
-
 
     // make the destination path if it doesn't exist
     var staticDir = grunt.config.get('plugin.minerva.static');
