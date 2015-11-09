@@ -209,8 +209,45 @@ minerva.views.MapPanel = minerva.View.extend({
             selectionAPI: true,
             dynamicDraw: true
         });
-        this.esClustered = true;
+        this.doAnimation = false;
         this.datasetLayers[datasetId] = this.esFeatureLayer;
+
+        if (!this.doAnimation) {
+            var color = '#C21529',
+                opacity = 0.65;
+
+            this.esPointFeature
+                .clustering({radius: 0.0})
+                .style({
+                    fillColor: color,
+                    fillOpacity: opacity,
+                    stroke: false,
+                    radius: function (d) {
+                        var baseRadius = 2;
+
+                        if (d.__cluster) {
+                            return baseRadius + Math.log10(d.__data.length);
+                        }
+
+                        return baseRadius;
+                    }
+                })
+                .position(function (d) {
+                    return {
+                        x: d.geometry.coordinates[0],
+                        y: d.geometry.coordinates[1]
+                    };
+                })
+                .geoOn(geo.event.feature.mouseover, _.bind(this._esMouseover, this))
+                .geoOn(geo.event.feature.mouseout, _.bind(this._esMouseout, this))
+                .geoOn(geo.event.feature.mouseclick, _.bind(this._esMouseclick, this))
+                .data(this.data.features);
+
+            this.map.draw();
+            this.transitionToMsa(this.msa);
+
+            return;
+        }
 
         this.ga_data({
             columns: {
