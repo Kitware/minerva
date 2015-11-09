@@ -83,7 +83,7 @@ Add the new source type to web/external/js/collections/SourceCollection.js, this
 
 ::
 
-   `a.on is not a function`
+   a.on is not a function
 
 You're welcome.
 
@@ -93,25 +93,17 @@ Add a new model like web_external/js/models/ElasticsearchSourceModel.js.
 
 Add the Source to AddSourceWidget
 ---------------------------------
-Add your new source type as an option in web_external/templates/widgets/addSourceWidget.jade and deal with the new option in the submit #m-add-source-form event handler in web_external/js/views/widgets/AddSourceWidget.js by creating a new add widget specific to your source, e.g. AddElasticsearchSourceWidget.
-
-Test that when you click on the add new source icon in the source panel, your new source type is displayed as an option.
-
-Create the widget to add your new source type, e.g. in
+Create a widget to add your new source type, e.g. AddElasticsearchSourceWidget
 
 ::
 
    web_external/js/views/widgets/AddElasticsearchSourceWidget.js
    web_external/templates/widgets/addElasticsearchSourceWidget.jade
 
-Display the New Source in the Source Panel
-------------------------------------------
-Update the necessary in
 
-::
+Add your new source type along with a reference to the create widget to the dictionary in AddSourceWidget.js.
 
-   web_external/templates/body/sourcePanel.jade
-   web_external/stylesheets/body/sourcePanel.styl
+Test that when you click on the add new source icon in the source panel, your new source type is displayed as an option.
 
 Add an Action to the Source Displayed in the Source Panel
 ---------------------------------------------------------
