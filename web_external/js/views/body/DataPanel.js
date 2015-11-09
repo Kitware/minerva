@@ -1,52 +1,8 @@
 minerva.views.DataPanel = minerva.View.extend({
     events: {
-        'click .m-add-dataset-button': 'addDataSetDialogEvent',
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
-        'click .csv-mapping': 'mapTableDataset',
-        'click .s3-bucket-menu': 'selectS3Files',
         'click .dataset-info': 'displayDatasetInfo'
-    },
-
-    selectS3Files: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-
-        this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
-            el: $('#g-dialog-container'),
-            dataset: dataset,
-            parentView: this
-        });
-
-    },
-
-    mapTableDataset: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        // TODO may want to split out json from csv at some point
-        // TODO standardize on callback or else dual calls of getX and getXData
-
-        var datasetType = dataset.getDatasetType();
-        if (datasetType === 'json' || datasetType === 'mongo') {
-            this.keymapWidget = new minerva.views.KeymapWidget({
-                el: $('#g-dialog-container'),
-                dataset: dataset,
-                parentView: this
-            });
-            this.keymapWidget.render();
-        } else {
-            // assuming csv
-            // list the files of this item
-            var filesCallback = _.bind(function () {
-                this.tableWidget = new minerva.views.TableWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.tableWidget.render();
-            }, this);
-            dataset.getCSVFile(filesCallback);
-        }
     },
 
     addDatasetToSessionEvent: function (event) {
@@ -83,16 +39,12 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.session = settings.session;
-        this.upload = settings.upload;
-        this.validateShapefileExtensions = settings.validateShapeFileExtensions || false;
         this.collection = settings.collection;
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
             this.render();
         }, this).listenTo(this.collection, 'change:meta', function () {
-            console.log('meta change');
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function () {
             this.render();
@@ -118,20 +70,7 @@ minerva.views.DataPanel = minerva.View.extend({
 
         // TODO pagination and search?
 
-        if (this.upload) {
-            this.uploadDialog();
-        }
-
         return this;
-    },
-
-    addDataSetDialogEvent: function () {
-        var container = $('#g-dialog-container');
-
-        this.addDataSetWidget = new minerva.views.AddDataSetWidget({
-            el: container,
-            parentView: this
-        }).render();
     }
 
 });
