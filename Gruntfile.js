@@ -86,7 +86,7 @@ module.exports = function (grunt) {
                     {
                         src: [
                             '<%= plugin.minerva.source %>/init.js',
-                            '<%= plugin.minerva.static %>/minerva.templates.js',
+                            '<%= plugin.minerva.static %>/minerva_templates.js',
                             '<%= plugin.minerva.source %>/minerva-version.js',
                             '<%= plugin.minerva.source %>/view.js',
                             '<%= plugin.minerva.source %>/contourJsonReader.js',
@@ -218,8 +218,8 @@ module.exports = function (grunt) {
         var pluginDependencies = pluginConfig.dependencies;
         var staticDir = grunt.config.get('plugin.minerva.static');
         var rootStaticDir = grunt.config.get('staticDir') + '/built';
-        var pluginsStaticDir = path.resolve(staticDir, '..');
-        var rootStaticLibDir = path.resolve(staticDir, 'lib');
+        var pluginsStaticDir = staticDir + '/..';
+        var rootStaticLibDir = grunt.config.get('staticDir') + '/lib';
         var i, plugin, pluginJs, pluginCss;
         var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
         var dependencies = [
