@@ -48,10 +48,10 @@ minerva.views.SourcePanel = minerva.View.extend({
                 collection: this.datasetCollection,
                 parentView: this
             });
-            this.wmsLayersListWidget.render();
         } else {
             this.wmsLayersListWidget.setCurrentSource(wmsSource);
         }
+        this.wmsLayersListWidget.render();
     },
 
     displaySourceInfo: function (evt) {
