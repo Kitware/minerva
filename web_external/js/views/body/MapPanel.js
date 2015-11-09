@@ -8,6 +8,11 @@ minerva.views.MapPanel = minerva.View.extend({
         }
     },
 
+    changeLayerOpacity: function (dataset) {
+        this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
+        this.map.draw();
+    },
+
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.getMinervaMetadata();
         var baseUrl = minervaMetadata.base_url;
@@ -59,6 +64,8 @@ minerva.views.MapPanel = minerva.View.extend({
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
                 var layer = this.map.createLayer('osm', {attribution: null});
+                // Set the layer opacity
+                layer.mapOpacity(dataset.get('opacity'));
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
@@ -141,6 +148,12 @@ minerva.views.MapPanel = minerva.View.extend({
                 } else {
                     this.removeDataset(dataset);
                 }
+            }
+        }, this);
+
+        this.listenTo(this.collection, 'change:opacity', function (dataset) {
+            if (this.mapCreated) {
+                this.changeLayerOpacity(dataset);
             }
         }, this);
     },
