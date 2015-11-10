@@ -200,7 +200,7 @@ module.exports = function (grunt) {
             'jade:minerva': {},
             'stylus:minerva': {},
             'test-env-html:minerva': {
-                dependencies: ['uglify:minerva', 'stylus:minerva']
+                dependencies: ['uglify:minerva', 'stylus:minerva', 'shell:readServerConfig']
             }
         }
     });
