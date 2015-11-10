@@ -177,7 +177,7 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
-            },
+            }
         },
         watch: {
             'plugin-minerva-jade-external': {
