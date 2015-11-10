@@ -8,13 +8,8 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
             $.ajax({
                 url: url,
                 jsonp: false,
-                async: false,
-                jsonpCallback: 'getLayerFeatures',
-                error: function (a, b, c) {
-                    console.log(c);
-                }
+                async: true
             }).done(function (data) {
-                //panel.content += data;
                 if ('features' in data && data.features.length > 0) {
                     var layer_div = document.createElement('div');
                     layer_div.className = 'accordion';
@@ -51,11 +46,11 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                 if (layer_idx < panel.layers.length - 1) {
                     panel.callInfo(layer_idx + 1, coords);
                 } else if (panel.content !== '') {
-                    $('#wms_info_dialog').html(panel.content);
-                    $('#wms_info_dialog').dialog('open');
+                    $('#m-wms-info-dialog').html(panel.content);
+                    $('#m-wms-info-dialog').dialog('open');
                     $('.accordion').accordion({collapsible: true});
                 } else {
-                    $('#wms_info_dialog').dialog('close');
+                    $('#m-wms-info-dialog').dialog('close');
                 }
             });
         }

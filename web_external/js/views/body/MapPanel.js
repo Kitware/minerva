@@ -134,12 +134,15 @@ minerva.views.MapPanel = minerva.View.extend({
             this.legendWidget[datasetId].remove(datasetId);
             delete this.legendWidget[datasetId];
         }
-        var layerIndex = $.inArray(layer, this.map.featureInfoWidget.layers);
-        if (layerIndex > -1) {
-            this.map.featureInfoWidget.layers.splice(layerIndex, 1);
-        }
         if (dataset.getDatasetType() === 'wms' && layer) {
             this.map.deleteLayer(layer);
+            if (this.map.featureInfoWidget) {
+                var layerIndex = $.inArray(layer,
+                    this.map.featureInfoWidget.layers);
+                if (layerIndex > -1) {
+                    this.map.featureInfoWidget.layers.splice(layerIndex, 1);
+                }
+            }
         } else if (layer) {
             layer.clear();
             layer.draw();
