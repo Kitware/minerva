@@ -8,9 +8,6 @@
         "romanesco"
     ],
     "grunt": {
-        "file": "Gruntfile.js",
-        "defaultTargets": [
-            "minerva-web"
-        ]
+        "file": "Gruntfile.js"
     }
 }

@@ -14,230 +14,307 @@
  * limitations under the License.
  */
 
+/* jshint node: true */
+
 module.exports = function (grunt) {
 
+    var path = require('path');
+
+    // This gruntfile is only designed to be used with girder's build system.
+    // Fail if grunt is executed here.
+    if (path.resolve(__dirname) === path.resolve(process.cwd())) {
+        grunt.fail.fatal('To build Minerva, run grunt from Girder\'s root directory');
+    }
+
+    grunt.config.requires('pluginDir');
+
     var fs = require('fs');
-    var jade = require('jade');
-    var defaultTasks = [];
+    var _;
 
-    // Since this is an external web app in a plugin,
-    // it handles building itself
-    //
-    // It is not included in the plugins being built by virtue of
-    // the web client not living in web_client, but rather web_external
-    var configureMinerva = function () {
-        var pluginName = 'minerva';
-        var pluginDir = 'plugins/' + pluginName;
-        // load our dependent plugins
-        var pluginJson = pluginDir + '/plugin.json';
-        var pluginDescription = grunt.file.readYAML(pluginJson);
-        var pluginDependencies = pluginDescription.dependencies;
+    try {
+        // Extreme hackery used to avoid exception on first time `grunt init`
+        // before local npm dependencies are installed.  If this isn't done,
+        // then `grunt init` needs to be run twice.
+        _ = require('underscore');
+    } catch (e) {
+        grunt.log.writeln(
+            'Mocking underscore dependency for first time install.'.yellow
+        );
+        grunt.log.writeln(
+            'grunt watch'.yellow.underline + ' will not be initialized this run.'.yellow
+        );
+        _ = {
+            pluck: function () {
+                return [];
+            }
+        };
+    }
 
-        var rootStaticDir = 'clients/web/static/built';
-        var pluginsStaticDir = 'clients/web/static/built/plugins';
-        var rootStaticLibDir = 'clients/web/static/lib';
-        var staticDir = rootStaticDir + '/' + pluginDir;
-        var sourceDir = "web_external";
-
-        if (!fs.existsSync(staticDir)) {
-            fs.mkdirSync(staticDir);
-        }
-
-        var jadeDir = pluginDir + '/' + sourceDir + '/templates';
-        if (fs.existsSync(jadeDir)) {
-            var files = {};
-            files[staticDir + '/minerva_templates.js'] = [jadeDir + '/**/*.jade'];
-            grunt.config.set('jade.' + pluginName, {
-                files: files
-            });
-            grunt.config.set('jade.' + pluginName + '.options', {
-                namespace: 'minerva.templates'
-            });
-            grunt.config.set('watch.jade_' + pluginName + '_app', {
-                files: [jadeDir + '/**/*.jade'],
-                tasks: ['jade:' + pluginName, 'uglify:' + pluginName]
-            });
-            defaultTasks.push('jade:' + pluginName);
-        }
-
-        var cssDir = pluginDir + '/' + sourceDir + '/stylesheets';
-        if (fs.existsSync(cssDir)) {
-            var files = {};
-            files[staticDir + '/minerva.min.css'] = [cssDir + '/**/*.styl'];
-            grunt.config.set('stylus.' + pluginName, {
-                files: files
-            });
-            grunt.config.set('watch.stylus_' + pluginName + '_app', {
-                files: [cssDir + '/**/*.styl'],
-                tasks: ['stylus:' + pluginName]
-            });
-            defaultTasks.push('stylus:' + pluginName);
-        }
-
-        var jsDir = pluginDir + '/' + sourceDir + '/js';
-        // depends on npm install being run locally in this plugin dir
-        var geojsDir = pluginDir + '/node_modules/geojs';
-        var jsonpathjsDir = pluginDir + '/node_modules/JSONPath/lib';
-        var geojsDistDir = geojsDir + '/dist/built';
-        var extDir = jsDir + '/ext';
-
-        grunt.config.set('shell.geojs-install', {
-            command: 'npm install --only=prod',
-            options: {
-                execOptions: {
-                    cwd: geojsDir
+    grunt.config.merge({
+        plugin: {
+            minerva: {
+                root: '<%= pluginDir %>/minerva',
+                external: '<%= plugin.minerva.root %>/web_external',
+                static: '<%= staticDir %>/built/plugins/minerva',
+                source: '<%= plugin.minerva.external %>/js',
+                geojs: '<%= plugin.minerva.root %>/node_modules/geojs',
+                extra: '<%= plugin.minerva.external %>/extra'
+            }
+        },
+        jade: {
+            minerva: {
+                files: [{
+                    src: ['<%= plugin.minerva.external %>/templates/**/*.jade'],
+                    dest: '<%= plugin.minerva.static %>/minerva_templates.js'
+                }],
+                options: {
+                    namespace: 'minerva.templates'
                 }
             }
+        },
+        stylus: {
+            minerva: {
+                files: [{
+                    src: ['<%= plugin.minerva.external %>/stylesheets/**/*.styl'],
+                    dest: '<%= plugin.minerva.static %>/minerva.min.css'
+                }]
+            }
+        },
+        uglify: {
+            minerva: {
+                files: [
+                    {
+                        src: [
+                            '<%= plugin.minerva.source %>/init.js',
+                            '<%= plugin.minerva.static %>/minerva_templates.js',
+                            '<%= plugin.minerva.source %>/minerva-version.js',
+                            '<%= plugin.minerva.source %>/view.js',
+                            '<%= plugin.minerva.source %>/contourJsonReader.js',
+                            '<%= plugin.minerva.source %>/app.js',
+                            '<%= plugin.minerva.source %>/utilities.js',
+                            '<%= plugin.minerva.source %>/MinervaModel.js',
+                            '<%= plugin.minerva.source %>/MinervaCollection.js',
+                            '<%= plugin.minerva.source %>/models/DatasetModel.js',
+                            '<%= plugin.minerva.source %>/models/SourceModel.js',
+                            '<%= plugin.minerva.source %>/models/**/*.js',
+                            '<%= plugin.minerva.source %>/collections/**/*.js',
+                            '<%= plugin.minerva.source %>/views/**/*.js'
+                        ],
+                        dest: '<%= plugin.minerva.static %>/minerva.min.js'
+                    },
+                    {
+                        src: [
+                            '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
+                            '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
+                            '<%= plugin.minerva.geojs %>/node_modules/pnltri/pnltri.js'
+                        ],
+                        dest: '<%= plugin.minerva.static %>/geo.ext.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.source %>/main.js'],
+                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
+                        dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
+                    }
+                ]
+            }
+        },
+        shell: {
+            'minerva-geojs-install': {
+                command: 'npm install --only=prod',
+                options: {
+                    execOptions: {
+                        cwd: '<%= plugin.minerva.geojs %>'
+                    }
+                }
+            },
+            'minerva-geojs-build': {
+                command: 'npm run build',
+                options: {
+                    execOptions: {
+                        cwd: '<%= plugin.minerva.geojs %>'
+                    }
+                }
+            }
+        },
+        copy: {
+            'minerva-extras': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.extra %>',
+                        src: ['**'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/dist/built',
+                        src: ['geo.min.js'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
+            },
+            'jquery-ui': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui',
+                        src: ['jquery-ui.min.js'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        src: ['jquery-ui.min.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        src: ['images/*'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
+            },
+        },
+        watch: {
+            'plugin-minerva-jade-external': {
+                files: _.pluck(grunt.config.get('jade.minerva.files'), 'src'),
+                tasks: ['jade.minerva']
+            },
+            'plugin-minerva-stylus-external': {
+                files: _.pluck(grunt.config.get('stylus.minerva.files'), 'src'),
+                tasks: ['stylus.minerva']
+            },
+            'plugin-minerva-uglify-external': {
+                files: _.pluck(grunt.config.get('uglify.minerva.files'), 'src'),
+                tasks: ['uglify.minerva']
+            },
+            'plugin-minerva-build-geojs': {
+                files: ['<%= plugin.minerva.geojs %>/**/*.js'],
+                tasks: ['shell.minerva-geojs']
+            },
+            'plugin-minerva-copy-extra': {
+                files: [
+                    '<%= plugin.minerva.extra %>/**',
+                    '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
+                ],
+                tasks: ['copy:minerva-extras']
+            }
+        },
+        init: {
+            'shell:minerva-geojs-install': {
+                dependencies: ['shell:plugin-install']
+            },
+            'shell:minerva-geojs-build': {
+                dependencies: ['shell:minerva-geojs-install']
+            },
+            'copy:minerva-extras': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'copy:jquery-ui': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            }
+        },
+        default: {
+            'uglify:minerva': {
+                dependencies: ['jade:minerva']
+            },
+            'jade:minerva': {},
+            'stylus:minerva': {},
+            'test-env-html:minerva': {
+                dependencies: ['uglify:minerva', 'stylus:minerva', 'shell:readServerConfig']
+            }
+        }
+    });
+
+    // make the destination path if it doesn't exist
+    var staticDir = grunt.config.get('plugin.minerva.static');
+    if (!fs.existsSync(staticDir)) {
+        fs.mkdirSync(staticDir);
+    }
+    grunt.registerTask('test-env-html:minerva', 'Build the phantom test html page for minerava', function () {
+        var jade = require('jade');
+        var pluginConfig = grunt.file.readYAML(
+            grunt.config.get('plugin.minerva.root') + '/plugin.json'
+        );
+        var pluginDependencies = pluginConfig.dependencies;
+        var staticDir = grunt.config.get('plugin.minerva.static');
+        var rootStaticDir = grunt.config.get('staticDir') + '/built';
+        var pluginsStaticDir = staticDir + '/..';
+        var rootStaticLibDir = grunt.config.get('staticDir') + '/lib';
+        var i, plugin, pluginJs, pluginCss;
+        var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
+        var dependencies = [
+            '/clients/web/test/testUtils.js',
+            '/clients/web/static/built/libs.min.js',
+            '/' + staticDir + '/geo.ext.min.js',
+            // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
+            '/' + staticDir + '/jquery.gridster.js',
+            '/' + staticDir + '/jquery-ui.min.js',
+            '/' + staticDir + '/geo.min.js',
+            '/' + rootStaticDir + '/app.min.js'
+        ];
+        // if any plugin dependencies have js, add them
+        for (i = 0; i < pluginDependencies.length; i = i + 1) {
+            plugin = pluginDependencies[i];
+            pluginJs = pluginsStaticDir + '/' + plugin + '/plugin.min.js';
+            if (fs.existsSync(pluginJs)) {
+                dependencies.push('/' + pluginJs);
+            }
+        }
+        dependencies.concat([
+            'http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js',
+            'http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js',
+            'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js',
+            '/' + staticDir + '/papaparse.min.js',
+            '/' + staticDir + '/jsonpath.min.js'
+        ]);
+
+        var globs = grunt.config.get('uglify.minerva.files')[0].src;
+        var jsFiles = [];
+        globs.forEach(function (glob) {
+            var files = grunt.file.expand(glob);
+            files.forEach(function (file) {
+                jsFiles.push('/' + file);
+            });
         });
-        grunt.config.set('shell.geojs-build', {
-            command: 'npm run build',
-            options: {
-                execOptions: {
-                    cwd: geojsDir
-                }
-            }
+
+        var fn = jade.compile(buffer, {
+            client: false,
+            pretty: true
         });
-        defaultTasks.push('shell:geojs-install');
-        defaultTasks.push('shell:geojs-build');
 
-        if (fs.existsSync(jsDir)) {
-            var files = {};
-            // name this minerva.min.js instead of plugin.min.js
-            // so that girder app won't load minerva, which
-            // should only be loaded as a separate web app running as minerva
-            files[staticDir + '/minerva.min.js'] = [
-                jsDir + '/init.js',
-                staticDir + '/minerva_templates.js',
-                jsDir + '/minerva-version.js',
-                jsDir + '/view.js',
-                jsDir + '/contourJsonReader.js',
-                jsDir + '/app.js',
-                jsDir + '/utilities.js',
-                jsDir + '/MinervaModel.js',
-                jsDir + '/MinervaCollection.js',
-                jsDir + '/models/DatasetModel.js',
-                jsDir + '/models/SourceModel.js',
-                jsDir + '/models/**/*.js',
-                jsDir + '/collections/**/*.js',
-                jsDir + '/views/**/*.js'
-            ];
-            // since Girder already provides jquery and d3
-            // don't take the prepackaged geo.ext.min.js from geojs, but rather
-            // create one based on the other required dependencies
-            files[staticDir + '/geo.ext.min.js'] = [
-                geojsDir + '/bower_components/gl-matrix/dist/gl-matrix.js',
-                geojsDir + '/bower_components/proj4/dist/proj4-src.js',
-                geojsDir + '/node_modules/pnltri/pnltri.js'
-            ];
-            files[staticDir + '/main.min.js'] = [
-                jsDir + '/main.js'
-            ];
-            files[staticDir + '/jsonpath.min.js'] = [
-                jsonpathjsDir + '/jsonpath.js'
-            ];
-            grunt.config.set('uglify.' + pluginName, {
-                files: files
-            });
-            grunt.config.set('watch.js_' + pluginName + '_app', {
-                files: [jsDir + '/**/*.js'],
-                tasks: ['uglify:' + pluginName]
-            });
-            defaultTasks.push('uglify:' + pluginName);
-        }
-
-        var jqueryUiDir  = geojsDir + '/bower_components/jquery-ui';
-        var extraDir = pluginDir + '/' + sourceDir + '/extra';
-        if (fs.existsSync(extraDir)) {
-            var files = [
-                { expand: true, cwd: extraDir, src: ['**'], dest: staticDir },
-                { expand: true, cwd: geojsDistDir, src: ['geo.min.js'], dest: staticDir },
-                { expand: true, cwd: jqueryUiDir, src: ['jquery-ui.min.js'], dest: staticDir },
-                { expand: true, cwd: jqueryUiDir + '/themes/smoothness', src: ['**/*'], dest: staticDir }
-            ];
-            grunt.config.set('copy.' + pluginName, { files: files});
-            grunt.config.set('watch.copy_' + pluginName, {
-                files: [extraDir + '/**/*', geojsDistDir + '/geo.min.js'],
-                tasks: ['copy:' + pluginName]
-            });
-            defaultTasks.push('copy:' + pluginName);
-        }
-
-        grunt.registerTask('test-env-html:' + pluginName, 'Build the phantom test html page for '+pluginName, function () {
-            var i, plugin, pluginJs, pluginCss;
-            var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
-            var dependencies = [
-                '/clients/web/test/testUtils.js',
-                '/clients/web/static/built/libs.min.js',
-                '/' + staticDir + '/geo.ext.min.js',
-                // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
-                '/' + staticDir + '/jquery.gridster.js',
-                '/' + staticDir + '/jquery-ui.min.js',
-                '/' + staticDir + '/geo.min.js',
-                '/' + rootStaticDir + '/app.min.js'
-            ];
-            // if any plugin dependencies have js, add them
-            for(i = 0; i < pluginDependencies.length; i = i + 1) {
-                plugin = pluginDependencies[i];
-                pluginJs = pluginsStaticDir + '/' + plugin + '/plugin.min.js';
-                if (fs.existsSync(pluginJs)) {
-                    dependencies.push('/' + pluginJs);
-                }
+        var cssFiles =  [
+            // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
+            '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
+            'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
+            '/' + rootStaticLibDir + '/fontello/css/fontello.css',
+            '/' + rootStaticLibDir + '/fontello/css/animation.css',
+            '/' + staticDir + '/jquery.gridster.min.css',
+            '/' + staticDir + '/jquery-ui.min.css',
+            '/' + rootStaticDir + '/app.min.css',
+            'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
+            'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
+        ];
+        // if any plugin dependencies have css, add them
+        for (i = 0; i < pluginDependencies.length; i = i + 1) {
+            plugin = pluginDependencies[i];
+            pluginCss = pluginsStaticDir + '/' + plugin + '/plugin.min.css';
+            if (fs.existsSync(pluginCss)) {
+                cssFiles.push('/' + pluginCss);
             }
-            dependencies.concat([
-                'http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js',
-                'http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js',
-                'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js',
-                '/' + staticDir + '/papaparse.min.js',
-                '/' + staticDir + '/jsonpath.min.js'
-            ]);
+        }
+        cssFiles.push('/' + staticDir + '/minerva.min.css');
 
-            var globs = grunt.config('uglify.' + pluginName + '.files')[staticDir + '/minerva.min.js'];
-            var jsFiles = [];
-            globs.forEach(function (glob) {
-                var files = grunt.file.expand(glob);
-                files.forEach(function (file) {
-                    jsFiles.push('/' + file);
-                });
-            });
-
-            var fn = jade.compile(buffer, {
-                client: false,
-                pretty: true
-            });
-
-            var cssFiles =  [
-                // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
-                '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
-                'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
-                '/' + rootStaticLibDir + '/fontello/css/fontello.css',
-                '/' + rootStaticLibDir + '/fontello/css/animation.css',
-                '/' + staticDir + '/jquery.gridster.min.css',
-                '/' + staticDir + '/jquery-ui.min.css',
-                '/' + rootStaticDir + '/app.min.css',
-                'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
-                'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
-            ];
-            // if any plugin dependencies have css, add them
-            for(i = 0; i < pluginDependencies.length; i = i + 1) {
-                plugin = pluginDependencies[i];
-                pluginCss = pluginsStaticDir + '/' + plugin + '/plugin.min.css';
-                if (fs.existsSync(pluginCss)) {
-                    cssFiles.push('/' + pluginCss);
-                }
-            }
-            cssFiles.push('/' + staticDir + '/minerva.min.css');
-
-            fs.writeFileSync(rootStaticDir + '/testEnvMinerva.html', fn({
-                cssFiles: cssFiles,
-                jsFilesUncovered: dependencies,
-                jsFilesCovered: jsFiles,
-                staticRoot: grunt.config('serverConfig.staticRoot'),
-                apiRoot: grunt.config('serverConfig.apiRoot')
-            }));
-        });
-        defaultTasks.push('test-env-html:' + pluginName);
-    };
-
-    configureMinerva();
-    grunt.registerTask('minerva-web', defaultTasks);
+        fs.writeFileSync(rootStaticDir + '/testEnvMinerva.html', fn({
+            cssFiles: cssFiles,
+            jsFilesUncovered: dependencies,
+            jsFilesCovered: jsFiles,
+            staticRoot: grunt.config('serverConfig.staticRoot'),
+            apiRoot: grunt.config('serverConfig.apiRoot')
+        }));
+    });
 };

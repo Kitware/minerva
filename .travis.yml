@@ -89,14 +89,7 @@ install:
     # create the Romanesco config and enable spark plugin
     - cp /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.dist.cfg /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
     - sed -i 's/plugins_enabled=/plugins_enabled=spark/' /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
-    - npm install grunt grunt-cli
-    - pushd plugins/minerva
-
-    # install minerva npm dependencies
-    - npm install
-    - popd
-
-    # install girder npm dependencies and grunt at top level
+    # build and install girder
     - npm install
 
 script:
