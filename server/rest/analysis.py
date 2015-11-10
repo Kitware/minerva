@@ -40,6 +40,7 @@ class Analysis(Resource):
         self.resourceName = 'minerva_analysis'
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('GET', ('terra_msa_from_bbox',), self.getMsaFromBBox)
+        self.route('GET', ('msa_bounding_box',), self.getMsaBBox)
         self.route('GET', ('get_ad_details',), self.getAdDetails)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
@@ -132,6 +133,32 @@ class Analysis(Resource):
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
 
     @access.user
+    def getMsaBBox(self, params):
+        centroid = self.boolParam('centroid', params, default=False)
+        regionQuery = 'ST_Extent(region)'
+
+        if centroid:
+            regionQuery = 'ST_Centroid(%s)' % regionQuery
+
+        cursor, _ = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
+        cursor.execute(
+            "select ST_AsGeoJSON(%s) from msas where name = %%s limit 1" % regionQuery,
+            (params['msaName'],))
+        geom = cursor.fetchone()
+
+        if not geom or not geom[0]:
+            raise RestException('MSA not found.')
+
+        return json.loads(geom[0])
+    getMsaBBox.description = (
+        Description('Return the bounding box of an MSAs region.')
+        .param('msaName', 'Name of the MSA')
+        .param('centroid',
+               'Return the centroid of the bounding box instead',
+               required=False,
+               dataType='boolean'))
+
+    @access.user
     def getAdDetails(self, params):
         from collections import defaultdict
         ad_images = defaultdict(list)
@@ -168,7 +195,7 @@ class Analysis(Resource):
 
     @access.user
     def getMsaFromBBox(self, params):
-        cursor = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
+        cursor, _ = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
         cursor.execute(("select msas.name, "
                         "ST_Area(ST_Intersection(msas.region, "
                         "(SELECT ST_SetSRID(ST_MakeEnvelope(%s, %s, %s, %s), 4326)))) as area "
