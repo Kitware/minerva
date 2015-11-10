@@ -43,14 +43,10 @@ Install of Minerva as a Girder plugin
 
    pip install -r requirements.txt
 
--  run npm install in the ``minerva`` directory to get Minerva’s JS
-   dependencies
+-  run npm install at the top level ``girder`` directory to get all javascript
+   dependencies and build the girder application
 
    npm install
-
--  grunt at the top level in the ``girder`` directory to build Minerva
-
-   grunt
 
 -  copy the ``minerva.dist.cfg`` file, located in the server/conf
    directory, to ``minerva.local.cfg`` in that same directory. Any

@@ -54,6 +54,11 @@ add_javascript_style_test(
     JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
 )
 
+add_javascript_style_test(
+    minerva-gruntfile "${PROJECT_SOURCE_DIR}/plugins/minerva/Gruntfile.js"
+    JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+)
+
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/minervaSpec.js"
     ENABLEDPLUGINS "gravatar" "jobs" "romanesco" "minerva"
