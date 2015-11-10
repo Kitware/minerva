@@ -9,21 +9,23 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     transitionToMsa: function (msa) {
-        if (_.has(this.boundingBoxes, msa)) {
-            var add = function (a, b) {
-                return a + b;
-            },
-                zoom = _.max([8, this.map.zoom()]);
-
+        girder.restRequest({
+            type: 'GET',
+            path: 'minerva_analysis/msa_bounding_box',
+            data: {
+                msaName: msa,
+                centroid: true
+            }
+        }).done(_.bind(function (boundingBox) {
             this.map.transition({
                 center: {
-                    x: _.reduce(this.boundingBoxes[msa][0], add) / 2,
-                    y: _.reduce(this.boundingBoxes[msa][1], add) / 2
+                    x: boundingBox.coordinates[0],
+                    y: boundingBox.coordinates[1]
                 },
-                zoom: zoom,
+                zoom: _.max([8, this.map.zoom()]),
                 duration: 200
             });
-        }
+        }, this));
     },
 
     _specifyWmsDatasetLayer: function (dataset, layer) {
@@ -479,38 +481,6 @@ minerva.views.MapPanel = minerva.View.extend({
                     parentView: this,
                     el: $('li.animationPanel')
                 });
-
-            var getBoundingBox = _.memoize(function(coordinates) {
-                var minX = _.first(coordinates)[0],
-                    maxX = minX,
-                    minY = _.first(coordinates)[1],
-                    maxY = minY;
-
-                _.each(_.rest(coordinates), function(coordPair) {
-                    minX = (minX < coordPair[0]) ? minX : coordPair[0];
-                    maxX = (maxX > coordPair[0]) ? maxX : coordPair[0];
-                    minY = (minY < coordPair[1]) ? minY : coordPair[1];
-                    maxY = (maxY > coordPair[1]) ? maxY : coordPair[1];
-                });
-
-                return [
-                    [minX, maxX],
-                    [minY, maxY]
-                ];
-            });
-
-            // @todo - this will never work on another machine
-            girder.restRequest({
-                type: 'GET',
-                path: 'file/' + '5627fb65d2a733029f8d0ed0' + '/download'
-            }).done(_.bind(function (resp) {
-                this.boundingBoxes = {};
-
-                _.each(resp, _.bind(function (geojson, msa) {
-                    this.boundingBoxes[msa] = getBoundingBox(
-                        geojson.features[0].geometry.coordinates[0]);
-                }, this));
-            }, this));
 
             // Tell the user what MSA they're viewing when they move the map.
             // It determines this based on which MSA is taking up the most area.
