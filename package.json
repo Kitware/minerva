@@ -6,6 +6,6 @@
   "dependencies": {
     "JSONPath": "0.10.0",
     "c3": "^0.4.11-rc4",
-    "geojs": "0.5.0"
+    "geojs": "git+https://github.com/OpenGeoscience/geojs.git#0e6258d55f08e923e117436535a9499d3e38ded0"
   }
 }

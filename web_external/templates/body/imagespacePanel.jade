@@ -1,8 +1,8 @@
-.imagespacePanelInner
-  .panelTitle
-        | Ad Results
-
-  #ad-results
+.panelTitle(data-toggle='collapse', data-target='.imagespacePanelInner')
+  | Ad Results
+  i(class='icon-up-open close-icon toggle-icon')
+.imagespacePanelInner.collapse.in
+  #ad-results(style='padding:5px;color:transparent;text-shadow: 0 0 5px rgba(0,0,0,0.5);')
     p Find similar images
 
     ul

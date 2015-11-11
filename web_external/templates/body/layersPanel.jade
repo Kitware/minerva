@@ -1,8 +1,11 @@
-.layersPanelContainer
-  .panelTitle
-    | Session Layers
+.panelTitle(data-toggle='collapse', data-target='.layersPanelContainer')
+  | Session Layers
+  i(class='icon-up-open close-icon toggle-icon')
+.layersPanelContainer.collapse.in
   .layersList
     ul.datasets
       each dataset in datasets
         li.dataset= dataset.get('name')
           i.icon-cancel-circled.remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+      else
+        li No session layers yet, apply some datasets to the map!

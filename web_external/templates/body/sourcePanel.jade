@@ -1,7 +1,8 @@
-.m-source-panel-container
-  .panelTitle
-      | Sources
-      i.m-add-source.m-icon-enabled.icon-plus-squared(title="Add new source")
+.panelTitle(data-toggle='collapse', data-target='.m-source-panel-container')
+  | Sources
+  i(class='icon-up-open close-icon toggle-icon')
+  i.m-add-source.m-icon-enabled.icon-plus-squared(title="Add new source")
+.m-source-panel-container.collapse.in
   .m-sourceList
     .m-sources
         each source in sources

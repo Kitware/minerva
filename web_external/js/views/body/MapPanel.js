@@ -12,15 +12,16 @@ minerva.views.MapPanel = minerva.View.extend({
         if (_.has(this.boundingBoxes, msa)) {
             var add = function (a, b) {
                 return a + b;
-            };
+            },
+                zoom = _.max([8, this.map.zoom()]);
 
             this.map.transition({
                 center: {
                     x: _.reduce(this.boundingBoxes[msa][0], add) / 2,
                     y: _.reduce(this.boundingBoxes[msa][1], add) / 2
                 },
-                zoom: 8,
-                duration: 1000
+                zoom: zoom,
+                duration: 200
             });
         }
     },
@@ -77,11 +78,33 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     _esMouseover: function (evt) {
+        var label, position;
+
         if (evt.data.__cluster) {
-            console.log('Cluster containing ' + evt.data.__data.length + ' points.');
+            label = 'Cluster containing ' + evt.data.__data.length + ' points.';
+            position = this.map.gcsToDisplay({
+                x: evt.data.x,
+                y: evt.data.y
+            });
         } else {
-            console.log(evt.data.properties);
+            label = 'it\'s a point!';
+            position = this.map.gcsToDisplay({
+                x: Number(evt.data.properties.latitude[0]),
+                y: Number(evt.data.properties.longitude[0])
+            });
         }
+
+        $(this.uiLayer.node()).append(
+            '<div id="example-overlay">' + label + '</div>'
+        );
+
+        $('#example-overlay').css('position', 'absolute');
+        $('#example-overlay').css('left', position.x + 'px');
+        $('#example-overlay').css('top', position.y + 'px');
+    },
+
+    _esMouseout: function (evt) {
+        $('#example-overlay').remove();
     },
 
     _esMouseclick: function (evt) {
@@ -131,8 +154,8 @@ minerva.views.MapPanel = minerva.View.extend({
         this.esPointFeature
             .clustering({radius: 0.0})
             .style({
-                fillColor: 'black',
-                fillOpacity: 0.65,
+                fillColor: '#C21529',
+                fillOpacity: 0.75,
                 stroke: false,
                 radius: function (d) {
                     var baseRadius = 2;
@@ -150,11 +173,22 @@ minerva.views.MapPanel = minerva.View.extend({
                     y: d.geometry.coordinates[1]
                 };
             })
-            .geoOn(geo.event.feature.mouseover, this._esMouseover)
+            .geoOn(geo.event.feature.mouseover, _.bind(this._esMouseover, this))
             .geoOn(geo.event.feature.mouseclick, _.bind(this._esMouseclick, this))
+            .geoOn(geo.event.feature.mouseout, _.bind(this._esMouseout, this))
             .data(this.data.features);
 
         this.map.draw();
+
+        minerva.events.trigger('m:terra-data-rendered');
+
+        console.log('Rendered ' +
+                    _.size(this.data.features) +
+                    ' points in ' +
+                    _.size(_.countBy(this.data.features, function(o) {
+                        return o.properties.latitude + o.properties.longitude;
+                    })) +
+                    ' locations.');
 
         this.transitionToMsa(this.msa);
     },
@@ -170,7 +204,10 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
-                var layer = this.map.createLayer('osm', {attribution: null});
+                var layer = this.map.createLayer('osm', {
+                    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat/',
+                    attribution: null
+                });
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
@@ -185,7 +222,6 @@ minerva.views.MapPanel = minerva.View.extend({
 
                 // Add the UI slider back
                 this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
                 this.map.draw();
             } else if (dataset.getDatasetType() === 'elasticsearch') {
                 dataset.once('m:dataLoaded', _.bind(this._renderElasticDataset, this));
@@ -204,9 +240,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     layer.clear();
 
                     reader.read(dataset.fileData, _.bind(function () {
-                        // Add the UI slider back
                         this.uiLayer = this.map.createLayer('ui');
-                        this.uiLayer.createWidget('slider');
                         this.map.draw();
                     }, this));
                 }, this);
@@ -300,12 +334,20 @@ minerva.views.MapPanel = minerva.View.extend({
         if (!this.map) {
             this.map = geo.map({
                 node: '.mapPanelMap',
-                center: this.session.sessionJsonContents.center,
-                zoom: this.session.sessionJsonContents.zoom
+                // Center of aggregate MSA bounding box
+                center: {
+                    x: -111.33493,
+                    y: 44.3101665
+                },
+                zoom: 3.8
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer('osm', {
+                tileUrl: 'http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+                attribution: '<div class="leaflet-control-attribution leaflet-control">© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="http://cartodb.com/attributions#basemaps">CartoDB</a>, CartoDB <a href="http://cartodb.com/attributions" target="_blank">attribution</a></div>'
+            });
+
+
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {

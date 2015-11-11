@@ -1,6 +1,7 @@
-.m-analysisPanelContainer
-  .panelTitle
-    | Analysis Panel
+.panelTitle(data-toggle='collapse', data-target='.m-analysisPanelContainer')
+  | Analyses
+  i(class='icon-up-open close-icon toggle-icon')
+.m-analysisPanelContainer.collapse.in
   .m-analysisList
     .m-analyses
         each analysis in analyses
