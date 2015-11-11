@@ -73,7 +73,9 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
     fetchTimeSeriesData: function() {
         var _this = this;
 
-        $.ajax({
+
+
+        this.ajax({
             url: 'https://tempus-demo.ngrok.com/api/series',
             data: {
                 table: 'escort_ads',
@@ -90,7 +92,7 @@ minerva.models.TSDatasetModel = minerva.models.TerraDatasetModel.extend({
                     data: data.result
                 }]);
 
-                $.ajax({
+                _this.ajax({
                     url: 'https://tempus-demo.ngrok.com/api/comparison',
                     data: {
                         table: 'escort_ads',

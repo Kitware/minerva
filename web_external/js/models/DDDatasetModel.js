@@ -67,7 +67,7 @@ minerva.models.DDDatasetModel = minerva.models.TerraDatasetModel.extend({
     fetchDiffInDiffData: function() {
         var _this = this;
 
-        $.ajax({
+        this.ajax({
             url: 'https://tempus-demo.ngrok.com/api/diffindiff',
             data: {
                 target: _this.get('targetLocation'),

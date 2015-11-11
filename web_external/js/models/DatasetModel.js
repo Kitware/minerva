@@ -6,6 +6,39 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         files: null
     },
 
+    ajax: function(options, useCache) {
+        var ajaxOptionsDefaults = {
+            data: {},
+            async: false,
+            cache: false
+        };
+
+        options = $.extend(ajaxOptionsDefaults, options);
+
+        var cachedRequest = localStorage.getItem(options.url + JSON.stringify(options.data));
+        useCache = true;
+
+        if (useCache && cachedRequest && options.hasOwnProperty('success')) {
+            options.success(JSON.parse(cachedRequest));
+        } else {
+            // Cache regardless
+            var successCallback = options.success;
+
+            options.success = function(data) {
+                try {
+                    localStorage.setItem(options.url + JSON.stringify(options.data), JSON.stringify(data));
+                } catch (e) {}
+
+                if (successCallback) {
+                    successCallback(data);
+                }
+            };
+
+            // Perform ajax call with caching wrapped around success callback
+            $.ajax(options);
+        }
+    },
+
     isRenderable: function () {
         // Really this function should be defined in each data model subclass,
         // OR - based on whether or not geoFileReader is defined (better because
