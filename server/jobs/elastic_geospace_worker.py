@@ -17,6 +17,8 @@ from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead
 
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
+from girder.plugins.minerva.utility.terra_utility import (esCursorFromEsSourceId,
+                                                          pgCursorFromPgSourceId)
 
 import girder_client
 
@@ -41,44 +43,29 @@ def run(job):
         client.token = token['_id']
 
         # Get datasource
-        source = client.getItem(elasticSearchParams['sourceId'])
-        pgSource = client.getItem(elasticSearchParams['pgSourceId'])
-
-        dbuser, dbpass = decryptCredentials(
-            pgSource['meta']['minerva']['postgres_params']['credentials']).split(':')
-        conn = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (
-            pgSource['meta']['minerva']['postgres_params']['dbname'],
-            dbuser,
-            pgSource['meta']['minerva']['postgres_params']['base_url'],
-            dbpass
-        ))
-        cursor = conn.cursor()
-
-        # Validate MSA name before injecting..
-        # Should this be done as a REST-level validation?
-        cursor.execute("select name from msas")
-        assert elasticSearchParams['msa'] in [row[0] for row in cursor.fetchall()]
+        esCursor, esSource = esCursorFromEsSourceId(elasticSearchParams['sourceId'])
+        pgCursor, pgSource = pgCursorFromPgSourceId(elasticSearchParams['pgSourceId'])
 
         # Find all ads within that MSA
         # todo - utilize the geojson querying
         # see: http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html
-        cursor.execute(("select als.ad_id, ST_AsGeoJSON(location) "
-                        "from ad_locations_sample als, msas "
+        pgCursor.execute(("select als.ad_id, ST_AsGeoJSON(location) "
+                        "from ad_locations als, msas "
                         "where msas.name = '%s' "
                         "and ST_Contains(msas.region, als.location)" %
                         elasticSearchParams['msa']))
-        ads = {k:v for (k, v) in cursor.fetchall()}
+        ads = {k:v for (k, v) in pgCursor.fetchall()}
 
         esUrl = 'https://%s@%s' % (decryptCredentials(
-            source['meta']['minerva']['elasticsearch_params']['credentials']),
-            source['meta']['minerva']['elasticsearch_params']['host_name'])
+            esSource['meta']['minerva']['elasticsearch_params']['credentials']),
+            esSource['meta']['minerva']['elasticsearch_params']['host_name'])
         es = Elasticsearch([esUrl])
 
         # Grab fields from elasticsearch where ad ids must be in relevant MSA,
         # and lat/long/posttime fields must exist
         searchResult = Search() \
-            .using(client=es) \
-            .index(source['meta']['minerva']['elasticsearch_params']['index']) \
+            .using(client=esCursor) \
+            .index(esSource['meta']['minerva']['elasticsearch_params']['index']) \
             .fields(['id', 'latitude', 'longitude', 'title', 'posttime']) \
             .filter('terms', id=ads.keys()) \
             .filter(~F('missing', field='latitude')) \
@@ -124,6 +111,7 @@ def run(job):
                 }
             })
 
+        # TODO use with tmpdir
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()
         outFilepath = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
