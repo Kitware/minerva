@@ -65,6 +65,8 @@ class CustomAppRoot(object):
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
         <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
+        <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
         % for plugin in pluginCss:
             <link rel="stylesheet"
@@ -87,6 +89,8 @@ class CustomAppRoot(object):
         </script>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
+        </script>
+        <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/minerva/geo.min.js">
         </script>

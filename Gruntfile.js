@@ -155,6 +155,28 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
+            },
+            'jquery-ui': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui',
+                        src: ['jquery-ui.min.js'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        src: ['jquery-ui.min.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        src: ['images/*'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
             }
         },
         watch: {
@@ -190,6 +212,9 @@ module.exports = function (grunt) {
                 dependencies: ['shell:minerva-geojs-install']
             },
             'copy:minerva-extras': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'copy:jquery-ui': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             }
         },
@@ -228,6 +253,7 @@ module.exports = function (grunt) {
             '/' + staticDir + '/geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
             '/' + staticDir + '/jquery.gridster.js',
+            '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',
             '/' + rootStaticDir + '/app.min.js'
         ];
@@ -268,6 +294,7 @@ module.exports = function (grunt) {
             '/' + rootStaticLibDir + '/fontello/css/fontello.css',
             '/' + rootStaticLibDir + '/fontello/css/animation.css',
             '/' + staticDir + '/jquery.gridster.min.css',
+            '/' + staticDir + '/jquery-ui.min.css',
             '/' + rootStaticDir + '/app.min.css',
             'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
             'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
