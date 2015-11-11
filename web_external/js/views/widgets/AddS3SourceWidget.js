@@ -22,11 +22,19 @@ minerva.views.AddS3SourceWidget = minerva.View.extend({
                 params.prefix = '/' + params.prefix;
             }
 
+            if (name.trim() === '' || bucket.trim() === '') {
+                this.$('.g-validation-failed-message').text('Source name and S3 bucket name are required');
+                return;
+            }
+
             var s3Source = new minerva.models.S3SourceModel();
             s3Source.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
+                this.$('.g-validation-failed-message').text('');
                 // TODO: might need to be added to a new panel/data sources ?
                 girder.events.trigger('m:job.created');
+            }, this).on('m:error', function (msg) {
+                this.$('.g-validation-failed-message').text(msg.responseText);
             }, this).createSource(params);
         }
     },
