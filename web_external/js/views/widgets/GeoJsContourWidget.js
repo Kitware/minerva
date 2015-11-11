@@ -13,7 +13,7 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
             var timestep = this.$('#m-geojs-contour-timestep').val();
             var dataset = this.datasetsCollection.get(datasetId);
             var itemId = this.analysis.get('_id');
-            var selectedDatasetItem = dataset.getMinervaMetadata().selectedItems[0];
+            var selectedDatasetItem = dataset.metadata().selectedItems[0];
 
             girder.restRequest({
                 path: 'item/' + selectedDatasetItem  + '/files',
