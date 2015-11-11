@@ -9,7 +9,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
-    mM: function (minervaMetadata) {
+    metadata: function (minervaMetadata) {
         if (minervaMetadata) {
             this.setMinervaMetadata(minervaMetadata);
         } else {

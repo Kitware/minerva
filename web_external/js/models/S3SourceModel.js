@@ -22,7 +22,7 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
     },
 
     destroy: function () {
-        var folderId = this.mM().folder_id;
+        var folderId = this.metadata().folder_id;
         this.on('g:deleted', _.bind(function () {
 
             if (folderId) {
