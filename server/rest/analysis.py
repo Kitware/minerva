@@ -23,9 +23,16 @@ from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, RestException
 
-from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
+from girder.plugins.minerva.utility.minerva_utility import (decryptCredentials,
+                                                            findAnalysisFolder,
                                                             findAnalysisByName,
                                                             findDatasetFolder)
+
+from girder.plugins.minerva.utility.terra_utility import (getTerraConfig,
+                                                          pgCursorFromPgSourceId)
+
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
 
 
 class Analysis(Resource):
@@ -33,6 +40,7 @@ class Analysis(Resource):
         self.resourceName = 'minerva_analysis'
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('GET', ('terra_msa_from_bbox',), self.getMsaFromBBox)
+        self.route('GET', ('get_ad_details',), self.getAdDetails)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
         self.route('POST', ('elastic_geospace',), self.elasticGeospaceAnalysis)
@@ -124,6 +132,40 @@ class Analysis(Resource):
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
 
     @access.user
+    def getAdDetails(self, params):
+        from collections import defaultdict
+        ad_images = defaultdict(list)
+        params['adIds'] = json.loads(params['adIds'])
+        for adId in params['adIds']:
+            int(adId)
+
+        cursor, _ = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
+        # TODO is mogrify needed?
+        cursor.execute(
+            cursor.mogrify("select ad_id, url from ad_images where ad_id in %s",
+                           tuple(params['adIds'])))
+
+        for (ad_id, image_url) in cursor.fetchall():
+            ad_images[ad_id].append(image_url)
+
+        es, esSource = esCursorFromEsSourceId(getTerraConfig()['elastic_source_id'])
+        ads = Search() \
+            .using(client=es) \
+            .index(esSource['elasticsearch_params']['index']) \
+            .filter('terms', id=params['adIds']) \
+            .execute() \
+            .to_dict()
+
+        for ad in ads['hits']['hits']:
+            ad['_pg'] = {
+                'images': ad_images[int(ad['_id'])]
+            }
+
+        return ads
+    getAdDetails.description = (
+        Description('Retrieve all known details about a set of ad ids, ES + PG')
+        .param('adIds', 'JSON list of ad ids (integers)'))
+
     @access.user
     def getMsaFromBBox(self, params):
         cursor = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
