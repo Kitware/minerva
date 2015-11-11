@@ -22,7 +22,7 @@ minerva.views.AddS3SourceWidget = minerva.View.extend({
                 params.prefix = '/' + params.prefix;
             }
 
-            if (name.trim() === '' || bucket.trim() === '') {
+            if (params.name.trim() === '' || params.bucket.trim() === '') {
                 this.$('.g-validation-failed-message').text('Source name and S3 bucket name are required');
                 return;
             }
