@@ -8,6 +8,8 @@ minerva.views.LayersPanel = minerva.View.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         dataset.set('displayed', false);
+
+        minerva.events.trigger('m:remove-dataset');
     },
 
     initialize: function (settings) {

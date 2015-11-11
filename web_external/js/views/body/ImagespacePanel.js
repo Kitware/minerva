@@ -4,6 +4,12 @@ minerva.views.ImagespacePanel = minerva.View.extend({
 
         this.ads = options.ads;
         this.render();
+
+        // Clear out ads panel when a dataset is removed
+        // TODO This ignores the notion of having multiple datasets on the map.
+        minerva.events.once('m:remove-dataset', _.bind(function (){
+            this.$el.empty();
+        }, this));
     },
 
     render: function () {
