@@ -128,6 +128,10 @@ minerva.views.SessionView = minerva.View.extend({
             parentView: this
         });
 
+        this.graphsPanel = new minerva.views.GraphsPanel({
+            parentView: this
+        });
+
         this.render();
     },
 
@@ -148,6 +152,7 @@ minerva.views.SessionView = minerva.View.extend({
             this.jobsPanel.setElement(this.$('.jobsPanel')).render();
             this.analysisPanel.setElement(this.$('.analysisPanel')).render();
             this.sourcePanel.setElement(this.$('.m-source-panel')).render();
+            this.graphsPanel.setElement(this.$('.graphsPanel')).render();
 
         }, this));
 
