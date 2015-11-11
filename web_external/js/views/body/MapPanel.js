@@ -299,6 +299,42 @@ minerva.views.MapPanel = minerva.View.extend({
                         geojson.features[0].geometry.coordinates[0]);
                 }, this));
             }, this));
+
+            // Tell the user what MSA they're viewing when they move the map.
+            // It determines this based on which MSA is taking up the most area.
+            this.uiLayer.geoOn(geo.event.pan, _.debounce(_.bind(function () {
+                var $el = $('#m-session-info');
+
+                // Only try to determine where they're looking if they're zoomed in
+                // a decent amount
+                if (this.map.zoom() <= 7.5) {
+                    $el.empty();
+                    return;
+                }
+
+                var bounds = this.map.bounds();
+
+                girder.restRequest({
+                    type: 'GET',
+                    path: 'minerva_analysis/terra_msa_from_bbox',
+                    data: {
+                        xMin: bounds.lowerLeft.x,
+                        yMin: bounds.lowerLeft.y,
+                        xMax: bounds.upperRight.x,
+                        yMax: bounds.upperRight.y
+                    },
+                    success: function (data) {
+                        // If we got an MSA back that has an intersecting area > 0,
+                        // display information about it
+                        if (_.size(data) === 2 && data[1] > 0) {
+                            $el.html(minerva.templates.sessionInfo({
+                                msa: _.first(data)
+                            }));
+                        }
+                    }
+                });
+            }, this), 500));
+
         }, this));
 
         this.session = settings.session;

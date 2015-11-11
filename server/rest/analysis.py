@@ -32,6 +32,7 @@ class Analysis(Resource):
     def __init__(self):
         self.resourceName = 'minerva_analysis'
         self.route('GET', ('folder',), self.getAnalysisFolder)
+        self.route('GET', ('terra_msa_from_bbox',), self.getMsaFromBBox)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
         self.route('POST', ('elastic_geospace',), self.elasticGeospaceAnalysis)
@@ -121,6 +122,27 @@ class Analysis(Resource):
         Description('Create the minerva analysis folder, a global resource.')
         .param('datasetName', 'Name of the dataset created by this analysis.')
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
+
+    @access.user
+    @access.user
+    def getMsaFromBBox(self, params):
+        cursor = pgCursorFromPgSourceId(getTerraConfig()['postgis_source_id'])
+        cursor.execute(("select msas.name, "
+                        "ST_Area(ST_Intersection(msas.region, "
+                        "(SELECT ST_SetSRID(ST_MakeEnvelope(%s, %s, %s, %s), 4326)))) as area "
+                        "from msas order by area desc limit 1"),
+                       (params['xMin'],
+                        params['yMin'],
+                        params['xMax'],
+                        params['yMax']))
+
+        return cursor.fetchone()
+    getMsaFromBBox.description = (
+        Description('Get the MSA which has the most area within a bounding box (such as the viewport)')
+        .param('xMin', 'xMin')
+        .param('yMin', 'yMin')
+        .param('xMax', 'xMax')
+        .param('yMax', 'yMax'))
 
     @access.user
     def elasticGeospaceAnalysis(self, params):

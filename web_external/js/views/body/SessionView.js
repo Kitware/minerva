@@ -1,6 +1,26 @@
 minerva.views.SessionView = minerva.View.extend({
 
     events: {
+        'click a#view-similar-msas': function (e) {
+            var msa = $('#current-msa-action-pane').data('msa');
+            e.preventDefault();
+
+            minerva.events.once('m:terra-sim-widget-rendered', function() {
+                $('#m-terra-similarity-input-location > option[value="' + msa + ' MSA"]').attr('selected', true);
+            });
+
+            $('.m-analysis:contains("Terra Similarity") > i').trigger('click');
+        },
+        'click a#event-compare-msas': function (e) {
+            var msa = $('#current-msa-action-pane').data('msa');
+            e.preventDefault();
+
+            minerva.events.once('m:terra-dd-widget-rendered', function() {
+                $('#m-terra-diff-in-diff-input-location > option[value="' + msa + ' MSA"]').attr('selected', true);
+            });
+
+            $('.m-analysis:contains("Terra Diff in Diff") > i').trigger('click');
+        },
         'click a.m-edit-session': function () {
             if (!this.editSessionWidget) {
                 this.editSessionWidget = new minerva.views.EditSessionWidget({
