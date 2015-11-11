@@ -28,8 +28,8 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
         }));
 
         var chartSize =  {
-            height: 330,
-            width: 600
+            height: 300,
+            width: 535
         };
 
         var chart = c3.generate({
@@ -56,17 +56,19 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
                         rotate: -60,
                         multiline: false,
                         fit: true,
-                        format: function(i) {
-                            if (data.groupedBy === 'yearly') {
+                        format: _.bind(function(i) {
+                            if (this.groupedBy === 'yearly') {
                                 return d3.time.format('%Y')(data.data[i].date);
-                            } else if (data.groupedBy === 'monthly') {
+                            } else if (this.groupedBy === 'monthly') {
                                 return d3.time.format('%b %Y')(data.data[i].date);
-                            } else if (data.groupedBy === 'daily') {
+                            } else if (this.groupedBy === 'daily') {
                                 return d3.time.format('%d %b %Y')(data.data[i].date);
                             }
-                        }
+
+                            throw 'Can not form date labels for diff in diff plot.';
+                        }, this)
                     },
-                    height: 50
+                    height: 35
                 }
             },
             bar: {
@@ -74,7 +76,7 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
                     ratio: 0.5
                 }
             },
-            bindto: '#dd-analysis-overlay > .plot',
+            bindto: '#terra-dd-plot',
             subchart: {
                 show: true
             },
@@ -94,7 +96,12 @@ minerva.views.TerraDiffInDiffPlot = minerva.View.extend({
             }
         });
 
-        var svg = d3.select('#dd-analysis-overlay > .plot > svg');
+      $('.graphsPanel').show();
+      if ($('.graphsPanel > .panelTitle').hasClass('collapsed')) {
+        $('.graphsPanel > .panelTitle').click();
+      }
+
+        var svg = d3.select('#terra-dd-plot > svg');
 
         // Legend
         var legend = svg.selectAll(".legend")

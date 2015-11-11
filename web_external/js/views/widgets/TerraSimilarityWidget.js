@@ -50,6 +50,8 @@ minerva.views.TerraSimilarityWidget = minerva.View.extend({
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
+        minerva.events.trigger('m:terra-sim-widget-rendered');
+
         return this;
     }
 });

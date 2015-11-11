@@ -35,6 +35,8 @@ minerva.views.TerraDiffInDiffWidget = minerva.View.extend({
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
+        minerva.events.trigger('m:terra-dd-widget-rendered');
+
         return this;
     }
 });
