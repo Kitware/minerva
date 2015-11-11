@@ -38,7 +38,7 @@ class S3Source(Source):
         user = self.getCurrentUser()
         name = params['name']
         bucket = params['bucket'].strip()
-        prefix = params['prefix'].strip()
+        prefix = params.get('prefix', '').strip()
         access_key_id = params.get('accessKeyId', '').strip()
         secret = params.get('secret', '').strip()
         service = params.get('service', '').strip()
