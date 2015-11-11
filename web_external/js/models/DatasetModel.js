@@ -30,7 +30,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             path: 'minerva_dataset/' + this.get('_id') + '/dataset',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             var minervaMetadata = this.getMinervaMetadata();
             if (_.has(minervaMetadata, 'geojson_file')) {
                 this.trigger('m:datasetCreated', this);
@@ -73,7 +73,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'POST',
             data: data
         }).done(_.bind(function (resp) {
-            var minervaMetadata = this.setMinervaMetadata(resp);
+            var minervaMetadata = this.metadata(resp);
             this.set('_id', minervaMetadata.dataset_id);
             // fetch to load all of the properties of the item
             this.on('g:fetched', function () {
@@ -89,7 +89,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'GET',
             data: data
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             this.trigger('m:externalMongoLimitsGot', this);
         }, this));
     },
@@ -111,7 +111,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 path: 'minerva_dataset/' + this.get('_id') + '/jsonrow',
                 type: 'POST'
             }).done(_.bind(function (resp) {
-                this.setMinervaMetadata(resp);
+                this.metadata(resp);
                 this.trigger('m:jsonrowGot', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);
@@ -150,7 +150,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'POST',
             data: data
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             this.trigger('m:geojsonCreated', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
