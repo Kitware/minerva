@@ -97,7 +97,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
      * the checked menu state.
      */
     updateChecked: function () {
-        // do nothing
+        // No Op, the superclass requires an implementation.
     },
 
     getCheckedResources: function () {
