@@ -20,6 +20,7 @@ add_python_test(session PLUGIN minerva)
 add_python_test(analysis PLUGIN minerva)
 add_python_test(geonames PLUGIN minerva)
 add_python_test(s3_dataset PLUGIN minerva)
+add_python_test(s3_source PLUGIN minerva)
 add_python_test(import_analyses PLUGIN minerva)
 add_python_test(contour_analysis PLUGIN minerva)
 add_python_test(wms PLUGIN minerva)
@@ -51,6 +52,13 @@ add_python_style_test(pep8_style_minerva_jobs
 add_javascript_style_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
     JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+    JSSTYLE_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jscsrc
+)
+
+add_javascript_style_test(
+    minerva-gruntfile "${PROJECT_SOURCE_DIR}/plugins/minerva/Gruntfile.js"
+    JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+    JSSTYLE_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jscsrc
 )
 
 add_web_client_test(

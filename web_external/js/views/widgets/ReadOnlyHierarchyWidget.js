@@ -5,9 +5,7 @@
 minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
 
     initialize: function () {
-
         girder.views.HierarchyWidget.prototype.initialize.apply(this, arguments);
-
     },
 
     _initFolderViewSubwidgets: function () {
@@ -71,9 +69,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
         this.folderListView.setElement(this.$('.g-folder-list-container')).render();
 
         if (this.parentModel.resourceName === 'folder' && this._showItems) {
-
-            var itemId = this.parentView.folder.get('minerva').selectedItems[0] || false;
-            this.itemListView.selected = itemId;
             this.itemListView.setElement(this.$('.g-item-list-container')).render();
         }
 
@@ -102,7 +97,7 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
      * the checked menu state.
      */
     updateChecked: function () {
-        // do nothing - DatasetHierarchyWidget will handle updating the dataset
+        // No Op, the superclass requires an implementation.
     },
 
     getCheckedResources: function () {

@@ -10,7 +10,7 @@
             label.control-label(for="m-geojs-contour-input-dataset") Input Dataset
             select.form-control.input-sm#m-geojs-contour-input-dataset
               each dataset in datasets
-                if dataset.getMinervaMetadata().original_type === "s3" && dataset.getMinervaMetadata().selectedItems && dataset.getMinervaMetadata().selectedItems.length > 0
+                if dataset.metadata().original_type === "s3" && dataset.metadata().selectedItems && dataset.metadata().selectedItems.length > 0
                   option(value=dataset.get("_id"))= dataset.get('name')
             .g-validation-failed-message
           .form-group

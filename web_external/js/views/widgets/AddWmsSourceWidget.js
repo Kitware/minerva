@@ -23,6 +23,7 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
 
     initialize: function (settings) {
         this.collection = settings.collection;
+        this.title = 'Enter WMS Source details';
     },
 
     render: function () {

@@ -4,7 +4,7 @@
   .m-analysisList
     .m-analyses
         each analysis in analyses
-            if analysis.getMinervaMetadata()
+            if analysis.metadata()
                 .m-analysis= analysis.get('name')
                     - var attributes = {'m-analysis-id': analysis.get('_id')}
                     - var classes = 'icon-play-circled m-attempt-analysis'

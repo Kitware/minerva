@@ -3,7 +3,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     defaults: {
         geojsonFileId: null,
         displayed: false,
-        files: null
+        files: null,
+        opacity: 1
     },
 
     isRenderable: function () {
@@ -15,7 +16,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
         // For now we know that if original_type is 'json' it's ACTUALLY contour json,
         // which is the only renderable type of DatasetModel.
-        return this.getMinervaMetadata().original_type === 'json';
+        return this.metadata().original_type === 'json';
     },
 
     createDataset: function () {
@@ -29,8 +30,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             path: 'minerva_dataset/' + this.get('_id') + '/dataset',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
-            var minervaMetadata = this.getMinervaMetadata();
+            this.metadata(resp);
+            var minervaMetadata = this.metadata();
             if (_.has(minervaMetadata, 'geojson_file')) {
                 this.trigger('m:datasetCreated', this);
             } else {
@@ -72,7 +73,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'POST',
             data: data
         }).done(_.bind(function (resp) {
-            var minervaMetadata = this.setMinervaMetadata(resp);
+            var minervaMetadata = this.metadata(resp);
             this.set('_id', minervaMetadata.dataset_id);
             // fetch to load all of the properties of the item
             this.on('g:fetched', function () {
@@ -88,14 +89,14 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'GET',
             data: data
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             this.trigger('m:externalMongoLimitsGot', this);
         }, this));
     },
 
     getDatasetType: function () {
         // this is the start of trying to build an interface around the minerva metadata
-        var minervaMetadata = this.getMinervaMetadata();
+        var minervaMetadata = this.metadata();
         return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
             (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
     },
@@ -104,13 +105,13 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     // TODO split out to a subclass
 
     getJsonRow: function () {
-        var minervaMetadata = this.getMinervaMetadata();
+        var minervaMetadata = this.metadata();
         if (!_.has(minervaMetadata, 'json_row')) {
             girder.restRequest({
                 path: 'minerva_dataset/' + this.get('_id') + '/jsonrow',
                 type: 'POST'
             }).done(_.bind(function (resp) {
-                this.setMinervaMetadata(resp);
+                this.metadata(resp);
                 this.trigger('m:jsonrowGot', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);
@@ -128,7 +129,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     getJsonRowData: function () {
         // assumes jsonrow is available in metdata
-        var minervaMetadata = this.getMinervaMetadata();
+        var minervaMetadata = this.metadata();
         return _.has(minervaMetadata, 'json_row') ? minervaMetadata.json_row : null;
     },
 
@@ -149,7 +150,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'POST',
             data: data
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             this.trigger('m:geojsonCreated', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
@@ -220,7 +221,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         //
         // already have the data client side when doing this, have to think
         // about whether to do all this server or client side
-        var minervaMeta = this.getMinervaMetadata();
+        var minervaMeta = this.metadata();
         var originalType = minervaMeta.original_type;
         if (originalType !== 'csv' && originalType !== 'json') {
             console.error('You should only use this for csv or json');
@@ -286,7 +287,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             this.loadGeoJsonData();
         } else {
             var file_id;
-            var minervaMeta = this.getMinervaMetadata();
+            var minervaMeta = this.metadata();
             // Manage contourJson style files here
             // for now. (will refactor this and loadGeoJsonData later)
             try {
@@ -314,7 +315,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     loadGeoJsonData: function () {
         if (this.geoJsonAvailable) {
-            var minervaMeta = this.getMinervaMetadata();
+            var minervaMeta = this.metadata();
             if (minervaMeta.original_type === 'mongo') {
                 // TODO search params
                 // if mongo, we'll need to pass down some search params to a new
@@ -326,7 +327,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     this.trigger('m:dataLoaded', this.get('_id'));
                 } else {
                     this.on('m:geojsonCreated', function () {
-                        var minervaMeta = this.getMinervaMetadata();
+                        var minervaMeta = this.metadata();
                         this.fileData = minervaMeta.geojson.data;
                         this.geoFileReader = 'jsonReader';
                         this.trigger('m:geoJsonDataLoaded', this.get('_id'));

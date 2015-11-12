@@ -24,7 +24,7 @@
             // this would be irritating to switch on multiple analyses
             // perhaps a mapping of analysis types to widgets, each
             // might need its own param set for initialization
-            var minervaMetadata = analysis.getMinervaMetadata();
+            var minervaMetadata = analysis.metadata();
 
             var analysisWidgetName = analysisTypeToWidgetName(minervaMetadata.analysis_type);
             if (!(analysisWidgetName in minerva.views)) {
@@ -49,7 +49,8 @@
             var analysisWidget = new minerva.views[analysisWidgetName]({
                     el: $('#g-dialog-container'),
                     parentView: this,
-                    datasetsCollection: this.datasetsCollection,
+                    datasetCollection: this.datasetCollection,
+                    sourceCollection: this.sourceCollection,
                     analysis: analysis
                 });
             analysisWidget.render();
@@ -57,7 +58,8 @@
 
         initialize: function (settings) {
             this.collection = settings.collection;
-            this.datasetsCollection = settings.datasetsCollection;
+            this.datasetCollection = settings.datasetCollection;
+            this.sourceCollection = settings.sourceCollection;
             this.listenTo(this.collection, 'g:changed', function () {
                 console.log('AP g:changed');
                 this.render();

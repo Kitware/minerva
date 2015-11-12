@@ -5,7 +5,8 @@ minerva.views.SourcePanel = minerva.View.extend({
         'click .m-display-wms-layers-list': 'displayWmsLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
-        'click .m-display-elasticsearch-query': 'displayElasticsearchQuery'
+        'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
+        'click .m-display-s3-bucket-hierarchy': 'selectS3Files'
     },
 
     addSourceDialog: function () {
@@ -18,7 +19,26 @@ minerva.views.SourcePanel = minerva.View.extend({
         }).render();
     },
 
+    selectS3Files: function (evt) {
+        var el = $(evt.currentTarget);
+        var source = this.sourceCollection.get(el.attr('cid'));
+
+        this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
+            el: $('#g-dialog-container'),
+            dataset: source,
+            folderId: source.metadata().folder_id,
+            parentView: this
+        });
+
+    },
+
     displayWmsLayersList: function (evt) {
+        // TODO this looks like a good interface for a generalized source-action
+        // Then we could just have a single source-action event handler
+        // which would pull the source type from the set of classes
+        // then create and dispatch to the correct widget type.
+        // First we should add in S3 as a source and get that working, then
+        // refactor.
         var el = $(evt.currentTarget);
         var wmsSource = this.sourceCollection.get(el.attr('cid'));
         if (!this.wmsLayersListWidget) {
@@ -28,10 +48,10 @@ minerva.views.SourcePanel = minerva.View.extend({
                 collection: this.datasetCollection,
                 parentView: this
             });
-            this.wmsLayersListWidget.render();
         } else {
             this.wmsLayersListWidget.setCurrentSource(wmsSource);
         }
+        this.wmsLayersListWidget.render();
     },
 
     displaySourceInfo: function (evt) {
@@ -70,6 +90,27 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.session = settings.session;
         this.sourceCollection = settings.sourceCollection;
         this.datasetCollection = settings.datasetCollection;
+
+        // TODO similar to addSourceWidget,
+        // would be nice if new source types could register themselves,
+        // perhaps with a method on the minerva object, that we could then
+        // query here.  All the source types register themselves upon definition,
+        // and we query here upon instantation.
+        this.sourceTypes = {
+            wms: {
+                icon: 'icon-layers',
+                action: 'm-display-wms-layers-list'
+            },
+            elasticsearch: {
+                icon: 'icon-search',
+                action: 'm-display-elasticsearch-query'
+            },
+            s3: {
+                icon: 'icon-cloud',
+                action: 'm-display-s3-bucket-hierarchy'
+            }
+        };
+
         this.listenTo(this.sourceCollection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.sourceCollection, 'change', function () {
@@ -81,11 +122,20 @@ minerva.views.SourcePanel = minerva.View.extend({
         }, this).listenTo(this.sourceCollection, 'remove', function () {
             this.render();
         }, this);
+
+        girder.eventStream.on('g:event.job_status', _.bind(function (event) {
+            var status = window.parseInt(event.data.status);
+            if (status === girder.jobs_JobStatus.SUCCESS &&
+                event.data.type === 's3.import') {
+                this.sourceCollection.fetch({}, true);
+            }
+        }, this));
     },
 
     render: function () {
         this.$el.html(minerva.templates.sourcePanel({
-            sources: this.sourceCollection.models
+            sources: this.sourceCollection.models,
+            sourceTypes: this.sourceTypes
         }));
 
         var tooltipProperties = {
