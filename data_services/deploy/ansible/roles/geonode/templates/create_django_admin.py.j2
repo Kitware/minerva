@@ -1,0 +1,8 @@
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = '{{ app_name }}.settings'
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+for user in User.objects.filter(username='{{ geonode_admin_user }}'):
+    user.delete()
+User.objects.create_superuser('{{ geonode_admin_user }}', '{{ geonode_admin_email }}', '{{ geonode_admin_password }}')

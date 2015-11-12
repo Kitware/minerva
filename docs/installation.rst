@@ -114,7 +114,7 @@ Notes:
    be a 32 byte url-safe base-64 encoded string. You can either replace
    the existing string with one of equal length, using letters and
    numbers, and ending with an ‘=’, or generate one within python with
-   the following code::
+   the following code
 
 ::
 
@@ -215,3 +215,10 @@ You should see in the Celery output
     python -m girder
 
 - In the Girder Admin Console, in the Romanesco plugin config, add a user or group who can use Romanesco
+
+Data services
+~~~~~~~~~~~~~
+
+Several minerva components rely on having a data services server up and running.  You can
+either connect to an existing server or spin up a local server using vagrant.  See
+the :doc:`deploy-data-services` section for more details.

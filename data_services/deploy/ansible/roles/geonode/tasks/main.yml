@@ -44,10 +44,10 @@
   copy: src=known_hosts dest={{ssh_dir}}/known_hosts
 
 - name: checkout latest web app code
-  git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}}
+  git: repo={{code_repository}} version={{app_version}} dest={{app_code_dir}}/{{app_name}} force=yes
 
 - name: copy the local_settings.py file in place
-  template: src=local_settings.py.j2 dest={{ app_code_dir}}/{{app_name}}/local_settings.py
+  template: src=local_settings.py.j2 dest={{geonode_root}}/local_settings.py
 
 - name: check if virtualenv already exists
   stat: path={{virtualenv_dir}}/{{app_name}}
@@ -99,10 +99,12 @@
                  encoding='UTF-8'
                  lc_collate='en_US.UTF-8'
                  lc_ctype='en_US.UTF-8'
-                 owner=postgres
+                 owner={{db_user}}
                  template='template0'
   sudo: yes
   sudo_user: postgres
+  retries: 2
+  delay: 5
 
 - name: create {{db_data_instance}} db
   postgresql_db: name={{db_data_instance}}
@@ -113,6 +115,8 @@
                  template='template0'
   sudo: yes
   sudo_user: postgres
+  retries: 2
+  delay: 5
 
 - name: add postgis to the {{db_data_instance}} db
   postgresql_ext: name=postgis db={{db_data_instance}}
@@ -131,18 +135,8 @@
                  virtualenv={{virtualenv_dir}}/{{app_name}}
                  settings={{main_module}}.settings
 
-- name: Copy initial fixtures in place
-  template: src=fixtures.json.j2 dest={{ app_code_dir}}/{{app_name}}/fixtures.json
-
-- name: Load the fixtures (Create the superuser)
-  django_manage: command="loaddata"
-                 app_path={{app_code_dir}}/{{app_name}}
-                 virtualenv={{virtualenv_dir}}/{{app_name}}
-                 settings={{main_module}}.settings
-                 fixtures={{ app_code_dir}}/{{app_name}}/fixtures.json
-
 - name: wait for geoserver to be up
-  shell: curl --head --silent http://localhost:8080/geoserver/web/
+  shell: curl --head --silent {{geoserver_root_url}}/web/
   register: result
   until: result.stdout.find('200 OK') != -1
   retries: 5
@@ -153,3 +147,11 @@
 
 - name: create the db datastore in geoserver
   command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_db_store.py"
+  # ignore errors when the db store already exists
+  ignore_errors: True
+
+- name: Copy create_django_admin script in place
+  template: src=create_django_admin.py.j2 dest={{ app_code_dir}}/{{app_name}}/create_django_admin.py
+
+- name: Run create_django_admin script
+  command: "{{virtualenv_dir}}/{{app_name}}/bin/python {{ app_code_dir}}/{{app_name}}/create_django_admin.py"
