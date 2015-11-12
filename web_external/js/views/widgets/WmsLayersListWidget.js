@@ -71,7 +71,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
             return model.getDatasetType() === 'wms';
         }, this);
         var layers = wmsLayers.map(function (model) {
-            var sourceId = model.getMinervaMetadata().source_id;
+            var sourceId = model.metadata().source_id;
             return this.generateUniqueLayerName(model.get('name'), sourceId);
         }, this);
         return layers;
@@ -108,7 +108,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     setCurrentSource: function (wmsSource) {
         this.source = wmsSource;
         this.sourceName = this.source.get('name');
-        this.layers = this.source.getMinervaMetadata().layers;
+        this.layers = this.source.metadata().layers;
     }
 
 });

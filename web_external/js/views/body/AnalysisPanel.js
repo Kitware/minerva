@@ -24,7 +24,7 @@
             // this would be irritating to switch on multiple analyses
             // perhaps a mapping of analysis types to widgets, each
             // might need its own param set for initialization
-            var minervaMetadata = analysis.getMinervaMetadata();
+            var minervaMetadata = analysis.metadata();
 
             var analysisWidgetName = analysisTypeToWidgetName(minervaMetadata.analysis_type);
             if (!(analysisWidgetName in minerva.views)) {

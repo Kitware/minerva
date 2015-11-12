@@ -26,7 +26,7 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.datasetHierarchyWidget = new minerva.views.DatasetHierarchyWidget({
             el: $('#g-dialog-container'),
             dataset: source,
-            folderId: source.getMinervaMetadata().folder_id,
+            folderId: source.metadata().folder_id,
             parentView: this
         });
 

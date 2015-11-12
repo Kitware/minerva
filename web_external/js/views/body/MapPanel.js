@@ -14,7 +14,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     _specifyWmsDatasetLayer: function (dataset, layer) {
-        var minervaMetadata = dataset.getMinervaMetadata();
+        var minervaMetadata = dataset.metadata();
         layer.layerName = minervaMetadata.type_name;
         layer.baseUrl = minervaMetadata.base_url;
         if (minervaMetadata.hasOwnProperty('credentials')) {
@@ -73,7 +73,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     el: $('.m-map-legend-container'),
                     parentView: this,
                     id: datasetId,
-                    legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
+                    legend: 'data:image/png;base64,' + dataset.metadata().legend
                 });
                 this.legendWidget[datasetId].render();
                 this.legendWidget[datasetId].show();

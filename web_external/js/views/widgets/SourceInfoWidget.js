@@ -10,7 +10,7 @@ minerva.views.SourceInfoWidget = minerva.View.extend({
         var modal = this.$el.html(minerva.templates.sourceInfoWidget({}))
             .girderModal(this)
             .on('ready.girder.modal', _.bind(function () {
-                this.$('#m-source-info').text(JSON.stringify(this.source.getMinervaMetadata(), null, 4));
+                this.$('#m-source-info').text(JSON.stringify(this.source.metadata(), null, 4));
             }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
