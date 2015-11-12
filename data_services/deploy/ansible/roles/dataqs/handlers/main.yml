@@ -1,0 +1,8 @@
+---
+- name: restart supervisor for celery
+  command: service supervisor restart
+  sudo: yes
+
+- name: reset geoserver permissions
+  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
+  sudo: yes

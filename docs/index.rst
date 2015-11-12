@@ -43,5 +43,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
+   installation
+   creating-a-source
+   deploy-data-services
    developer-documentation
+   api-documentation
 

@@ -22,6 +22,15 @@ code_repository: "https://github.com/{{ github_user }}/{{ app_name }}.git"
 # TODO: Production IP address
 server_name: localhost:8080
 
+# geoserver url
+geoserver_root_url: http://localhost:8080/geoserver
+
+# geoserver rest endpoint
+geoserver_rest: "{{ geoserver_root_url }}/rest"
+
+# geonode workspace (probably shouldn't change this)
+geonode_workspace: geonode
+
 db_data_instance: "{{ app_name }}"
 db_metadata_instance: "{{ app_name }}_app"
 db_password: "{{ app_name }}"
@@ -38,9 +47,15 @@ deploy_user: vagrant
 # server directory for the virtualenv that will be created to run the web app
 virtualenv_dir: /home/{{deploy_user}}/venvs
 
+# place where virtualenv binaries are stored
+virtualenv_bin: "{{virtualenv_dir}}/{{app_name}}/bin"
+
 # server directory to put the code into that is pulled from the code
 # repository
 app_code_dir: /home/{{deploy_user}}
+
+# app root directory
+geonode_root: "{{app_code_dir}}/{{app_name}}/geonode"
 
 # location of the requirements.txt flie in the code
 requirements_file: "{{app_code_dir}}/requirements.txt"
@@ -52,3 +67,15 @@ site_url: "http://192.168.33.12/"
 ssh_dir: ~/.ssh/
 
 geoserver_url: http://build.geonode.org/geoserver/latest/geoserver.war
+
+# geoserver admin user
+geoserver_user: admin
+geoserver_password: geoserver
+
+# geonode admin user
+geonode_admin_user: admin
+geonode_admin_email: "{{ geonode_admin_user }}@geonode.com"
+geonode_admin_password: geonode
+
+gpm_email: "setme@email.com"
+healthmap_apikey: "setme"
