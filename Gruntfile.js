@@ -266,7 +266,6 @@ module.exports = function (grunt) {
             '/clients/web/static/built/libs.min.js',
             '/' + staticDir + '/geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
-            '/' + staticDir + '/jquery.gridster.js',
             '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',
             '/' + rootStaticDir + '/app.min.js'
@@ -307,7 +306,6 @@ module.exports = function (grunt) {
             'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
             '/' + rootStaticLibDir + '/fontello/css/fontello.css',
             '/' + rootStaticLibDir + '/fontello/css/animation.css',
-            '/' + staticDir + '/jquery.gridster.min.css',
             '/' + staticDir + '/jquery-ui.min.css',
             '/' + rootStaticDir + '/app.min.css',
             'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',

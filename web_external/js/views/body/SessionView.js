@@ -142,18 +142,6 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            this.$('.gridster > ul').gridster({
-                widget_margins: [10, 10],
-                widget_base_dimensions: [210, 210],
-                draggable: {
-                    handle: '.panelTitle'
-                },
-                resize: {
-                    enabled: true,
-                    min_size: [1, 1]
-                }
-            });
-
             this.dataPanel.setElement(this.$('.dataPanel')).render();
             this.mapPanel.setElement(this.$('.mapPanel')).render();
             this.layersPanel.setElement(this.$('.layersPanel')).render();
