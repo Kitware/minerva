@@ -5,7 +5,7 @@
       ul.datasets
         each dataset in datasets
           li.dataset= dataset.get('name')
-              i.icon-cancel-circled.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+              i.icon-eye-off.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
               if dataset.getDatasetType() === 'wms'
                   .m-opacity-container
                     i.icon-ajust
