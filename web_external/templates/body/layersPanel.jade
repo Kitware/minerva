@@ -6,6 +6,8 @@
         each dataset in datasets
           li.dataset= dataset.get('name')
               i.icon-eye-off.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+              each option in layersOrderOptions
+                  i(class='icon-angle-#{option.class} m-order-layer')&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
               if dataset.getDatasetType() === 'wms'
                   .m-opacity-container
                     i.icon-ajust
