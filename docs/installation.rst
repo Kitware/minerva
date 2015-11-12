@@ -130,7 +130,7 @@ Notes:
 
 
 
-Because Romanesco is a Girder plugin that is a depedency of Minerva, when you enable the Minerva Girder plugin, you will also enable the Romanesco Girder plugin.
+Because Romanesco is a Girder plugin that is a dependency of Minerva, when you enable the Minerva Girder plugin, you will also enable the Romanesco Girder plugin.
 
 To see more details about this on Romanesco, though you will not need to follow it, see `Install Romanesco as a Girder plugin`_
 
