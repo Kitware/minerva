@@ -1,0 +1,87 @@
+- hosts: mongo
+  sudo: yes
+  roles:
+    - role: mongodb
+      state: started
+
+- hosts: rabbitmq
+  sudo: yes
+  roles:
+    - role: rabbitmq
+      state: started
+
+
+
+- hosts: girder
+  sudo: yes
+  roles:
+    - role: romanesco
+      rabbitmq_ansible_group: rabbitmq
+      state: started
+
+    - role: girder
+      mongodb_ansible_group: girder
+      girder_admin_user: girder
+      girder_admin_password: letmein
+      state: started
+
+
+# Configure plugins and girder
+- hosts: girder
+  sudo: yes
+  pre_tasks:
+    - name: Set plugin directories
+      girder_plugin_dir:
+        girder_dir: "{{ girder_install_root }}"
+        plugin_dir: "/opt/plugins"
+        state: present
+
+  roles:
+    - role: girder-grunt
+
+  tasks:
+    - name: Create an 'Admin' user
+      girder:
+        user:
+          firstName: "Admin"
+          lastName: "Admin"
+          login: "admin"
+          password: "letmein"
+          email: "admin@example.com"
+          admin: yes
+        state: present
+
+    - name: Activate Plugins
+      girder:
+        username: "admin"
+        password: "letmein"
+        plugins:
+          - romanesco
+          - minerva
+        state: present
+
+    - name: Create assetstore directory
+      file:
+        path: "/opt/data"
+        owner: "girder"
+        group: "girder"
+        state: directory
+
+    - name: Create filesystem assetstore
+      girder:
+        username: "admin"
+        password: "letmein"
+        assetstore:
+          name: "Filesystem Assetstore"
+          type: "filesystem"
+          root: "/opt/data"
+          current: true
+        state: present
+
+
+    - name: Restart Minerva
+      girder:
+        username: "admin"
+        password: "letmein"
+        put:
+          path: "system/restart"

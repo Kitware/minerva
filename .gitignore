@@ -5,3 +5,5 @@ npm-debug.log
 .tern-*
 src
 /docs/_build/
+.vagrant
+*~
