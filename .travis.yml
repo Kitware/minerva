@@ -79,10 +79,6 @@ before_install:
     - sleep 3
     - $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
 
-    # global npm install
-    - npm install -g npm
-    - npm --version
-
 install:
     - cd $HOME/build/girder
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
