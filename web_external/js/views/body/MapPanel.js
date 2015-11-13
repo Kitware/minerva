@@ -13,7 +13,7 @@ minerva.views.MapPanel = minerva.View.extend({
         this.map.draw();
     },
 
-    changeLayerOrder: function (dataset) {
+    changeLayerZIndex: function (dataset) {
         this.datasetLayers[dataset.id][dataset.get('order')]();
         this.map.draw();
     },
@@ -71,6 +71,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 var layer = this.map.createLayer('osm', {attribution: null});
                 // Set the layer opacity
                 layer.mapOpacity(dataset.get('opacity'));
+
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
@@ -164,7 +165,7 @@ minerva.views.MapPanel = minerva.View.extend({
 
         this.listenTo(this.collection, 'change:order', function (dataset) {
             if (this.mapCreated) {
-                this.changeLayerOrder(dataset);
+                this.changeLayerZIndex(dataset);
             }
         }, this);
     },

@@ -9,8 +9,15 @@ minerva.views.DataPanel = minerva.View.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         // TODO maybe this check is unnecessary, how can we get into this state?
+        var stackValues = _.map(this.collection.models, function (dataset) {
+            return dataset.get('stack');
+        });
+        // Retrieve the last stack value in the collection
+        var lastValueInStack = _.last((stackValues).sort());
+
         if (!dataset.get('displayed')) {
             dataset.set('displayed', true);
+            dataset.set('stack', lastValueInStack + 1);
         }
     },
 
