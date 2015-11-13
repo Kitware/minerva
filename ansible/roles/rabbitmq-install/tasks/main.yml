@@ -1,0 +1,9 @@
+---
+
+  - name: install
+    apt:
+        name: rabbitmq-server
+        state: >
+            {{ "present" if (do_install|bool) else "absent" }}
+        update_cache: true
+

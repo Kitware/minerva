@@ -1,0 +1,8 @@
+---
+
+  - name: rabbitmq | service
+    service:
+        name: rabbitmq-server
+        state: "{{ state }}"
+    when: notify_services|bool
+
