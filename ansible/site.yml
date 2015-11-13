@@ -25,6 +25,30 @@
       girder_admin_password: letmein
       state: started
 
+  tasks:
+    - name: Install minerva system dependencies
+      apt: name={{ item }} state=present update_cache=yes
+      with_items:
+        - libfreetype6-dev
+        - libpng12-dev
+        - pkg-config
+        - libgdal-dev
+        - libxml2-dev
+        - libxslt1-dev
+        - python-dev
+        - python-pip
+        - python-numpy
+
+
+    - name: Upgrade cffi
+      pip: name=cffi extra_args="-U"
+
+    - name: Install minerval python dependencies
+      pip: requirements=/opt/plugins/minerva/{{ item }}
+      with_items:
+        - requirements.txt
+        - requirements-dev.txt
+
 
 # Configure plugins and girder
 - hosts: girder
@@ -35,7 +59,6 @@
         girder_dir: "{{ girder_install_root }}"
         plugin_dir: "/opt/plugins"
         state: present
-
   roles:
     - role: girder-grunt
 
