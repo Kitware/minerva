@@ -16,8 +16,8 @@ minerva.views.DataPanel = minerva.View.extend({
         var lastValueInStack = _.last((stackValues).sort());
 
         if (!dataset.get('displayed')) {
-            dataset.set('displayed', true);
             dataset.set('stack', lastValueInStack + 1);
+            dataset.set('displayed', true);
         }
     },
 

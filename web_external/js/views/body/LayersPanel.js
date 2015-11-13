@@ -26,41 +26,6 @@ minerva.views.LayersPanel = minerva.View.extend({
         dataset.set('order', option);
     },
 
-    rearrange: function (displayedDatasets, dataset) {
-
-        var currentDatasetIndex = _.indexOf(displayedDatasets, dataset);
-        var displayedDatasetsCopy = displayedDatasets.slice();
-
-        var firstItem = _.first(displayedDatasetsCopy);
-        var lastItem = _.last(displayedDatasetsCopy);
-        var temp;
-
-        if (dataset.get('order') === 'moveToTop') {
-          // displayedDatasetsCopy.splice(currentDatasetIndex, 0, dataset);
-          temp = displayedDatasetsCopy[0];
-          displayedDatasetsCopy[0] = displayedDatasetsCopy[currentDatasetIndex];
-          displayedDatasetsCopy[currentDatasetIndex] = temp;
-        } else if (dataset.get('order') === 'moveToBottom') {
-          temp = displayedDatasetsCopy[displayedDatasetsCopy.length - 1];
-          displayedDatasetsCopy[displayedDatasetsCopy.length - 1] = displayedDatasetsCopy[currentDatasetIndex];
-          displayedDatasetsCopy[currentDatasetIndex] = temp;
-        } else if (dataset.get('order') === 'moveDown') {
-          if (displayedDatasetsCopy[currentDatasetIndex + 1]) {
-            temp = displayedDatasetsCopy[currentDatasetIndex + 1];
-            displayedDatasetsCopy[currentDatasetIndex + 1] = displayedDatasetsCopy[currentDatasetIndex];
-            displayedDatasetsCopy[currentDatasetIndex] = temp;
-          }
-        } else {
-          if (displayedDatasetsCopy[currentDatasetIndex - 1]) {
-            temp = displayedDatasetsCopy[currentDatasetIndex - 1];
-            displayedDatasetsCopy[currentDatasetIndex - 1] = displayedDatasetsCopy[currentDatasetIndex];
-            displayedDatasetsCopy[currentDatasetIndex] = temp;
-          }
-        }
-
-        return displayedDatasetsCopy;
-    },
-
     initialize: function (settings) {
         settings = settings || {};
         this.collection = settings.collection;
@@ -72,15 +37,13 @@ minerva.views.LayersPanel = minerva.View.extend({
 
     render: function (dataset) {
 
-        var displayedDatasets = _.filter(this.collection.models, function (dataset) {
-            return dataset.get('displayed');
+        var displayedDatasets = _.filter(this.collection.models, function (set) {
+            return set.get('displayed');
         });
 
-        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, function (dataset) {
-            return dataset.get('stack');
-        });
-
-        console.log(sortedDisplayedDatasets);
+        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, function (set) {
+            return set.get('stack');
+        }).reverse();
 
         this.$el.html(minerva.templates.layersPanel({
             datasets: sortedDisplayedDatasets,
