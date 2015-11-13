@@ -18,12 +18,12 @@
 ###############################################################################
 
 import mako
-import json
 import os
 import requests
 import cherrypy
 from base64 import b64encode
-from girder import constants, events
+from girder import events
+from girder.constants import SettingKey, STATIC_ROOT_DIR
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
@@ -33,7 +33,7 @@ from girder.plugins.minerva.rest import \
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
-class CustomAppRoot(object):
+class CustomAppRoot(ModelImporter):
     """
     The webroot endpoint simply serves the main index HTML file of minerva.
     """
@@ -123,17 +123,13 @@ src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
         if self.indexHtml is None:
             self.vars['pluginCss'] = []
             self.vars['pluginJs'] = []
-            builtDir = os.path.join(constants.STATIC_ROOT_DIR, 'clients',
+            builtDir = os.path.join(STATIC_ROOT_DIR, 'clients',
                                     'web', 'static', 'built', 'plugins')
-            # it would be nice to get the activated plugins from girder's
-            # settings # but we need to reproduce this functionality in the
-            # Gruntfile, so pull these from the plugin.json
-            minervaPluginDir = os.path.dirname(os.path.realpath(__file__))
-            pluginJson = os.path.join(minervaPluginDir, '..', 'plugin.json')
-            with open(pluginJson, 'r') as pluginJsonData:
-                pluginConfig = json.load(pluginJsonData)
-                self.vars['plugins'] = pluginConfig['dependencies']
-            for plugin in self.vars['plugins']:
+            # Load resources from all enabled plugins, which allows Minerva
+            # to be extended by other Girder plugins.
+            plugins = self.model('setting').get(SettingKey.PLUGINS_ENABLED, ())
+            plugins.remove('minerva')
+            for plugin in plugins:
                 if os.path.exists(os.path.join(builtDir, plugin,
                                                'plugin.min.css')):
                     self.vars['pluginCss'].append(plugin)
