@@ -58,7 +58,8 @@ module.exports = function (grunt) {
                 static: '<%= staticDir %>/built/plugins/minerva',
                 source: '<%= plugin.minerva.external %>/js',
                 geojs: '<%= plugin.minerva.root %>/node_modules/geojs',
-                extra: '<%= plugin.minerva.external %>/extra'
+                extra: '<%= plugin.minerva.external %>/extra',
+                fontello: '<%= plugin.minerva.external %>/fontello'
             }
         },
         jade: {
@@ -156,6 +157,16 @@ module.exports = function (grunt) {
                     }
                 ]
             },
+            'minerva-fontello': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.fontello %>',
+                        src: ['font/*', 'css/*'],
+                        dest: '<%= staticDir %>/lib/fontello/minerva'
+                    }
+                ]
+            },
             'jquery-ui': {
                 files: [
                     {
@@ -212,6 +223,9 @@ module.exports = function (grunt) {
                 dependencies: ['shell:minerva-geojs-install']
             },
             'copy:minerva-extras': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'copy:minerva-fontello': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             },
             'copy:jquery-ui': {
