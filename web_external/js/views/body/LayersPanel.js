@@ -41,26 +41,22 @@ minerva.views.LayersPanel = minerva.View.extend({
             return dataset.get('stack');
         });
 
-        // console.log(stackValues);
         var currentStack = dataset.get('stack');
         // Retrieve the last stack value in the collection
         var lastValueInStack = _.last((stackValues).sort());
         var firstValueInStack = _.first((stackValues).sort());
 
-        // console.log('first', firstValueInStack, 'last', lastValueInStack, 'cuurent', currentStack);
-
+        // Set the layer order on the map
         dataset.set('order', option);
 
         if (option === 'moveToTop' && currentStack !== lastValueInStack) {
             dataset.set('stack', lastValueInStack + 1);
         } else if (option === 'moveToBottom' && currentStack !== firstValueInStack) {
-            console.log(currentStack - 1);
             dataset.set('stack', firstValueInStack - 1);
         } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
             dataset.set('stack', currentStack + 1);
             nextDataset.set('stack', currentStack);
         } else if (option === 'moveDown' && currentStack !== firstValueInStack) {
-            console.log(currentStack - 1);
             dataset.set('stack', currentStack - 1);
             prevDataset.set('stack', currentStack);
         }

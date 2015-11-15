@@ -14,13 +14,12 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     changeLayerZIndex: function (dataset) {
-
-        this.datasetLayers[dataset.id][dataset.get('order')]();
-        // MoveToBottom will set the layer's index to 0 and put it under the bae map
+        var geojsSliderZIndex = 1, baseMapZIndex = 1;
+        this.datasetLayers[dataset.id][dataset.get('order')](geojsSliderZIndex + 1);
+        // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Call moveUp(1) to place it on top of base map
-        console.log(dataset.get('order'));
         if (dataset.get('order') === 'moveToBottom') {
-            this.datasetLayers[dataset.id].moveUp(1);
+            this.datasetLayers[dataset.id].moveUp(baseMapZIndex);
         }
         this.map.draw();
     },
