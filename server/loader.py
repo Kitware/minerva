@@ -63,7 +63,9 @@ def load(info):
     # to be extended by other Girder plugins.
     plugins = ModelImporter.model('setting').get(SettingKey.PLUGINS_ENABLED,
                                                  ())
-    plugins.remove('minerva')
+    plugins = list(plugins)
+    if 'minerva' in plugins:
+        plugins.remove('minerva')
     vars = {
         'plugins': plugins,
         'apiRoot': '/api/v1',

@@ -80,7 +80,6 @@ class ElasticsearchTestCase(base.TestCase):
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         elasticsearchSource = response.json
-        print(response.json)
         minerva_metadata = elasticsearchSource['meta']['minerva']
         self.assertEquals(elasticsearchSource['name'], name, 'incorrect elasticsearch source name')
         self.assertEquals(minerva_metadata['source_type'], 'elasticsearch', 'incorrect elasticsearch source type')
