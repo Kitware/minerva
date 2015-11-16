@@ -40,9 +40,6 @@
         - python-numpy
 
 
-    - name: Upgrade cffi
-      pip: name=cffi extra_args="-U"
-
     - name: Install minerval python dependencies
       pip: requirements=/opt/plugins/minerva/{{ item }}
       with_items:
