@@ -47,7 +47,7 @@ minerva.models.CSVSourceModel = minerva.models.SourceModel.extend({
         });
       });
 
-      console.log(geojson);
+      return geojson;
 
     },
 
@@ -58,7 +58,7 @@ minerva.models.CSVSourceModel = minerva.models.SourceModel.extend({
           success: function (resp) {
             var json = this.parseCSVContent(resp);
             var geojson = this.convertJSONToGEOJSON(json);
-            this.set(geojson);
+            this.set('geojson', geojson);
             this.trigger('m:csvSourceReceived');
           }.bind(this)
         });
