@@ -6,7 +6,8 @@ minerva.views.SourcePanel = minerva.View.extend({
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
-        'click .m-display-s3-bucket-hierarchy': 'selectS3Files'
+        'click .m-display-s3-bucket-hierarchy': 'selectS3Files',
+        'click .m-display-csv-file': 'displayCSVFile'
     },
 
     addSourceDialog: function () {
@@ -86,6 +87,20 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.elasticsearchWidget.render();
     },
 
+    displayCSVFile: function (evt) {
+        var el = $(evt.currentTarget);
+        var source = this.sourceCollection.get(el.attr('cid'));
+        if (!this.elasticsearchWidget) {
+            this.elasticsearchWidget = new minerva.views.AddCSVSourceWidget({
+                el: $('#g-dialog-container'),
+                source: source,
+                collection: this.datasetCollection,
+                parentView: this
+            });
+        }
+        this.elasticsearchWidget.render();
+    },
+
     initialize: function (settings) {
         this.session = settings.session;
         this.sourceCollection = settings.sourceCollection;
@@ -108,6 +123,10 @@ minerva.views.SourcePanel = minerva.View.extend({
             s3: {
                 icon: 'icon-cloud',
                 action: 'm-display-s3-bucket-hierarchy'
+            },
+            CSV: {
+                icon: 'icon-cloud',
+                action: 'm-display-csv-file'
             }
         };
 

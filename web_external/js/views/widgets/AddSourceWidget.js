@@ -54,6 +54,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'S3 bucket',
                 icon: 'icon-cloud',
                 widget: minerva.views.AddS3SourceWidget
+            },
+            CSV: {
+                label: 'CSV file',
+                icon: 'icon-cloud',
+                widget: minerva.views.AddCSVSourceWidget
             }
         };
     },
