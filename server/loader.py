@@ -17,13 +17,13 @@
 #  limitations under the License.
 ###############################################################################
 
-import mako
 import os
 import requests
 import cherrypy
 from base64 import b64encode
 from girder import events
-from girder.constants import SettingKey, STATIC_ROOT_DIR
+from girder.constants import SettingKey
+from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
@@ -31,115 +31,6 @@ from girder.plugins.minerva.rest import \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
         s3_source
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
-
-
-class CustomAppRoot(ModelImporter):
-    """
-    The webroot endpoint simply serves the main index HTML file of minerva.
-    """
-    exposed = True
-
-    indexHtml = None
-
-    vars = {
-        'plugins': [],
-        'apiRoot': '/api/v1',
-        'staticRoot': '/static',
-        'title': 'Minerva'
-    }
-
-    template = r"""
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <title>${title}</title>
-        <link rel="stylesheet"
-              href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
-        <link rel="stylesheet"
-              href="${staticRoot}/lib/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="////cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css"/>
-        <link rel="stylesheet"
-              href="${staticRoot}/lib/fontello/css/fontello.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/lib/fontello/css/animation.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/app.min.css">
-        % for plugin in pluginCss:
-            <link rel="stylesheet"
-            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endfor
-        <link rel="stylesheet"
-              href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
-        <link rel="stylesheet"
-              href="http:////cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/minerva/minerva.min.css">
-        <link rel="icon"
-              type="image/png"
-              href="${staticRoot}/img/Girder_Favicon.png">
-      </head>
-      <body>
-        <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
-        <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-        <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js">
-        </script>
-        <script src="${staticRoot}/built/libs.min.js"></script>
-        <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/geo.min.js">
-        </script>
-        <script src="${staticRoot}/built/app.min.js"></script>
-        </script>
-        % for plugin in pluginJs:
-            <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js">
-            </script>
-        % endfor
-        <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js">
-        </script>
-<script src="http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js">
-    </script>
-<script
-src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/minerva.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
-
-       </body>
-    </html>
-    """
-
-    def GET(self):
-        if self.indexHtml is None:
-            self.vars['pluginCss'] = []
-            self.vars['pluginJs'] = []
-            builtDir = os.path.join(STATIC_ROOT_DIR, 'clients',
-                                    'web', 'static', 'built', 'plugins')
-            # Load resources from all enabled plugins, which allows Minerva
-            # to be extended by other Girder plugins.
-            plugins = self.model('setting').get(SettingKey.PLUGINS_ENABLED, ())
-            plugins.remove('minerva')
-            for plugin in plugins:
-                if os.path.exists(os.path.join(builtDir, plugin,
-                                               'plugin.min.css')):
-                    self.vars['pluginCss'].append(plugin)
-                if os.path.exists(os.path.join(builtDir, plugin,
-                                               'plugin.min.js')):
-                    self.vars['pluginJs'].append(plugin)
-            self.indexHtml = mako.template.Template(self.template).render(
-                **self.vars)
-
-        return self.indexHtml
 
 
 class WmsProxy(object):
@@ -164,8 +55,25 @@ def validate_settings(event):
 
 
 def load(info):
+    # Load the mako template for Minerva and serve it as the root document.
+    minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
+    minerva_webroot = Webroot(minerva_mako)
+
+    # Load resources from all enabled plugins, which allows Minerva
+    # to be extended by other Girder plugins.
+    plugins = ModelImporter.model('setting').get(SettingKey.PLUGINS_ENABLED,
+                                                 ())
+    plugins.remove('minerva')
+    vars = {
+        'plugins': plugins,
+        'apiRoot': '/api/v1',
+        'staticRoot': '/static',
+        'title': 'Minerva'
+    }
+    minerva_webroot.updateHtmlVars(vars)
+
     # Move girder app to /girder, serve minerva app from /
-    info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
+    info['serverRoot'], info['serverRoot'].girder = (minerva_webroot,
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
 
