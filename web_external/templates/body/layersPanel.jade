@@ -3,11 +3,15 @@
       | Session Layers
     .layersList
       ul.datasets
-        each dataset in datasets
+        each dataset, index in datasets
           li.dataset= dataset.get('name')
               i.icon-eye-off.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
               each option in layersOrderOptions
-                  i(class='icon-angle-#{option.class} m-order-layer')&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
+                  if ((index === 0 && option.class.indexOf('up') > -1) || (index === datasets.length - 1 && option.class.indexOf('down') > -1 ))
+                      - var disable = 'm-disable-text'
+                  else
+                      - var disable = ''
+                  i(class='icon-angle-#{option.class} m-order-layer #{disable}')&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
               if dataset.getDatasetType() === 'wms'
                   .m-opacity-container
                     i.icon-ajust
