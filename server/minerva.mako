@@ -18,8 +18,10 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/app.min.css">
     % for plugin in pluginCss:
-        <link rel="stylesheet"
-        href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
+        % if plugin != 'minerva':
+            <link rel="stylesheet"
+            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
+        % endif
     % endfor
     <link rel="stylesheet"
           href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
@@ -40,8 +42,17 @@
     <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/geo.min.js"></script>
     <script src="${staticRoot}/built/app.min.js"></script>
-    % for plugin in pluginJs:
-        <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
+    ## We want to include client side resources from all loaded plugins,
+    ## which allows Minerva to be extended by other plugins and have the
+    ## client side resources of the downstream plugins be served by the
+    ## Minerva application.
+    ## We don't want to serve the plugin.min.[cs|j]s resources for Minerva
+    ## since these are related to the Girder plugins page.
+    ## Same applies to CSS above.
+     % for plugin in pluginJs:
+        % if plugin != 'minerva':
+            <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
+        % endif
     % endfor
     <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
     <script src="http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js"></script>

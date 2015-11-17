@@ -22,7 +22,6 @@ import requests
 import cherrypy
 from base64 import b64encode
 from girder import events
-from girder.constants import SettingKey
 from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
@@ -58,21 +57,8 @@ def load(info):
     # Load the mako template for Minerva and serve it as the root document.
     minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
     minerva_webroot = Webroot(minerva_mako)
-
-    # Load resources from all enabled plugins, which allows Minerva
-    # to be extended by other Girder plugins.
-    plugins = ModelImporter.model('setting').get(SettingKey.PLUGINS_ENABLED,
-                                                 ())
-    plugins = list(plugins)
-    if 'minerva' in plugins:
-        plugins.remove('minerva')
-    vars = {
-        'plugins': plugins,
-        'apiRoot': '/api/v1',
-        'staticRoot': '/static',
-        'title': 'Minerva'
-    }
-    minerva_webroot.updateHtmlVars(vars)
+    minerva_webroot.updateHtmlVars(info['serverRoot'].vars)
+    minerva_webroot.updateHtmlVars({'title': 'Minerva'})
 
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (minerva_webroot,
