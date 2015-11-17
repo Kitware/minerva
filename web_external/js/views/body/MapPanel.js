@@ -15,7 +15,7 @@ minerva.views.MapPanel = minerva.View.extend({
 
     changeLayerZIndex: function (dataset) {
         var geojsSliderZIndex = 1, baseMapZIndex = 1;
-        this.datasetLayers[dataset.id][dataset.get('order')](geojsSliderZIndex + 1);
+        this.datasetLayers[dataset.id][dataset.get('order') || 'moveToTop'](1);
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Call moveUp(1) to place it on top of base map
         if (dataset.get('order') === 'moveToBottom') {
@@ -91,8 +91,8 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.legendWidget[datasetId].show();
 
                 // Add the UI slider back
-                this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
+                // this.uiLayer = this.map.createLayer('ui');
+                // this.uiLayer.createWidget('slider');
                 this.map.draw();
             } else {
                 // Assume the dataset provides a reader, so load the data

@@ -24,6 +24,7 @@ minerva.views.LayersPanel = minerva.View.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var option = $(event.currentTarget).attr('m-order-option');
         var dataset = this.collection.get(datasetId);
+
         var currentDatasetIndex = _.indexOf(this.collection.models, dataset);
         var displayedDatasets = _.filter(this.collection.models, function (set) {
             return set.get('displayed');
@@ -43,30 +44,35 @@ minerva.views.LayersPanel = minerva.View.extend({
 
         var currentStack = dataset.get('stack');
         // Retrieve the last stack value in the collection
-        var lastValueInStack = _.last((stackValues).sort());
-        var firstValueInStack = _.first((stackValues).sort());
+        var lastValueInStack = _.last((stackValues).sort(function(a,b) {
+           return a - b
+        }));
+        var firstValueInStack = _.first((stackValues).sort(function(a,b) {
+           return a - b
+        }));
 
-        // Set the layer order on the map
-        dataset.set('order', option);
-
-        if (option === 'moveToTop' && currentStack !== lastValueInStack) {
+        if (option === 'moveToTop') {
             dataset.set('stack', lastValueInStack + 1);
-        } else if (option === 'moveToBottom' && currentStack !== firstValueInStack) {
+        } else if (option === 'moveToBottom') {
             dataset.set('stack', firstValueInStack - 1);
-        } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
+        } else if (option === 'moveUp') {
             dataset.set('stack', currentStack + 1);
-            nextDataset.set('stack', currentStack);
-        } else if (option === 'moveDown' && currentStack !== firstValueInStack) {
+            (nextDataset || prevDataset).set('stack', currentStack);
+        } else if (option === 'moveDown') {
             dataset.set('stack', currentStack - 1);
-            prevDataset.set('stack', currentStack);
+            (prevDataset || nextDataset).set('stack', currentStack);
         }
+
+        // Re-set the layer order on the map and then set the new order
+        dataset.set('order', null);
+        dataset.set('order', option);
     },
 
     initialize: function (settings) {
         settings = settings || {};
         this.collection = settings.collection;
         this.layersOrderOptions = [{'method': 'moveUp', 'class': 'up'}, {'method': 'moveDown', 'class': 'down'}, {'method': 'moveToTop', 'class': 'double-up'}, {'method': 'moveToBottom', 'class': 'double-down'}];
-        this.listenTo(this.collection, 'change:displayed change:order change:stack', function (dataset) {
+        this.listenTo(this.collection, 'change:displayed change:order', function (dataset) {
             this.render(dataset);
         }, this);
     },

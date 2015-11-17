@@ -5,7 +5,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         displayed: false,
         files: null,
         opacity: 1,
-        order: 'moveToTop',
+        order: null,
         stack: 0
     },
 

@@ -11,11 +11,17 @@ minerva.views.DataPanel = minerva.View.extend({
         var stackValues = _.map(this.collection.models, function (dataset) {
             return dataset.get('stack');
         });
+
         // Retrieve the last stack value in the collection
-        var lastValueInStack = _.last((stackValues).sort());
+        var lastValueInStack =
+            _.last(
+                stackValues.sort(function(a,b) {
+                   return a - b
+                })
+            );
 
         if (!dataset.get('displayed')) {
-            dataset.set('stack', lastValueInStack + 2);
+            dataset.set('stack', lastValueInStack + 1);
             // TODO maybe this check is unnecessary, how can we get into this state?
             dataset.set('displayed', true);
         }
