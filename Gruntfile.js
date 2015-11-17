@@ -225,7 +225,7 @@ module.exports = function (grunt) {
             'jade:minerva': {},
             'stylus:minerva': {},
             'test-env-html:minerva': {
-                dependencies: ['uglify:minerva', 'stylus:minerva', 'shell:readServerConfig']
+                dependencies: ['uglify:minerva', 'stylus:minerva']
             }
         }
     });
@@ -313,8 +313,8 @@ module.exports = function (grunt) {
             cssFiles: cssFiles,
             jsFilesUncovered: dependencies,
             jsFilesCovered: jsFiles,
-            staticRoot: grunt.config('serverConfig.staticRoot'),
-            apiRoot: grunt.config('serverConfig.apiRoot')
+            staticRoot: '/static',
+            apiRoot: '/api/v1'
         }));
     });
 };
