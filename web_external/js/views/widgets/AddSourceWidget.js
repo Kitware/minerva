@@ -59,6 +59,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'PostgreSQL',
                 icon: 'icon-database',
                 widget: minerva.views.AddPostgresSourceWidget
+            },
+            mongo: {
+                label: 'Mongo DB',
+                icon: 'icon-leaf',
+                widget: minerva.views.AddMongoSourceWidget
             }
         };
     },

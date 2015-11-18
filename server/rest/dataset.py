@@ -45,10 +45,6 @@ class Dataset(Resource):
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
         self.route('POST', (':id', 'dataset'), self.createDataset)
-        self.route('POST', ('external_mongo_dataset',),
-                   self.createExternalMongoDataset)
-        self.route('GET', (':id', 'external_mongo_limits'),
-                   self.getExternalMongoLimits)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
@@ -282,49 +278,6 @@ class Dataset(Resource):
         collection = MongoProxy(db[collectionName])
         return collection
 
-    def createExternalMongo(self, name, dbConnectionUri, collectionName):
-        # assuming to create in the user space of the current user
-        user = self.getCurrentUser()
-        folder = findDatasetFolder(user, user)
-        desc = 'external mongo dataset for %s' % name
-        item = self.model('item').createItem(name, user, folder, desc)
-        minerva_metadata = {
-            'dataset_id': item['_id'],
-            'original_type': 'mongo',
-            'mongo_connection': {
-                'db_uri': dbConnectionUri,
-                'collection_name': collectionName
-            }
-        }
-        # get the first entry in the collection, set as json_row
-        # TODO integrate this with the methods for taking a row from a JSON
-        # array in a file
-        collection = self.mongoCollection(dbConnectionUri, collectionName)
-        collectionList = list(collection.find(limit=1))
-        if len(collectionList) > 0:
-            minerva_metadata['json_row'] = collectionList[0]
-        else:
-            minerva_metadata['json_row'] = None
-        if 'meta' not in item:
-            item['meta'] = {}
-        item['meta']['minerva'] = minerva_metadata
-        self.model('item').setMetadata(item, item['meta'])
-        return item['meta']['minerva']
-
-    def findExternalMongoLimits(self, item, field):
-        minerva_metadata = item['meta']['minerva']
-        mongo_connection = minerva_metadata['mongo_connection']
-        connectionUri = mongo_connection['db_uri']
-        collectionName = mongo_connection['collection_name']
-        collection = self.mongoCollection(connectionUri, collectionName)
-        minVal = (collection.find(limit=1).sort(field, 1))[0][field]
-        maxVal = (collection.find(limit=1).sort(field, -1))[0][field]
-        # update but don't save the meta, as it could become stale
-        mongo_fields = minerva_metadata.get('mongo_fields', {})
-        mongo_fields[field] = {'min': minVal, 'max': maxVal}
-        minerva_metadata['mongo_fields'] = mongo_fields
-        return minerva_metadata
-
     # TODO rename to createDataset once the existing createDataset
     # endpoint method is removed.
     def constructDataset(self, name, minerva_metadata, desc=''):
@@ -398,28 +351,6 @@ class Dataset(Resource):
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
-
-    @access.user
-    def createExternalMongoDataset(self, params):
-        return self.createExternalMongo(**params)
-    createExternalMongoDataset.description = (
-        Description('Create a dataset from an external mongo collection.')
-        .param('name', 'The name of the dataset')
-        .param('dbConnectionUri', 'Connection URI to MongoDB')
-        .param('collectionName', 'Collection name within the MongoDB.')
-        .errorResponse('Write permission denied on the dataset folder.', 403))
-
-    @access.public
-    @loadmodel(model='item', level=AccessType.WRITE)
-    def getExternalMongoLimits(self, item,  params):
-        field = params['field']
-        return self.findExternalMongoLimits(item, field)
-    getExternalMongoLimits.description = (
-        Description('Find min and max for the field in the datset')
-        .param('id', 'The Dataset ID', paramType='path')
-        .param('field', 'The field for which range limits are sought')
-        .errorResponse('ID was invalid.')
-        .errorResponse('Write permission denied on the Item.', 403))
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)

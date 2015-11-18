@@ -6,7 +6,8 @@ minerva.views.SourcePanel = minerva.View.extend({
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
-        'click .m-display-s3-bucket-hierarchy': 'selectS3Files'
+        'click .m-display-s3-bucket-hierarchy': 'selectS3Files',
+        'click .m-display-mongo-collections': 'displayMongoCollections'
     },
 
     addSourceDialog: function () {
@@ -30,6 +31,23 @@ minerva.views.SourcePanel = minerva.View.extend({
             parentView: this
         });
 
+    },
+
+    displayMongoCollections: function (evt) {
+        var el = $(evt.currentTarget);
+        var source = this.sourceCollection.get(el.attr('cid'));
+        if (!this.addMongoDatasetWidget) {
+            this.addMongoDatasetWidget = new minerva.views.AddMongoDatasetWidget({
+                el: $('#g-dialog-container'),
+                source: source,
+                collection: this.datasetCollection,
+                folderId: source.getMinervaMetadata().folder_id,
+                parentView: this
+            });
+            this.addMongoDatasetWidget.render();
+        } else {
+            this.addMongoDatasetWidget.setCurrentSource(source);
+        }
     },
 
     displayWmsLayersList: function (evt) {
@@ -108,6 +126,10 @@ minerva.views.SourcePanel = minerva.View.extend({
             s3: {
                 icon: 'icon-cloud',
                 action: 'm-display-s3-bucket-hierarchy'
+            },
+            mongo: {
+                icon: 'icon-leaf',
+                action: 'm-display-mongo-collections'
             }
         };
 

@@ -28,7 +28,7 @@ from girder.utility.model_importer import ModelImporter
 from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
-        s3_source, postgres_source
+        s3_source, postgres_source, mongo_source, mongo_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
@@ -96,8 +96,8 @@ def load(info):
         elasticsearch_source.ElasticsearchSource()
     info['apiRoot'].minerva_query_elasticsearch = \
         elasticsearch_source.ElasticsearchQuery()
-
     info['apiRoot'].minerva_source_postgres = \
         postgres_source.PostgresSource()
-
+    info['apiRoot'].minerva_source_mongo = mongo_source.MongoSource()
+    info['apiRoot'].minerva_dataset_mongo = mongo_dataset.MongoDataset()
     info['serverRoot'].wms_proxy = WmsProxy()

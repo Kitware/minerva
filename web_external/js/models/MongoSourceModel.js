@@ -1,0 +1,23 @@
+minerva.models.MongoSourceModel = minerva.models.SourceModel.extend({
+
+    initialize: function () {
+    },
+
+    createSource: function (params) {
+        girder.restRequest({
+            path: '/minerva_source_mongo',
+            type: 'POST',
+            data: params,
+            error: null // don't do default error behavior (validation may fail)
+        }).done(_.bind(function (resp) {
+            this.set(resp);
+            this.trigger('m:sourceReceived');
+        }, this)).error(_.bind(function (err) {
+            this.trigger('m:error', err);
+            // If we couldn't successfully start the s3 import destroy the item.
+            this.destroy();
+        }, this));
+
+        return this;
+    }
+});
