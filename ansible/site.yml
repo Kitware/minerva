@@ -40,25 +40,19 @@
         - python-numpy
 
 
-    - name: Install minerval python dependencies
-      pip: requirements=/opt/plugins/minerva/{{ item }}
-      with_items:
-        - requirements.txt
-        - requirements-dev.txt
+    - name: Install minerva as a girder plugin
+      command: "girder-install plugin -s --dev /opt/minerva"
+      args:
+        creates: "/opt/girder/plugins/minerva"
 
+    - name: Install romanesco as a girder plugin
+      command: "girder-install plugin -s --dev /opt/romanesco"
+      args:
+        creates: "/opt/girder/plugins/romanesco"
 
 # Configure plugins and girder
 - hosts: girder
   sudo: yes
-  pre_tasks:
-    - name: Set plugin directories
-      girder_plugin_dir:
-        girder_dir: "{{ girder_install_root }}"
-        plugin_dir: "/opt/plugins"
-        state: present
-  roles:
-    - role: girder-grunt
-
   tasks:
     - name: Create an 'Admin' user
       girder:

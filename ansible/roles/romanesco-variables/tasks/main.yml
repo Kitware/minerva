@@ -15,7 +15,7 @@
 
   - name: romanesco | install root | default | set
     set_fact:
-        romanesco_install_root: /opt/plugins/romanesco
+        romanesco_install_root: /opt/romanesco
     when: romanesco_install_root == ""
 
   - name: romanesco | install root | parent | probe
