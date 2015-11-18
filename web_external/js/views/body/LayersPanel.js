@@ -30,6 +30,9 @@ minerva.views.LayersPanel = minerva.View.extend({
             return set.get('displayed');
         });
 
+        var numberOfPossibleLayers = this.collection.models.length;
+        var numberOfLayersInSession = displayedDatasets.length;
+
         if (displayedDatasets[currentDatasetIndex - 1]) {
           prevDataset = displayedDatasets[currentDatasetIndex - 1];
         }
@@ -43,22 +46,22 @@ minerva.views.LayersPanel = minerva.View.extend({
         });
 
         var currentStack = dataset.get('stack');
-        // Retrieve the last stack value in the collection
-        var lastValueInStack = _.last((stackValues).sort(function(a,b) {
-           return a - b
+        // Retrieve the first and last stack value in the collection
+        var lastValueInStack = _.last((stackValues).sort(function(a, b) {
+           return a - b;
         }));
-        var firstValueInStack = _.first((stackValues).sort(function(a,b) {
-           return a - b
+        var firstValueInStack = _.first((stackValues).sort(function(a, b) {
+           return a - b;
         }));
 
-        if (option === 'moveToTop') {
+        if (option === 'moveToTop' && currentStack !== lastValueInStack) {
             dataset.set('stack', lastValueInStack + 1);
-        } else if (option === 'moveToBottom') {
+        } else if (option === 'moveToBottom' && currentStack !== (numberOfPossibleLayers - numberOfLayersInSession)) {
             dataset.set('stack', firstValueInStack - 1);
-        } else if (option === 'moveUp') {
+        } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
             dataset.set('stack', currentStack + 1);
             (nextDataset || prevDataset).set('stack', currentStack);
-        } else if (option === 'moveDown') {
+        } else if (option === 'moveDown' && currentStack !== (numberOfPossibleLayers - numberOfLayersInSession)) {
             dataset.set('stack', currentStack - 1);
             (prevDataset || nextDataset).set('stack', currentStack);
         }
@@ -71,7 +74,13 @@ minerva.views.LayersPanel = minerva.View.extend({
     initialize: function (settings) {
         settings = settings || {};
         this.collection = settings.collection;
-        this.layersOrderOptions = [{'method': 'moveUp', 'class': 'up'}, {'method': 'moveDown', 'class': 'down'}, {'method': 'moveToTop', 'class': 'double-up'}, {'method': 'moveToBottom', 'class': 'double-down'}];
+        this.layersOrderOptions = [
+            {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
+            {'title': 'move down', 'method': 'moveDown', 'class': 'down'},
+            {'title': 'move to top', 'method': 'moveToTop', 'class': 'double-up'},
+            {'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down'}
+        ];
+
         this.listenTo(this.collection, 'change:displayed change:order', function (dataset) {
             this.render(dataset);
         }, this);
@@ -83,6 +92,7 @@ minerva.views.LayersPanel = minerva.View.extend({
             return set.get('displayed');
         });
 
+        // Sort datasets by stack
         var sortedDisplayedDatasets = _.sortBy(displayedDatasets, function (set) {
             return set.get('stack');
         }).reverse();

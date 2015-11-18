@@ -14,10 +14,10 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     changeLayerZIndex: function (dataset) {
-        var geojsSliderZIndex = 1, baseMapZIndex = 1;
-        this.datasetLayers[dataset.id][dataset.get('order') || 'moveToTop'](1);
+        var baseMapZIndex = 1;
+        this.datasetLayers[dataset.id][dataset.get('order') || 'moveToTop']();
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
-        // Call moveUp(1) to place it on top of base map
+        // Calling moveUp(1) to place it on top of base map
         if (dataset.get('order') === 'moveToBottom') {
             this.datasetLayers[dataset.id].moveUp(baseMapZIndex);
         }
