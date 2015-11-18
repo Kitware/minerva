@@ -76,6 +76,15 @@
         state: directory
     when: do_install|bool
 
+  - name: girder | conf | owner | set
+    file:
+        recurse: yes
+        path: "{{ girder_install_root }}"
+        group: "{{ girder_group }}"
+        mode: 0755
+        owner: "{{ girder_user }}"
+    when: do_install|bool
+
   - name: Install editable version of girder
     pip:
       chdir: "{{ girder_install_root }}"
@@ -84,7 +93,7 @@
 
   - name: Install frontend assets
     command: "girder-install web"
-    sudo: no
+    become_user: "{{ girder_user }}"
 
   - name: Install editable version of girder-client
     pip:
@@ -98,14 +107,6 @@
         global: yes
     when: do_install|bool
 
-  - name: girder | conf | owner | set
-    file:
-        recurse: yes
-        path: "{{ girder_install_root }}"
-        group: "{{ girder_group }}"
-        mode: 0755
-        owner: "{{ girder_user }}"
-    when: do_install|bool
 
   - name: girder | conf | girder.local.cfg | generate
     template:
