@@ -39,13 +39,14 @@ Vagrant.configure(2) do |config|
   if File.directory?("../girder")
     config.vm.synced_folder "../girder", "/opt/girder", owner: 1003, group: 1003
   end
+
   if File.directory?("../romanesco")
-    config.vm.synced_folder "../romanesco", "/opt/plugins/romanesco", owner: 1002, group: 1002
+    config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: 1002, group: 1002
   end
 
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder ".", "/opt/plugins/minerva", owner: 1003, group: 1003
+  config.vm.synced_folder ".", "/opt/minerva", owner: 1003, group: 1003
 
   config.vm.provision "ansible" do |ansible|
     ansible.groups = {
