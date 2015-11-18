@@ -34,11 +34,11 @@ minerva.views.LayersPanel = minerva.View.extend({
         var numberOfLayersInSession = displayedDatasets.length;
 
         if (displayedDatasets[currentDatasetIndex - 1]) {
-          prevDataset = displayedDatasets[currentDatasetIndex - 1];
+            prevDataset = displayedDatasets[currentDatasetIndex - 1];
         }
 
         if (displayedDatasets[currentDatasetIndex + 1]) {
-          nextDataset = displayedDatasets[currentDatasetIndex + 1];
+            nextDataset = displayedDatasets[currentDatasetIndex + 1];
         }
 
         var stackValues = _.map(this.collection.models, function (dataset) {
@@ -48,10 +48,10 @@ minerva.views.LayersPanel = minerva.View.extend({
         var currentStack = dataset.get('stack');
         // Retrieve the first and last stack value in the collection
         var lastValueInStack = _.last((stackValues).sort(function(a, b) {
-           return a - b;
+            return a - b;
         }));
         var firstValueInStack = _.first((stackValues).sort(function(a, b) {
-           return a - b;
+            return a - b;
         }));
 
         if (option === 'moveToTop' && currentStack !== lastValueInStack) {
