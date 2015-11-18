@@ -76,15 +76,6 @@
         state: directory
     when: do_install|bool
 
-  # Minerva depends on cryptography,  which requires a newer version of
-  # cffi.  This task is a temporary fix until we can bump the version in
-  # girder.
-  - name: Update cffi version for minerva
-    replace:
-      dest: "{{ girder_install_root }}/requirements.txt"
-      regexp: 'cffi==0\.8\.6'
-      replace: 'cffi==1.3.0'
-
 
   - name: girder | pip
     pip: requirements={{ girder_install_root }}/requirements.txt
