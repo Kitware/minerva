@@ -22,7 +22,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
             }
 
             // create or update metadata
-            var minervaMetadata = this.dataset.getMinervaMetadata();
+            var minervaMetadata = this.dataset.metadata();
             minervaMetadata.mapper = mapper;
 
             // save the dataset with updated metadata
@@ -70,7 +70,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
 
     initialize: function (settings) {
         this.dataset = settings.dataset;
-        this.minervaMetadata = this.dataset.getMinervaMetadata();
+        this.minervaMetadata = this.dataset.metadata();
         if (this.minervaMetadata.mapper) {
             this.create = false;
         } else {
@@ -101,7 +101,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
 
                 this.dataset.on('m:externalMongoLimitsGot', function () {
                     var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
-                    var fields = this.dataset.getMinervaMetadata().mongo_fields;
+                    var fields = this.dataset.metadata().mongo_fields;
                     var fieldLimits = fields[jsonpathDate];
                     // fieldLimits are epoch time, convert to date
                     this.startTime = fieldLimits.min;

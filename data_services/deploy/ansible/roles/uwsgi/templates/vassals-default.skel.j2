@@ -18,9 +18,9 @@ module = django.core.handlers.wsgi:WSGIHandler()
 
 ;enable-threads = true
 
-virtualenv = {{virtualenv_dir}}/%n
+virtualenv = {{virtualenv_dir}}/{{app_name}}
 vacuum = true
-env = DJANGO_SETTINGS_MODULE={{main_module}}.settings
+env = DJANGO_SETTINGS_MODULE=%n.settings
 pidfile = /tmp/%n.pid
 ;harakiri = 20 # respawn processes taking more than 20 seconds
 max-requests = 5000 # respawn processes after serving 5000 requests

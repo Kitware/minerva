@@ -2,8 +2,11 @@
   remote_user: vagrant
   roles:
      - common
+     - {role: geerlingguy.redis, sudo: yes}
+     - zenoamaro.supervisord
      - postgres_postgis
      - geoserver
      - nginx
      - uwsgi
      - geonode
+     - dataqs

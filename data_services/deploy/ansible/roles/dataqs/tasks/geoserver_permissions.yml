@@ -1,0 +1,7 @@
+- name: reset geoserver owner
+  command: chown -R tomcat7:tomcat7 /var/lib/tomcat7/webapps/geoserver/data
+  sudo: yes
+
+- name: reset geoserver permissions
+  command: chmod -R g+rws /var/lib/tomcat7/webapps/geoserver/data
+  sudo: yes
