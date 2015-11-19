@@ -93,40 +93,56 @@ minerva.views.SessionView = minerva.View.extend({
             this._disableSave();
         });
 
-        this.dataPanel = new minerva.views.DataPanel({
+        minerva.layout = {
+            panelGroups: []
+        };
+
+        var corePanelGroup = new minerva.views.PanelGroup({
+            id: 'core-panel-group',
+            parentView: this,
+            panelViews: []
+        });
+
+        var leftPanelGroup = new minerva.views.PanelGroup({
+            id: 'left-panel-group',
+            parentView: this,
+            panelViews: []
+        });
+
+        corePanelGroup.panelViews.push(new minerva.views.MapPanel({
+            id: 'map-panel',
+            parentView: this,
             session: this.model,
-            collection: this.datasetsCollection,
-            parentView: this
-        });
+            collection: this.datasetsCollection
+        }));
 
-        this.mapPanel = new minerva.views.MapPanel({
-            session: this.model,
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
-        this.layersPanel = new minerva.views.LayersPanel({
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
-        this.jobsPanel = new minerva.views.JobsPanel({
-            parentView: this
-        });
-
-        this.analysisPanel = new minerva.views.AnalysisPanel({
+        leftPanelGroup.panelViews.push(new minerva.views.AnalysisPanel({
+            id: 'analysis-panel',
             parentView: this,
             collection: this.analysisCollection,
-            datasetCollection: this.datasetCollection,
-            sourceCollection: this.sourceCollection
-        });
+            datasetCollection: this.datasetCollection
+        }));
 
-        this.sourcePanel = new minerva.views.SourcePanel({
-            session: this.model,
+        leftPanelGroup.panelViews.push(new minerva.views.SourcePanel({
+            id: 'source-panel',
             sourceCollection: this.sourceCollection,
             datasetCollection: this.datasetsCollection,
             parentView: this
-        });
+        }));
+
+        leftPanelGroup.panelViews.push(new minerva.views.DataPanel({
+            id: 'data-panel',
+            parentView: this,
+            session: this.model,
+            collection: this.datasetsCollection
+        }));
+
+        leftPanelGroup.panelViews.push(new minerva.views.JobsPanel({
+            id: 'jobs-panel',
+            parentView: this
+        }));
+
+        minerva.layout.panelGroups = [corePanelGroup, leftPanelGroup];
 
         this.render();
     },
@@ -142,13 +158,11 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            this.dataPanel.setElement(this.$('.dataPanel')).render();
-            this.mapPanel.setElement(this.$('.mapPanel')).render();
-            this.layersPanel.setElement(this.$('.layersPanel')).render();
-            this.jobsPanel.setElement(this.$('.jobsPanel')).render();
-            this.analysisPanel.setElement(this.$('.analysisPanel')).render();
-            this.sourcePanel.setElement(this.$('.m-source-panel')).render();
-
+            // Render each of the panel groups
+            _.each(minerva.layout.panelGroups, function (panelGroup) {
+                this.$('#panelGroups').append('<div id="' + panelGroup.id  +'"></div>');
+                panelGroup.setElement(this.$('#' + panelGroup.id)).render();
+            }, this);
         }, this));
 
         return this;
