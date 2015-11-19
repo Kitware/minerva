@@ -19,6 +19,14 @@ minerva.views.LayersPanel = minerva.View.extend({
         dataset.set('opacity', parseFloat(opacity));
     },
 
+    reorderDisplayedLayers: function (option, dataset) {
+        // Re-set the layer order on the map and then set the new order
+        if (dataset.get('order') === option) {
+            dataset.set('order', null);
+        }
+        dataset.set('order', option);
+    },
+
     reorderLayer: function (event) {
         var prevDataset, nextDataset;
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
@@ -47,28 +55,28 @@ minerva.views.LayersPanel = minerva.View.extend({
 
         var currentStack = dataset.get('stack');
         // Retrieve the first and last stack value in the collection
-        var lastValueInStack = _.last((stackValues).sort(function(a, b) {
+        var lastValueInStack = _.last((stackValues).sort(function (a, b) {
             return a - b;
         }));
-        var firstValueInStack = _.first((stackValues).sort(function(a, b) {
+        var firstValueInStack = _.first((stackValues).sort(function (a, b) {
             return a - b;
         }));
 
         if (option === 'moveToTop' && currentStack !== lastValueInStack) {
             dataset.set('stack', lastValueInStack + 1);
+            this.reorderDisplayedLayers(option, dataset);
         } else if (option === 'moveToBottom' && currentStack !== (numberOfPossibleLayers - numberOfLayersInSession)) {
             dataset.set('stack', firstValueInStack - 1);
+            this.reorderDisplayedLayers(option, dataset);
         } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
-            dataset.set('stack', currentStack + 1);
-            (nextDataset || prevDataset).set('stack', currentStack);
-        } else if (option === 'moveDown' && currentStack !== (numberOfPossibleLayers - numberOfLayersInSession)) {
-            dataset.set('stack', currentStack - 1);
             (prevDataset || nextDataset).set('stack', currentStack);
+            dataset.set('stack', currentStack + 1);
+            this.reorderDisplayedLayers(option, dataset);
+        } else if (option === 'moveDown' && (currentStack === 1 ? currentStack: currentStack - 1) !== (numberOfPossibleLayers - numberOfLayersInSession)) {
+            (nextDataset || prevDataset).set('stack', currentStack);
+            dataset.set('stack', currentStack - 1);
+            this.reorderDisplayedLayers(option, dataset);
         }
-
-        // Re-set the layer order on the map and then set the new order
-        dataset.set('order', null);
-        dataset.set('order', option);
     },
 
     initialize: function (settings) {
@@ -81,13 +89,12 @@ minerva.views.LayersPanel = minerva.View.extend({
             {'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down'}
         ];
 
-        this.listenTo(this.collection, 'change:displayed change:order', function (dataset) {
-            this.render(dataset);
+        this.listenTo(this.collection, 'change:displayed change:order', function () {
+            this.render();
         }, this);
     },
 
-    render: function (dataset) {
-
+    render: function () {
         var displayedDatasets = _.filter(this.collection.models, function (set) {
             return set.get('displayed');
         });
