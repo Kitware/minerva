@@ -22,7 +22,6 @@ from girder.api.rest import loadmodel
 from girder.constants import AccessType
 
 from girder.plugins.minerva.rest.dataset import Dataset
-from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 import json
 
 
@@ -90,13 +89,7 @@ class MongoDataset(Dataset):
         collectionName = params["mongo_collection"]
         dbConnectionUri = \
             mongoSource['meta']['minerva']['mongo_connection']['db_uri']
-        # assuming to create in the user space of the current user
-        user = self.getCurrentUser()
-        folder = findDatasetFolder(user, user, create=True)
-        desc = 'external mongo dataset for %s' % name
-        item = self.model('item').createItem(name, user, folder, desc)
         minerva_metadata = {
-            'dataset_id': item['_id'],
             'source_id': mongoSource['_id'],
             'original_type': 'mongo',
             'mongo_connection': {
@@ -124,13 +117,16 @@ class MongoDataset(Dataset):
                         minerva_metadata['spatial_field'] = 'geometry'
                         minerva_metadata['geojson'] = {}
             if 'geojson' in minerva_metadata:
-                item['geoJsonAvailable'] = True
                 minerva_metadata['geojson'] = \
                     self.convertToGeoJSON(collection,
                                           minerva_metadata['spatial_field'])
         else:
             minerva_metadata['json_row'] = None
-        dataset = self.constructDataset(name, minerva_metadata)
+        desc = 'external mongo dataset for %s' % name
+        dataset = self.constructDataset(name, minerva_metadata, desc)
+        if 'geojson' in minerva_metadata:
+            dataset['geoJsonAvailable'] = True
+            dataset = self.model('item').updateItem(dataset)
         return dataset
     createMongoDataset.description = (
         Description('Create a Mongo Dataset from a Mongo Source.')
