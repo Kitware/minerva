@@ -222,3 +222,55 @@ Data services
 Several minerva components rely on having a data services server up and running.  You can
 either connect to an existing server or spin up a local server using vagrant.  See
 the :doc:`deploy-data-services` section for more details.
+
+Installation via pip
+~~~~~~~~~~~~~~~~~~~~
+
+These instructions are in beta.  Use at your own risk.
+
+Ensure you have enough memory, 2G, or possibly less with swap.
+
+Install system depedencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Follow the above, or as a shortcut for Ubuntu 14.04
+
+::
+
+    sudo apt-get update
+    sudo apt-get install curl g++ git libffi-dev make python-dev python-pip
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+    echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'     | sudo tee /etc/apt/sources.list.d/mongodb.list
+    sudo apt-get update;sudo apt-get install mongodb-org-server
+    curl -sL https://deb.nodesource.com/setup | sudo bash -
+    sudo apt-get
+    sudo apt-get install nodejs
+    sudo apt-get install libfreetype6-dev libpng12-dev pkg-config libgdal-dev libxml2-dev libxslt1-dev
+    # update the version of npm
+    sudo npm install -g npm
+
+Pip install Girder
+^^^^^^^^^^^^^^^^^^
+
+TODO: fill in and update upon Girder 1.4.0 release and Minerva's peg to that.
+
+Instead of pip installing Girder, we'll clone it.  These instructions follow
+doing everything in a Vagrant VM, in the /home/vagrant dir, and using lots
+of sudo.  Installing into a Virtual Environment will reduce the need for sudo, because
+we would not be using the system pip.
+
+::
+
+    git clone https://github.com/Girder/girder.git
+    git clone https://github.com/Kitware/romanesco.git
+    git clone https://github.com/Kitware/minerva.git
+
+When Girder is installed via pip, you can run the 'girder-install' command
+instead of calling python -m girder.utility.install.
+
+::
+
+    cd girder
+    sudo python -m girder.utility.install plugin ~/romanesco
+    sudo python -m girder.utility.install plugin ~/minerva
+    python -m girder
