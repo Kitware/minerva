@@ -15,7 +15,7 @@ minerva.views.DataPanel = minerva.View.extend({
         // Retrieve the last stack value in the collection
         var lastValueInStack =
             _.last(
-                stackValues.sort(function(a, b) {
+                stackValues.sort(function (a, b) {
                     return a - b;
                 })
             );
