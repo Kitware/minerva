@@ -45,8 +45,14 @@
       args:
         creates: "/opt/girder/plugins/minerva"
 
+    # This should be removed once romanesco bumps requests to 2.7.0
+    - name: force Romanesco requests==2.7.0
+      lineinfile: dest=/opt/romanesco/requirements.txt regexp='^requests=' line='requests==2.7.0'
+      tags:
+        - test
+
     - name: Install romanesco as a girder plugin
-      command: "girder-install plugin -s --dev /opt/romanesco"
+      command: "girder-install plugin -s --dev -f /opt/romanesco"
       args:
         creates: "/opt/girder/plugins/romanesco"
 
