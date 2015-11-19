@@ -72,7 +72,7 @@ minerva.views.LayersPanel = minerva.View.extend({
             (prevDataset || nextDataset).set('stack', currentStack);
             dataset.set('stack', currentStack + 1);
             this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveDown' && (currentStack === 1 ? currentStack: currentStack - 1) !== (numberOfPossibleLayers - numberOfLayersInSession)) {
+        } else if (option === 'moveDown' && (currentStack === 1 ? currentStack : currentStack - 1) !== (numberOfPossibleLayers - numberOfLayersInSession)) {
             (nextDataset || prevDataset).set('stack', currentStack);
             dataset.set('stack', currentStack - 1);
             this.reorderDisplayedLayers(option, dataset);
