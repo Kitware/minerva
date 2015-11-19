@@ -1,6 +1,8 @@
-.layersPanelContainer
-    .panelTitle
-      | Session Layers
+extends ../layout/panelLayout.jade
+
+block title
+  | Session Layers
+block content
     .layersList
       ul.datasets
         each dataset, index in datasets

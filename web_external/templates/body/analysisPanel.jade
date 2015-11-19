@@ -1,6 +1,11 @@
-.m-analysisPanelContainer
-  .panelTitle
-    | Analysis Panel
+extends ../layout/panelLayout.jade
+
+block title
+  | Analysis Panel
+  i(class='icon-down-open',
+    data-toggle='collapse',
+    data-target='#m-analysis-panel > .m-panel-content')
+block content
   .m-analysisList
     .m-analyses
         each analysis in analyses

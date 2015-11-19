@@ -98,13 +98,13 @@ minerva.views.SessionView = minerva.View.extend({
         };
 
         var corePanelGroup = new minerva.views.PanelGroup({
-            id: 'core-panel-group',
+            id: 'm-core-panel-group',
             parentView: this,
             panelViews: []
         });
 
         var leftPanelGroup = new minerva.views.PanelGroup({
-            id: 'left-panel-group',
+            id: 'm-left-panel-group',
             parentView: this,
             panelViews: []
         });
@@ -117,28 +117,28 @@ minerva.views.SessionView = minerva.View.extend({
         }));
 
         leftPanelGroup.panelViews.push(new minerva.views.AnalysisPanel({
-            id: 'analysis-panel',
+            id: 'm-analysis-panel',
             parentView: this,
             collection: this.analysisCollection,
             datasetCollection: this.datasetCollection
         }));
 
         leftPanelGroup.panelViews.push(new minerva.views.SourcePanel({
-            id: 'source-panel',
+            id: 'm-source-panel',
             sourceCollection: this.sourceCollection,
             datasetCollection: this.datasetsCollection,
             parentView: this
         }));
 
         leftPanelGroup.panelViews.push(new minerva.views.DataPanel({
-            id: 'data-panel',
+            id: 'm-data-panel',
             parentView: this,
             session: this.model,
             collection: this.datasetsCollection
         }));
 
         leftPanelGroup.panelViews.push(new minerva.views.JobsPanel({
-            id: 'jobs-panel',
+            id: 'm-jobs-panel',
             parentView: this
         }));
 
@@ -158,9 +158,11 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
+            girder.events.trigger('m:pre-render-panel-groups');
+
             // Render each of the panel groups
             _.each(minerva.layout.panelGroups, function (panelGroup) {
-                this.$('#panelGroups').append('<div id="' + panelGroup.id  +'"></div>');
+                this.$('#m-panel-groups').append('<div id="' + panelGroup.id  +'"></div>');
                 panelGroup.setElement(this.$('#' + panelGroup.id)).render();
             }, this);
         }, this));
