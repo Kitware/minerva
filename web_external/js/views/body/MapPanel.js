@@ -110,6 +110,7 @@ minerva.views.MapPanel = minerva.View.extend({
                         this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
+                this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
             } else {
                 // Assume the dataset provides a reader, so load the data
@@ -127,7 +128,6 @@ minerva.views.MapPanel = minerva.View.extend({
                     reader.read(dataset.fileData, _.bind(function () {
                         // Add the UI slider back
                         this.uiLayer = this.map.createLayer('ui');
-                        this.uiLayer.createWidget('slider');
                         this.map.draw();
                     }, this));
                 }, this);
@@ -216,7 +216,6 @@ minerva.views.MapPanel = minerva.View.extend({
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {

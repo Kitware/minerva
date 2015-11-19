@@ -1,0 +1,24 @@
+#left-panel-group
+  float left
+  width 280px
+  position absolute
+  z-index 999
+  margin-left 5px
+
+// @dl @todo assumes all panelgroups are divs, and all panel views are encapsulated in a div
+#panelGroups > div > div
+  background-color #ffffff
+  opacity .95
+  margin-bottom 2px
+  border-radius 3px
+  height auto
+  border 1px solid #d6d6d6
+
+.panelContent
+  margin 5px
+
+.panelContent:empty
+  margin 0px
+
+.panelTitle > i
+  float right
