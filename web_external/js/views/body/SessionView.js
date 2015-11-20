@@ -137,6 +137,12 @@ minerva.views.SessionView = minerva.View.extend({
             collection: this.datasetsCollection
         }));
 
+        leftPanelGroup.panelViews.push(new minerva.views.LayersPanel({
+            id: 'm-layer-panel',
+            parentView: this,
+            collection: this.datasetsCollection
+        }));
+
         leftPanelGroup.panelViews.push(new minerva.views.JobsPanel({
             id: 'm-jobs-panel',
             parentView: this
@@ -165,6 +171,15 @@ minerva.views.SessionView = minerva.View.extend({
                 this.$('#m-panel-groups').append('<div id="' + panelGroup.id  +'"></div>');
                 panelGroup.setElement(this.$('#' + panelGroup.id)).render();
             }, this);
+
+
+            $('.collapse').on('show.bs.collapse', function () {
+                $(this).prev().find('i.icon-down-open').attr('class', 'icon-up-open');
+            });
+
+            $('.collapse').on('hide.bs.collapse', function () {
+                $(this).prev().find('i.icon-up-open').attr('class', 'icon-down-open');
+            });
         }, this));
 
         return this;

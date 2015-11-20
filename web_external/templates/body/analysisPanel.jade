@@ -1,16 +1,15 @@
-extends ../layout/panelLayout.jade
+include ../layout/panelMixins.jade
 
-block title
-  | Analysis Panel
-  i(class='icon-down-open',
++panel-title('Analysis Panel')
+  i(class='icon-up-open',
     data-toggle='collapse',
     data-target='#m-analysis-panel > .m-panel-content')
-block content
-  .m-analysisList
-    .m-analyses
-        each analysis in analyses
-            if analysis.metadata()
-                .m-analysis= analysis.get('name')
-                    - var attributes = {'m-analysis-id': analysis.get('_id')}
-                    - var classes = 'icon-play-circled m-attempt-analysis'
-                    i(class=classes)&attributes(attributes)
+
++panel-content('collapse in')
+  .m-analyses
+     each analysis in analyses
+       if analysis.metadata()
+         .m-analysis= analysis.get('name')
+           - var attributes = {'m-analysis-id': analysis.get('_id')}
+           - var classes = 'icon-play-circled m-attempt-analysis'
+           i(class=classes)&attributes(attributes)

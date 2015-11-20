@@ -1,0 +1,11 @@
+mixin panel-title(title)
+  .m-panel-title
+    | #{title}
+    if block
+      span
+        block
+
+mixin panel-content(cls)
+  .m-panel-content(class=cls)
+    if block
+      block

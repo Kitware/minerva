@@ -1,6 +1,10 @@
-extends ../layout/panelLayout.jade
+include ../layout/panelMixins.jade
 
-block title
-  | Jobs
-block content
++panel-title('Jobs')
+  i(class='icon-up-open',
+    data-toggle='collapse',
+    data-target='#m-jobs-panel > .m-panel-content')
+
+
++panel-content('collapse in')
   .m-jobsListContainer
