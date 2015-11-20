@@ -6,6 +6,19 @@ Jade
 
 All indentions should be 2 spaces.
 
+Register modals as girderModal
+------------------------------
+
+When creating modal dialogs, call ``girderModal``, passing in the view object
+
+::
+
+
+    var modal = this.$el.html(minerva.templates.wmsLayersListWidget({
+            layers: this.layers
+    })).girderModal(this);
+        
+
 HTML Elements Namespacing and Style
 -----------------------------------
 
