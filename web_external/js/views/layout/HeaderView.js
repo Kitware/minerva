@@ -3,7 +3,7 @@ minerva.views.LayoutHeaderView = minerva.View.extend({
     },
 
     render: function () {
-        this.$el.html(minerva.templates.layoutHeader());
+        //this.$el.html(minerva.templates.layoutHeader());
 
         this.$('a[title]').tooltip({
             placement: 'bottom',
