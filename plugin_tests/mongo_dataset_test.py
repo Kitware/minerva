@@ -72,6 +72,18 @@ class MongoDatasetTestCase(base.TestCase):
         self.externalMongoDbConnection = getDbConnection(self.dbUri)
         self.externalMongoDb = self.externalMongoDbConnection.get_default_database()
         from girder.external.mongodb_proxy import MongoProxy
+        self.geojsonIndexedName = 'polyGeoIndexed'
+        self.geojsonNonIndexedName = 'polyGeoNonIndexed'
+        self.polyIndexedCollection = MongoProxy(self.externalMongoDb[self.geojsonIndexedName])
+        self.polyNonIndexedCollection = MongoProxy(self.externalMongoDb[self.geojsonNonIndexedName])
+        self.pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+        geojsonPath = os.path.join(self.pluginTestDir, 'data', 'polygons.json')
+        with open(geojsonPath) as geojsonFile:
+            polys = json.load(geojsonFile)
+            for poly in polys:
+                self.polyIndexedCollection.save(poly)
+                self.polyNonIndexedCollection.save(poly)
+            self.polyIndexedCollection.create_index([('geometry', '2dsphere')])
         self.collectionName = 'tweetsgeo'
         self.tweetsgeoCollection = MongoProxy(self.externalMongoDb[self.collectionName])
         # add test data to external dataset
@@ -97,7 +109,7 @@ class MongoDatasetTestCase(base.TestCase):
             method='POST',
             user=self._user,
             params={
-                'name': 'tweetsgeodatasource',
+                'name': 'mongogeodatasource',
                 'dbConnectionUri': self.dbUri
             }
         )
@@ -106,7 +118,57 @@ class MongoDatasetTestCase(base.TestCase):
         self.assertHasKeys(minerva_metadata, ['mongo_connection', 'source_type'])
         self.assertEquals(minerva_metadata['source_type'], 'mongo', 'expected mongo for source_type')
         self.assertEquals(minerva_metadata['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
-        #create a mongo dataset
+        #create a mongo dataset from a spatially indexed collection
+        sourceId = response.json['_id']
+        path = '/minerva_dataset_mongo'
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+            params={
+                'name': self.geojsonIndexedName,
+                'mongoSourceId': sourceId,
+                'mongo_collection': self.geojsonIndexedName
+            }
+        )
+        self.assertStatusOk(response)
+        minerva_metadata_indexed = response.json['meta']['minerva']
+        self.assertHasKeys(minerva_metadata_indexed, ['source_id', 'json_row', 'mongo_connection', 'json_row', 'original_type', 'geojson'])
+        self.assertEquals(minerva_metadata_indexed['original_type'], 'mongo', 'expected mongo for original_type')
+        self.assertEquals(minerva_metadata_indexed['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
+        self.assertEquals(minerva_metadata_indexed['mongo_connection']['collection_name'],
+                          self.geojsonIndexedName, 'unexpected collection')
+        self.assertHasKeys(minerva_metadata_indexed['geojson'], ['query_count', 'data'])
+        self.assertEquals(minerva_metadata_indexed['geojson']['query_count'], 2)
+        geojson = json.loads(minerva_metadata_indexed['geojson']['data'])
+        self.assertHasKeys(geojson, ['features', 'type'])
+        self.assertEquals(geojson['type'], 'FeatureCollection')
+        #create a mongo dataset from a spatial but non-indexed collection
+        sourceId = response.json['_id']
+        path = '/minerva_dataset_mongo'
+        response = self.request(
+            path=path,
+            method='POST',
+            user=self._user,
+            params={
+                'name': self.geojsonNonIndexedName,
+                'mongoSourceId': sourceId,
+                'mongo_collection': self.geojsonNonIndexedName
+            }
+        )
+        self.assertStatusOk(response)
+        minerva_metadata_nonindexed = response.json['meta']['minerva']
+        self.assertHasKeys(minerva_metadata_nonindexed, ['source_id', 'json_row', 'mongo_connection', 'json_row', 'original_type', 'geojson'])
+        self.assertEquals(minerva_metadata_nonindexed['original_type'], 'mongo', 'expected mongo for original_type')
+        self.assertEquals(minerva_metadata_nonindexed['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
+        self.assertEquals(minerva_metadata_nonindexed['mongo_connection']['collection_name'],
+                          self.geojsonNonIndexedName, 'unexpected collection')
+        self.assertHasKeys(minerva_metadata_nonindexed['geojson'], ['query_count', 'data'])
+        self.assertEquals(minerva_metadata_nonindexed['geojson']['query_count'], 2)
+        geojson = json.loads(minerva_metadata_nonindexed['geojson']['data'])
+        self.assertHasKeys(geojson, ['features', 'type'])
+        self.assertEquals(geojson['type'], 'FeatureCollection')
+        #create a mongo dataset from a collection without a geometry field
         sourceId = response.json['_id']
         path = '/minerva_dataset_mongo'
         response = self.request(
@@ -120,9 +182,10 @@ class MongoDatasetTestCase(base.TestCase):
             }
         )
         self.assertStatusOk(response)
-        minerva_metadata = response.json['meta']['minerva']
-        self.assertHasKeys(minerva_metadata, ['source_id', 'json_row', 'mongo_connection', 'json_row', 'original_type'])
-        self.assertEquals(minerva_metadata['original_type'], 'mongo', 'expected mongo for original_type')
-        self.assertEquals(minerva_metadata['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
-        self.assertEquals(minerva_metadata['mongo_connection']['collection_name'],
+        minerva_metadata_nogeometry = response.json['meta']['minerva']
+        self.assertHasKeys(minerva_metadata_nogeometry, ['source_id', 'json_row', 'mongo_connection', 'json_row', 'original_type'])
+        self.assertEquals(minerva_metadata_nogeometry['original_type'], 'mongo', 'expected mongo for original_type')
+        self.assertEquals(minerva_metadata_nogeometry['mongo_connection']['db_uri'], self.dbUri, 'unexpected db uri')
+        self.assertEquals(minerva_metadata_nogeometry['mongo_connection']['collection_name'],
                           self.collectionName, 'unexpected collection')
+        self.assertNotHasKeys(minerva_metadata_nogeometry, ['geojson'])
