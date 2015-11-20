@@ -19,18 +19,19 @@
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/app.min.css">
-    % for plugin in pluginCss:
-        % if plugin != 'minerva':
-            <link rel="stylesheet"
-            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endif
-    % endfor
     <link rel="stylesheet"
           href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
     <link rel="stylesheet"
           href="http:////cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/minerva.min.css">
+    % for plugin in pluginCss:
+        % if plugin != 'minerva':
+            <link rel="stylesheet"
+            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
+        % endif
+    % endfor
+
     <link rel="icon"
           type="image/png"
           href="${staticRoot}/img/Girder_Favicon.png">
