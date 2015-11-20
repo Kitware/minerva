@@ -214,7 +214,9 @@ minerva.views.MapPanel = minerva.View.extend({
                     }
                 })
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer(this.session.sessionJsonContents.basemap,
+                                 _.has(this.session.sessionJsonContents, 'basemap_args') ?
+                                 this.session.sessionJsonContents.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
