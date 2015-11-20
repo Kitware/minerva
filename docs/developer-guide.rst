@@ -1,6 +1,11 @@
 Developer Guide
 ===============
 
+Jade
+----
+
+All indentions should be 2 spaces.
+
 HTML Elements Namespacing and Style
 -----------------------------------
 
@@ -24,3 +29,15 @@ Since Minerva is often developed against cutting edge GeoJS versions, we specify
 version of GeoJS in the package.json file.  If you need to develop against a specific
 reference of GeoJS for a Minerva feature, update the SHA reference for 'geojs' in
 package.json as part of your branch.
+
+Minerva Metadata
+----------------
+
+Minerva metadata should not contain pointers to the Item's id.  E.g., a dataset should not have a 'dataset_id' property in its Minerva metadata.  The id is tracked in the Item itself, and it would be hard to update these upon a copy.
+
+It is fine to have a pointer to a different Girder resource's id.
+
+Dataset and Source API endpoints
+--------------------------------
+
+These should return the document corresponding to the Girder Item, including the metadata, rather than the Minerva metadata.
