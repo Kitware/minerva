@@ -11,6 +11,12 @@
       "css": "file-pdf",
       "code": 59392,
       "src": "fontawesome"
+    },
+    {
+      "uid": "347c38a8b96a509270fdcabc951e7571",
+      "css": "database",
+      "code": 59393,
+      "src": "fontawesome"
     }
   ]
 }
