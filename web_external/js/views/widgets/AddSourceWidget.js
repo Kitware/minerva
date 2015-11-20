@@ -54,6 +54,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'S3 bucket',
                 icon: 'icon-cloud',
                 widget: minerva.views.AddS3SourceWidget
+            },
+            postgres: {
+                label: 'PostgreSQL',
+                icon: 'icon-floppy',
+                widget: minerva.views.AddPostgresSourceWidget
             }
         };
     },

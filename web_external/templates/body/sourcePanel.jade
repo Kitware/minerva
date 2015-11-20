@@ -10,9 +10,11 @@
                     span(title=source.get('name'))= source.get('name').length > 13 ? source.get('name').slice(0,13) + "..." : source.get('name')
                         - var attributes = {'cid': source.cid}
                         - var sourceType = sourceTypes[source.getSourceType()]
-                        - var classes = 'm-icon-enabled m-display-source-action ' + sourceType.icon + ' ' + sourceType.action
-                        i(class=classes)&attributes(attributes)
-                        //- trash icon to delete source
+
+                        if sourceType
+                          - var classes = 'm-icon-enabled m-display-source-action ' + sourceType.icon + ' ' + sourceType.action
+                          i(class=classes)&attributes(attributes)
+                          //- trash icon to delete source
                         - classes = 'icon-trash m-icon-enabled m-delete-source'
                         i(title='delete source', class=classes)&attributes(attributes)
                         //- info icon for minerva metadata display
