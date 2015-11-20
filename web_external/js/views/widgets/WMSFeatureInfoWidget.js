@@ -27,7 +27,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                             tbl_row.className = 'header';
                             $.each(this.properties, function (k) {
                                 var cell = tbl_row.insertCell();
-                                cell.appendChild(document.createTextNode(k.toString()));
+                                cell.appendChild(document.createTextNode(k ? k.toString() : ''));
                             });
                             header = true;
                         }
@@ -35,7 +35,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                         tbl_row.className = odd_even ? 'odd' : 'even';
                         $.each(this.properties, function (k, v) {
                             var cell = tbl_row.insertCell();
-                            cell.appendChild(document.createTextNode(v.toString()));
+                            cell.appendChild(document.createTextNode(v ? v.toString() : ''));
                         });
                         odd_even = !odd_even;
                     });
