@@ -57,7 +57,7 @@ minerva.views.AddSourceWidget = minerva.View.extend({
             },
             postgres: {
                 label: 'PostgreSQL',
-                icon: 'icon-floppy',
+                icon: 'icon-database',
                 widget: minerva.views.AddPostgresSourceWidget
             }
         };
