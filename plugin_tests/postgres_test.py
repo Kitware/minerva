@@ -80,11 +80,10 @@ class PostgresTestCase(base.TestCase):
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         postgresSource = response.json
-        print(response.json)
         minerva_metadata = postgresSource['meta']['minerva']
         self.assertEquals(postgresSource['name'], name, 'incorrect postgres source name')
         self.assertEquals(minerva_metadata['source_type'], 'postgres', 'incorrect postgres source type')
         self.assertEquals(minerva_metadata['postgres_params']['base_url'], baseURL, 'incorrect postgres source baseURL')
-        self.assertEquals(minerva_metadata['postgres_params']['index'], index, 'incorrect postgres source index')
+        self.assertEquals(minerva_metadata['postgres_params']['dbname'], dbname, 'incorrect postgres database name')
 
         return postgresSource
