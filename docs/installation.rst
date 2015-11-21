@@ -243,7 +243,7 @@ Follow the above, or as a shortcut for Ubuntu 14.04
     echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'     | sudo tee /etc/apt/sources.list.d/mongodb.list
     sudo apt-get update;sudo apt-get install mongodb-org-server
     curl -sL https://deb.nodesource.com/setup | sudo bash -
-    sudo apt-get
+    sudo apt-get update
     sudo apt-get install nodejs
     sudo apt-get install libfreetype6-dev libpng12-dev pkg-config libgdal-dev libxml2-dev libxslt1-dev
     # update the version of npm
@@ -251,26 +251,25 @@ Follow the above, or as a shortcut for Ubuntu 14.04
 
 Pip install Girder
 ^^^^^^^^^^^^^^^^^^
+These instructions follow doing everything in a Vagrant VM, in the /home/vagrant dir .
 
-TODO: fill in and update upon Girder 1.4.0 release and Minerva's peg to that.
+We'll pip install Girder, but we still need to git clone Romanesco and Minerva.
 
-Instead of pip installing Girder, we'll clone it.  These instructions follow
-doing everything in a Vagrant VM, in the /home/vagrant dir, and using lots
-of sudo.  Installing into a Virtual Environment will reduce the need for sudo, because
-we would not be using the system pip.
+Do this in a virtual environment so less sudo is required.
 
 ::
 
-    git clone https://github.com/Girder/girder.git
+    sudo pip install virtualenv
+    mkdir minerva_install
+    cd minerva_install/
+    virtualenv venv
+    source venv/bin/activate
+    pip install girder
     git clone https://github.com/Kitware/romanesco.git
     git clone https://github.com/Kitware/minerva.git
+    girder-install plugin romanesco/
+    girder-install plugin minerva/
+    
+Actually, this is borked.
 
-When Girder is installed via pip, you can run the 'girder-install' command
-instead of calling python -m girder.utility.install.
-
-::
-
-    cd girder
-    sudo python -m girder.utility.install plugin ~/romanesco
-    sudo python -m girder.utility.install plugin ~/minerva
-    python -m girder
+Issues with requests version order of install between Girder, pip romanesco[spark], cffi issue, virtual env didn't work because of npm.
