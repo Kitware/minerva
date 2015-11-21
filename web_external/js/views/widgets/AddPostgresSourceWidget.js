@@ -26,7 +26,8 @@ minerva.views.AddPostgresSourceWidget = minerva.View.extend({
     },
 
     render: function () {
-        this.$el.html(minerva.templates.addPostgresSourceWidget()).girderModal(this);
+        var modal = this.$el.html(minerva.templates.addPostgresSourceWidget());
+        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }
 });
