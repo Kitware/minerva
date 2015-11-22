@@ -1,7 +1,4 @@
-minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
-
-    initialize: function () {
-    },
+var S3SourceModel = minerva.models.SourceModel.extend({
 
     createSource: function (params) {
         girder.restRequest({
@@ -45,3 +42,5 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
         return this;
     }
 });
+
+minerva.registerSourceModel('S3SourceModel', 's3', S3SourceModel);

@@ -10,4 +10,15 @@ _.extend(minerva, {
     events: _.clone(Backbone.Events)
 });
 
+minerva.clearRegistry = function (key) {
+    if (key) {
+        minerva.registry[key] = {};
+    } else {
+        minerva.registry = {
+            sourceModels: {}
+        };
+    }
+};
+minerva.clearRegistry();
+
 girder.router.enabled(false);

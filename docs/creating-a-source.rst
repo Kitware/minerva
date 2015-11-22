@@ -77,19 +77,26 @@ Also check your python style, and fix any errors
 
    ctest -R pep8_style_minerva_rest -VV
 
-Add the source to client side collection
-----------------------------------------
-Add the new source type to web/external/js/collections/SourceCollection.js, this will prevent mysterious backbone errors later on like
+Add a new Source Model
+----------------------
+
+If your model is simple, with only its specific endpoint and source type to
+differentiate it, you can add a line to the bottom of
+web_external/js/models/SourceModel.js calling ``createSourceModel``, which
+will create the model for you and register it with the minerva application.
 
 ::
 
-   a.on is not a function
+    minerva.createSourceModel('WmsSourceModel', 'wms', 'minerva_source_wms');
 
-You're welcome.
+If your source model needs to do something more specific, such as override
+``destroy`` or respond to a creation failure, add a new model
+like web_external/js/models/S3SourceModel.js, and be sure to register
+your new model with the minerva application.
 
-Add a new Source Model
-----------------------
-Add a new model like web_external/js/models/ElasticsearchSourceModel.js.
+::
+
+    minerva.registerSourceModel('S3SourceModel', 's3', S3SourceModel);
 
 Add the Source to AddSourceWidget
 ---------------------------------
