@@ -1,0 +1,74 @@
+###
+# Installs geonode customizations from epidemico
+---
+- name: get necessary apt packages
+  apt: name=libgdal-dev
+  sudo: yes
+
+- name: install python dependencies
+  pip: virtualenv={{virtualenv_dir}}/{{app_name}} name={{item}}
+  with_items:
+    - redis
+    - flower
+
+- name: install dataqs python package
+  pip: virtualenv={{virtualenv_dir}}/{{app_name}} name=git+https://github.com/OpenGeoscience/dataqs.git#egg=dataqs
+
+- name: add user to tomcat7 group
+  user: name={{deploy_user}} append=yes groups=tomcat7
+  sudo: yes
+
+- name: create work directory
+  file: path=/home/{{deploy_user}}/epigeonode state=directory mode=1775 owner={{deploy_user}} group=tomcat7
+  sudo: yes
+
+- name: create geoserver data directory
+  file: path=/var/lib/tomcat7/webapps/geoserver/data recurse=yes owner=tomcat7 group=tomcat7 state=directory mode=g+rws
+  sudo: yes
+
+- include: geoserver_permissions.yml
+
+- name: patch geonode application
+  patch: >
+    src=geonode_patch.diff
+    basedir={{app_code_dir}}/{{app_name}}
+    strip=1
+  notify: restart uwsgi
+
+- name: copy settings to geonode application
+  template: src=dataq_settings.py dest={{geonode_root}}/dataq_settings.py
+  notify: restart uwsgi
+
+- name: import dataq settings in geonode configuration
+  lineinfile: name="{{geonode_root}}/local_settings.py" state=present
+              insertafter="EOF" line="from dataq_settings import *"
+  notify: restart uwsgi
+
+- name: enable dataq apps in geonode configuration
+  lineinfile: name={{geonode_root}}/local_settings.py state=present
+              insertafter=EOF line="dataqs_extend()"
+  notify: restart uwsgi
+
+- name: install supervisor config for workers
+  template: src=celery.conf dest=/etc/supervisor/conf.d/ owner=root group=root mode=0644
+  sudo: yes
+  notify:
+    - restart supervisor for celery
+
+- include: geoserver_permissions.yml
+
+- name: Create the gfms coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/gfms/gfms.py"
+  ignore_errors: yes
+
+- include: geoserver_permissions.yml
+
+- name: Create the forecastio coverage store
+  command: "{{ app_code_dir }}/venvs/geonode/bin/python {{app_code_dir}}/venvs/geonode/src/dataqs/dataqs/forecastio/forecastio_air.py"
+  ignore_errors: yes
+
+- name: Django updatelayers
+  django_manage: command=updatelayers
+                 app_path={{app_code_dir}}/{{app_name}}
+                 virtualenv={{virtualenv_dir}}/{{app_name}}
+                 settings={{main_module}}.settings

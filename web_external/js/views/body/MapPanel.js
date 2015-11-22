@@ -14,10 +14,12 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     changeLayerZIndex: function (dataset) {
-        var geojsSliderZIndex = 1, baseMapZIndex = 1;
-        this.datasetLayers[dataset.id][dataset.get('order')](geojsSliderZIndex + 1);
+        var baseMapZIndex = 1;
+        if (dataset.get('order')) {
+            this.datasetLayers[dataset.id][dataset.get('order')]();
+        }
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
-        // Call moveUp(1) to place it on top of base map
+        // Calling moveUp(1) to place it on top of base map
         if (dataset.get('order') === 'moveToBottom') {
             this.datasetLayers[dataset.id].moveUp(baseMapZIndex);
         }
@@ -25,13 +27,13 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     _specifyWmsDatasetLayer: function (dataset, layer) {
-        var minervaMetadata = dataset.getMinervaMetadata();
-        var baseUrl = minervaMetadata.base_url;
+        var minervaMetadata = dataset.metadata();
+        layer.layerName = minervaMetadata.type_name;
+        layer.baseUrl = minervaMetadata.base_url;
         if (minervaMetadata.hasOwnProperty('credentials')) {
-            baseUrl = '/wms_proxy/' + encodeURIComponent(baseUrl) + '/' +
-                    minervaMetadata.credentials;
+            layer.baseUrl = '/wms_proxy/' + encodeURIComponent(layer.baseUrl) +
+                    '/' + minervaMetadata.credentials;
         }
-        var layerName = minervaMetadata.type_name;
         var projection = 'EPSG:3857';
         layer.gcs(projection);
         layer.tileUrl(
@@ -48,7 +50,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     SERVICE: 'WMS',
                     VERSION: '1.1.1',
                     REQUEST: 'GetMap',
-                    LAYERS: layerName,
+                    LAYERS: layer.layerName,
                     STYLES: '',
                     BBOX: bbox_mercator,
                     WIDTH: 256,
@@ -58,7 +60,7 @@ minerva.views.MapPanel = minerva.View.extend({
                     SRS: projection,
                     TILED: true
                 };
-                return baseUrl + '?' + $.param(params);
+                return layer.baseUrl + '?' + $.param(params);
             }
         );
     },
@@ -85,14 +87,29 @@ minerva.views.MapPanel = minerva.View.extend({
                     el: $('.m-map-legend-container'),
                     parentView: this,
                     id: datasetId,
-                    legend: 'data:image/png;base64,' + dataset.getMinervaMetadata().legend
+                    legend: 'data:image/png;base64,' + dataset.metadata().legend
                 });
                 this.legendWidget[datasetId].render();
                 this.legendWidget[datasetId].show();
 
-                // Add the UI slider back
-                this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
+                if (this.map.featureInfoWidget) {
+                    this.map.featureInfoWidget.layers.push(layer);
+                } else {
+                    this.map.featureInfoWidget =
+                        new minerva.views.WmsFeatureInfoWidget({
+                            map: this.map,
+                            version: '1.1.1',
+                            layers: [layer],
+                            callback: 'getLayerFeatures',
+                            session: this.model,
+                            parentView: this
+                        });
+                    this.map.featureInfoWidget.setElement($('.mapPanel')).render();
+                    this.map.geoOn(geo.event.mouseclick, function (evt) {
+                        this.featureInfoWidget.content = '';
+                        this.featureInfoWidget.callInfo(0, evt.geo);
+                    });
+                }
                 this.map.draw();
             } else {
                 // Assume the dataset provides a reader, so load the data
@@ -129,6 +146,13 @@ minerva.views.MapPanel = minerva.View.extend({
         }
         if (dataset.getDatasetType() === 'wms' && layer) {
             this.map.deleteLayer(layer);
+            if (this.map.featureInfoWidget) {
+                var layerIndex = $.inArray(layer,
+                    this.map.featureInfoWidget.layers);
+                if (layerIndex > -1) {
+                    this.map.featureInfoWidget.layers.splice(layerIndex, 1);
+                }
+            }
         } else if (layer) {
             layer.clear();
             layer.draw();
@@ -181,7 +205,14 @@ minerva.views.MapPanel = minerva.View.extend({
             this.map = geo.map({
                 node: '.mapPanelMap',
                 center: this.session.sessionJsonContents.center,
-                zoom: this.session.sessionJsonContents.zoom
+                zoom: this.session.sessionJsonContents.zoom,
+                interactor: geo.mapInteractor({
+                    map: this.map,
+                    click: {
+                        enabled: true,
+                        cancelOnMove: true
+                    }
+                })
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap);
             this.uiLayer = this.map.createLayer('ui');

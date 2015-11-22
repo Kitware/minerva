@@ -25,7 +25,9 @@ PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Read the configuration files
 _cfgs = ('minerva.dist.cfg', 'minerva.local.cfg')
 for f in _cfgs:
-    _mergeConfig(os.path.join(PACKAGE_DIR, 'conf', f))
+    configPath = os.path.join(PACKAGE_DIR, 'conf', f)
+    if os.path.exists(configPath):
+	    _mergeConfig(configPath)
 
 def load(info):
     loader.load(info)

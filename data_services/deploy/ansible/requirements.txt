@@ -1,0 +1,2 @@
+zenoamaro.supervisord
+geerlingguy.redis

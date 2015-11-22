@@ -24,10 +24,9 @@ minerva.models.GeojsonDatasetModel = minerva.models.DatasetModel.extend({
         if (this.fileData) {
             this.trigger('m:dataLoaded', this.get('_id'));
         } else {
-            var minervaMeta = this.getMinervaMetadata();
             // Download geojson file.
             $.ajax({
-                url: girder.apiRoot + '/file/' + minervaMeta.geojson_file._id + '/download',
+                url: girder.apiRoot + '/file/' + this.metadata().geojson_file._id + '/download',
                 contentType: 'application/json',
                 success: _.bind(function (data) {
                     this.fileData = data;

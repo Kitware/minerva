@@ -29,7 +29,7 @@
 
 - name: setup postgres cluster to default to utf8
   sudo: yes
-  shell: "pg_dropcluster --stop 9.4 main && pg_createcluster --start -e UTF-8 9.4 main"
+  shell: "service postgresql stop && pg_dropcluster 9.4 main ; pg_createcluster -e UTF-8 9.4 main && service postgresql start"
 
 - name: update postgres client configuration
   template: src=pg_hba.conf dest=/etc/postgresql/9.4/main/pg_hba.conf
@@ -45,6 +45,8 @@
   postgresql_user: name={{db_user}}
                    password={{db_password}}
                    role_attr_flags=LOGIN,CREATEDB,NOSUPERUSER
+  # in case the user already exists
+  ignore_errors: True
   sudo: yes
   sudo_user: postgres
   notify:

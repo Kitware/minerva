@@ -52,6 +52,13 @@ add_python_style_test(pep8_style_minerva_jobs
 add_javascript_style_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
     JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+    JSSTYLE_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jscsrc
+)
+
+add_javascript_style_test(
+    minerva-gruntfile "${PROJECT_SOURCE_DIR}/plugins/minerva/Gruntfile.js"
+    JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jshintrc
+    JSSTYLE_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js/.jscsrc
 )
 
 add_web_client_test(

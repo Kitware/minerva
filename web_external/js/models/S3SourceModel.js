@@ -10,7 +10,7 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
             data: params,
             error: null // don't do default error behavior (validation may fail)
         }).done(_.bind(function (resp) {
-            this.setMinervaMetadata(resp);
+            this.metadata(resp);
             this.trigger('m:sourceReceived');
         }, this)).error(_.bind(function (err) {
             this.trigger('m:error', err);
@@ -22,7 +22,7 @@ minerva.models.S3SourceModel = minerva.models.SourceModel.extend({
     },
 
     destroy: function () {
-        var folderId = this.mM().folder_id;
+        var folderId = this.metadata().folder_id;
         this.on('g:deleted', _.bind(function () {
 
             if (folderId) {

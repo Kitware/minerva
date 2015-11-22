@@ -100,7 +100,7 @@ minerva.views.MeanContourWidget = minerva.View.extend({
         }
 
         this.folder = new girder.models.FolderModel();
-        var mm = source.mM();
+        var mm = source.metadata();
         this.folder.set({
             _id: mm.folder_id,
             minerva: mm

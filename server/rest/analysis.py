@@ -25,7 +25,8 @@ from girder.api.rest import Resource, RestException
 
 from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
                                                             findAnalysisByName,
-                                                            findDatasetFolder)
+                                                            addJobOutput)
+from girder.plugins.minerva.rest.dataset import Dataset
 
 
 class Analysis(Resource):
@@ -62,23 +63,21 @@ class Analysis(Resource):
         except ValueError:
             raise RestException('bsveSearchParams is invalid JSON.')
 
-        datasetFolder = findDatasetFolder(currentUser, currentUser)
-        # TODO
-        # try findOne earlier
-        # all throughout utility
-        # create a new dataset in the dataset folder with this name
-        # TODO in case of duplicates?
-        dataset = (self.model('item').createItem(datasetName, currentUser,
-                                                 datasetFolder,
-                                                 'created by bsve search'))
+        minerva_metadata = {
+            'dataset_type': 'geojson',
+            'source': 'bsve_search',
+            'bsve_search_params': bsveSearchParams,
+            'original_type': 'json'
+        }
 
+        datasetResource = Dataset()
+        dataset = datasetResource.constructDataset(datasetName,
+                                                   minerva_metadata,
+                                                   'created by bsve search')
         params = {
             'bsveSearchParams': bsveSearchParams
         }
 
-        # create a local job with bsve search
-        # tie in the dataset id with the local job
-        # TODO would we rather create the dataset at the end of the bsve search?
         # TODO change token to job token
         user, token = self.getCurrentUser(returnToken=True)
         kwargs = {
@@ -97,24 +96,9 @@ class Analysis(Resource):
             kwargs=kwargs,
             module='girder.plugins.minerva.jobs.bsve_search_worker',
             async=True)
-
-        if 'meta' in dataset:
-            metadata = dataset['meta']
-        else:
-            metadata = {}
-
-        minerva_metadata = {
-            'dataset_id': dataset['_id'],
-            'source': 'bsve_search',
-            'bsve_search_params': bsveSearchParams,
-            'original_type': 'json'
-        }
-        metadata['minerva'] = minerva_metadata
-        self.model('item').setMetadata(dataset, metadata)
-
+        addJobOutput(job, dataset)
         self.model('job', 'jobs').scheduleJob(job)
-
-        return minerva_metadata
+        return job
 
     bsveSearchAnalysis.description = (
         Description('Create the minerva analysis folder, a global resource.')

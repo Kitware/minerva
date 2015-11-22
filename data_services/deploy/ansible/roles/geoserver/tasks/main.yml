@@ -11,7 +11,12 @@
   apt: pkg={{ item }} state=present
   sudo: yes
   with_items:
-   - tomcat7 
+   - tomcat7
+
+- name: copy the Tomcat setenv.sh file to /usr/share/tomcat7/bin
+  template: src=setenv.sh dest=/usr/share/tomcat7/bin/setenv.sh
+  sudo: yes
+  notify: restart tomcat
 
 - name: Download Geoserver (remote)
   sudo: yes
