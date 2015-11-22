@@ -3,12 +3,9 @@ minerva.views.LayoutHeaderView = minerva.View.extend({
     },
 
     render: function () {
-        this.$el.html(minerva.templates.layoutHeader());
-
-        this.$('a[title]').tooltip({
-            placement: 'bottom',
-            delay: {show: 300}
-        });
+        this.$el.html(minerva.templates.layoutHeader({
+            staticRoot: girder.staticRoot
+        }));
 
         new minerva.views.LayoutHeaderUserView({
             el: this.$('.m-current-user-wrapper'),

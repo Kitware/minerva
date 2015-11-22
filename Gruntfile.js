@@ -141,6 +141,16 @@ module.exports = function (grunt) {
             }
         },
         copy: {
+            'minerva-images': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.external %>',
+                        src: ['images/**'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
+            },
             'minerva-extras': {
                 files: [
                     {
@@ -204,6 +214,9 @@ module.exports = function (grunt) {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             },
             'copy:jquery-ui': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'copy:minerva-images': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             }
         },
