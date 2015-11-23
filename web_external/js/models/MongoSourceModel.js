@@ -14,8 +14,6 @@ minerva.models.MongoSourceModel = minerva.models.SourceModel.extend({
             this.trigger('m:sourceReceived');
         }, this)).error(_.bind(function (err) {
             this.trigger('m:error', err);
-            // If we couldn't successfully start the s3 import destroy the item.
-            this.destroy();
         }, this));
 
         return this;

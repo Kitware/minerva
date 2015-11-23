@@ -149,34 +149,8 @@ class Dataset(Resource):
         # in this case we don't actually want to store a file
         # but store the metadata we used to create the geojson
 
-        # Look for datetime limits, if none, look for limit and offset
-        # use 50/0 as defaults
-
-        metadataQuery = {}
-        if 'dateField' in params:
-            dateField = params['dateField']
-            metadataQuery = {dateField: {}}
-        else:
-            if 'startTime' in params or 'endTime' in params:
-                raise RestException('dateField param required for startTime ' +
-                                    'or endTime param')
-
-        query = {}
-
-        if 'startTime' in params:
-            startTime = params['startTime']
-            query[dateField] = {'$gte': int(startTime)}
-            metadataQuery[dateField]['startTime'] = startTime
-
-        if 'endTime' in params:
-            endTime = params['endTime']
-            dateFieldQuery = query.get(dateField, {})
-            dateFieldQuery['$lte'] = int(endTime)
-            query[dateField] = dateFieldQuery
-            metadataQuery[dateField]['endTime'] = endTime
-
-        minerva_metadata['geojson'] = {}
-        minerva_metadata['geojson']['query'] = metadataQuery
+        if 'geojson' not in minerva_metadata:
+            minerva_metadata['geojson'] = {}
 
         # TODO no reason couldn't have query and limit/offset
 
@@ -188,10 +162,9 @@ class Dataset(Resource):
         collectionName = connection['collection_name']
         collection = self.mongoCollection(dbConnectionUri, collectionName)
 
-        query_count = collection.find(query).count()
+        query_count = collection.find().count()
         minerva_metadata['geojson']['query_count'] = query_count
-        objects = collection.find(query)
-
+        objects = collection.find()
         mapping = item['meta']['minerva']['mapper']
         geoJsonMapper = GeoJsonMapper(objConverter=None,
                                       mapping=mapping)
@@ -200,8 +173,8 @@ class Dataset(Resource):
         geoJsonMapper.mapToJson(objects, writer)
 
         item['meta']['minerva'] = minerva_metadata
-        self.model('item').setMetadata(item, item['meta'])
         item['meta']['minerva']['geojson']['data'] = writer.getvalue()
+        self.model('item').setMetadata(item, item['meta'])
         return minerva_metadata
 
     def createGeoJsonFromDataset(self, item, params):
