@@ -26,7 +26,6 @@ add_python_test(contour_analysis PLUGIN minerva)
 add_python_test(wms PLUGIN minerva)
 add_python_test(elasticsearch PLUGIN minerva)
 add_python_test(geojson PLUGIN minerva)
-<<<<<<< 1f2c43bced4279ffd3c93214b4aa8c6df7fdabcc
 add_python_test(postgres PLUGIN minerva)
 add_python_test(mongo_dataset PLUGIN minerva)
 
