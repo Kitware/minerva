@@ -54,8 +54,10 @@ class MongoDatasetTestCase(base.TestCase):
 
     def setUp(self):
         """
-        Set up the mongo db for the external dataset, with a collection
-        named tweetsgeo, which have tweet data that is geolocated.
+        Set up the mongo db for the external dataset, with 3 collections:
+        a) tweetsgeo, which has tweet data that is geolocated (lat/long fields).
+        b) polyGeoIndexed, w/2 polygons in a 2dsphere-indexed 'geometry' field
+        c) polyGeoIndeces, same as above but without the 2dsphere index
         """
         super(MongoDatasetTestCase, self).setUp()
 
@@ -102,6 +104,14 @@ class MongoDatasetTestCase(base.TestCase):
         self.externalMongoDbConnection.drop_database(self.dbName)
 
     def testMongoDataSourceAndDataset(self):
+        """
+        Test Mongo source and dataset creation.
+        Test automatic geojson configuration when there is a 2dsphere index or
+        'geometry' field in the collection.
+        Test that geojson is not automatically configured for a collection that
+        has no 'geometry' field or 2dsphere-indexed field.
+        :return:
+        """
         #create a mongo source
         path = '/minerva_source_mongo'
         response = self.request(

@@ -106,17 +106,21 @@ class MongoDataset(Dataset):
         collectionIndexes = collection.index_information().items()
         for idx in collectionIndexes:
             if 'key' in idx[1] and idx[1]['key'][0][1] == '2dsphere':
+                # Store the name of the spatially indexed geometry field
                 minerva_metadata['spatial_field'] = idx[1]['key'][0][0]
                 minerva_metadata['geojson'] = {}
                 break
         if len(collectionList) > 0:
             minerva_metadata['json_row'] = collectionList[0]
             if 'geojson' not in minerva_metadata:
+                # No spatial index, but maybe there's a 'geometry' field
+                # with coordinates
                 if 'geometry' in collectionList[0]:
                     if 'coordinates' in collectionList[0]['geometry']:
                         minerva_metadata['spatial_field'] = 'geometry'
                         minerva_metadata['geojson'] = {}
             if 'geojson' in minerva_metadata:
+                # Store the collection's data as GeoJSON in the metadata
                 minerva_metadata['geojson'] = \
                     self.convertToGeoJSON(collection,
                                           minerva_metadata['spatial_field'])
