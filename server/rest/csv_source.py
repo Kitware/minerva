@@ -16,6 +16,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
+import json
 
 from girder.api import access
 from girder.api.describe import Description
@@ -38,7 +39,7 @@ class CSVSource(Source):
         geojson = params['geojson']
         minerva_metadata = {
             'source_type': 'csv',
-            'geojson': geojson
+            'geojson': json.loads(geojson)
         }
 
         desc = 'csv source for  %s' % name

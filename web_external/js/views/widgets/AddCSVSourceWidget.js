@@ -4,21 +4,61 @@
 minerva.views.AddCSVSourceWidget = minerva.View.extend({
 
     events: {
-        'submit #m-add-csv-dataset-form': function (e) {
+        'submit #m-add-csv-source-form': function (e) {
             e.preventDefault();
-            this.getGeoJson(function (geojson) {
-              var params = {
-                  name: this.$('#m-csv-name').val(),
-                  geojson: JSON.stringify(geojson) // send the uploaded file data
-              };
-              var csvSource = new minerva.models.CSVSourceModel({});
-              csvSource.on('m:csvSourceReceived', function () {
-                  this.$el.modal('hide');
-                  // TODO: might need to be added to a new panel/data sources ?
-                  console.log('source', csvSource);
-                  this.collection.add(csvSource);
-              }, this).createCSVDataset(params);
-            }.bind(this));
+
+            var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+            if (regex.test($("#csvFileUpload").val().toLowerCase())) {
+                if (typeof (FileReader) != "undefined") {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var table = $("<table />");
+                        var dataWithLines = this.parseCSVContent(e.target.result);
+                        var rows = dataWithLines.split("/");
+                        var tableHead = rows[0].split(',');
+                        var tableBody = [];
+                        for (var i = 0; i < rows.length; i++) {
+                            // var row = $("<tr />");
+                            var cells = rows[i].split(",");
+                            tableBody.push(cells);
+                            // for (var j = 17; j < cells.length; j++) {
+                            //   tableBody.push(cells[j]);
+                            //   // console.log('cell', cells[j]);
+                            //     // var cell = $("<td />");
+                            //     // cell.html(cells[j]);
+                            //     // row.append(cell);
+                            // }
+                            // table.append(row);
+                        }
+                        // Append the table to the csvViewerWidget
+                        // $("#dvCSV").html('');
+                        // $("#dvCSV").append(table);
+                        this.tableData.tableHead = tableHead;
+                        console.log(tableBody);
+                        this.tableData.tableBody = tableBody;
+                        this.render();
+                    }.bind(this);
+                    reader.readAsText($("#csvFileUpload")[0].files[0]);
+                } else {
+                    alert("This browser does not support HTML5.");
+                }
+            } else {
+                alert("Please upload a valid CSV file.");
+            }
+
+            // this.getGeoJson(function (geojson) {
+            //   var params = {
+            //       name: this.$('#m-csv-name').val(),
+            //       geojson: JSON.stringify(geojson) // send the uploaded file data
+            //   };
+            //   var csvSource = new minerva.models.CSVSourceModel({});
+            //   csvSource.on('m:csvSourceReceived', function () {
+            //       this.$el.modal('hide');
+            //       // TODO: might need to be added to a new panel/data sources ?
+            //       console.log('source', csvSource);
+            //       this.collection.add(csvSource);
+            //   }, this).createCSVDataset(params);
+            // }.bind(this));
         }
     },
 
@@ -55,18 +95,18 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         }
 
       }
-      var lines = dataWithLines.split("/");
-      var colNames = lines[0].split(",");
-      var records = [];
-      for(var i = 1; i < lines.length; i++) {
-        var record = {};
-        var bits = lines[i].split(",");
-        for (var j = 0 ; j < bits.length ; j++) {
-          record[colNames[j]] = bits[j];
-        }
-        records.push(record);
-      }
-      return records;
+      // var lines = dataWithLines.split("/");
+      // var colNames = lines[0].split(",");
+      // var records = [];
+      // for(var i = 1; i < lines.length; i++) {
+      //   var record = {};
+      //   var bits = lines[i].split(",");
+      //   for (var j = 0 ; j < bits.length ; j++) {
+      //     record[colNames[j]] = bits[j];
+      //   }
+      //   records.push(record);
+      // }
+      return dataWithLines;
     },
 
     jsonToGeojson: function (json) {
@@ -94,11 +134,13 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
 
     initialize: function (settings) {
         this.collection = settings.collection;
-        this.title = 'Enter CSV Source details';
+        this.tableData = { tableHead: [], tableBody: [] };
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addCSVSourceWidget({}));
+        var modal = this.$el.html(minerva.templates.addCSVSourceWidget({
+          tableData: this.tableData
+        }));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }
