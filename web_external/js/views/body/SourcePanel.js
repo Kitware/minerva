@@ -89,16 +89,13 @@ minerva.views.SourcePanel = minerva.View.extend({
 
     displayCSVFile: function (evt) {
         var el = $(evt.currentTarget);
-        var source = this.sourceCollection.get(el.attr('cid'));
-        if (!this.elasticsearchWidget) {
-            this.elasticsearchWidget = new minerva.views.AddCSVSourceWidget({
-                el: $('#g-dialog-container'),
-                source: source,
-                collection: this.datasetCollection,
-                parentView: this
-            });
-        }
-        this.elasticsearchWidget.render();
+        var csvSource = this.sourceCollection.get(el.attr('cid'));
+        this.addCSVDatasetWidget = new minerva.views.AddCSVSourceWidget({
+            el: $('#g-dialog-container'),
+            source: csvSource,
+            collection: this.datasetCollection,
+            parentView: this
+        });
     },
 
     initialize: function (settings) {
@@ -124,8 +121,8 @@ minerva.views.SourcePanel = minerva.View.extend({
                 icon: 'icon-cloud',
                 action: 'm-display-s3-bucket-hierarchy'
             },
-            CSV: {
-                icon: 'icon-cloud',
+            csv: {
+                icon: 'icon-table',
                 action: 'm-display-csv-file'
             }
         };

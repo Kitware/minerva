@@ -57,7 +57,7 @@ minerva.views.AddSourceWidget = minerva.View.extend({
             },
             CSV: {
                 label: 'CSV file',
-                icon: 'icon-cloud',
+                icon: 'icon-table',
                 widget: minerva.views.AddCSVSourceWidget
             }
         };

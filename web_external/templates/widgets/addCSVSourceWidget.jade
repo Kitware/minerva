@@ -1,6 +1,21 @@
 .modal-dialog
   .modal-content
     form#m-add-csv-dataset-form.modal-form(role="form")
-      button.m-create-s3-dataset-button.btn.btn-small.btn-primary
-          i.icon-plus-squared
-          | Add
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Upload CSV file
+
+      .modal-body
+        .form-group
+          label.control-label(for="m-csv-name") Name
+          input.input-sm#m-csv-name.form-control(type="text", placeholder="Enter CSV source name")
+        .form-group
+          label.control-label(for="m-csv-file") TODO: file uploader
+          input.input-sm#m-csv-file.form-control(type="text", placeholder="upload")
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-create-csv-source-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Upload file
