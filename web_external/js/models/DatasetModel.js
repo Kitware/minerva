@@ -18,7 +18,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
         // For now we know that if original_type is 'json' it's ACTUALLY contour json,
         // which is the only renderable type of DatasetModel.
-        return this.metadata().original_type === 'json';
+        return $.inArray(this.getMinervaMetadata().original_type,
+            ['json', 'mongo']);
     },
 
     createDataset: function () {
@@ -61,38 +62,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 type: 'error',
                 timeout: 4000
             });
-        }, this));
-    },
-
-    createExternalMongoDataset: function (datasetName, mongoUri, mongoCollection) {
-        var data = {
-            name: datasetName,
-            dbConnectionUri: mongoUri,
-            collectionName: mongoCollection
-        };
-        girder.restRequest({
-            path: 'minerva_dataset/external_mongo_dataset',
-            type: 'POST',
-            data: data
-        }).done(_.bind(function (resp) {
-            var minervaMetadata = this.metadata(resp);
-            this.set('_id', minervaMetadata.dataset_id);
-            // fetch to load all of the properties of the item
-            this.on('g:fetched', function () {
-                this.trigger('m:externalMongoDatasetCreated', this);
-            }, this).fetch();
-        }, this));
-    },
-
-    getExternalMongoLimits: function (field) {
-        var data = { field: field };
-        girder.restRequest({
-            path: 'minerva_dataset/' + this.get('_id') + '/external_mongo_limits',
-            type: 'GET',
-            data: data
-        }).done(_.bind(function (resp) {
-            this.metadata(resp);
-            this.trigger('m:externalMongoLimitsGot', this);
         }, this));
     },
 
@@ -318,24 +287,36 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     loadGeoJsonData: function () {
         if (this.geoJsonAvailable) {
             var minervaMeta = this.metadata();
-            if (minervaMeta.original_type === 'mongo') {
-                // TODO search params
-                // if mongo, we'll need to pass down some search params to a new
-                // endpoint that will pull out of mongo and convert into geojson
-                if (minervaMeta.geojson && minervaMeta.geojson.data) {
-                    this.fileData = minervaMeta.geojson.data;
-                    this.geoFileReader = 'jsonReader';
-                    this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-                    this.trigger('m:dataLoaded', this.get('_id'));
-                } else {
-                    this.on('m:geojsonCreated', function () {
-                        var minervaMeta = this.metadata();
-                        this.fileData = minervaMeta.geojson.data;
+            if (minervaMeta.geojson_file) {
+                // just download from the endpoint
+                $.ajax({
+                    url: girder.apiRoot + '/file/' + minervaMeta.geojson_file._id + '/download',
+                    contentType: 'application/json',
+                    success: _.bind(function (data) {
+                        this.fileData = data;
+                    }, this),
+                    complete: _.bind(function () {
+                        this.trigger('m:dataLoaded', this.get('_id'));
+                    }, this)
+                });
+            } else if (minervaMeta.geojson) {
+                this.filedata = minervaMeta.geojson.data;
+                this.geoFileReader = 'jsonReader';
+                this.trigger('m:geoJsonDataLoaded', this.get('_id'));
+                this.trigger('m:dataLoaded', this.get('_id'));
+            } else if (minervaMeta.original_type === 'mongo') {
+                $.ajax({
+                    url: girder.apiRoot + '/minerva_dataset_mongo/' + minervaMeta.dataset_id + '/geojson',
+                    contentType: 'application/json',
+                    success: _.bind(function (data) {
+                        this.fileData = data;
+                    }, this),
+                    complete: _.bind(function () {
                         this.geoFileReader = 'jsonReader';
                         this.trigger('m:geoJsonDataLoaded', this.get('_id'));
                         this.trigger('m:dataLoaded', this.get('_id'));
-                    }, this).createGeoJson();
-                }
+                    }, this)
+                });
             }
         } else {
             if (this.latLongMapper) {

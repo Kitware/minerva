@@ -27,6 +27,7 @@ add_python_test(wms PLUGIN minerva)
 add_python_test(elasticsearch PLUGIN minerva)
 add_python_test(geojson PLUGIN minerva)
 add_python_test(postgres PLUGIN minerva)
+add_python_test(mongo_dataset PLUGIN minerva)
 
 
 set(SPARK_TEST_MASTER_URL  "" CACHE STRING "Spark master URL")
