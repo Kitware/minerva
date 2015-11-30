@@ -6,3 +6,4 @@ geopy==1.10.0
 owslib==0.9.1
 cryptography==1.1.0
 numpy==1.10.1
+python-dateutil===2.4.2

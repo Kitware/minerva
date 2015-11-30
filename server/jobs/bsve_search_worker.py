@@ -22,18 +22,33 @@ def run(job):
     job_model.updateJob(job, status=JobStatus.RUNNING)
 
     try:
+
+        configFile = os.path.join(os.path.dirname(__file__), "bsve.json")
+        if os.path.exists(configFile):
+            bsveConfig = json.load(open(configFile))['bsve']
+        else:
+            bsveConfig = {}
+
         kwargs = job['kwargs']
         bsveSearchParams = kwargs['params']['bsveSearchParams']
         datasetId = str(kwargs['dataset']['_id'])
         # TODO better to create a job token rather than a user token?
         token = kwargs['token']
 
-        bsveUtility = BsveUtility()
+        bsveUtility = BsveUtility(
+            user=bsveConfig.get(
+                'USER_NAME', os.environ.get('BSVE_USERNAME')),
+            apikey=bsveConfig.get(
+                'API_KEY', os.environ.get('BSVE_APIKEY')),
+            secret=bsveConfig.get(
+                'SECRET_KEY', os.environ.get('BSVE_SECRETKEY')),
+            base=bsveConfig.get('BASE_URL')
+        )
 
         # TODO sleeping in async thread, probably starving other tasks
         # would be better to split this into two or more parts, creating
         # additional jobs as needed
-        searchResult = bsveUtility.searchUntilResult(bsveSearchParams)
+        searchResult = bsveUtility.search(bsveSearchParams)
 
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()
