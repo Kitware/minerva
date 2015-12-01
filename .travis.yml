@@ -17,6 +17,9 @@ compiler:
 addons:
   apt:
     packages:
+    - libpng12-dev
+    - libgdal1-dev
+    - pkg-config
     - libnetcdf-dev
 
 before_install:
@@ -79,8 +82,12 @@ install:
     - cd $HOME/build/girder
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     # create the Romanesco config and enable spark plugin
-    - cp /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.dist.cfg /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
-    - sed -i 's/plugins_enabled=/plugins_enabled=spark/' /home/travis/virtualenv/python2.7.9/src/romanesco/romanesco/worker.local.cfg
+    - cp /home/travis/build/girder/plugins/romanesco/romanesco/worker.dist.cfg /home/travis/build/girder/plugins/romanesco/romanesco/worker.local.cfg
+    - sed -i 's/plugins_enabled=/plugins_enabled=spark/' /home/travis/build/girder/plugins/romanesco/romanesco/worker.local.cfg
+    - cd /home/travis/build/girder/plugins/romanesco
+    - pip install -e .[spark]
+    - python -m romanesco &
+    - cd /home/travis/build/girder
     # build and install girder
     - npm install
 
