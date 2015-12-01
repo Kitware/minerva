@@ -65,6 +65,30 @@ minerva.views.SessionView = minerva.View.extend({
         this.$('.m-save-session-button').removeClass('btn-success');
     },
 
+    getEnabledPanelGroups: function () {
+        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+            return this.layout.panelGroups;
+        }
+
+        return _.filter(this.layout.panelGroups, function (panelGroup) {
+            return !(_.has(this.model.sessionJsonContents.layout, panelGroup.id) &&
+                     _.has(this.model.sessionJsonContents.layout[panelGroup.id], 'disabled') &&
+                     this.model.sessionJsonContents.layout[panelGroup.id].disabled === true);
+        }, this);
+    },
+
+    getEnabledPanelViews: function (panelGroup) {
+        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+            return panelGroup.panelViews;
+        }
+
+        return _.filter(panelGroup.panelViews, function (panelView) {
+            return !(_.has(this.model.sessionJsonContents.layout, panelView.id) &&
+                     _.has(this.model.sessionJsonContents.layout[panelView.id], 'disabled') &&
+                     this.model.sessionJsonContents.layout[panelView.id].disabled === true);
+        }, this);
+    },
+
     initialize: function (settings) {
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;
@@ -93,62 +117,46 @@ minerva.views.SessionView = minerva.View.extend({
             this._disableSave();
         });
 
-        minerva.layout = {
-            panelGroups: []
+        this.layout = {
+            panelGroups: [
+                {
+                    id: 'm-core-panel-group',
+                    view: minerva.views.PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'map-panel',
+                            view: minerva.views.MapPanel
+                        }
+                    ]
+                },
+                {
+                    id: 'm-left-panel-group',
+                    view: minerva.views.PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'm-analysis-panel',
+                            view: minerva.views.AnalysisPanel
+                        },
+                        {
+                            id: 'm-source-panel',
+                            view: minerva.views.SourcePanel
+                        },
+                        {
+                            id: 'm-data-panel',
+                            view: minerva.views.DataPanel
+                        },
+                        {
+                            id: 'm-layer-panel',
+                            view: minerva.views.LayersPanel
+                        },
+                        {
+                            id: 'm-jobs-panel',
+                            view: minerva.views.JobsPanel
+                        }
+                    ]
+                }
+            ]
         };
-
-        var corePanelGroup = new minerva.views.PanelGroup({
-            id: 'm-core-panel-group',
-            parentView: this,
-            panelViews: []
-        });
-
-        var leftPanelGroup = new minerva.views.PanelGroup({
-            id: 'm-left-panel-group',
-            parentView: this,
-            panelViews: []
-        });
-
-        corePanelGroup.panelViews.push(new minerva.views.MapPanel({
-            id: 'map-panel',
-            parentView: this,
-            session: this.model,
-            collection: this.datasetsCollection
-        }));
-
-        leftPanelGroup.panelViews.push(new minerva.views.AnalysisPanel({
-            id: 'm-analysis-panel',
-            parentView: this,
-            collection: this.analysisCollection,
-            datasetCollection: this.datasetCollection
-        }));
-
-        leftPanelGroup.panelViews.push(new minerva.views.SourcePanel({
-            id: 'm-source-panel',
-            sourceCollection: this.sourceCollection,
-            datasetCollection: this.datasetsCollection,
-            parentView: this
-        }));
-
-        leftPanelGroup.panelViews.push(new minerva.views.DataPanel({
-            id: 'm-data-panel',
-            parentView: this,
-            session: this.model,
-            collection: this.datasetsCollection
-        }));
-
-        leftPanelGroup.panelViews.push(new minerva.views.LayersPanel({
-            id: 'm-layer-panel',
-            parentView: this,
-            collection: this.datasetsCollection
-        }));
-
-        leftPanelGroup.panelViews.push(new minerva.views.JobsPanel({
-            id: 'm-jobs-panel',
-            parentView: this
-        }));
-
-        minerva.layout.panelGroups = [corePanelGroup, leftPanelGroup];
 
         this.render();
     },
@@ -164,22 +172,28 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            girder.events.trigger('m:pre-render-panel-groups');
+            // Render each panel group, which is responsible for rendering
+            // each panel view
+            girder.events.trigger('m:pre-render-panel-groups', this);
+            _.each(this.getEnabledPanelGroups(), function (panelGroupSpec) {
+                var panelGroup = new panelGroupSpec.view({
+                    parentView: this,
+                    session: this.model,
+                    panelViews: this.getEnabledPanelViews(panelGroupSpec)
+                });
 
-            // Render each of the panel groups
-            _.each(minerva.layout.panelGroups, function (panelGroup) {
-                this.$('#m-panel-groups').append('<div id="' + panelGroup.id  +'"></div>');
-                panelGroup.setElement(this.$('#' + panelGroup.id)).render();
+                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id  +'"></div>');
+                panelGroup.setElement(this.$('#' + panelGroupSpec.id)).render();
             }, this);
 
-
-            $('.collapse').on('show.bs.collapse', function () {
-                $(this).prev().find('i.icon-down-open').attr('class', 'icon-up-open');
-            });
-
-            $('.collapse').on('hide.bs.collapse', function () {
-                $(this).prev().find('i.icon-up-open').attr('class', 'icon-down-open');
-            });
+            // Restore state of collapsed panels
+            if (_.has(this.model.sessionJsonContents, 'layout')) {
+                _.each(this.model.sessionJsonContents.layout, function (panelView, panelViewId) {
+                    if (_.has(panelView, 'collapsed') && panelView.collapsed === true) {
+                        $('#' + panelViewId).find('i.icon-up-open').trigger('click');
+                    }
+                }, this);
+            }
         }, this));
 
         return this;

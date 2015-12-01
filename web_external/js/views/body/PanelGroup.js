@@ -6,9 +6,14 @@ minerva.views.PanelGroup = minerva.View.extend({
 
     render: function () {
         // Render each of our panels
-        _.each(this.panelViews, function (panelView) {
-            this.$el.append('<div id="' + panelView.id + '"></div>');
-            panelView.setElement(this.$('#' + panelView.id)).render();
+        _.each(this.panelViews, function (panelViewSpec) {
+            var panelView = new panelViewSpec.view({
+                parentView: this,
+                session: this.parentView
+            });
+
+            this.$el.append('<div id="' + panelViewSpec.id + '"></div>');
+            panelView.setElement(this.$('#' + panelViewSpec.id)).render();
         }, this);
 
         return this;
