@@ -34,7 +34,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
                     // can't seem to get the dataset panel to pick up the update events from collection or dataset
                     this.parentView.render();
                 }, this);
-                this.dataset.createGeoJson(mapper.dateKeypath, this.startTime, this.endTime);
+                this.dataset.createGeoJson();
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('button.m-save-keymap-mapping').removeClass('disabled');

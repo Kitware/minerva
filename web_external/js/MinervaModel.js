@@ -30,6 +30,10 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
 
     setMinervaMetadata: function (minervaMetadata) {
         this.set('meta', _.extend(this.get('meta') || {}, {minerva: minervaMetadata}));
+        if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
+            this.geoJsonAvailable = true;
+            this.fileData = minervaMetadata.geojson.data;
+        }
         return minervaMetadata;
     },
 

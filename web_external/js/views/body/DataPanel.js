@@ -2,14 +2,57 @@ minerva.views.DataPanel = minerva.View.extend({
     events: {
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
+        'click .csv-mapping': 'mapTableDataset',
         'click .dataset-info': 'displayDatasetInfo'
+    },
+
+    mapTableDataset: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        // TODO may want to split out json from csv at some point
+        // TODO standardize on callback or else dual calls of getX and getXData
+
+        var datasetType = dataset.getDatasetType();
+        if (datasetType === 'json' || datasetType === 'mongo') {
+            this.keymapWidget = new minerva.views.KeymapWidget({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                parentView: this
+            });
+            this.keymapWidget.render();
+        } else {
+            // assuming csv
+            // list the files of this item
+            var filesCallback = _.bind(function () {
+                this.tableWidget = new minerva.views.TableWidget({
+                    el: $('#g-dialog-container'),
+                    dataset: dataset,
+                    parentView: this
+                });
+                this.tableWidget.render();
+            }, this);
+            dataset.getCSVFile(filesCallback);
+        }
     },
 
     addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        // TODO maybe this check is unnecessary, how can we get into this state?
+        var stackValues = _.map(this.collection.models, function (dataset) {
+            return dataset.get('stack');
+        });
+
+        // Retrieve the last stack value in the collection
+        var lastValueInStack =
+            _.last(
+                stackValues.sort(function (a, b) {
+                    return a - b;
+                })
+            );
+
         if (!dataset.get('displayed')) {
+            dataset.set('stack', lastValueInStack + 1);
+            // TODO maybe this check is unnecessary, how can we get into this state?
             dataset.set('displayed', true);
         }
     },

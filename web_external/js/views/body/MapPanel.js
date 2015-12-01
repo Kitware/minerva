@@ -13,6 +13,19 @@ minerva.views.MapPanel = minerva.View.extend({
         this.map.draw();
     },
 
+    changeLayerZIndex: function (dataset) {
+        var baseMapZIndex = 1;
+        if (dataset.get('order')) {
+            this.datasetLayers[dataset.id][dataset.get('order')]();
+        }
+        // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
+        // Calling moveUp(1) to place it on top of base map
+        if (dataset.get('order') === 'moveToBottom') {
+            this.datasetLayers[dataset.id].moveUp(baseMapZIndex);
+        }
+        this.map.draw();
+    },
+
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.metadata();
         layer.layerName = minervaMetadata.type_name;
@@ -66,6 +79,7 @@ minerva.views.MapPanel = minerva.View.extend({
                 var layer = this.map.createLayer('osm', {attribution: null});
                 // Set the layer opacity
                 layer.mapOpacity(dataset.get('opacity'));
+
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
 
@@ -96,10 +110,6 @@ minerva.views.MapPanel = minerva.View.extend({
                         this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
-
-                // Add the UI slider back
-                this.uiLayer = this.map.createLayer('ui');
-                this.uiLayer.createWidget('slider');
                 this.map.draw();
             } else {
                 // Assume the dataset provides a reader, so load the data
@@ -180,6 +190,12 @@ minerva.views.MapPanel = minerva.View.extend({
         this.listenTo(this.collection, 'change:opacity', function (dataset) {
             if (this.mapCreated) {
                 this.changeLayerOpacity(dataset);
+            }
+        }, this);
+
+        this.listenTo(this.collection, 'change:order', function (dataset) {
+            if (this.mapCreated) {
+                this.changeLayerZIndex(dataset);
             }
         }, this);
     },

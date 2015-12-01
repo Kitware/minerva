@@ -26,9 +26,9 @@ from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
-        analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
+        analysis, dataset, s3_dataset, session, geocode, source, \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
-        s3_source
+        s3_source, postgres_source, mongo_source, mongo_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
@@ -65,12 +65,6 @@ def load(info):
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
 
-    shapefileREST = shapefile.Shapefile()
-    info['apiRoot'].item.route('POST', (':id', 'geojson'),
-                               shapefileREST.createGeoJson)
-    info['apiRoot'].item.route('GET', (':id', 'geojson'),
-                               shapefileREST.findGeoJson)
-
     # Admin endpoint for initializing the geonames database
     info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
     info['apiRoot'].geonames.route('POST', ('setup',),
@@ -96,5 +90,8 @@ def load(info):
         elasticsearch_source.ElasticsearchSource()
     info['apiRoot'].minerva_query_elasticsearch = \
         elasticsearch_source.ElasticsearchQuery()
-
+    info['apiRoot'].minerva_source_postgres = \
+        postgres_source.PostgresSource()
+    info['apiRoot'].minerva_source_mongo = mongo_source.MongoSource()
+    info['apiRoot'].minerva_dataset_mongo = mongo_dataset.MongoDataset()
     info['serverRoot'].wms_proxy = WmsProxy()

@@ -5,21 +5,16 @@
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
           | Add a Mongo collection as a new dataset
-
       .modal-body
-        .form-group
-          label.control-label(for="m-dataset-name") Dataset name
-          input.input-sm#m-dataset-name.form-control(type="text", placeholder="Enter dataset name")
-        .form-group
-          label.control-label(for="m-mongo-uri") Mongo db connection URI
-          input.input-sm#m-mongo-uri.form-control(type="text", placeholder="mongodb://host:27017/database_name")
-        .form-group
-          label.control-label(for="m-mongo-collection") Mongo collection
-          input.input-sm#m-mongo-collection.form-control(type="text", placeholder="Enter Mongo collection")
-        .g-validation-failed-message
-
+        each collection in mongo_collections
+          .form-group
+            .checkbox
+              input.m-add-collections(type="checkbox", name="#{collection}" mongo-collection="#{collection}")
+              label
+                i.icon-layers.m-add-layers-type-icon
+                | #{collection}
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-        button.m-add-dataset-button.btn.btn-small.btn-primary
+        button.m-add-mongo-collections-button.btn.btn-small.btn-primary
             i.icon-plus-squared
             | Add Dataset

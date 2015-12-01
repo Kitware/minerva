@@ -12,6 +12,8 @@
     <link rel="stylesheet"
           href="${staticRoot}/lib/fontello/css/animation.css">
     <link rel="stylesheet"
+          href="${staticRoot}/lib/fontello/minerva/css/fontello.css">
+    <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
@@ -49,7 +51,7 @@
     ## We don't want to serve the plugin.min.[cs|j]s resources for Minerva
     ## since these are related to the Girder plugins page.
     ## Same applies to CSS above.
-     % for plugin in pluginJs:
+    % for plugin in pluginJs:
         % if plugin != 'minerva':
             <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
         % endif
