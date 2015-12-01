@@ -161,7 +161,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.session = settings.session;
+        this.session = settings.session.model;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
             if (this.map) {
@@ -172,7 +172,7 @@ minerva.views.MapPanel = minerva.View.extend({
         this.datasetLayers = {};
         this.legendWidget = {};
 
-        this.collection = settings.collection;
+        this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'change:displayed', function (dataset) {
             // There is a slight danger of a user trying to add a dataset
             // to a session while the map is not yet created.  If the map isn't

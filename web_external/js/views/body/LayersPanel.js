@@ -81,7 +81,7 @@ minerva.views.LayersPanel = minerva.View.extend({
 
     initialize: function (settings) {
         settings = settings || {};
-        this.collection = settings.collection;
+        this.collection = settings.session.datasetsCollection;
         this.layersOrderOptions = [
             {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
             {'title': 'move down', 'method': 'moveDown', 'class': 'down'},
