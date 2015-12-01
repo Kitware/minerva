@@ -17,10 +17,6 @@ compiler:
 addons:
   apt:
     packages:
-    - libfreetype6-dev
-    - libpng12-dev
-    - libgdal1-dev
-    - pkg-config
     - libnetcdf-dev
 
 before_install:

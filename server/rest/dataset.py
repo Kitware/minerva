@@ -89,32 +89,6 @@ class Dataset(Resource):
         self.model('item').setMetadata(item, item['meta'])
         return item['meta']['minerva']
 
-    def _convertShapefileToGeoJson(self, item, tmpdir):
-        # TODO need to figure out convention here
-        # assumes a shapefile is stored as a single item with a certain name
-        # and all of the shapefiles as files within that item with
-        # the same name.
-        #
-        # ex: item['name'] = myshapefile
-        #     # abuse of notation for item.files
-        #     item.files[0]['name'] =  myshapefile.cpg
-        #     item.files[1]['name'] =  myshapefile.dbf
-        #     item.files[2]['name'] =  myshapefile.prj
-        #     item.files[3]['name'] =  myshapefile.shp
-        #     item.files[4]['name'] =  myshapefile.shx
-
-        from gaia.pandas import GeopandasReader, GeopandasWriter
-        reader = GeopandasReader()
-        reader.file_name = os.path.join(tmpdir, item['name'])
-        geojsonFilepath = os.path.join(tmpdir, item['name'] +
-                                       PluginSettings.GEOJSON_EXTENSION)
-        writer = GeopandasWriter()
-        writer.file_name = geojsonFilepath
-        writer.format = 'GeoJSON'
-        writer.set_input(port=reader.get_output())
-        writer.run()
-        return geojsonFilepath
-
     def _convertJsonfileToGeoJson(self, item, tmpdir):
         # use the first filename with json ext found in original_files
         filename = None
@@ -183,9 +157,7 @@ class Dataset(Resource):
         # i.e. looking for filex, but the item name is filex (1)
 
         minerva_metadata = item['meta']['minerva']
-        if minerva_metadata['original_type'] == 'shapefile':
-            converter = self._convertShapefileToGeoJson
-        elif minerva_metadata['original_type'] == 'json':
+        if minerva_metadata['original_type'] == 'json':
             converter = self._convertJsonfileToGeoJson
         elif minerva_metadata['original_type'] == 'mongo':
             return self._convertMongoToGeoJson(item, params)
@@ -338,7 +310,7 @@ class Dataset(Resource):
         #
         # 1) get all the files
         # 2) find their types based on mimetype and extension
-        # one of (shapefile, geojson, json, csv)
+        # one of (geojson, json, csv)
         # set the original_type and original_file[] meta.minerva fields
         # with geojson_file if appropriate
         #
@@ -360,12 +332,6 @@ class Dataset(Resource):
                 break
             elif 'json' in file['exts']:
                 minerva_metadata['original_type'] = 'json'
-                minerva_metadata['original_files'] = [{
-                    'name': file['name'], '_id': file['_id']}]
-                break
-            elif 'shp' in file['exts']:
-                minerva_metadata['original_type'] = 'shapefile'
-                # TODO possible we want to store the other shapefiles?
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
@@ -414,7 +380,7 @@ class Dataset(Resource):
         # always create the geojson as perhaps the params have changed
         item_meta = item['meta']
         minerva_meta = item_meta['minerva']
-        supported_conversions = ['shapefile', 'json', 'mongo']
+        supported_conversions = ['json', 'mongo']
         if minerva_meta['original_type'] in supported_conversions:
             # TODO passing params for limit and offset
             # maybe better to make those explicit and for all original_type

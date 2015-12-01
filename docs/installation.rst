@@ -28,7 +28,7 @@ Update apt package indices before you start.
 
 ::
 
-    sudo apt-get install libfreetype6-dev libpng12-dev pkg-config libgdal-dev
+    sudo apt-get install libnetcdf-dev
 
 - Install Romanesco dev system dependencies
 
