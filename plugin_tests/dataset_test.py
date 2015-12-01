@@ -220,16 +220,6 @@ class DatasetTestCase(base.TestCase):
         self.assertEquals(minervaMetadata['original_type'], 'geojson', 'Expected geojson dataset original_type')
         self.assertEquals(minervaMetadata['geojson_file']['name'], 'states.geojson', 'Expected geojson file to be set')
 
-        # shapefile
-        fileExts = ['cpg', 'dbf', 'prj', 'shp', 'shx']
-        files = [{
-            'name': 'shapefile.' + ext,
-            'path': os.path.join(pluginTestDir, 'data', 'shapefile.' + ext),
-            'mimeType': 'application/octet-stream'
-        } for ext in fileExts]
-        shapefileMinervaMetadata, shapefileItemId = createDataset('shapefile', files)
-        self.assertEquals(shapefileMinervaMetadata['original_type'], 'shapefile', 'Expected shapefile dataset original_type')
-
         # json array
         files = [{
             'name': 'twopoints.json',
@@ -328,32 +318,6 @@ class DatasetTestCase(base.TestCase):
             self.assertTrue(-80 > coordinates[0], 'x coordinate out of range')
             self.assertTrue(20 < coordinates[1], 'y coordinate out of range')
             self.assertTrue(30 > coordinates[1], 'y coordinate out of range')
-
-        #
-        # Test minerva_dataset/id/geojson creating geojson from shapefile
-        #
-
-        # create geojson in the dataset
-        path = '/minerva_dataset/{}/geojson'.format(shapefileItemId)
-        response = self.request(
-            path=path,
-            method='POST',
-            user=self._user,
-        )
-        self.assertHasKeys(response.json, ['geojson_file'])
-
-        # download the file and test it is valid geojson
-        geojsonFileId = response.json['geojson_file']['_id']
-        path = '/file/{}/download'.format(geojsonFileId)
-        response = self.request(
-            path=path,
-            method='GET',
-            user=self._user,
-            isJson=False
-        )
-        geojsonContents = self.getBody(response)
-        shapefileGeojson = geojson.loads(geojsonContents)
-        self.assertEquals(len(shapefileGeojson['features']), 5, 'geojson should have five features')
 
         #
         # Test minerva_dataset/id/geojson creating geojson from csv

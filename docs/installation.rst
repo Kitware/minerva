@@ -28,7 +28,7 @@ Update apt package indices before you start.
 
 ::
 
-    sudo apt-get install libfreetype6-dev libpng12-dev pkg-config libgdal-dev
+    sudo apt-get install libgdal-dev libnetcdf-dev libpng12-dev pkg-config
 
 - Install Romanesco dev system dependencies
 
@@ -41,7 +41,7 @@ Fedora 22
 
 ::
 
-    sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip freetype-devel geos-devel gdal-devel netcdf-devel hdf5-devel
+    sudo dnf install git gcc-c++ libffi-devel make python-devel python-pip geos-devel gdal-devel netcdf-devel hdf5-devel
 
 -  See `installing mongo on Red Hat`_
 -  See `installing node.js on Red Hat`_

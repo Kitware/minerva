@@ -26,7 +26,7 @@ from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
-        analysis, dataset, s3_dataset, session, shapefile, geocode, source, \
+        analysis, dataset, s3_dataset, session, geocode, source, \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
         s3_source, postgres_source, mongo_source, mongo_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
@@ -64,12 +64,6 @@ def load(info):
     info['serverRoot'], info['serverRoot'].girder = (minerva_webroot,
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
-
-    shapefileREST = shapefile.Shapefile()
-    info['apiRoot'].item.route('POST', (':id', 'geojson'),
-                               shapefileREST.createGeoJson)
-    info['apiRoot'].item.route('GET', (':id', 'geojson'),
-                               shapefileREST.findGeoJson)
 
     # Admin endpoint for initializing the geonames database
     info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
