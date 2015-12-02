@@ -16,35 +16,32 @@ from girder.plugins.minerva.utility.minerva_utility import mM
 
 import girder_client
 
-config_file = os.path.join(
-    os.path.dirname(bsve_utility.__file__), 'bsve.json'
-)
-
 
 def run(job):
     job_model = ModelImporter.model('job', 'jobs')
     job_model.updateJob(job, status=JobStatus.RUNNING)
 
     try:
-        with open(config_file, 'r') as f:
-            bsve_config = json.loads(f.read())
 
         kwargs = job['kwargs']
-        bsveSearchParams = kwargs['params']['bsveSearchParams']
+        query = kwargs['params']['query']
         datasetId = str(kwargs['dataset']['_id'])
+        username = kwargs['username']
+        apikey = kwargs['apikey']
+        secretkey = kwargs['secretkey']
+        baseurl = kwargs.get('baseurl')
+
         # TODO better to create a job token rather than a user token?
         token = kwargs['token']
 
         bsveUtility = bsve_utility.BsveUtility(
-            bsve_config['bsve']['USER_NAME'],
-            bsve_config['bsve']['API_KEY'],
-            bsve_config['bsve']['SECRET_KEY']
+            username, apikey, secretkey, baseurl
         )
 
         # TODO sleeping in async thread, probably starving other tasks
         # would be better to split this into two or more parts, creating
         # additional jobs as needed
-        searchResult = bsveUtility.search(bsveSearchParams)
+        searchResult = bsveUtility.search(**query)
 
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()

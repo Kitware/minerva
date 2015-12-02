@@ -30,7 +30,7 @@ from girder.plugins.minerva.utility.bsve import BsveUtility
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
-class BsveSearchDataset(Dataset):
+class BSVESearchDataset(Dataset):
 
     def __init__(self):
         self.resourceName = 'minerva_dataset_bsve_search'
@@ -49,7 +49,7 @@ class BsveSearchDataset(Dataset):
         if metadata.get('source_type') != 'bsve':
             raise RestException('Invalid source type', 403)
 
-        bp = metadata['bsve_params']
+        bp = metadata
         username = bp['username']
         apikey = bp['apikey']
         secretkey = decryptCredentials(bp['secretkey'])

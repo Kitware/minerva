@@ -64,6 +64,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'Mongo DB',
                 icon: 'icon-leaf',
                 widget: minerva.views.AddMongoSourceWidget
+            },
+            bsvesearch: {
+                label: 'BSVE search',
+                icon: 'icon-users',
+                widget: minerva.views.AddBsveSourceWidget
             }
         };
     },

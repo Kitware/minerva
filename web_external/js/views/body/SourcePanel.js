@@ -130,6 +130,10 @@ minerva.views.SourcePanel = minerva.View.extend({
             mongo: {
                 icon: 'icon-leaf',
                 action: 'm-display-mongo-collections'
+            },
+            bsve: {
+                icon: 'icon-users',
+                action: 'm-display-bsve-search'
             }
         };
 

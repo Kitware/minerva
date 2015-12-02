@@ -30,7 +30,7 @@ class BSVESearchSource(Source):
     _baseURL = 'http://search.bsvecosystem.net'
 
     def __init__(self):
-        self.resourceName = 'minerva_source_bsve_search'
+        self.resourceName = 'minerva_source_bsve'
         self.route('POST', (), self.createBSVESearchSource)
 
     @access.user
@@ -49,12 +49,10 @@ class BSVESearchSource(Source):
 
         metadata = {
             'source_type': 'bsve',
-            'bsve_params': {
-                'baseurl': baseURL,
-                'username': username,
-                'apikey': apikey,
-                'secretkey': secretkey
-            }
+            'baseurl': baseURL,
+            'username': username,
+            'apikey': apikey,
+            'secretkey': secretkey
         }
 
         return self.createSource(name, metadata, desc)
