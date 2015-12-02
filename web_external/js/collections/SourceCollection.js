@@ -14,10 +14,12 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
                 return new minerva.models.PostgresSourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 'mongo') {
                 return new minerva.models.MongoSourceModel(attrs, options);
+            } else if (attrs.meta.minerva.source_type === 'item') {
+                return new minerva.models.ItemSourceModel(attrs, options);
             }
         }
 
-        console.error('Source collection includes unknown source type');
+        console.error('Source collection includes unknown source type '+ attrs.meta.minerva.source_type);
         console.error(attrs);
         girder.events.trigger('g:alert', {
             icon: 'cancel',
