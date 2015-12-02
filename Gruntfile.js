@@ -190,31 +190,6 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        watch: {
-            'plugin-minerva-jade-external': {
-                files: _.pluck(grunt.config.get('jade.minerva.files'), 'src'),
-                tasks: ['jade.minerva']
-            },
-            'plugin-minerva-stylus-external': {
-                files: _.pluck(grunt.config.get('stylus.minerva.files'), 'src'),
-                tasks: ['stylus.minerva']
-            },
-            'plugin-minerva-uglify-external': {
-                files: _.pluck(grunt.config.get('uglify.minerva.files'), 'src'),
-                tasks: ['uglify.minerva']
-            },
-            'plugin-minerva-build-geojs': {
-                files: ['<%= plugin.minerva.geojs %>/**/*.js'],
-                tasks: ['shell.minerva-geojs']
-            },
-            'plugin-minerva-copy-extra': {
-                files: [
-                    '<%= plugin.minerva.extra %>/**',
-                    '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
-                ],
-                tasks: ['copy:minerva-extras']
-            }
-        },
         init: {
             'shell:minerva-geojs-install': {
                 dependencies: ['shell:plugin-install']
@@ -240,6 +215,34 @@ module.exports = function (grunt) {
             'stylus:minerva': {},
             'test-env-html:minerva': {
                 dependencies: ['uglify:minerva', 'stylus:minerva']
+            }
+        }
+    });
+
+    grunt.config.merge({
+        watch: {
+            'plugin-minerva-jade-external': {
+                files: _.pluck(grunt.config.get('jade.minerva.files'), 'src'),
+                tasks: ['jade:minerva']
+            },
+            'plugin-minerva-stylus-external': {
+                files: _.pluck(grunt.config.get('stylus.minerva.files'), 'src'),
+                tasks: ['stylus:minerva']
+            },
+            'plugin-minerva-uglify-external': {
+                files: _.pluck(grunt.config.get('uglify.minerva.files'), 'src'),
+                tasks: ['uglify:minerva']
+            },
+            'plugin-minerva-build-geojs': {
+                files: ['<%= plugin.minerva.geojs %>/**/*.js'],
+                tasks: ['shell:minerva-geojs']
+            },
+            'plugin-minerva-copy-extra': {
+                files: [
+                    '<%= plugin.minerva.extra %>/**',
+                    '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
+                ],
+                tasks: ['copy:minerva-extras']
             }
         }
     });
