@@ -25,6 +25,18 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
         return _.some(this.sessionJsonContents.features, datasetFinder);
     },
 
+    addLayoutAttributes: function (panelView, attributes) {
+        if (!_.has(this.sessionJsonContents, 'layout')) {
+            this.sessionJsonContents.layout = {};
+        }
+
+        if (!_.has(_.keys(this.sessionJsonContents.layout, panelView))) {
+            this.sessionJsonContents.layout[panelView] = attributes;
+        } else {
+            _.extend(this.sessionJsonContents.layout[panelView], attributes);
+        }
+    },
+
     addDataset: function (dataset) {
         // for now just add them to a list
         // may want to unify caching of geojson file id
