@@ -1,4 +1,4 @@
-minerva.views.MapPanel = minerva.View.extend({
+minerva.views.MapPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-save-current-baselayer': function () {
@@ -161,6 +161,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        _.extend(this.events, minerva.views.Panel.prototype.events);
         this.session = settings.session.model;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center

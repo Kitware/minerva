@@ -1,4 +1,4 @@
-minerva.views.SourcePanel = minerva.View.extend({
+minerva.views.SourcePanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-add-source': 'addSourceDialog',
@@ -105,6 +105,7 @@ minerva.views.SourcePanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        _.extend(this.events, minerva.views.Panel.prototype.events);
         this.session = settings.session.model;
         this.sourceCollection = settings.session.sourceCollection;
         this.datasetCollection = settings.session.datasetsCollection;

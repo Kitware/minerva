@@ -1,6 +1,7 @@
-minerva.views.JobsPanel = minerva.View.extend({
+minerva.views.JobsPanel = minerva.views.Panel.extend({
 
     initialize: function () {
+        _.extend(this.events, minerva.views.Panel.prototype.events);
         var columnEnum = girder.views.jobs_JobListWidget.prototype.columnEnum;
         var columns = columnEnum.COLUMN_STATUS_ICON |
                       columnEnum.COLUMN_TITLE;

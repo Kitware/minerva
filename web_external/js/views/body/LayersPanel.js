@@ -1,4 +1,4 @@
-minerva.views.LayersPanel = minerva.View.extend({
+minerva.views.LayersPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
@@ -80,6 +80,7 @@ minerva.views.LayersPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        _.extend(this.events, minerva.views.Panel.prototype.events);
         settings = settings || {};
         this.collection = settings.session.datasetsCollection;
         this.layersOrderOptions = [

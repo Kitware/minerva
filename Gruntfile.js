@@ -99,6 +99,7 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/models/SourceModel.js',
                             '<%= plugin.minerva.source %>/models/**/*.js',
                             '<%= plugin.minerva.source %>/collections/**/*.js',
+                            '<%= plugin.minerva.source %>/views/body/Panel.js',
                             '<%= plugin.minerva.source %>/views/**/*.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.min.js'

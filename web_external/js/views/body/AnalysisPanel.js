@@ -10,7 +10,7 @@
         return name  + 'Widget';
     };
 
-    minerva.views.AnalysisPanel = minerva.View.extend({
+    minerva.views.AnalysisPanel = minerva.views.Panel.extend({
 
         events: {
             'click .m-attempt-analysis': 'attemptAnalysis'
@@ -57,6 +57,7 @@
         },
 
         initialize: function (settings) {
+            _.extend(this.events, minerva.views.Panel.prototype.events);
             this.collection = settings.session.analysisCollection;
             this.datasetCollection = settings.session.datasetsCollection;
             this.sourceCollection = settings.session.sourceCollection;
