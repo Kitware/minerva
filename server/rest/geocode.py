@@ -14,7 +14,6 @@ from girder.constants import AccessType
 
 
 class Geonames(Resource):
-
     """API Endpoint for managing Geonames database."""
 
     _geonames_folder = None

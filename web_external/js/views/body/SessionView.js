@@ -182,7 +182,7 @@ minerva.views.SessionView = minerva.View.extend({
                     panelViews: this.getEnabledPanelViews(panelGroupSpec)
                 });
 
-                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id  +'"></div>');
+                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id  + '"></div>');
                 panelGroup.setElement(this.$('#' + panelGroupSpec.id)).render();
             }, this);
 
