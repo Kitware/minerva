@@ -1,0 +1,11 @@
+.modal-dialog
+  .modal-content
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | #{name} pdf source
+        .modal-body
+          .m-pdf-display
+            object(type="application/pdf", data="#{data}", width="100%", height="100%")
+              p
+                | Cannot display pdf

@@ -2,6 +2,7 @@
   .panelTitle
       | Sources
       i.m-add-source.m-icon-enabled.icon-plus-squared(title="Add new source")
+      i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
   .m-sourceList
     .m-sources
         each source in sources
@@ -9,11 +10,14 @@
                 .m-source
                     span(title=source.get('name'))= source.get('name').length > 13 ? source.get('name').slice(0,13) + "..." : source.get('name')
                         - var attributes = {'cid': source.cid}
-                        - var sourceType = sourceTypes[source.getSourceType()]
+                        - var display = sourceDisplay(source)
 
-                        if sourceType
-                          - var classes = 'm-icon-enabled m-display-source-action ' + sourceType.icon + ' ' + sourceType.action
-                          i(class=classes)&attributes(attributes)
+                        if display.action
+                          - var classes = 'm-icon-enabled m-display-source-action ' + display.icon + ' ' + display.action
+                        else
+                          - var classes = 'm-icon-disabled m-display-source-action ' + display.icon
+
+                        i(class=classes)&attributes(attributes)
                         - classes = 'icon-trash m-icon-enabled m-delete-source'
                         i(title='delete source', class=classes)&attributes(attributes)
                         //- info icon for minerva metadata display

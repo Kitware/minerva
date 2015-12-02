@@ -101,7 +101,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
     },
 
     /**
-     * Change the current wmsSource whose layers will be displayed, and render.
+     * Change the current wmsSource whose layers will be displayed.
      *
      * @param  wmsSource  The wmsSource to display.
      */

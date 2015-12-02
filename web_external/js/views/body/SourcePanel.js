@@ -2,13 +2,16 @@ minerva.views.SourcePanel = minerva.View.extend({
 
     events: {
         'click .m-add-source': 'addSourceDialog',
+        'click .m-upload-local': 'uploadLocalDialog',
         'click .m-display-wms-layers-list': 'displayWmsLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
         'click .m-display-s3-bucket-hierarchy': 'selectS3Files',
-        'click .m-display-mongo-collections': 'displayMongoCollections'
+        'click .m-display-mongo-collections': 'displayMongoCollections',
+        'click .m-display-pdf': 'displayPdf'
     },
+
 
     addSourceDialog: function () {
         var container = $('#g-dialog-container');
@@ -18,6 +21,79 @@ minerva.views.SourcePanel = minerva.View.extend({
             collection: this.sourceCollection,
             parentView: this
         }).render();
+    },
+
+    uploadLocalDialog: function () {
+        var container = $('#g-dialog-container');
+
+        this.uploadWidget = new girder.views.UploadWidget({
+            el: container,
+            noParent: true,
+            title: 'Upload a local file',
+            overrideStart: true,
+            parentView: this.parentView
+        }).on('g:uploadFinished', function () {
+            this.upload = false;
+        }, this).render();
+        this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
+        this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
+        this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
+
+        //this.addSourceWidget = new minerva.views.AddSourceWidget({
+            //el: container,
+            //collection: this.sourceCollection,
+            //parentView: this
+        //}).render();
+    },
+
+    /**
+     * Called when the user selects or drops files to be uploaded.
+     */
+    filesSelected: function (files) {
+        var zeroethFileName = null;
+        this.newItemName = null;
+        this.newItemExt = null;
+        if (files && files.length > 0) {
+            console.log(files);
+            zeroethFileName = files[0].name;
+            this.newItemName = zeroethFileName.substr(0, zeroethFileName.lastIndexOf('.'));
+            this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
+            this.newItemType = files[0].type;
+        }
+    },
+
+    /**
+     * Create a new Item for the source, then upload all files there.
+     */
+    uploadStarted: function () {
+        console.log('uploadStarted');
+        console.log(this.sourceCollection);
+        // need to create a new item in the dataset folder, then upload there
+        this.itemSource = new minerva.models.ItemSourceModel({});
+        var params = {
+            name: this.newItemName,
+            type: this.newItemType
+        };
+        this.itemSource.on('m:sourceReceived', function (source) {
+        //this.itemSource.on('g:saved', function () {
+            this.uploadWidget.parentType = 'item';
+            this.uploadWidget.parent = this.itemSource;
+            this.uploadWidget.uploadNextFile();
+        }, this).on('g:error', function (err) {
+            console.error(err);
+        }).createSource(params);
+    },
+
+    /**
+     * Post-process data after it has been loaded depending on the
+     * extension of the dataset.
+     */
+    uploadFinished: function () {
+        console.log('uplaodFinished');
+        this.sourceCollection.add(this.itemSource);
+//source);
+        //this.itemSource.on('m:sourceReceived', function (source) {
+        //}, this).createSource();
     },
 
     selectS3Files: function (evt) {
@@ -83,6 +159,22 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.sourceInfoWidget.render();
     },
 
+    displayPdf: function (evt) {
+        var el = $(evt.currentTarget);
+        var source = this.sourceCollection.get(el.attr('cid'));
+        console.log(source);
+        if (!this.pdfViewWidget) {
+            this.pdfViewWidget = new minerva.views.PdfViewWidget({
+                el: $('#g-dialog-container'),
+                source: source,
+                parentView: this
+            });
+        } else {
+            this.pdfViewWidget.setCurrentSource(source);
+        }
+        this.pdfViewWidget.render();
+    },
+
     deleteSource: function (evt) {
         var el = $(evt.currentTarget);
         var source = this.sourceCollection.get(el.attr('cid'));
@@ -109,30 +201,6 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.sourceCollection = settings.sourceCollection;
         this.datasetCollection = settings.datasetCollection;
 
-        // TODO similar to addSourceWidget,
-        // would be nice if new source types could register themselves,
-        // perhaps with a method on the minerva object, that we could then
-        // query here.  All the source types register themselves upon definition,
-        // and we query here upon instantation.
-        this.sourceTypes = {
-            wms: {
-                icon: 'icon-layers',
-                action: 'm-display-wms-layers-list'
-            },
-            elasticsearch: {
-                icon: 'icon-search',
-                action: 'm-display-elasticsearch-query'
-            },
-            s3: {
-                icon: 'icon-cloud',
-                action: 'm-display-s3-bucket-hierarchy'
-            },
-            mongo: {
-                icon: 'icon-leaf',
-                action: 'm-display-mongo-collections'
-            }
-        };
-
         this.listenTo(this.sourceCollection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.sourceCollection, 'change', function () {
@@ -154,10 +222,57 @@ minerva.views.SourcePanel = minerva.View.extend({
         }, this));
     },
 
+    sourceDisplay: function (source) {
+        // TODO similar to addSourceWidget,
+        //
+        //
+        //
+        // would be nice if new source types could register themselves,
+        // perhaps with a method on the minerva object, that we could then
+        // query here.  All the source types register themselves upon definition,
+        // and we query here upon instantation.
+
+        var sourceTypes = {
+            wms: {
+                icon: 'icon-layers',
+                action: 'm-display-wms-layers-list'
+            },
+            elasticsearch: {
+                icon: 'icon-search',
+                action: 'm-display-elasticsearch-query'
+            },
+            s3: {
+                icon: 'icon-cloud',
+                action: 'm-display-s3-bucket-hierarchy'
+            },
+            mongo: {
+                icon: 'icon-leaf',
+                action: 'm-display-mongo-collections'
+            },
+            item: {
+                icon: 'icon-doc-text-inv',
+                action: null
+            }
+        // TODO check postgres
+        };
+
+        var display = sourceTypes[source.metadata().source_type];
+        if (source.metadata().source_type === 'item' && source.metadata().item_type === 'application/pdf') {
+            display = {
+                icon: 'icon-file-pdf',
+                action: 'm-display-pdf'
+            };
+        }
+        return display;
+    },
+
+
     render: function () {
+
+
         this.$el.html(minerva.templates.sourcePanel({
             sources: this.sourceCollection.models,
-            sourceTypes: this.sourceTypes
+            sourceDisplay: this.sourceDisplay
         }));
 
         var tooltipProperties = {
@@ -166,7 +281,7 @@ minerva.views.SourcePanel = minerva.View.extend({
             container: this.$el,
             trigger: 'hover'
         };
-        this.$('.m-add-source').tooltip(tooltipProperties);
+        this.$('i').tooltip(tooltipProperties);
 
         return this;
     }
