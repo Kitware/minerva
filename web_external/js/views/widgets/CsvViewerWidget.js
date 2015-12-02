@@ -4,8 +4,9 @@
 minerva.views.CsvViewerWidget = minerva.View.extend({
 
   events: {
-      'click .m-add-source-button': function () {
-
+      'click .m-add-source-button': function (e) {
+          e.preventDefault();
+          // TODO: Add to source here
       },
 
       'click .m-upload-another-file-button': function (e) {
@@ -40,7 +41,8 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
           $('table#data').DataTable({
               data: this.data,
               columns: colNames,
-              autoWidth: false,
+              autoWidth: true,
+              hover: true,
               ordering: true
           });
       }, this));

@@ -1,16 +1,17 @@
 .modal-dialog
   .modal-content
-    form#m-add-csv-source-form.modal-form(role="form")
+    form#m-add-csv-viewer-form.modal-form(role="form")
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
           | CSV Viewer
 
-      .tableDataContainer
-          .tableDataContainerHeader
-              h4.modal-title
+      .m-tableDataContainer
+          .m-ableDataContainerHeader
+              h4.modal-title.csv-tile
                   | #{title}
-          table#data
+          .m-table-container
+              table.table-hover#data
 
       .modal-footer
           button.m-upload-another-file-button.btn.btn-small.btn-primary
