@@ -1,0 +1,22 @@
+.modal-dialog
+  .modal-content
+    form#m-add-csv-source-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | CSV Viewer
+
+      .tableDataContainer
+          .tableDataContainerHeader
+              h4.modal-title
+                  | #{title}
+          table#data
+
+      .modal-footer
+          button.m-upload-another-file-button.btn.btn-small.btn-primary
+            i.icon-upload
+            | Upload another file
+
+          button.m-add-source-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Add source

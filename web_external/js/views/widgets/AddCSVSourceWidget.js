@@ -12,31 +12,20 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                 if (typeof (FileReader) != "undefined") {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        var table = $("<table />");
-                        var dataWithLines = this.parseCSVContent(e.target.result);
-                        var rows = dataWithLines.split("/");
-                        var tableHead = rows[0].split(',');
-                        var tableBody = [];
-                        for (var i = 0; i < rows.length; i++) {
-                            // var row = $("<tr />");
-                            var cells = rows[i].split(",");
-                            tableBody.push(cells);
-                            // for (var j = 17; j < cells.length; j++) {
-                            //   tableBody.push(cells[j]);
-                            //   // console.log('cell', cells[j]);
-                            //     // var cell = $("<td />");
-                            //     // cell.html(cells[j]);
-                            //     // row.append(cell);
-                            // }
-                            // table.append(row);
+                        var pasredCSV = Papa.parse(e.target.result, {skipEmptyLines: true});
+                        if (!pasredCSV || !pasredCSV.data) {
+                            console.error('This dataset lacks csv data to create geojson on the client.');
+                            return;
                         }
-                        // Append the table to the csvViewerWidget
-                        // $("#dvCSV").html('');
-                        // $("#dvCSV").append(table);
-                        this.tableData.tableHead = tableHead;
-                        console.log(tableBody);
-                        this.tableData.tableBody = tableBody;
-                        this.render();
+
+                        new minerva.views.CsvViewerWidget({
+                            el: $('#g-dialog-container'),
+                            parentView: this,
+                            parentCollection: this.collection,
+                            data: pasredCSV.data,
+                            title: this.$('#m-csv-name').val()
+                        }).render();
+                        
                     }.bind(this);
                     reader.readAsText($("#csvFileUpload")[0].files[0]);
                 } else {
@@ -62,85 +51,41 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         }
     },
 
-    getGeoJson: function (callback) {
-      $.ajax({
-        url: "https://s3.amazonaws.com/epidemico/minerva_geojson.csv",
-        type: 'GET',
-        success: function (resp) {
-          var json = this.parseCSVContent(resp);
-          var geojson = this.jsonToGeojson(json);
-          callback(geojson);
-          // this.fileData = JSON.stringify(geojson);
-          // this.set('geojson', geojson);
-          // this.set('name', 'testing');
-          // this.geoFileReader = 'jsonReader';
-          // this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-          // this.trigger('m:dataLoaded', this.get('_id'));
-          // this.trigger('m:csvDatasetReceived');
-        }.bind(this)
-      });
-    },
-
-    parseCSVContent: function (data) {
-      var dataWithLines = '';
-      var dataArray = data.split(',');
-      var counter = 0;
-      for (var k = 0; k < dataArray.length;  k++) {
-        counter++;
-        if (counter === 17) {
-          dataWithLines += dataArray[k] + '/';
-          counter = 0;
-        } else {
-          dataWithLines += dataArray[k] + ',';
-        }
-
-      }
-      // var lines = dataWithLines.split("/");
-      // var colNames = lines[0].split(",");
-      // var records = [];
-      // for(var i = 1; i < lines.length; i++) {
-      //   var record = {};
-      //   var bits = lines[i].split(",");
-      //   for (var j = 0 ; j < bits.length ; j++) {
-      //     record[colNames[j]] = bits[j];
-      //   }
-      //   records.push(record);
-      // }
-      return dataWithLines;
-    },
-
-    jsonToGeojson: function (json) {
-      var geojson = {};
-
-      geojson.type = "FeatureCollection";
-      geojson.features = [];
-
-      json.forEach(function (object) {
-        geojson.features.push({
-          "type": "Feature",
-           "geometry": { "type": "Point",
-                         "coordinates": [
-                                          parseInt(object.point_longitude),
-                                          parseInt(object.point_latitude)
-                                        ]
-                        },
-           "properties": object
-        });
-      });
-
-      return geojson;
-
-    },
-
     initialize: function (settings) {
         this.collection = settings.collection;
-        this.tableData = { tableHead: [], tableBody: [] };
+        this.pasredCSV = {};
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addCSVSourceWidget({
-          tableData: this.tableData
-        }));
+
+//       var data = [
+//         [
+//             "1",
+//             "2",
+//             "3",
+//             "4",
+//             "5",
+//             "6"
+//         ],
+//     [
+//         "Tiger Nixon",
+//         "System Architect",
+//         "Edinburgh",
+//         "5421",
+//         "2011/04/25",
+//         "$3,120"
+//     ],
+//     [
+//         "Garrett Winters",
+//         "Director",
+//         "Edinburgh",
+//         "8422",
+//         "2011/07/25",
+//         "$5,300"
+//     ]
+// ];
+
+        var modal = this.$el.html(minerva.templates.addCSVSourceWidget({}));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }

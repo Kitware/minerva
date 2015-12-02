@@ -11,23 +11,11 @@
           label.control-label(for="m-csv-name") Name
           input.input-sm#m-csv-name.form-control(type="text", placeholder="Enter CSV source name")
         .form-group
-          label.control-label(for="m-csv-file") TODO: file uploader
+          label.control-label(for="m-csv-file")
           input#csvFileUpload(type="file")
-
-        .m-table-container
-          table.table.table-hover
-            thead
-              each head in tableData.tableHead
-                th #{head}
-            tbody
-              each rows in tableData.tableBody
-                  tr
-                    each row in rows
-                      td #{row}
-
 
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-create-csv-source-button.btn.btn-small.btn-primary
-            i.icon-plus-squared
+            i.icon-upload
             | Upload file
