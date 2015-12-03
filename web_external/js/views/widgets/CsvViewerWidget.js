@@ -22,7 +22,6 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       }
   },
 
-
   initialize: function (settings) {
       this.data = settings.data;
       this.title = settings.title;
