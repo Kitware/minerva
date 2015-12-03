@@ -54,7 +54,6 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.newItemName = null;
         this.newItemExt = null;
         if (files && files.length > 0) {
-            console.log(files);
             zeroethFileName = files[0].name;
             this.newItemName = zeroethFileName.substr(0, zeroethFileName.lastIndexOf('.'));
             this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
@@ -66,8 +65,6 @@ minerva.views.SourcePanel = minerva.View.extend({
      * Create a new Item for the source, then upload all files there.
      */
     uploadStarted: function () {
-        console.log('uploadStarted');
-        console.log(this.sourceCollection);
         // need to create a new item in the dataset folder, then upload there
         this.itemSource = new minerva.models.ItemSourceModel({});
         var params = {
@@ -89,7 +86,6 @@ minerva.views.SourcePanel = minerva.View.extend({
      * extension of the dataset.
      */
     uploadFinished: function () {
-        console.log('uplaodFinished');
         this.sourceCollection.add(this.itemSource);
 //source);
         //this.itemSource.on('m:sourceReceived', function (source) {
@@ -162,7 +158,6 @@ minerva.views.SourcePanel = minerva.View.extend({
     displayPdf: function (evt) {
         var el = $(evt.currentTarget);
         var source = this.sourceCollection.get(el.attr('cid'));
-        console.log(source);
         if (!this.pdfViewWidget) {
             this.pdfViewWidget = new minerva.views.PdfViewWidget({
                 el: $('#g-dialog-container'),

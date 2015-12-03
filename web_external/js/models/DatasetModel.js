@@ -9,6 +9,10 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         stack: 0
     },
 
+    isDownloadable: function () {
+        return false;
+    },
+
     isRenderable: function () {
         // Really this function should be defined in each data model subclass,
         // OR - based on whether or not geoFileReader is defined (better because

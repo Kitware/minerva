@@ -35,6 +35,8 @@ class Analysis(Resource):
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
+        self.route('POST', ('pdf_table_extraction',),
+                   self.pdfTableExtractionAnalysis)
 
     @access.user
     def getAnalysisFolder(self, params):
@@ -104,3 +106,72 @@ class Analysis(Resource):
         Description('Create the minerva analysis folder, a global resource.')
         .param('datasetName', 'Name of the dataset created by this analysis.')
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
+
+    @access.user
+    def pdfTableExtractionAnalysis(self, params):
+        currentUser = self.getCurrentUser()
+        sourceId = params['sourceId']
+        source = self.model('item').load(sourceId, user=currentUser)
+        # TODO assuming only one file
+        for itemFile in self.model('item').childFiles(source):
+            fileId = itemFile['_id']
+
+
+
+
+        pageNumber = params['pageNumber']
+        analysis = findAnalysisByName(currentUser, 'pdf table extraction')
+
+        # TODO want to give the option to set this from the UI?
+        datasetName = 'pdf extract %s' % source['name']
+        print(fileId)
+        print(pageNumber)
+        print(analysis)
+        print datasetName
+
+        minerva_metadata = {
+            'dataset_type': 'text', # HACK very limited support
+            'source': 'pdf_table_extraction',
+            'source_id': sourceId,
+            'file_id': fileId,
+            'page_number': pageNumber
+        }
+
+        datasetResource = Dataset()
+        dataset = datasetResource.constructDataset(datasetName,
+                                                   minerva_metadata,
+                                                   'created by pdf table extraction')
+
+        print(dataset)
+
+        params = {
+            'fileId': fileId,
+            'pageNumber': pageNumber
+        }
+
+        # TODO change token to job token
+        user, token = self.getCurrentUser(returnToken=True)
+        kwargs = {
+            'params': params,
+            'user': currentUser,
+            'dataset': dataset,
+            'analysis': analysis,
+            'token': token
+        }
+
+        job = self.model('job', 'jobs').createLocalJob(
+            title='pdf table extraction: %s' % datasetName,
+            user=currentUser,
+            type='bsve.pdfextraction',
+            public=False,
+            kwargs=kwargs,
+            module='girder.plugins.minerva.jobs.pdf_table_extraction',
+            async=True)  # TODO change
+        addJobOutput(job, dataset)
+        self.model('job', 'jobs').scheduleJob(job)
+        return job
+
+    pdfTableExtractionAnalysis.description = (
+        Description('Create a job to extract a table from a pdf item source.')
+        .param('sourceId', 'ID of the Item Source with the PDF file.')
+        .param('pageNumber', 'The page number to extract from the PDF file.'))

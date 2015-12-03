@@ -22,7 +22,6 @@ minerva.views.PdfViewWidget = minerva.View.extend({
 
     render: function () {
         this.collection.on('g:changed', function () {
-            console.log(this.collection);
             var modal = this.$el.html(minerva.templates.pdfViewWidget({
                         name: this.source.get('name'),
                         // TODO get static path, currently hardcoded

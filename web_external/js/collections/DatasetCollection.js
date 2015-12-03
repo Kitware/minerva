@@ -7,6 +7,8 @@ minerva.collections.DatasetCollection = minerva.collections.MinervaCollection.ex
                 return new minerva.models.WmsDatasetModel(attrs, options);
             } else if (attrs.meta.minerva.dataset_type === 'geojson') {
                 return new minerva.models.GeojsonDatasetModel(attrs, options);
+            } else if (attrs.meta.minerva.dataset_type === 'text') {
+                return new minerva.models.TextDatasetModel(attrs, options);
             }
         }
         return new minerva.models.DatasetModel(attrs, options);

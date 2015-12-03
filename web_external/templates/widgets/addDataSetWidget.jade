@@ -1,0 +1,29 @@
+.modal-dialog
+  .modal-content
+    form#m-add-dataset-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Select data set type to add
+      .modal-body
+        .form-group
+          .radio
+            input#m-upload-dataset(type="radio", name="m-dataset-add-method", checked=true)
+            label
+              i.icon-upload-cloud.m-add-dataset-type-icon
+              | Local
+          .radio
+            input#m-s3-dataset(type="radio", name="m-dataset-add-method")
+            label
+              i.icon-cloud.m-add-dataset-type-icon
+              | S3 bucket
+          .radio
+            input#m-mongo-dataset(type="radio", name="m-dataset-add-method")
+            label
+              i.icon-database-1.m-add-dataset-type-icon
+              | MongoDB
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-add-dataset-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Add Dataset

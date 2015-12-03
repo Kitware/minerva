@@ -1,0 +1,26 @@
+.modal-dialog
+  .modal-content
+    form#m-pdf-table-extraction-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Pdf Table Extraction
+        .modal-body
+          .form-group.m-pdf-table-extraction-input-source
+            label.control-label(for="m-pdf-table-extraction-input-source") input source
+            select.form-control.input-sm#m-pdf-table-extraction-input-source
+              option(id='m-pdf-table-source-select-placeholder', value='', disabled=true, selected=true) select a pdf source
+              each source in pdfSources
+                option(value=source.cid)= source.get('name')
+            .m-pdf-table-extraction-display
+          .form-group
+            label.control-label(for="m-pdf-table-extraction-page-parameter") page number
+            input.input-sm#m-pdf-table-extraction-page-parameter.form-control(type="text", placeholder="Enter page number to extract")
+          .form-group
+            .g-validation-failed-message
+
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-run-pdf-table-extraction.btn.btn-small.btn-primary(type="submit", disabled=true)
+                i.icon-play-circled
+                | Run

@@ -14,6 +14,10 @@
                             //- Eye icon to move dataset into current session
                             - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
                             i(class=classes)&attributes(attributes)
+                        else if dataset.isDownloadable()
+                            a.m-dataset-download-link(target="_self", href="#{dataset.downloadUrl()}")
+                              - var classes = 'icon-download icon-enabled m-download-dataset'
+                              i(class=classes)&attributes(attributes)
                         //- trash icon to delete dataset
                         - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
                         i(class=classes)&attributes(attributes)
