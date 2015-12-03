@@ -6,11 +6,12 @@ include uploadWidgetMixins
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title= title
+          | Upload CSV File
         +g-upload-widget-subtitle
       .modal-body
         .form-group
-          label.control-label(for="m-csv-name") Name
-          input.input-sm#m-csv-name.form-control(type="text", placeholder="Enter CSV source name")
+          label.control-label(for="m-csv-name") Title
+          input.input-sm#m-csv-name.form-control(type="text", placeholder="Enter CSV source title")
         +g-upload-widget-browse-or-drop
         +m-upload-widget-progress
       .modal-footer
