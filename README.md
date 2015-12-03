@@ -1,3 +1,4 @@
+<img src="https://github.com/Kitware/minerva/blob/header_design/web_external/images/owl.png" alt="Minerva Logo" width="100" height="100"/>
 ## Minerva
 Minerva is an application framework that provides client/server/services
 capabilities using [Girder](http://www.github.com/Girder/girder), [GeoJS]
