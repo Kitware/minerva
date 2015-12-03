@@ -10,8 +10,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             var title = this.$('#m-csv-name').val();
 
             if (this.csv) {
-                var pasredCSV = this.parseCsv(this.csv);
-                this.renderCsvViewer(pasredCSV.data, title);
+                var parsedCSV = this.parseCsv(this.csv);
+                this.renderCsvViewer(parsedCSV.data, title);
                 return;
             }
 
@@ -21,8 +21,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                 if (typeof (FileReader) != "undefined") {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        var pasredCSV = this.parseCsv(e.target.result);
-                        this.renderCsvViewer(pasredCSV.data, title);
+                        var parsedCSV = this.parseCsv(e.target.result);
+                        this.renderCsvViewer(parsedCSV.data, title);
                     }.bind(this);
                     reader.readAsText($(".m-files")[0].files[0]);
                 } else {
@@ -80,12 +80,12 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     },
 
     parseCsv: function (csv) {
-        var pasredCSV = Papa.parse(csv, {skipEmptyLines: true});
-        if (!pasredCSV || !pasredCSV.data) {
+        var parsedCSV = Papa.parse(csv, {skipEmptyLines: true});
+        if (!parsedCSV || !parsedCSV.data) {
             console.error('This dataset lacks csv data to create geojson on the client.');
             return;
         }
-        return pasredCSV;
+        return parsedCSV;
     },
 
     filesChanged: function () {
