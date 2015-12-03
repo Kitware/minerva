@@ -28,12 +28,11 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
   },
 
   render: function () {
-
-    var colNames = _.map(this.data[0], function (name) {
-        return { title: name };
-    });
-    var modal = this.$el.html(minerva.templates.csvViewerWidget({
-          title: this.title
+      var colNames = _.map(this.data[0], function (name) {
+          return { title: name };
+      });
+      var modal = this.$el.html(minerva.templates.csvViewerWidget({
+            title: this.title
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {
@@ -46,9 +45,8 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
           });
       }, this));
 
-    modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
-    return this;
-
+      modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+      return this;
   }
 
 });

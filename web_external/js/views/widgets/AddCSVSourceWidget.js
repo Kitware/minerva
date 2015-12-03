@@ -6,28 +6,23 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     events: {
         'submit #m-upload-form': function (e) {
             e.preventDefault();
-            var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+
+            var title = this.$('#m-csv-name').val();
 
             if (this.csv) {
-                var pasredCSV = Papa.parse(this.csv, {skipEmptyLines: true});
-                if (!pasredCSV || !pasredCSV.data) {
-                    console.error('This dataset lacks csv data to create geojson on the client.');
-                    return;
-                }
-                this.renderCsvViewer(pasredCSV.data, this.$('#m-csv-name').val());
+                var pasredCSV = this.parseCsv(this.csv);
+                this.renderCsvViewer(pasredCSV.data, title);
                 return;
             }
 
-            if (regex.test($(".m-files").val().toLowerCase())) {
+            var REGEX = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+
+            if (REGEX.test($(".m-files").val().toLowerCase())) {
                 if (typeof (FileReader) != "undefined") {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        var pasredCSV = Papa.parse(e.target.result, {skipEmptyLines: true});
-                        if (!pasredCSV || !pasredCSV.data) {
-                            console.error('This dataset lacks csv data to create geojson on the client.');
-                            return;
-                        }
-                        this.renderCsvViewer(pasredCSV.data, this.$('#m-csv-name').val());
+                        var pasredCSV = this.parseCsv(e.target.result);
+                        this.renderCsvViewer(pasredCSV.data, title);
                     }.bind(this);
                     reader.readAsText($(".m-files")[0].files[0]);
                 } else {
@@ -42,10 +37,12 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             this.$('.g-upload-error-message').html('');
             this.currentFile.resumeUpload();
         },
+
         'click .g-restart-upload': function () {
             this.$('.g-upload-error-message').html('');
             this.uploadNextFile();
         },
+
         'change .m-files': function () {
             var files = this.$('.m-files')[0].files;
             if (files.length) {
@@ -53,33 +50,47 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                 this.filesChanged();
             }
         },
-        'click .g-drop-zone': function () {
+
+        'click .m-drop-zone': function () {
             this.$('.m-files').click();
         },
-        'dragenter .g-drop-zone': function (e) {
+
+        'dragenter .m-drop-zone': function (e) {
             e.stopPropagation();
             e.preventDefault();
             e.originalEvent.dataTransfer.dropEffect = 'copy';
-            this.$('.g-drop-zone')
-                .addClass('g-dropzone-show')
+            this.$('.m-drop-zone')
+                .addClass('m-dropzone-show')
                 .html('<i class="icon-bullseye"/> Drop files here');
         },
-        'dragleave .g-drop-zone': function (e) {
+
+        'dragleave .m-drop-zone': function (e) {
             e.stopPropagation();
             e.preventDefault();
-            this.$('.g-drop-zone')
-                .removeClass('g-dropzone-show')
+            this.$('.m-drop-zone')
+                .removeClass('m-dropzone-show')
                 .html('<i class="icon-docs"/> Browse or drop files');
         },
-        'dragover .g-drop-zone': function (e) {
+
+        'dragover .m-drop-zone': function (e) {
             e.preventDefault();
         },
-        'drop .g-drop-zone': 'filesDropped'
+
+        'drop .m-drop-zone': 'filesDropped'
+    },
+
+    parseCsv: function (csv) {
+        var pasredCSV = Papa.parse(csv, {skipEmptyLines: true});
+        if (!pasredCSV || !pasredCSV.data) {
+            console.error('This dataset lacks csv data to create geojson on the client.');
+            return;
+        }
+        return pasredCSV;
     },
 
     filesChanged: function () {
         if (this.files.length === 0) {
-            this.$('.g-overall-progress-message').text('No files selected');
+            this.$('.m-overall-progress-message').text('No files selected');
             this.setUploadEnabled(false);
         } else {
             this.totalSize = 0;
@@ -94,12 +105,12 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             } else {
                 msg = 'Selected <b>' + this.files[0].name + '</b>';
             }
-            this.$('.g-overall-progress-message').html('<i class="icon-ok"/> ' +
+            this.$('.m-overall-progress-message').html('<i class="icon-ok"/> ' +
                 msg + '  (' + girder.formatSize(this.totalSize) +
                 ') -- Press start button');
             this.setUploadEnabled(true);
-            this.$('.g-progress-overall,.g-progress-current').addClass('hide');
-            this.$('.g-current-progress-message').empty();
+            this.$('.g-progress-overall,.m-progress-current').addClass('hide');
+            this.$('.m-current-progress-message').empty();
             this.$('.g-upload-error-message').empty();
         }
     },
@@ -115,8 +126,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     filesDropped: function (e) {
         e.stopPropagation();
         e.preventDefault();
-        this.$('.g-drop-zone')
-            .removeClass('g-dropzone-show')
+        this.$('.m-drop-zone')
+            .removeClass('m-dropzone-show')
             .html('<i class="icon-docs"/> Browse or drop files');
         this.files = e.originalEvent.dataTransfer.files;
         var reader = new FileReader();
@@ -129,6 +140,16 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         this.filesChanged();
     },
 
+    renderCsvViewer: function (data, name) {
+        new minerva.views.CsvViewerWidget({
+            el: $('#g-dialog-container'),
+            parentView: this,
+            parentCollection: this.collection,
+            data: data,
+            title: name
+        }).render();
+    },
+
     initialize: function (settings) {
         this.collection = settings.collection;
         this.csv = null;
@@ -136,18 +157,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         this.totalSize = 0;
     },
 
-    renderCsvViewer: function (data, name) {
-      new minerva.views.CsvViewerWidget({
-          el: $('#g-dialog-container'),
-          parentView: this,
-          parentCollection: this.collection,
-          data: data,
-          title: name
-      }).render();
-    },
-
     render: function () {
-
         var modal = this.$el.html(minerva.templates.addCSVSourceWidget({}));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;

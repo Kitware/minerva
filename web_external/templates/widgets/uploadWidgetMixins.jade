@@ -10,7 +10,7 @@ mixin g-upload-widget-subtitle
       | #{parent.name()}
 
 mixin g-upload-widget-browse-or-drop
-  .g-drop-zone
+  .m-drop-zone
     i.icon-docs
     if (parentType === 'file')
       |  Browse or drop a file here
@@ -22,16 +22,16 @@ mixin g-upload-widget-browse-or-drop
     else
       input.m-files(type="file", multiple)
 
-mixin g-upload-widget-progress
-  .g-current-progress-message
-  .g-progress-current.progress.progress-striped.hide
+mixin m-upload-widget-progress
+  .m-current-progress-message
+  .m-progress-current.progress.progress-striped.hide
     .progress-bar.progress-bar-info(role="progressbar")
-  .g-overall-progress-message No files selected
-  .g-progress-overall.progress.progress-striped.hide
+  .m-overall-progress-message No files selected
+  .m-progress-overall.progress.progress-striped.hide
     .progress-bar.progress-bar-info(role="progressbar")
   .g-upload-error-message.g-validation-failed-message
 
-mixin g-upload-widget-start-button
+mixin m-upload-widget-start-button
   button.g-start-upload.btn.btn-small.btn-primary.disabled(type="submit")
     i.icon-upload
     |  Start Upload
