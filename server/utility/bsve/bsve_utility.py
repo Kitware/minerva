@@ -26,9 +26,49 @@ import random
 import time
 import sys
 from datetime import datetime
+from functools import wraps
 
 from dateutil.parser import parse
 import requests
+
+
+def flatten(func):
+    """Flatten the output of a single element REST request."""
+    @wraps(func)
+    def wrapper(*args, **kw):
+        result = func(*args, **kw)
+        try:
+            assert len(result) == 1
+        except Exception:
+            raise Exception('Expected an return value of length 1')
+        return result[0]
+    return wrapper
+
+
+def assert_status(func):
+    """Assert the value returned by a rest endpoint succeeded.
+
+    The wrapped function will return the results of the REST call when
+    it succeeds.  When the call fails, an exception will be raised.
+    None will be returned when the requested item is not yet ready.
+    """
+    @wraps(func)
+    def wrapper(*args, **kw):
+        result = json.loads(func(*args, **kw))
+        if result['status'] == 1:
+            if result.get('results') is not None:
+                return result['results']
+            elif result.get('result') is not None:
+                return result['result']
+            return result
+        elif result['status'] == -1:
+            raise Exception('BSVE request failed with %s' % result['errors'])
+        elif result['status'] != 0:
+            raise Exception(
+                'Unexpected status from BSVE %s.' % str(result['status'])
+            )
+        return None
+    return wrapper
 
 
 class BsveUtility(object):
@@ -59,10 +99,10 @@ class BsveUtility(object):
         signature = hashed.digest().encode('hex').rstrip('\n')
 
         authParts = [
-            'apikey='+apiKey,
-            'timestamp='+timestamp,
-            'nonce='+nonce,
-            'signature='+signature
+            'apikey=' + apiKey,
+            'timestamp=' + timestamp,
+            'nonce=' + nonce,
+            'signature=' + signature
         ]
         harbingerAuthentication = ';'.join(authParts)
 
@@ -115,24 +155,14 @@ class BsveUtility(object):
         endpoint = '/api/search/v1/request'
         return self._request('POST', endpoint, data=json.dumps(data))
 
+    @assert_status
     def search_result(self, requestId):
         """Query the BSVE for the results of a the given search request.
 
         :returns dict[]: The array of results or None if not finished
         """
         endpoint = '/api/search/v1/result'
-        resp = self._request('GET', endpoint, params={'requestId': requestId})
-        search = json.loads(resp)
-
-        if search['status'] == 1:
-            return search['results']
-        elif search['status'] == -1:
-            raise Exception('BSVE request %s failed.' % requestId)
-        elif search['status'] != 0:
-            raise Exception(
-                'Unexpected status from BSVE %s.' % str(search['status'])
-            )
-        return None
+        return self._request('GET', endpoint, params={'requestId': requestId})
 
     @classmethod
     def construct_search_query(cls, term, from_date, to_date,
@@ -171,8 +201,72 @@ class BsveUtility(object):
         request = self.search_submit(data)
         result = None
         while result is None:
+            time.sleep(1)
             result = self.search_result(request)
         return result
+
+    @assert_status
+    def list_types(self, *types):
+        """List available data types.
+
+        :returns dict[]: The available sources
+        """
+        endpoint = '/api/data/list'
+        return self._request('GET', endpoint)
+
+    @flatten
+    @assert_status
+    def type_info(self, type):
+        """Get information about a data source type.
+
+        :param str type: The source type name
+        :returns dict[]: The datasource metadata
+        """
+        endpoint = '/api/data/list/' + type
+        return self._request('GET', endpoint)
+
+    def data_dump_submit(self, type, filter, source=None, count=None):
+        """Performa data dump of the given source type.
+
+        :param str type: A source type
+        :param str filter: An sql style query string
+        :param str source: A single data source
+        :param int count: Return the top "count" results
+        :returns dict: Should contain the key `requestId` to get results
+        """
+        endpoint = '/api/data/query/' + type
+        params = {
+            '$filter': filter
+        }
+        if source is not None:
+            params['$source'] = source
+        if count is not None:
+            params['$top'] = str(count)
+        result = json.loads(self._request('GET', endpoint, params=params))
+        if result['status'] not in (0, 1):
+            raise Exception('Request failed with %s' % result['errors'])
+        return result
+
+    @assert_status
+    def data_dump_result(self, requestId):
+        """Query for the results of a data dump."""
+        endpoint = '/api/data/result/' + str(requestId)
+        return self._request('GET', endpoint)
+
+    def data_dump(self, type, filter, source=None, count=None):
+        """Perform a data set query and block until done."""
+        request = self.data_dump_submit(
+            type, filter, source, count
+        )['requestId']
+        result = None
+        while result is None:
+            time.sleep(1)
+            result = self.data_dump_result(request)
+        return result
+
+    def custom_call(self, endpoint, method='GET', params={}, data=''):
+        """Submit a custom REST call to the BSVE API."""
+        return json.loads(self._request(method, endpoint, params, data))
 
     @staticmethod
     def _normalize_date(date):
@@ -213,7 +307,8 @@ class BsveUtility(object):
         file.write(resp.text)
         file.write('\n' + '*' * 35 + ' END ' + '*' * 35 + '\n\n')
 
-if __name__ == '__main__':
+
+def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     from os import environ
 
@@ -224,49 +319,101 @@ if __name__ == '__main__':
     start = str(start.date())
 
     parser = ArgumentParser(
-        description='Perform a BSVE search.',
+        description='Perform a BSVE REST call.',
         formatter_class=ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('term', nargs='+', help='The search term')
     parser.add_argument(
         '--verbose', '-v', default=False, const=sys.stderr,
         help='Verbose output', action='store_const'
     )
     parser.add_argument(
-        '--start', '-s', nargs=1, default=start,
-        help='The start date'
-    )
-    parser.add_argument(
-        '--end', '-e', nargs=1, default=end,
-        help='The end date'
-    )
-    parser.add_argument(
-        '--sources', nargs='+', default=None,
-        help='The data sources to search'
-    )
-    parser.add_argument(
-        '--locations', nargs='+', default=None,
-        help='The locations to include'
-    )
-    parser.add_argument(
-        '--timezone', nargs=1, default='UTC',
-        help='The timezone of the search'
-    )
-    parser.add_argument(
-        '--user', nargs=1, default=environ.get('BSVE_USERNAME'),
+        '--user', default=environ.get('BSVE_USERNAME'),
         help='The bsve username, defaults $BSVE_USERNAME'
     )
     parser.add_argument(
-        '--apikey', nargs=1, default=environ.get('BSVE_APIKEY'),
+        '--apikey', default=environ.get('BSVE_APIKEY'),
         help='The bsve api key, defaults to $BSVE_APIKEY'
     )
     parser.add_argument(
-        '--secretkey', nargs=1, default=environ.get('BSVE_SECRETKEY'),
+        '--secretkey', default=environ.get('BSVE_SECRETKEY'),
         help='The bsve secret key, defaults to $BSVE_SECRETKEY'
     )
     parser.add_argument(
-        '--url', nargs=1, default='http://search.bsvecosystem.net',
+        '--url', default='http://search.bsvecosystem.net',
         help='The base url hosting the bsve api'
+    )
+
+    subparsers = parser.add_subparsers(dest='command')
+
+    search_parser = subparsers.add_parser(
+        'search', help='Search BSVE data sets'
+    )
+    search_parser.add_argument('term', nargs='+', help='The search term')
+    search_parser.add_argument(
+        '--start', '-s', default=start,
+        help='The start date'
+    )
+    search_parser.add_argument(
+        '--end', '-e', default=end,
+        help='The end date'
+    )
+    search_parser.add_argument(
+        '--sources', nargs='+', default=None,
+        help='The data sources to search'
+    )
+    search_parser.add_argument(
+        '--locations', nargs='+', default=None,
+        help='The locations to include'
+    )
+    search_parser.add_argument(
+        '--timezone', default='UTC',
+        help='The timezone of the search'
+    )
+
+    custom_parser = subparsers.add_parser(
+        'custom', help='Call a custom endpoint'
+    )
+    custom_parser.add_argument(
+        'endpoint', help='The endpoint to call, ex "/api/data/list"'
+    )
+    custom_parser.add_argument(
+        '--method', help='The HTTP method to use', default='GET'
+    )
+    custom_parser.add_argument(
+        '--params', help='A JSON dictionary of URL query parameters',
+        default='{}'
+    )
+    custom_parser.add_argument(
+        '--data', nargs='?',
+        help='Raw data for the request body or with no '
+        'argument read from STDIN',
+        default='', const=None
+    )
+
+    type_parser = subparsers.add_parser(
+        'type', help='Return data source type information'
+    )
+    type_parser.add_argument(
+        '--name', help='Return only the this type',
+        default=None
+    )
+
+    data_parser = subparsers.add_parser(
+        'data', help='Dump data for a given source type'
+    )
+    data_parser.add_argument(
+        'type', help='The source data type'
+    )
+    data_parser.add_argument(
+        'filter', help='The data filter to query the database with'
+    )
+    data_parser.add_argument(
+        '--source', help='Limit to this data source',
+        default=None
+    )
+    data_parser.add_argument(
+        '--count', help='Limit to this many results',
+        default=None
     )
 
     args = parser.parse_args()
@@ -280,10 +427,38 @@ if __name__ == '__main__':
         args.user, args.apikey, args.secretkey,
         args.url, args.verbose
     )
-    data = bsve.construct_search_query(
-        ' '.join(args.term), args.start, args.end,
-        time_zone=args.timezone, sources=args.sources,
-        locations=args.locations
-    )
 
-    print(json.dumps(bsve.search(data)))
+    if args.command == 'search':
+        data = bsve.construct_search_query(
+            ' '.join(args.term), args.start, args.end,
+            time_zone=args.timezone, sources=args.sources,
+            locations=args.locations
+        )
+        output = bsve.search(data)
+    elif args.command == 'list':
+        output = bsve.list_sources()
+    elif args.command == 'custom':
+        data = args.data
+        if data is None:
+            data = sys.stdin.read()
+        else:
+            data = ''.join(args.data)
+        output = bsve.custom_call(
+            args.endpoint, args.method, json.loads(args.params), data
+        )
+    elif args.command == 'type':
+        if args.name is None:
+            output = bsve.list_types()
+        else:
+            output = bsve.type_info(args.name)
+    elif args.command == 'data':
+        output = bsve.data_dump(
+            args.type, args.filter, source=args.source, count=args.count
+        )
+
+    if isinstance(output, (dict, list, tuple)):
+        output = json.dumps(output, indent=2)
+    print(output)
+
+if __name__ == '__main__':
+    main()
