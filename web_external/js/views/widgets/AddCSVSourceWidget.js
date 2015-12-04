@@ -12,12 +12,12 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             var rows = this.$('#m-csv-number-rows').val();
             this.rows = rows;
 
-            if (this.csv) {
-                var parsedCSV = this.parseCsv(this.csv);
-                this.data = parsedCSV.data;
-                this.renderCsvViewer();
-                return;
-            }
+            // if (this.csv) {
+            //     var parsedCSV = this.parseCsv(this.csv);
+            //     this.data = parsedCSV.data;
+            //     this.renderCsvViewer();
+            //     return;
+            // }
 
             var REGEX = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
 
@@ -25,9 +25,13 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                 if (typeof (FileReader) != "undefined") {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        var parsedCSV = this.parseCsv(e.target.result);
-                        this.data = parsedCSV.data;
+                        this.csv = e.target.result;
+                        var stats = this.getCsvStas();
+                        this.stats = stats;
                         this.renderCsvViewer();
+                        // var parsedCSV = this.parseCsv(e.target.result);
+                        // this.data = parsedCSV.data;
+                        // this.renderCsvViewer();
                     }.bind(this);
                     reader.readAsText($(".m-files")[0].files[0]);
                 } else {
@@ -84,8 +88,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         'drop .m-drop-zone': 'filesDropped'
     },
 
-    parseCsv: function (csv) {
-        var parsedCSV = Papa.parse(csv, { skipEmptyLines: true, preview: this.rows });
+    parseCsv: function () {
+        var parsedCSV = Papa.parse(this.csv, { skipEmptyLines: true });
         if (!parsedCSV || !parsedCSV.data) {
             console.error('This dataset lacks csv data to create geojson on the client.');
             return;
@@ -140,6 +144,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         		// get file content
         		var csv = e.target.result;
             this.csv = csv;
+            var stats = this.getCsvStas();
+            this.stats = stats;
         }.bind(this);
         reader.readAsText(this.files[0]);
         this.filesChanged();
@@ -150,18 +156,25 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             el: $('#g-dialog-container'),
             parentView: this,
             parentCollection: this.collection,
-            data: this.data,
-            title: this.title
+            csv: this.csv,
+            rows: this.rows,
+            title: this.title,
+            stats: this.stats
         }).render();
+    },
+
+    getCsvStas: function () {
+        var csv = this.parseCsv();
+        return csv.data.length;
     },
 
     initialize: function (settings) {
         this.collection = settings.collection;
         this.csv = null;
-        this.data = null;
+        this.stats = null;
         this.title = '';
         this.files = [];
-        this.totalSize = 0;
+        this.totalRows = 0;
         this.rows = null;
     },
 
