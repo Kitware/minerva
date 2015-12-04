@@ -19,7 +19,10 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
               parentCollection: this.collection
           }).render();
 
-      }
+      },
+      'click .m-load-more-rows-button': function (e) {
+          e.preventDefault();
+      },
   },
 
   initialize: function (settings) {

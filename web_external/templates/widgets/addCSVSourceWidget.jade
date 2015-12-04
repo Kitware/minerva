@@ -14,6 +14,9 @@ include uploadWidgetMixins
           input.input-sm#m-csv-name.form-control(type="text", placeholder="Enter CSV source title")
         +g-upload-widget-browse-or-drop
         +m-upload-widget-progress
+        .form-group
+          label.control-label(for="m-csv-name") Number of rows to be viewed
+          input.input-sm#m-csv-number-rows.form-control(type="text", placeholder="Number of rows to be viewed")
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Close
         +m-upload-widget-start-button

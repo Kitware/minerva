@@ -8,10 +8,14 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             e.preventDefault();
 
             var title = this.$('#m-csv-name').val();
+            this.title = title;
+            var rows = this.$('#m-csv-number-rows').val();
+            this.rows = rows;
 
             if (this.csv) {
                 var parsedCSV = this.parseCsv(this.csv);
-                this.renderCsvViewer(parsedCSV.data, title);
+                this.data = parsedCSV.data;
+                this.renderCsvViewer();
                 return;
             }
 
@@ -22,7 +26,8 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                     var reader = new FileReader();
                     reader.onload = function (e) {
                         var parsedCSV = this.parseCsv(e.target.result);
-                        this.renderCsvViewer(parsedCSV.data, title);
+                        this.data = parsedCSV.data;
+                        this.renderCsvViewer();
                     }.bind(this);
                     reader.readAsText($(".m-files")[0].files[0]);
                 } else {
@@ -80,7 +85,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     },
 
     parseCsv: function (csv) {
-        var parsedCSV = Papa.parse(csv, {skipEmptyLines: true});
+        var parsedCSV = Papa.parse(csv, { skipEmptyLines: true, preview: this.rows });
         if (!parsedCSV || !parsedCSV.data) {
             console.error('This dataset lacks csv data to create geojson on the client.');
             return;
@@ -140,21 +145,24 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         this.filesChanged();
     },
 
-    renderCsvViewer: function (data, name) {
+    renderCsvViewer: function () {
         new minerva.views.CsvViewerWidget({
             el: $('#g-dialog-container'),
             parentView: this,
             parentCollection: this.collection,
-            data: data,
-            title: name
+            data: this.data,
+            title: this.title
         }).render();
     },
 
     initialize: function (settings) {
         this.collection = settings.collection;
         this.csv = null;
+        this.data = null;
+        this.title = '';
         this.files = [];
         this.totalSize = 0;
+        this.rows = null;
     },
 
     render: function () {
