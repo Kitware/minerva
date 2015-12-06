@@ -26,6 +26,8 @@
     <link rel="stylesheet"
           href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
     <link rel="stylesheet"
+          href="http:////cdn.datatables.net/buttons/1.1.0/css/buttons.dataTables.min.css">
+    <link rel="stylesheet"
           href="http:////cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/minerva.min.css">
@@ -55,6 +57,8 @@
         % endif
     % endfor
     <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/buttons.colVis.min.js"></script>
     <script src="http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js"></script>
     <script src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>

@@ -73,13 +73,20 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {
-          $('table#data').dataTable({
+          $('table#data').DataTable({
               data: this.data,
               columns: this.colNames,
               autoWidth: true,
               hover: true,
               ordering: true,
-              pagingType: "full"
+              pagingType: "full",
+              dom: 'Bfrtip',
+              buttons: [
+                  {
+                      extend: 'colvis',
+                      columns: ':not(:first-child)'
+                  }
+              ]
           });
       }, this));
 
