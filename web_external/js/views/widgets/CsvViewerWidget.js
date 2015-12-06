@@ -5,6 +5,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
 
   events: {
       'click .m-add-source-button': function (e) {
+
           e.preventDefault();
           // TODO: Add to source here
       },
@@ -20,7 +21,9 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
           }).render();
 
       },
+
       'click .m-load-more-rows-button': function (e) {
+
           e.preventDefault();
 
           // TODO: Here we are arbitrarily doubling the rows
@@ -28,14 +31,16 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
           this.data = this.parseCsv();
 
           var table = $('table#data').dataTable();
+
           // Clear the table then render the new data
           table.fnClearTable();
           table.fnAddData(this.data);
 
+          // Disable the `show more rows` btn
           if (this.rows > this.stats) {
             $('.m-load-more-rows-button').addClass('disabled');
           }
-          
+
       },
   },
 
@@ -68,12 +73,13 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {
-          $('table#data').DataTable({
+          $('table#data').dataTable({
               data: this.data,
               columns: this.colNames,
               autoWidth: true,
               hover: true,
-              ordering: true
+              ordering: true,
+              pagingType: "full"
           });
       }, this));
 
