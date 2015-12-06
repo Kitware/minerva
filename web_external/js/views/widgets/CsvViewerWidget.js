@@ -22,9 +22,20 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       },
       'click .m-load-more-rows-button': function (e) {
           e.preventDefault();
+
+          // TODO: Here we are arbitrarily doubling the rows
           this.rows = this.rows * 2;
           this.data = this.parseCsv();
-          this.render();
+
+          var table = $('table#data').dataTable();
+          // Clear the table then render the new data
+          table.fnClearTable();
+          table.fnAddData(this.data);
+
+          if (this.rows > this.stats) {
+            $('.m-load-more-rows-button').addClass('disabled');
+          }
+          
       },
   },
 
@@ -43,22 +54,23 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       this.stats = settings.stats;
       this.data = this.parseCsv();
       this.title = settings.title;
+      this.columns = [];
   },
 
   render: function () {
 
-      var colNames = _.map(this.data[0], function (name) {
+      this.colNames = _.map(this.data[0], function (name) {
           return { title: name };
       });
       var modal = this.$el.html(minerva.templates.csvViewerWidget({
             title: this.title,
-            stats: this.stats,
+            stats: this.stats
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {
           $('table#data').DataTable({
               data: this.data,
-              columns: colNames,
+              columns: this.colNames,
               autoWidth: true,
               hover: true,
               ordering: true
@@ -66,6 +78,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       }, this));
 
       modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+
       return this;
   }
 

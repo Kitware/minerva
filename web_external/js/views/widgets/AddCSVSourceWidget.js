@@ -145,7 +145,6 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         		var csv = e.target.result;
             this.csv = csv;
             var stats = this.getCsvStas();
-            this.stats = stats;
         }.bind(this);
         reader.readAsText(this.files[0]);
         this.filesChanged();
