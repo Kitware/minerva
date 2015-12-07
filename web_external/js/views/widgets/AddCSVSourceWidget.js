@@ -5,41 +5,28 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
 
     events: {
         'submit #m-upload-form': function (e) {
+
             e.preventDefault();
 
-            var title = this.$('#m-csv-name').val();
+            var title, rowsType, rows;
+
+            title = this.$('#m-csv-name').val();
+
             this.title = title;
-            var rows = this.$('#m-csv-number-rows').val();
-            this.rows = rows;
 
-            // if (this.csv) {
-            //     var parsedCSV = this.parseCsv(this.csv);
-            //     this.data = parsedCSV.data;
-            //     this.renderCsvViewer();
-            //     return;
-            // }
+            rowsType = $('#m-upload-form input:radio:checked').attr('select');
 
-            var REGEX = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
-
-            if (REGEX.test($(".m-files").val().toLowerCase())) {
-                if (typeof (FileReader) != "undefined") {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        this.csv = e.target.result;
-                        var stats = this.getCsvStas();
-                        this.stats = stats;
-                        this.renderCsvViewer();
-                        // var parsedCSV = this.parseCsv(e.target.result);
-                        // this.data = parsedCSV.data;
-                        // this.renderCsvViewer();
-                    }.bind(this);
-                    reader.readAsText($(".m-files")[0].files[0]);
-                } else {
-                    alert("This browser does not support HTML5.");
-                }
-            } else {
-                alert("Please upload a valid CSV file.");
+            if (rowsType !== 'all') {
+                rows = this.$('#m-csv-number-rows').val();
+                this.rows = rows;
             }
+
+            this.renderCsvViewer();
+        },
+
+        'change #m-upload-form input[type=radio]': function () {
+            rowsViewType = $('#m-upload-form input:radio:checked').attr('select');
+            rowsViewType === 'custom' ? this.$('input#m-csv-number-rows').css('display', 'block') : this.$('input#m-csv-number-rows').hide();
         },
 
         'click .g-resume-upload': function () {
@@ -98,6 +85,33 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     },
 
     filesChanged: function () {
+
+        var REGEX = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+
+        if (REGEX.test(this.files[0].name.toLowerCase())) {
+            if (typeof (FileReader) !== "undefined") {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    // get file content
+                    var csv = e.target.result;
+                    this.csv = csv;
+                    var totalRows = this.getTotalRows();
+                    this.totalRows = totalRows;
+
+                    this.$('.radio.m-number-rows li:nth-child(1)')
+                        .html('<input type="radio" select="all" name="m-select-rows" checked="true">Show all '+ this.totalRows.toLocaleString() +' rows');
+
+                }.bind(this);
+                reader.readAsText(this.files[0]);
+            } else {
+                alert("This browser does not support HTML5.");
+            }
+        } else {
+            alert("Please upload a valid CSV file.");
+            return;
+        }
+
+
         if (this.files.length === 0) {
             this.$('.m-overall-progress-message').text('No files selected');
             this.setUploadEnabled(false);
@@ -139,42 +153,33 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
             .removeClass('m-dropzone-show')
             .html('<i class="icon-docs"/> Browse or drop files');
         this.files = e.originalEvent.dataTransfer.files;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-        		// get file content
-        		var csv = e.target.result;
-            this.csv = csv;
-            var stats = this.getCsvStas();
-        }.bind(this);
-        reader.readAsText(this.files[0]);
         this.filesChanged();
     },
 
     renderCsvViewer: function () {
         new minerva.views.CsvViewerWidget({
-            el: $('#g-dialog-container'),
-            parentView: this,
-            parentCollection: this.collection,
-            csv: this.csv,
-            rows: this.rows,
-            title: this.title,
-            stats: this.stats
+            el               : $('#g-dialog-container'),
+            parentView       : this,
+            parentCollection : this.collection,
+            csv              : this.csv,
+            rows             : this.rows || this.totalRows,
+            title            : this.title,
+            totalRows        : this.totalRows
         }).render();
     },
 
-    getCsvStas: function () {
+    getTotalRows: function () {
         var csv = this.parseCsv();
         return csv.data.length;
     },
 
     initialize: function (settings) {
-        this.collection = settings.collection;
-        this.csv = null;
-        this.stats = null;
-        this.title = '';
-        this.files = [];
-        this.totalRows = 0;
-        this.rows = null;
+        this.collection  = settings.collection;
+        this.csv         = null;
+        this.title       = '';
+        this.files       = [];
+        this.totalRows   = 0;
+        this.rows        = null;
     },
 
     render: function () {

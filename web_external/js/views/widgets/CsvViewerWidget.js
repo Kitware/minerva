@@ -5,7 +5,6 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
 
   events: {
       'click .m-add-source-button': function (e) {
-
           e.preventDefault();
           // TODO: Add to source here
       },
@@ -19,15 +18,13 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
               parentView: this,
               parentCollection: this.collection
           }).render();
-
       },
 
       'click .m-load-more-rows-button': function (e) {
 
           e.preventDefault();
 
-          // TODO: Here we are arbitrarily doubling the rows
-          this.rows = this.rows * 2;
+          this.rows += this.requestedRows;
           this.data = this.parseCsv();
 
           var table = $('table#data').dataTable();
@@ -36,9 +33,9 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
           table.fnClearTable();
           table.fnAddData(this.data);
 
-          // Disable the `show more rows` btn
-          if (this.rows > this.stats) {
-            $('.m-load-more-rows-button').addClass('disabled');
+          // Disable the `show more rows` btn when reach the max number of rows
+          if (this.rows >= this.totalRows) {
+              $('.m-load-more-rows-button').addClass('disabled');
           }
 
       },
@@ -54,12 +51,13 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
   },
 
   initialize: function (settings) {
-      this.csv = settings.csv;
-      this.rows = settings.rows;
-      this.stats = settings.stats;
-      this.data = this.parseCsv();
-      this.title = settings.title;
-      this.columns = [];
+      this.csv           = settings.csv;
+      this.rows          = parseInt(settings.rows);
+      this.requestedRows = parseInt(settings.rows);
+      this.totalRows     = settings.totalRows;
+      this.data          = this.parseCsv();
+      this.title         = settings.title;
+      this.columns       = [];
   },
 
   render: function () {
@@ -67,13 +65,14 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       this.colNames = _.map(this.data[0], function (name) {
           return { title: name };
       });
+
       var modal = this.$el.html(minerva.templates.csvViewerWidget({
             title: this.title,
-            stats: this.stats
+            totalRows: this.totalRows
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {
-          $('table#data').DataTable({
+          $('table#data').dataTable({
               data: this.data,
               columns: this.colNames,
               autoWidth: true,
@@ -89,6 +88,11 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
               ]
           });
       }, this));
+
+      // Disable the `show more rows` btn when reach the max rows
+      if (this.rows >= this.totalRows) {
+          $('.m-load-more-rows-button').addClass('disabled');
+      }
 
       modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
