@@ -76,7 +76,7 @@ module.exports = function (grunt) {
         stylus: {
             minerva: {
                 files: [{
-                    src: ['<%= plugin.minerva.external %>/stylesheets/**/*.styl'],
+                    src: ['<%= plugin.minerva.external %>/stylesheets/main.styl'],
                     dest: '<%= plugin.minerva.static %>/minerva.min.css'
                 }]
             }
@@ -197,7 +197,7 @@ module.exports = function (grunt) {
                 tasks: ['jade.minerva']
             },
             'plugin-minerva-stylus-external': {
-                files: _.pluck(grunt.config.get('stylus.minerva.files'), 'src'),
+                files: ['<%= plugin.minerva.external %>/stylesheets/**/*.styl'],
                 tasks: ['stylus.minerva']
             },
             'plugin-minerva-uglify-external': {

@@ -4,6 +4,18 @@
   position absolute
   z-index 999
   margin-left 5px
+  top 0
+
+#m-core-panel-group
+  height 100%
+  width 100%
+  position absolute
+  top 0
+
+#m-panel-groups
+  height "calc(100% - %s)" % $headerHeight
+  width 100%
+  position relative
 
 // @todo assumes all panelgroups are divs, and all panel views are encapsulated in a div
 #m-panel-groups > div > div
