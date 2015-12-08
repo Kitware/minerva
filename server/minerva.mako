@@ -6,7 +6,6 @@
           href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
     <link rel="stylesheet"
           href="${staticRoot}/lib/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="////cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css"/>
     <link rel="stylesheet"
           href="${staticRoot}/lib/fontello/css/fontello.css">
     <link rel="stylesheet"
@@ -25,10 +24,6 @@
             href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
         % endif
     % endfor
-    <link rel="stylesheet"
-          href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
-    <link rel="stylesheet"
-          href="http:////cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/minerva.min.css">
     <link rel="icon"
@@ -56,9 +51,6 @@
             <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
         % endif
     % endfor
-    <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script src="http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js"></script>
-    <script src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
