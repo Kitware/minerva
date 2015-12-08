@@ -247,12 +247,12 @@ class MeanContourAnalysisTestCase(base.TestCase):
         outputs = romanesco.run(romAnalysis, data['inputs'], data['outputs'])
         outputItemId = outputs['output_item_id']['data']
 
-        # check the sha512 of the result file
+        # check the size of the result file
         path = '/item/{}/files'.format(outputItemId)
         params = {
             'limit': 1
         }
         response = self.request(path=path, method='GET', params=params, user=self._user)
-        uploadedSha512 = response.json[0]['sha512']
-        expectedSha512 = 'af37c2e693b1b9f45dac8d3baff2b7017403be1455e572ce6aa2d324cc526444f7d50b43825740707f1b2e8d6150029eb65ac23e3e979ca56c5d4e2f5182daf1'
-        self.assertEquals(uploadedSha512, expectedSha512, 'mean_contour_analysis output file has unexpected sha512')
+        uploadedSize = response.json[0]['size']
+        expectedSize = 1265241
+        self.assertEquals(uploadedSize, expectedSize, 'mean_contour_analysis output file has unexpected size')
