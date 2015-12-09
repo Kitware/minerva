@@ -99,10 +99,10 @@ class BsveUtility(object):
         signature = hashed.digest().encode('hex').rstrip('\n')
 
         authParts = [
-            'apikey='+apiKey,
-            'timestamp='+timestamp,
-            'nonce='+nonce,
-            'signature='+signature
+            'apikey=' + apiKey,
+            'timestamp=' + timestamp,
+            'nonce=' + nonce,
+            'signature=' + signature
         ]
         harbingerAuthentication = ';'.join(authParts)
 
@@ -225,15 +225,19 @@ class BsveUtility(object):
         endpoint = '/api/data/list/' + type
         return self._request('GET', endpoint)
 
-    def data_dump_submit(self, type, source=None, count=None):
+    def data_dump_submit(self, type, filter, source=None, count=None):
         """Performa data dump of the given source type.
 
+        :param str type: A source type
+        :param str filter: An sql style query string
         :param str source: A single data source
         :param int count: Return the top "count" results
         :returns dict: Should contain the key `requestId` to get results
         """
         endpoint = '/api/data/query/' + type
-        params = {}
+        params = {
+            '$filter': filter
+        }
         if source is not None:
             params['$source'] = source
         if count is not None:
@@ -249,9 +253,11 @@ class BsveUtility(object):
         endpoint = '/api/data/result/' + str(requestId)
         return self._request('GET', endpoint)
 
-    def data_dump(self, type, source=None, count=None):
+    def data_dump(self, type, filter, source=None, count=None):
         """Perform a data set query and block until done."""
-        request = self.data_dump_submit(type, source, count)['requestId']
+        request = self.data_dump_submit(
+            type, filter, source, count
+        )['requestId']
         result = None
         while result is None:
             time.sleep(1)
@@ -399,6 +405,9 @@ def main():
         'type', help='The source data type'
     )
     data_parser.add_argument(
+        'filter', help='The data filter to query the database with'
+    )
+    data_parser.add_argument(
         '--source', help='Limit to this data source',
         default=None
     )
@@ -444,7 +453,7 @@ def main():
             output = bsve.type_info(args.name)
     elif args.command == 'data':
         output = bsve.data_dump(
-            args.type, source=args.source, count=args.count
+            args.type, args.filter, source=args.source, count=args.count
         )
 
     if isinstance(output, (dict, list, tuple)):
