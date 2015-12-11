@@ -9,8 +9,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
 
             var mapper = {
                 longitudeKeypath: this.$('#m-longitude-mapper').val(),
-                latitudeKeypath: this.$('#m-latitude-mapper').val(),
-                dateKeypath: this.$('#m-date-range-filter-mapper').val()
+                latitudeKeypath: this.$('#m-latitude-mapper').val()
             };
 
             // validate columns, be sure they aren't equal
@@ -53,9 +52,6 @@ minerva.views.KeymapWidget = minerva.View.extend({
             var longExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLong); // jshint ignore:line
             this.$('#m-longitude-example-value').val(longExampleVal);
         },
-        'change #m-date-range-filter-mapper': function () {
-            this.populateDateRangeFilter();
-        },
         'click .hide-keymap-preview': function () {
             this.$('.hide-keymap-preview').hide();
             this.$('.jsonrowData').hide();
@@ -79,79 +75,22 @@ minerva.views.KeymapWidget = minerva.View.extend({
         this.jsonrowData = this.dataset.getJsonRowData();
     },
 
-    populateDateRangeFilter: function () {
-        var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
-        if (jsonpathDate) {
-            var dateExampleVal = jsonPath.eval(this.jsonrowData, jsonpathDate); // jshint ignore:line
-            this.$('#m-date-example-value').val(dateExampleVal);
-            if (dateExampleVal.length > 0) {
-                // TODO
-                // probably want a button to trigger this
-
-                var secondsSinceEpochToDateString = function (seconds) {
-                    var d = new Date(seconds * 1000);
-                    var dateString = d.getUTCFullYear() + '-' +
-                        ('0' + (d.getUTCMonth() + 1)).slice(-2) + '-' +
-                        ('0' + d.getUTCDate()).slice(-2) + ' ' +
-                        ('0' + d.getUTCHours()).slice(-2) + ':' +
-                        ('0' + d.getUTCMinutes()).slice(-2) + ':' +
-                        ('0' + d.getUTCSeconds()).slice(-2);
-                    return dateString;
-                };
-
-                this.dataset.on('m:externalMongoLimitsGot', function () {
-                    var jsonpathDate = this.$('#m-date-range-filter-mapper').val();
-                    var fields = this.dataset.metadata().mongo_fields;
-                    var fieldLimits = fields[jsonpathDate];
-                    // fieldLimits are epoch time, convert to date
-                    this.startTime = fieldLimits.min;
-                    this.endTime = fieldLimits.max;
-                    var startTimeString = secondsSinceEpochToDateString(this.startTime);
-                    var endTimeString = secondsSinceEpochToDateString(this.endTime);
-                    this.$('#m-date-range-filter').prop('disabled', false);
-                    this.$('#m-date-range-filter').val(startTimeString + ' - ' + endTimeString);
-                    this.$('#m-date-range-filter').daterangepicker({
-                        timePicker: true,
-                        format: 'YYYY-MM-DD H:mm:s',
-                        timePickerIncrement: 30,
-                        timePicker12Hour: false,
-                        minDate: startTimeString,
-                        maxDate: endTimeString,
-                        timePickerSeconds: false
-                    });
-                    this.$('#m-date-range-filter').on('apply.daterangepicker', _.bind(function (ev, picker) {
-                        // HACK super ugly convert to GMT - 4
-                        this.startTime = (Date.parse(picker.startDate._d.toISOString()) / 1000) - (4 * 3600);
-                        this.endTime = (Date.parse(picker.endDate._d.toISOString()) / 1000) - (4 * 3600);
-                    }, this));
-                }, this);
-                this.dataset.getExternalMongoLimits(jsonpathDate);
-            } else {
-                this.$('#m-date-range-filter').val('');
-            }
-        }
-    },
-
     render: function () {
         var longitudeKeypath = null,
             latitudeKeypath = null,
-            dateKeypath = null,
             latExampleVal = null,
             longExampleVal = null,
             dateExampleVal = null;
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
-            dateKeypath = this.minervaMetadata.mapper.dateKeypath;
             latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath); // jshint ignore:line
             longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath); // jshint ignore:line
-            dateExampleVal = jsonPath.eval(this.jsonrowData, dateKeypath); // jshint ignore:line
         }
         var modal = this.$el.html(minerva.templates.keymapWidget({
             create: this.create,
             longitudeKeypath: longitudeKeypath,
             latitudeKeypath: latitudeKeypath,
-            dateKeypath: dateKeypath,
             latExampleVal: latExampleVal,
             longExampleVal: longExampleVal,
             dateExampleVal: dateExampleVal
@@ -159,7 +98,6 @@ minerva.views.KeymapWidget = minerva.View.extend({
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
             this.$('#jsonrow-preview').text(JSON.stringify(this.jsonrowData, null, 4));
-            this.populateDateRangeFilter();
         }, this));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
