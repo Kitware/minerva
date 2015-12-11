@@ -283,9 +283,6 @@ module.exports = function (grunt) {
             }
         }
         dependencies.concat([
-            'http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js',
-            'http://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js',
-            'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker.js',
             '/' + staticDir + '/papaparse.min.js',
             '/' + staticDir + '/jsonpath.min.js'
         ]);
@@ -307,14 +304,11 @@ module.exports = function (grunt) {
         var cssFiles =  [
             // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
             '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
-            'http://cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.css',
             '/' + rootStaticLibDir + '/fontello/css/fontello.css',
             '/' + rootStaticLibDir + '/fontello/css/animation.css',
             '/' + staticDir + '/jquery.gridster.min.css',
             '/' + staticDir + '/jquery-ui.min.css',
-            '/' + rootStaticDir + '/app.min.css',
-            'http://cdn.datatables.net/1.10.7/css/jquery.dataTables.css',
-            'http://cdn.jsdelivr.net/bootstrap.daterangepicker/1/daterangepicker-bs3.css'
+            '/' + rootStaticDir + '/app.min.css'
         ];
         // if any plugin dependencies have css, add them
         for (i = 0; i < pluginDependencies.length; i = i + 1) {
