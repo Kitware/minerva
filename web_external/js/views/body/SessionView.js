@@ -89,6 +89,21 @@ minerva.views.SessionView = minerva.View.extend({
         }, this);
     },
 
+    getPanelGroup: function (id) {
+        return _.find(this.layout.panelGroups, function (panelGroup) {
+            return panelGroup.id === id;
+        });
+    },
+
+    /**
+     * Disables the panel by way of modifying the session json.
+     */
+    disablePanel: function (id) {
+        this.model.addLayoutAttributes(id, {
+            disabled: true
+        });
+    },
+
     initialize: function (settings) {
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;

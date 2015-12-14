@@ -44,14 +44,10 @@ From your plugin root, create a JavaScript file at ``web_client/js/some-file.js`
 .. code-block:: javascript
 
    girder.events.once('m:pre-render-panel-groups', function (sessionView) {
-       var leftPanelGroup = _.find(sessionView.layout.panelGroups, function (panelGroup) {
-           return panelGroup.id === 'm-left-panel-group';
-       });
+       var leftPanelGroup = sessionView.getPanelGroup('m-left-panel-group');
 
-       // Remove the jobs panel
-       leftPanelGroup.panelViews = _.filter(leftPanelGroup.panelViews, function (panelView) {
-           return panelView.id !== 'm-jobs-panel';
-       });
+       // Disable/remove the jobs panel
+       sessionView.disablePanel('m-jobs-panel');
 
        // Move the 'Available Datasets' panel to the top
        leftPanelGroup.panelViews.sort(function (a, b) {

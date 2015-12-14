@@ -23,9 +23,7 @@ minerva.views.Panel = minerva.View.extend({
      **/
     removePanel: function () {
         if (confirm('Are you sure you want to remove this panel?')) {
-            this.getSessionModel().addLayoutAttributes(this.el.id, {
-                disabled: true
-            });
+            this.getSessionView().disablePanel(this.el.id);
             this.getSessionView()._enableSave();
             this.remove();
             minerva.View.prototype.remove.call(this);
