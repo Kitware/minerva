@@ -3,9 +3,12 @@ Extending Minerva
 
 Creating a Minerva Plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+Minerva plugins are **identical** to Girder plugins with the exception that they have a hard dependency on Minerva. This ensures that Minerva will be loaded before your plugin is.
+
 Minerva utilizes the Girder plugin system, so it will be worthwhile to familiarize yourself with their section on `Plugin Development <http://girder.readthedocs.org/en/latest/plugin-development.html>`_.
 
-For Minerva specific plugins, specifying "minerva" as a dependency within your plugin is required to ensure things load in the proper order. Take this example plugin configuration:
+
+Below is an example configuration for a Minerva plugin, note the dependency on Minerva:
 
 .. code-block:: python
 
@@ -14,7 +17,7 @@ For Minerva specific plugins, specifying "minerva" as a dependency within your p
        "dependencies": ["minerva"]
    }
 
-You should have a Minerva plugin that does nothing, and `can be enabled through the administration console <http://girder.readthedocs.org/en/latest/installation.html#initial-setup>`_. 
+Your new Minerva plugin should provide no new functionality at this point, and `can be enabled through the administration console <http://girder.readthedocs.org/en/latest/installation.html#initial-setup>`_.
 
 
 Extending the look and feel of Minerva
@@ -61,4 +64,4 @@ From your plugin root, create a JavaScript file at ``web_client/js/some-file.js`
        });
    });
 
-Above we utilize the ``m:pre-render-panel-groups`` event to hook into Minerva before any panels are actually rendered, this gives full control over what the end layout looks like.
+Above we utilize the ``m:pre-render-panel-groups`` event to hook into Minerva before any panels are actually rendered, this gives full control over what the final layout looks like.
