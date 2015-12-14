@@ -12,7 +12,7 @@ describe('a test for the minerva plugin application', function () {
     it('displays the minerva app', function () {
         waitsFor(function () {
             return $('.m-sessions-search-container:visible').length === 1;
-        }, 'the core panel to be visible');
+        }, 'the main panel to be visible');
     });
 
 });
