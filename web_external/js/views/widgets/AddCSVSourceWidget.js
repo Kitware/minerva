@@ -1,7 +1,7 @@
 /**
 * This widget displays a form for adding a CSV file.
 */
-minerva.views.AddCSVSourceWidget = minerva.View.extend({
+minerva.views.AddCsvSourceWidget = minerva.View.extend({
 
     events: {
         'submit #m-upload-form': function (e) {
@@ -95,6 +95,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
                     // get file content
                     var csv = e.target.result;
                     this.csv = csv;
+                    this.csvData = csv;
                     var totalRows = this.getTotalRows();
                     this.totalRows = totalRows;
 
@@ -160,6 +161,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
         new minerva.views.CsvViewerWidget({
             el               : $('#g-dialog-container'),
             parentView       : this,
+            csvData          : this.csvData,
             parentCollection : this.collection,
             csv              : this.csv,
             rows             : this.rows || this.totalRows,
@@ -176,6 +178,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     initialize: function (settings) {
         this.collection  = settings.collection;
         this.csv         = null;
+        this.csvData     = null;
         this.title       = '';
         this.files       = [];
         this.totalRows   = 0;
@@ -183,7 +186,7 @@ minerva.views.AddCSVSourceWidget = minerva.View.extend({
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addCSVSourceWidget({}));
+        var modal = this.$el.html(minerva.templates.addCsvSourceWidget({}));
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }

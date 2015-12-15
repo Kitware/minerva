@@ -58,7 +58,7 @@ minerva.views.AddSourceWidget = minerva.View.extend({
             CSV: {
                 label: 'CSV file',
                 icon: 'icon-table',
-                widget: minerva.views.AddCSVSourceWidget
+                widget: minerva.views.AddCsvSourceWidget
             }
         };
     },

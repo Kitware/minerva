@@ -6,7 +6,21 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
   events: {
       'click .m-add-source-button': function (e) {
           e.preventDefault();
-          // TODO: Add to source here
+          var parsedCSV = Papa.parse(this.csvData, { skipEmptyLines: true });
+          if (!parsedCSV || !parsedCSV.data) {
+              console.error('This dataset lacks csv data to create geojson on the client.');
+              return;
+          }
+          var params = {
+            name: this.title,
+            csvData: JSON.stringify(parsedCSV.data)
+          }
+          var csvSource = new minerva.models.CsvSourceModel({});
+          csvSource.on('m:csvSourceReceived', function () {
+              this.$el.modal('hide');
+              // TODO: might need to be added to a new panel/data sources ?
+              this.collection.add(csvSource);
+          }, this).createSource(params);
       },
 
       'click .m-upload-another-file-button': function (e) {
@@ -56,6 +70,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       this.requestedRows = parseInt(settings.rows);
       this.totalRows     = settings.totalRows;
       this.data          = this.parseCsv();
+      this.csvData       = settings.csvData;
       this.title         = settings.title;
       this.columns       = [];
   },

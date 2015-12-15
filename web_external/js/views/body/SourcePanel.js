@@ -87,10 +87,10 @@ minerva.views.SourcePanel = minerva.View.extend({
         this.elasticsearchWidget.render();
     },
 
-    displayCSVFile: function (evt) {
+    displayCsvFile: function (evt) {
         var el = $(evt.currentTarget);
         var csvSource = this.sourceCollection.get(el.attr('cid'));
-        this.addCSVDatasetWidget = new minerva.views.AddCSVSourceWidget({
+        this.addCsvDatasetWidget = new minerva.views.AddCsvSourceWidget({
             el: $('#g-dialog-container'),
             source: csvSource,
             collection: this.datasetCollection,

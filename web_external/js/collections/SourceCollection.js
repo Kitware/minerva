@@ -11,7 +11,7 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             } else if (attrs.meta.minerva.source_type === 's3') {
                 return new minerva.models.S3SourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 'csv') {
-                return new minerva.models.CSVSourceModel(attrs, options);
+                return new minerva.models.CsvSourceModel(attrs, options);
             }
         }
 
