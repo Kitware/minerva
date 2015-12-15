@@ -1,10 +1,6 @@
 include ../layout/panelMixins.jade
 
-+panel-title('Available Datasets')
-  i(class='icon-up-open',
-    data-toggle='collapse',
-    data-target='#m-data-panel > .m-panel-content')
-  i(class='icon-cancel')
++panel-title('Available Datasets', 'm-data-panel')
 
 if datasets
   +panel-content('collapse in')
