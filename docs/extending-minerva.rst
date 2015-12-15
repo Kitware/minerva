@@ -33,7 +33,17 @@ Minerva renders panels in a particular way, as a result there are some guideline
 
 - Panels should never call render within their initialize function
 - Panel views must extend the base Panel view
+
+.. code-block:: javascript
+
+    minerva.views.CoolNewPanel = minerva.views.Panel.extend({
+
 - Panel views need to extend their events to take advantage of collapsible, removable, configurable panels
+
+.. code-block:: javascript
+
+    // inside CoolNewPanel's initialize function
+    _.extend(this.events, minerva.views.Panel.prototype.events);
 
 
 Configure Minerva's layout
