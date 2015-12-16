@@ -104,7 +104,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                             session: this.model,
                             parentView: this
                         });
-                    this.map.featureInfoWidget.setElement($('.m-map-panel')).render();
+                    this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
                         this.featureInfoWidget.content = '';
                         this.featureInfoWidget.callInfo(0, evt.geo);
