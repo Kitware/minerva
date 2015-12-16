@@ -65,11 +65,17 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
   },
 
   initialize: function (settings) {
+      this.source        = settings.source;
+      this.collection    = settings.collection;
       this.csv           = settings.csv;
       this.rows          = parseInt(settings.rows);
       this.requestedRows = parseInt(settings.rows);
       this.totalRows     = settings.totalRows;
-      this.data          = this.parseCsv();
+      if (!this.source) {
+          this.data      = this.parseCsv();
+      } else {
+          this.data      = this.source.metadata().csvData;
+      }
       this.csvData       = settings.csvData;
       this.title         = settings.title;
       this.columns       = [];

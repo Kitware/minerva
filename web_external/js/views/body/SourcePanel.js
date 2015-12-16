@@ -7,7 +7,7 @@ minerva.views.SourcePanel = minerva.View.extend({
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
         'click .m-display-s3-bucket-hierarchy': 'selectS3Files',
-        'click .m-display-csv-file': 'displayCSVFile'
+        'click .m-display-csv-file': 'displayCsvFile'
     },
 
     addSourceDialog: function () {
@@ -90,12 +90,21 @@ minerva.views.SourcePanel = minerva.View.extend({
     displayCsvFile: function (evt) {
         var el = $(evt.currentTarget);
         var csvSource = this.sourceCollection.get(el.attr('cid'));
-        this.addCsvDatasetWidget = new minerva.views.AddCsvSourceWidget({
-            el: $('#g-dialog-container'),
-            source: csvSource,
-            collection: this.datasetCollection,
-            parentView: this
-        });
+
+        new minerva.views.CsvViewerWidget({
+            el               : $('#g-dialog-container'),
+            parentView       : this,
+            collection       : this.datasetCollection,
+            source           : csvSource
+        }).render();
+        //
+        //
+        // this.addCsvDatasetWidget = new minerva.views.AddCsvSourceWidget({
+        //     el: $('#g-dialog-container'),
+        //     source: csvSource,
+        //     collection: this.datasetCollection,
+        //     parentView: this
+        // });
     },
 
     initialize: function (settings) {

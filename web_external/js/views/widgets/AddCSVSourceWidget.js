@@ -160,6 +160,7 @@ minerva.views.AddCsvSourceWidget = minerva.View.extend({
     renderCsvViewer: function () {
         new minerva.views.CsvViewerWidget({
             el               : $('#g-dialog-container'),
+            collection       : this.collection,
             parentView       : this,
             csvData          : this.csvData,
             parentCollection : this.collection,
