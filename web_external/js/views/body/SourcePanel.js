@@ -95,16 +95,9 @@ minerva.views.SourcePanel = minerva.View.extend({
             el               : $('#g-dialog-container'),
             parentView       : this,
             collection       : this.datasetCollection,
-            source           : csvSource
+            source           : csvSource,
+            rows             : csvSource.metadata().csvData.length
         }).render();
-        //
-        //
-        // this.addCsvDatasetWidget = new minerva.views.AddCsvSourceWidget({
-        //     el: $('#g-dialog-container'),
-        //     source: csvSource,
-        //     collection: this.datasetCollection,
-        //     parentView: this
-        // });
     },
 
     initialize: function (settings) {

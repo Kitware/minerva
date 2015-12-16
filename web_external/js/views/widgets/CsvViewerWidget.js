@@ -70,7 +70,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       this.csv           = settings.csv;
       this.rows          = parseInt(settings.rows);
       this.requestedRows = parseInt(settings.rows);
-      this.totalRows     = settings.totalRows;
+      this.totalRows     = settings.totalRows || this.rows;
       if (!this.source) {
           this.data      = this.parseCsv();
       } else {
@@ -88,8 +88,9 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
       });
 
       var modal = this.$el.html(minerva.templates.csvViewerWidget({
-            title: this.title,
-            totalRows: this.totalRows
+          title: this.title,
+          source : this.source,
+          totalRows: this.totalRows
       })).girderModal(this).on('shown.bs.modal', function () {
       }).on('hidden.bs.modal', function () {
       }).on('ready.girder.modal', _.bind(function () {

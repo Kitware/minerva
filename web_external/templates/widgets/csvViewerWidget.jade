@@ -15,16 +15,18 @@
               h5.modal-title
                  | Total number of rows: #{totalRows}
 
-      .modal-footer
+      if !source
+      
+        .modal-footer
 
-          button.m-load-more-rows-button.btn.btn-small.btn-primary
-            i.icon-plus-squared
-            | Load more rows
+            button.m-load-more-rows-button.btn.btn-small.btn-primary
+              i.icon-plus-squared
+              | Load more rows
 
-          button.m-upload-another-file-button.btn.btn-small.btn-primary
-            i.icon-upload
-            | Upload another file
+            button.m-upload-another-file-button.btn.btn-small.btn-primary
+              i.icon-upload
+              | Upload another file
 
-          button.m-add-source-button.btn.btn-small.btn-primary
-            i.icon-plus-squared
-            | Add source
+            button.m-add-source-button.btn.btn-small.btn-primary
+              i.icon-plus-squared
+              | Add source
