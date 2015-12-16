@@ -132,7 +132,7 @@ class AnalysisTestCase(base.TestCase):
         self.assertStatusOk(response)
 
         # mock the calls to bsve search
-        @urlmatch(netloc=r'(.*\.)?beta-search.bsvecosystem.net(.*)$')
+        @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
         def bsve_mock(url, request):
             if url.path.split('/')[-1] == 'request':
                 return httmock.response(200, '12345')
