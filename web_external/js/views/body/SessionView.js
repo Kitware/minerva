@@ -135,11 +135,11 @@ minerva.views.SessionView = minerva.View.extend({
         this.layout = {
             panelGroups: [
                 {
-                    id: 'm-core-panel-group',
+                    id: 'm-main-panel-group',
                     view: minerva.views.PanelGroup,
                     panelViews: [
                         {
-                            id: 'map-panel',
+                            id: 'm-map-panel',
                             view: minerva.views.MapPanel
                         }
                     ]

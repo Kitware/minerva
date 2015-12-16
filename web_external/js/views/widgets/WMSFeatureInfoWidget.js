@@ -62,7 +62,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         this.version = settings.version;
         this.layers = settings.layers;
         this.callback = settings.callback;
-        this.el = $('.mapPanel');
+        this.el = $('#m-map-panel');
         this.content = '';
         this.fixedParams = 'REQUEST=GetFeatureInfo&' +
             'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +

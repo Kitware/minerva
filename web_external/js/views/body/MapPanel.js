@@ -104,7 +104,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                             session: this.model,
                             parentView: this
                         });
-                    this.map.featureInfoWidget.setElement($('.mapPanel')).render();
+                    this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
                         this.featureInfoWidget.content = '';
                         this.featureInfoWidget.callInfo(0, evt.geo);
@@ -204,7 +204,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     renderMap: function () {
         if (!this.map) {
             this.map = geo.map({
-                node: '.mapPanelMap',
+                node: '.m-map-panel-map',
                 center: this.session.sessionJsonContents.center,
                 zoom: this.session.sessionJsonContents.zoom,
                 interactor: geo.mapInteractor({
