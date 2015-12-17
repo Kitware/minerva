@@ -57,7 +57,6 @@
         },
 
         initialize: function (settings) {
-            _.extend(this.events, minerva.views.Panel.prototype.events);
             this.collection = settings.session.analysisCollection;
             this.datasetCollection = settings.session.datasetsCollection;
             this.sourceCollection = settings.session.sourceCollection;
@@ -80,8 +79,8 @@
                 console.log('AP remove');
                 this.render();
             }, this);
-            // this.render();
 
+            minerva.views.Panel.prototype.initialize.apply(this);
         },
 
         render: function () {

@@ -82,7 +82,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     initialize: function (settings) {
-        _.extend(this.events, minerva.views.Panel.prototype.events);
         this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -105,6 +104,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         }, this));
 
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

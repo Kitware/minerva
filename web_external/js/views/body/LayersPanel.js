@@ -80,7 +80,6 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
     },
 
     initialize: function (settings) {
-        _.extend(this.events, minerva.views.Panel.prototype.events);
         settings = settings || {};
         this.collection = settings.session.datasetsCollection;
         this.layersOrderOptions = [
@@ -93,6 +92,8 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         this.listenTo(this.collection, 'change:displayed change:order', function () {
             this.render();
         }, this);
+
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

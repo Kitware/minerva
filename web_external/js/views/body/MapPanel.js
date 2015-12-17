@@ -161,7 +161,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     },
 
     initialize: function (settings) {
-        _.extend(this.events, minerva.views.Panel.prototype.events);
         this.session = settings.session.model;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
@@ -199,6 +198,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 this.changeLayerZIndex(dataset);
             }
         }, this);
+
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     renderMap: function () {

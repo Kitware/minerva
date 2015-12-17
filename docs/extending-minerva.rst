@@ -38,12 +38,12 @@ Minerva renders panels in a particular way, as a result there are some guideline
 
     minerva.views.CoolNewPanel = minerva.views.Panel.extend({
 
-- Panel views need to extend their events to take advantage of collapsible, removable, configurable panels
+- Panel views need to call their parent initialize method to take advantage of collapsible, removable, configurable panels
 
 .. code-block:: javascript
 
     // inside CoolNewPanel's initialize function
-    _.extend(this.events, minerva.views.Panel.prototype.events);
+    minerva.views.Panel.prototype.initialize.apply(this);
 
 
 Configure Minerva's layout

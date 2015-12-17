@@ -8,6 +8,10 @@ minerva.views.Panel = minerva.View.extend({
         'hide.bs.collapse': 'collapsePanel'
     },
 
+    initialize: function () {
+        _.extend(this.events, minerva.views.Panel.prototype.events);
+    },
+
     getSessionView: function () {
         return this.parentView.parentView;
     },
