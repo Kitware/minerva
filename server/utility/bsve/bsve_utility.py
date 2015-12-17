@@ -264,6 +264,15 @@ class BsveUtility(object):
             result = self.data_dump_result(request)
         return result
 
+    def soda_dump(self, count=1000):
+        """Dump and process a data query of the SODA source.
+
+        :param int start: The starting record
+        :param int count: The maximum number of results to return
+        """
+        results = self.data_dump('SODA', '', count=count)
+        return [json.loads(r) for r in results]
+
     def custom_call(self, endpoint, method='GET', params={}, data=''):
         """Submit a custom REST call to the BSVE API."""
         return json.loads(self._request(method, endpoint, params, data))
@@ -416,6 +425,14 @@ def main():
         default=None
     )
 
+    soda_parser = subparsers.add_parser(
+        'soda', help='Dump data from the SODA API.'
+    )
+    soda_parser.add_argument(
+        '--count', help='Limit to this many results',
+        default=None
+    )
+
     args = parser.parse_args()
 
     if not (args.user and args.apikey and args.secretkey):
@@ -454,6 +471,10 @@ def main():
     elif args.command == 'data':
         output = bsve.data_dump(
             args.type, args.filter, source=args.source, count=args.count
+        )
+    elif args.command == 'soda':
+        output = bsve.soda_dump(
+            count=args.count
         )
 
     if isinstance(output, (dict, list, tuple)):
