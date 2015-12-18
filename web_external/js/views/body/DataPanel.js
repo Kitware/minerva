@@ -1,4 +1,4 @@
-minerva.views.DataPanel = minerva.View.extend({
+minerva.views.DataPanel = minerva.views.Panel.extend({
     events: {
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .delete-dataset': 'deleteDatasetEvent',
@@ -82,7 +82,7 @@ minerva.views.DataPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.collection = settings.collection;
+        this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -104,6 +104,7 @@ minerva.views.DataPanel = minerva.View.extend({
             }
         }, this));
 
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

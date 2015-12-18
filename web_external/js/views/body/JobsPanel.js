@@ -1,4 +1,4 @@
-minerva.views.JobsPanel = minerva.View.extend({
+minerva.views.JobsPanel = minerva.views.Panel.extend({
 
     initialize: function () {
         var columnEnum = girder.views.jobs_JobListWidget.prototype.columnEnum;
@@ -28,6 +28,7 @@ minerva.views.JobsPanel = minerva.View.extend({
             this.jobListWidget.collection.fetch({}, true);
         }, this);
 
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

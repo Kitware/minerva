@@ -1,4 +1,4 @@
-minerva.views.SourcePanel = minerva.View.extend({
+minerva.views.SourcePanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-add-source': 'addSourceDialog',
@@ -105,9 +105,9 @@ minerva.views.SourcePanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.session = settings.session;
-        this.sourceCollection = settings.sourceCollection;
-        this.datasetCollection = settings.datasetCollection;
+        this.session = settings.session.model;
+        this.sourceCollection = settings.session.sourceCollection;
+        this.datasetCollection = settings.session.datasetsCollection;
 
         // TODO similar to addSourceWidget,
         // would be nice if new source types could register themselves,
@@ -152,6 +152,8 @@ minerva.views.SourcePanel = minerva.View.extend({
                 this.sourceCollection.fetch({}, true);
             }
         }, this));
+
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

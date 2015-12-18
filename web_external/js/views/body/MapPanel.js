@@ -1,4 +1,4 @@
-minerva.views.MapPanel = minerva.View.extend({
+minerva.views.MapPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-save-current-baselayer': function () {
@@ -104,12 +104,13 @@ minerva.views.MapPanel = minerva.View.extend({
                             session: this.model,
                             parentView: this
                         });
-                    this.map.featureInfoWidget.setElement($('.mapPanel')).render();
+                    this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
                     this.map.geoOn(geo.event.mouseclick, function (evt) {
                         this.featureInfoWidget.content = '';
                         this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
+                this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
             } else {
                 // Assume the dataset provides a reader, so load the data
@@ -127,7 +128,6 @@ minerva.views.MapPanel = minerva.View.extend({
                     reader.read(dataset.fileData, _.bind(function () {
                         // Add the UI slider back
                         this.uiLayer = this.map.createLayer('ui');
-                        this.uiLayer.createWidget('slider');
                         this.map.draw();
                     }, this));
                 }, this);
@@ -161,7 +161,7 @@ minerva.views.MapPanel = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.session = settings.session;
+        this.session = settings.session.model;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
             if (this.map) {
@@ -172,7 +172,7 @@ minerva.views.MapPanel = minerva.View.extend({
         this.datasetLayers = {};
         this.legendWidget = {};
 
-        this.collection = settings.collection;
+        this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'change:displayed', function (dataset) {
             // There is a slight danger of a user trying to add a dataset
             // to a session while the map is not yet created.  If the map isn't
@@ -198,12 +198,14 @@ minerva.views.MapPanel = minerva.View.extend({
                 this.changeLayerZIndex(dataset);
             }
         }, this);
+
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     renderMap: function () {
         if (!this.map) {
             this.map = geo.map({
-                node: '.mapPanelMap',
+                node: '.m-map-panel-map',
                 center: this.session.sessionJsonContents.center,
                 zoom: this.session.sessionJsonContents.zoom,
                 interactor: geo.mapInteractor({
@@ -214,9 +216,10 @@ minerva.views.MapPanel = minerva.View.extend({
                     }
                 })
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap);
+            this.map.createLayer(this.session.sessionJsonContents.basemap,
+                                 _.has(this.session.sessionJsonContents, 'basemap_args') ?
+                                 this.session.sessionJsonContents.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {

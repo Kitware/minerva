@@ -65,6 +65,45 @@ minerva.views.SessionView = minerva.View.extend({
         this.$('.m-save-session-button').removeClass('btn-success');
     },
 
+    getEnabledPanelGroups: function () {
+        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+            return this.layout.panelGroups;
+        }
+
+        return _.filter(this.layout.panelGroups, function (panelGroup) {
+            return !(_.has(this.model.sessionJsonContents.layout, panelGroup.id) &&
+                     _.has(this.model.sessionJsonContents.layout[panelGroup.id], 'disabled') &&
+                     this.model.sessionJsonContents.layout[panelGroup.id].disabled === true);
+        }, this);
+    },
+
+    getEnabledPanelViews: function (panelGroup) {
+        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+            return panelGroup.panelViews;
+        }
+
+        return _.filter(panelGroup.panelViews, function (panelView) {
+            return !(_.has(this.model.sessionJsonContents.layout, panelView.id) &&
+                     _.has(this.model.sessionJsonContents.layout[panelView.id], 'disabled') &&
+                     this.model.sessionJsonContents.layout[panelView.id].disabled === true);
+        }, this);
+    },
+
+    getPanelGroup: function (id) {
+        return _.find(this.layout.panelGroups, function (panelGroup) {
+            return panelGroup.id === id;
+        });
+    },
+
+    /**
+     * Disables the panel by way of modifying the session json.
+     */
+    disablePanel: function (id) {
+        this.model.addLayoutAttributes(id, {
+            disabled: true
+        });
+    },
+
     initialize: function (settings) {
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;
@@ -93,40 +132,46 @@ minerva.views.SessionView = minerva.View.extend({
             this._disableSave();
         });
 
-        this.dataPanel = new minerva.views.DataPanel({
-            session: this.model,
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
-        this.mapPanel = new minerva.views.MapPanel({
-            session: this.model,
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
-        this.layersPanel = new minerva.views.LayersPanel({
-            collection: this.datasetsCollection,
-            parentView: this
-        });
-
-        this.jobsPanel = new minerva.views.JobsPanel({
-            parentView: this
-        });
-
-        this.analysisPanel = new minerva.views.AnalysisPanel({
-            parentView: this,
-            collection: this.analysisCollection,
-            datasetCollection: this.datasetCollection,
-            sourceCollection: this.sourceCollection
-        });
-
-        this.sourcePanel = new minerva.views.SourcePanel({
-            session: this.model,
-            sourceCollection: this.sourceCollection,
-            datasetCollection: this.datasetsCollection,
-            parentView: this
-        });
+        this.layout = {
+            panelGroups: [
+                {
+                    id: 'm-main-panel-group',
+                    view: minerva.views.PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'm-map-panel',
+                            view: minerva.views.MapPanel
+                        }
+                    ]
+                },
+                {
+                    id: 'm-left-panel-group',
+                    view: minerva.views.PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'm-analysis-panel',
+                            view: minerva.views.AnalysisPanel
+                        },
+                        {
+                            id: 'm-source-panel',
+                            view: minerva.views.SourcePanel
+                        },
+                        {
+                            id: 'm-data-panel',
+                            view: minerva.views.DataPanel
+                        },
+                        {
+                            id: 'm-layer-panel',
+                            view: minerva.views.LayersPanel
+                        },
+                        {
+                            id: 'm-jobs-panel',
+                            view: minerva.views.JobsPanel
+                        }
+                    ]
+                }
+            ]
+        };
 
         this.render();
     },
@@ -142,25 +187,28 @@ minerva.views.SessionView = minerva.View.extend({
                 girder: girder
             }));
 
-            this.$('.gridster > ul').gridster({
-                widget_margins: [10, 10],
-                widget_base_dimensions: [210, 210],
-                draggable: {
-                    handle: '.panelTitle'
-                },
-                resize: {
-                    enabled: true,
-                    min_size: [1, 1]
-                }
-            });
+            // Render each panel group, which is responsible for rendering
+            // each panel view
+            girder.events.trigger('m:pre-render-panel-groups', this);
+            _.each(this.getEnabledPanelGroups(), function (panelGroupSpec) {
+                var panelGroup = new panelGroupSpec.view({
+                    parentView: this,
+                    session: this.model,
+                    panelViews: this.getEnabledPanelViews(panelGroupSpec)
+                });
 
-            this.dataPanel.setElement(this.$('.dataPanel')).render();
-            this.mapPanel.setElement(this.$('.mapPanel')).render();
-            this.layersPanel.setElement(this.$('.layersPanel')).render();
-            this.jobsPanel.setElement(this.$('.jobsPanel')).render();
-            this.analysisPanel.setElement(this.$('.analysisPanel')).render();
-            this.sourcePanel.setElement(this.$('.m-source-panel')).render();
+                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id  + '"></div>');
+                panelGroup.setElement(this.$('#' + panelGroupSpec.id)).render();
+            }, this);
 
+            // Restore state of collapsed panels
+            if (_.has(this.model.sessionJsonContents, 'layout')) {
+                _.each(this.model.sessionJsonContents.layout, function (panelView, panelViewId) {
+                    if (_.has(panelView, 'collapsed') && panelView.collapsed === true) {
+                        $('#' + panelViewId).find('i.icon-up-open').trigger('click');
+                    }
+                }, this);
+            }
         }, this));
 
         return this;

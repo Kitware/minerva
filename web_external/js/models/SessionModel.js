@@ -25,6 +25,18 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
         return _.some(this.sessionJsonContents.features, datasetFinder);
     },
 
+    addLayoutAttributes: function (panelView, attributes) {
+        if (!_.has(this.sessionJsonContents, 'layout')) {
+            this.sessionJsonContents.layout = {};
+        }
+
+        if (!_.has(_.keys(this.sessionJsonContents.layout, panelView))) {
+            this.sessionJsonContents.layout[panelView] = attributes;
+        } else {
+            _.extend(this.sessionJsonContents.layout[panelView], attributes);
+        }
+    },
+
     addDataset: function (dataset) {
         // for now just add them to a list
         // may want to unify caching of geojson file id
@@ -49,8 +61,12 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
         // when we create the session item, want to create a session.json file in it
         var sessionJsonContents = {};
         sessionJsonContents.basemap = 'osm';
+        sessionJsonContents.basemap_args = {
+            tileUrl: 'https://{s}.tiles.mapbox.com/v3/datamade.hn83a654/{z}/{x}/{y}.png',
+            attribution: '<a href=http://www.mapbox.com/about/maps/ target=_blank>Terms &amp; Feedback</a>'
+        };
         sessionJsonContents.center = {x: -100, y: 36.5};
-        sessionJsonContents.zoom = 1;
+        sessionJsonContents.zoom = 4;
         sessionJsonContents.features = [];
         // now save this as session.json as a file in the item
         this.sessionJsonFile = new girder.models.FileModel();

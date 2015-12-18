@@ -6,5 +6,6 @@ Developer Documentation
 
    installation
    api-documentation
+   extending-minerva
    creating-a-source
    

@@ -1,4 +1,4 @@
-minerva.views.LayersPanel = minerva.View.extend({
+minerva.views.LayersPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
@@ -81,7 +81,7 @@ minerva.views.LayersPanel = minerva.View.extend({
 
     initialize: function (settings) {
         settings = settings || {};
-        this.collection = settings.collection;
+        this.collection = settings.session.datasetsCollection;
         this.layersOrderOptions = [
             {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
             {'title': 'move down', 'method': 'moveDown', 'class': 'down'},
@@ -92,6 +92,8 @@ minerva.views.LayersPanel = minerva.View.extend({
         this.listenTo(this.collection, 'change:displayed change:order', function () {
             this.render();
         }, this);
+
+        minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {

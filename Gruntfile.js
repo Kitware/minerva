@@ -76,7 +76,7 @@ module.exports = function (grunt) {
         stylus: {
             minerva: {
                 files: [{
-                    src: ['<%= plugin.minerva.external %>/stylesheets/**/*.styl'],
+                    src: ['<%= plugin.minerva.external %>/stylesheets/main.styl'],
                     dest: '<%= plugin.minerva.static %>/minerva.min.css'
                 }]
             }
@@ -99,6 +99,7 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/models/SourceModel.js',
                             '<%= plugin.minerva.source %>/models/**/*.js',
                             '<%= plugin.minerva.source %>/collections/**/*.js',
+                            '<%= plugin.minerva.source %>/views/body/Panel.js',
                             '<%= plugin.minerva.source %>/views/**/*.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.min.js'
@@ -269,7 +270,6 @@ module.exports = function (grunt) {
             '/clients/web/static/built/libs.min.js',
             '/' + staticDir + '/geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
-            '/' + staticDir + '/jquery.gridster.js',
             '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',
             '/' + rootStaticDir + '/app.min.js'
@@ -306,7 +306,6 @@ module.exports = function (grunt) {
             '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
             '/' + rootStaticLibDir + '/fontello/css/fontello.css',
             '/' + rootStaticLibDir + '/fontello/css/animation.css',
-            '/' + staticDir + '/jquery.gridster.min.css',
             '/' + staticDir + '/jquery-ui.min.css',
             '/' + rootStaticDir + '/app.min.css'
         ];

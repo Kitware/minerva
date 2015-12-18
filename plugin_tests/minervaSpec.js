@@ -11,8 +11,8 @@ describe('a test for the minerva plugin application', function () {
 
     it('displays the minerva app', function () {
         waitsFor(function () {
-            return $('a.m-maps-link:visible').length === 1;
-        }, 'the maps button to be visible');
+            return $('.m-sessions-search-container:visible').length === 1;
+        }, 'the main panel to be visible');
     });
 
 });
