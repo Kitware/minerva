@@ -3,6 +3,5 @@
 dependencies:
   - role: girder-variables
   - role: girder-install
-#  - role: girder-grunt
   - role: girder-service-install
   - role: girder-service
