@@ -1,0 +1,42 @@
+---
+  - name: Probe minerva folder
+    stat: path="{{minerva_install_root}}"
+    register: path
+
+  - name: Get minerva from github
+    git:
+      repo: https://github.com/Kitware/minerva.git
+      version: "{{ minerva_version }}"
+      dest: "{{minerva_install_root}}"
+      force: yes
+      accept_hostkey: yes
+    when: path.stat.exists == False
+
+
+  - name: Install minerva system dependencies
+    apt: name={{ item }} state=present update_cache=yes
+    with_items:
+      - libfreetype6-dev
+      - libpng12-dev
+      - pkg-config
+      - libgdal-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - python-dev
+      - python-pip
+      - python-numpy
+      - htop
+
+  - name: Update pip
+    pip:
+      name: pip
+      state: latest
+
+  # girder-install should take care of this for us,  but for some reason
+  # we see a Resource Unavailable' error (probably due to long install times
+  # for numpy etc). This is kind of a hack,  but if we install with pip here
+  # We don't see the crash and girder-install will skip the installed dependencies
+  # Reducing the total time and eliminating the error.
+  - name: Install minerva python requirements
+    pip:
+      requirements: "{{minerva_install_root}}/requirements.txt"
