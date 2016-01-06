@@ -64,13 +64,22 @@ _states = None
 """
 
 
+#: A set of properties to ignore when accumulating
+ignored_properties = set([
+    'mmwr_week',
+    'mmwr_year'
+])
+
+
 def accumulate(data):
     """Accumulate data by state returning a geojson object.
 
     The argument is expected to be structured as follows:
         [
             {
-                "reporting_area": "New York City, NY", # city, state pair
+                "location_1": {
+                    "city": "New York City, NY", # city, state pair
+                },
                 "key1": "value1",
                 "key2": "value2",
                 ...
@@ -86,6 +95,11 @@ def accumulate(data):
 
     Finally, any state for which no record was encountered is filtered out of
     the returned value.
+
+    :param list data: A list of dicts containing mappings of keys to counts
+    :returns dict: A geojson object with ``properties`` containing accumulated
+        values.  The top level ``FeatureCollection`` property contains a list
+        of list of keys available in the individual features.
     """
     global _states
     if _states is None:
@@ -102,23 +116,29 @@ def accumulate(data):
     # city, state regex
     citystate = re.compile(r', ([A-Z][A-Z])$')
 
+    # store all properties encountered here
+    all_props = set()
+
     # loop over records
     for record in data:
-        m = citystate(record.pop('reporting_area', ''))
-        if m and m.groups(1) in states:  # it is a valid state
+        m = citystate.search(record.get('reporting_area', ''))
+        if m and m.group(1) in states:  # it is a valid state
 
-            props = states[m.groups(1)]
+            props = states[m.group(1)]
             props['num_records'] = props.get('num_records', 0) + 1
 
             for key, value in record.iteritems():
+                if key in ignored_properties:
+                    continue
+
                 try:
                     v = float(value)
                 except Exception:
                     v = float('NaN')
 
                 # check that it's a real value
-                if not (math.isnan(v) or math.isinf(v)):
-                    pass
+                if math.isnan(v) or math.isinf(v):
+                    continue
 
                 if v < 0:  # maybe this is a valid case?
                     print('Encountered a negative value!')
@@ -126,13 +146,21 @@ def accumulate(data):
                 # accumulate the field as a property
                 props[key] = props.get(key, 0) + v
 
+                # add the property to the global list of properties found
+                all_props.add(key)
+
     # filter out states that have no records
-    geojson['properties'] = filter(
-        lambda f: states.get(
-            f.get('properties', {}).get('abbr')
-        ).get('num_records', 0) >= 0,
-        geojson.get('properties', [])
-    )
+    # geojson['properties'] = filter(
+    #     lambda f: states.get(
+    #         f.get('properties', {}).get('abbr')
+    #     ).get('num_records', 0) >= 0,
+    #     geojson.get('properties', [])
+    # )
+
+    # store the global list of properties
+    geojson['properties'] = {
+        'values': list(all_props)
+    }
     return geojson
 
 
@@ -141,7 +169,6 @@ def run(job):
     job_model.updateJob(job, status=JobStatus.RUNNING)
 
     try:
-
         configFile = os.path.join(os.path.dirname(__file__), "bsve.json")
         if os.path.exists(configFile):
             bsveConfig = json.load(open(configFile))['bsve']
@@ -154,6 +181,8 @@ def run(job):
         # TODO better to create a job token rather than a user token?
         token = kwargs['token']
 
+        params = kwargs['params']
+
         bsveUtility = BsveUtility(
             user=bsveConfig.get(
                 'USER_NAME', os.environ.get('BSVE_USERNAME')),
@@ -163,7 +192,7 @@ def run(job):
                 'SECRET_KEY', os.environ.get('BSVE_SECRETKEY')),
             base=bsveConfig.get('BASE_URL')
         )
-        data = accumulate(bsveUtility.soda_dump(**kwargs))
+        data = accumulate(bsveUtility.soda_dump(count=params['count']))
 
         # write the output to a json file
         tmpdir = tempfile.mkdtemp()
@@ -204,17 +233,22 @@ def run(job):
             'itemId': dataset['_id'],
             'name': outFilename
         })
+
         if not existing:
             raise (Exception('Cannot find file %s in dataset %s' %
                    (outFilename, datasetId)))
 
         shutil.rmtree(tmpdir)
         minerva_metadata['dataset_type'] = 'geojson'
+        minerva_metadata['values'] = data['properties']['values']
+
+        mM(dataset, minerva_metadata)
 
         existing = file_model.findOne({
             'itemId': dataset['_id'],
             'name': outFilename
         })
+
         if existing:
             minerva_metadata['geojson_file'] = {
                 '_id': existing['_id'],

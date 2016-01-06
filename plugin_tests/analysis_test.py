@@ -58,6 +58,7 @@ class AnalysisTestCase(base.TestCase):
         """Set up the test case with  a user."""
         super(AnalysisTestCase, self).setUp()
 
+        self._import_done = False
         self._user = self.model('user').createUser(
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
@@ -96,12 +97,11 @@ class AnalysisTestCase(base.TestCase):
             'An analysis folder should exist'
         )
 
-    def importAnalysis(self):
+    def _importAnalysis(self):
         """Setup and import analyses for bsve tests."""
+        if self._import_done:
+            return
 
-    def testBsveSearchAnalysis(self):
-        self.importAnalysis()
-        # create the analysis folder
         path = '/minerva_analysis/folder'
         response = self.request(path=path, method='POST', user=self._user)
         self.assertStatusOk(response)
@@ -128,25 +128,40 @@ class AnalysisTestCase(base.TestCase):
         )
         self.assertStatusOk(response)
         self.assertEquals(
-            len(response.json), 1,
+            len(response.json), 2,
             'Expecting only one analysis'
         )
-        analysis = response.json[0]
-        self.assertEquals(
-            analysis['name'], 'bsve search',
-            'Expecting analysis name to be "bsve search"'
-        )
-        expected_meta = {
-            u'minerva': {
-                u'analysis_type': u'bsve_search',
-                u'analysis_name': u'bsve search',
-                u'analysis_id': analysis['_id']
-            }
-        }
-        self.assertEquals(
-            analysis['meta'], expected_meta,
-            'Unexpected value for meta data'
-        )
+#          for analysis in response.json:
+#              if analysis['name'] == 'bsve search':
+#                  search_analysis = analysis
+#              elif analysis['name'] == 'MMWR data import':
+#                  soda_analysis = analysis
+#              else:
+#                  self.fail(
+#                      'Unexpected analysis found "%s".' % analysis['name']
+#                  )
+#          expected_meta = {
+#              u'minerva': {
+#                  u'analysis_type': u'bsve_search',
+#                  u'analysis_name': u'bsve search',
+#                  u'analysis_id': search_analysis['_id']
+#              }
+#          }
+#          self.assertEquals(
+#              search_analysis, expected_meta,
+#              'Unexpected value for search meta data'
+#          )
+#          expected_meta = {
+#              u'minerva': {
+#                  u'analysis_type': u'soda_dump',
+#                  u'analysis_name': u'soda dump',
+#                  u'analysis_id': soda_analysis['_id']
+#              }
+#          }
+#          self.assertEquals(
+#              soda_analysis, expected_meta,
+#              'Unexpected value for soda meta data'
+#          )
 
         # create the dataset folder
         path = '/minerva_dataset/folder'
@@ -157,6 +172,10 @@ class AnalysisTestCase(base.TestCase):
             path=path, method='POST', params=params, user=self._user
         )
         self.assertStatusOk(response)
+        self._importDone = True
+
+    def testBsveSearchAnalysis(self):
+        self._importAnalysis()
 
         # mock the calls to bsve search
         @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
@@ -212,6 +231,7 @@ class AnalysisTestCase(base.TestCase):
                     user=self._user
                 )
                 dataset = response.json
+
                 if 'json_row' in dataset:
                     searchResultsFinished = True
                 else:
@@ -250,4 +270,80 @@ class AnalysisTestCase(base.TestCase):
             self.assertEquals(
                 dataset['original_type'], 'json',
                 'expected original_type of json'
+            )
+
+    def testBsveSodaAnalysis(self):
+        self._importAnalysis()
+
+        # mock the calls to bsve soda query
+        @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
+        def bsve_mock(url, request):
+            r = url.path.split('/')[-1].lower()
+            if r == 'soda':
+                # the initial search request
+                return httmock.response(200, '12345')
+            elif r == '12345':
+                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+                filepath = os.path.join(
+                    pluginTestDir, 'data', 'soda_dump.json'
+                )
+                with open(filepath) as soda_dump_file:
+                    content = {
+                        'status': 1,
+                        'results': json.load(soda_dump_file)
+                    }
+                    headers = {
+                        'content-length': len(content),
+                        'content-type': 'application/json'
+                    }
+                    return httmock.response(
+                        200, content, headers, request=request
+                    )
+            else:
+                self.fail('Unexpected BSVE request "%s"' % url.path)
+
+        with HTTMock(bsve_mock):
+            response = self.request(
+                path='/minerva_analysis/mmwr_import',
+                method='POST',
+                params={
+                    'datasetName': 'soda dataset'
+                },
+                user=self._user
+            )
+            self.assertStatusOk(response)
+            job = response.json
+            print >> sys.stderr, ""
+            print >> sys.stderr, json.dumps(job, indent=2)
+
+            # wait for the async job to complete
+            searchResultsFinished = False
+            count = 0
+            output = job['meta']['minerva']['outputs'][0]
+            self.assertEquals(
+                output['type'], 'dataset',
+                'Incorrect output type %s' % output['type']
+            )
+
+            while not searchResultsFinished and count < 5:
+                # get the dataset and check if it has been updated
+                path = '/minerva_dataset/%s/dataset' % str(output['dataset_id'])
+                response = self.request(
+                    path=path,
+                    method='GET',
+                    user=self._user
+                )
+                dataset = response.json
+                print >> sys.stderr, ""
+                print >> sys.stderr, json.dumps(dataset, indent=2)
+                if 'values' in dataset:
+                    searchResultsFinished = True
+                else:
+                    time.sleep(2)
+                    count += 1
+
+            # ensure the first row of results was added to the dataset
+            self.assertTrue(
+                'values' in dataset,
+                '"values" expected in dataset'
             )
