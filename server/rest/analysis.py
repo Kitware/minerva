@@ -121,9 +121,11 @@ class Analysis(Resource):
         }
 
         datasetResource = Dataset()
-        dataset = datasetResource.constructDataset(datasetName,
-                                                   minerva_metadata,
-                                                   'created by MMWR data import')
+        dataset = datasetResource.constructDataset(
+            datasetName,
+            minerva_metadata,
+            'created by MMWR data import'
+        )
         params = {
             'count': count
         }
@@ -153,4 +155,8 @@ class Analysis(Resource):
     bsveMMWRAnalysis.description = (
         Description('Create a new accumulated MMWR dataset from the BSVE.')
         .param('datasetName', 'Name of the dataset created by this analysis.')
-        .param('count', 'The number of items to get from the server', required=False))
+        .param(
+            'count', 'The number of items to get from the server',
+            required=False
+        )
+    )
