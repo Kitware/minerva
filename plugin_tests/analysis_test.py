@@ -131,37 +131,37 @@ class AnalysisTestCase(base.TestCase):
             len(response.json), 2,
             'Expecting only one analysis'
         )
-#          for analysis in response.json:
-#              if analysis['name'] == 'bsve search':
-#                  search_analysis = analysis
-#              elif analysis['name'] == 'MMWR data import':
-#                  soda_analysis = analysis
-#              else:
-#                  self.fail(
-#                      'Unexpected analysis found "%s".' % analysis['name']
-#                  )
-#          expected_meta = {
-#              u'minerva': {
-#                  u'analysis_type': u'bsve_search',
-#                  u'analysis_name': u'bsve search',
-#                  u'analysis_id': search_analysis['_id']
-#              }
-#          }
-#          self.assertEquals(
-#              search_analysis, expected_meta,
-#              'Unexpected value for search meta data'
-#          )
-#          expected_meta = {
-#              u'minerva': {
-#                  u'analysis_type': u'soda_dump',
-#                  u'analysis_name': u'soda dump',
-#                  u'analysis_id': soda_analysis['_id']
-#              }
-#          }
-#          self.assertEquals(
-#              soda_analysis, expected_meta,
-#              'Unexpected value for soda meta data'
-#          )
+        for analysis in response.json:
+            if analysis['name'] == 'bsve search':
+                search_analysis = analysis
+            elif analysis['name'] == 'MMWR data import':
+                soda_analysis = analysis
+            else:
+                self.fail(
+                    'Unexpected analysis found "%s".' % analysis['name']
+                )
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'bsve_search',
+                u'analysis_name': u'bsve search',
+                u'analysis_id': search_analysis['_id']
+            }
+        }
+        self.assertEquals(
+            search_analysis['meta'], expected_meta,
+            'Unexpected value for search meta data'
+        )
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'mmwr_data_import',
+                u'analysis_name': u'MMWR data import',
+                u'analysis_id': soda_analysis['_id']
+            }
+        }
+        self.assertEquals(
+            soda_analysis['meta'], expected_meta,
+            'Unexpected value for soda meta data'
+        )
 
         # create the dataset folder
         path = '/minerva_dataset/folder'
@@ -281,17 +281,14 @@ class AnalysisTestCase(base.TestCase):
             r = url.path.split('/')[-1].lower()
             if r == 'soda':
                 # the initial search request
-                return httmock.response(200, '12345')
+                return httmock.response(200, '{"requestId": "12345", "status": 0}')
             elif r == '12345':
                 pluginTestDir = os.path.dirname(os.path.realpath(__file__))
                 filepath = os.path.join(
                     pluginTestDir, 'data', 'soda_dump.json'
                 )
                 with open(filepath) as soda_dump_file:
-                    content = {
-                        'status': 1,
-                        'results': json.load(soda_dump_file)
-                    }
+                    content = json.load(soda_dump_file)
                     headers = {
                         'content-length': len(content),
                         'content-type': 'application/json'
@@ -313,8 +310,6 @@ class AnalysisTestCase(base.TestCase):
             )
             self.assertStatusOk(response)
             job = response.json
-            print >> sys.stderr, ""
-            print >> sys.stderr, json.dumps(job, indent=2)
 
             # wait for the async job to complete
             searchResultsFinished = False
@@ -334,8 +329,6 @@ class AnalysisTestCase(base.TestCase):
                     user=self._user
                 )
                 dataset = response.json
-                print >> sys.stderr, ""
-                print >> sys.stderr, json.dumps(dataset, indent=2)
                 if 'values' in dataset:
                     searchResultsFinished = True
                 else:
