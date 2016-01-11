@@ -6,3 +6,4 @@ dependencies:
     version: "{{ romanesco_version }}"
     variable_prefix: romanesco
     state: present
+    sudo: yes

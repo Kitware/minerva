@@ -11,26 +11,50 @@
       state: started
 
 - hosts: girder
-  sudo: yes
   vars:
-    - base_dir: /opt
+    base_dir: /opt
+    girder_user: "girder"
+    girder_group: "girder"
+  pre_tasks:
+    - name: Create virtualenv folder
+      file:
+        path: "{{venv_root}}"
+        state: directory
+        mode: 0775
+      sudo: yes
+
   roles:
     - role: romanesco
       rabbitmq_ansible_group: rabbitmq
       state: started
+      sudo: yes
 
     - role: girder
       mongodb_ansible_group: girder
       girder_admin_user: girder
       girder_admin_password: letmein
       state: started
+      sudo: yes
 
     - role: minerva
+      sudo: yes
 
   tasks:
-    - name: Install minerva and romanesco as girder plugins
-      command: "girder-install plugin -s -f {{base_dir}}/minerva {{base_dir}}/romanesco"
+    - name: Set permissions on virtualenv folder
+      file:
+        path: "{{venv_root}}"
+        recurse: yes
+        state: directory
+        mode: 0775
+        owner: "{{ girder_user }}"
+        group: "{{ girder_group }}"
+      sudo: yes
 
+    - name: Install minerva and romanesco as girder plugins
+      shell: ". {{venv_root}}/bin/activate && girder-install plugin -s -f {{base_dir}}/minerva {{base_dir}}/romanesco"
+      become: yes
+      become_user: "{{girder_user}}"
+      tags: test
 
 # Configure plugins and girder
 - hosts: girder

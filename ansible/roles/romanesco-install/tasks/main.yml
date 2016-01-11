@@ -9,6 +9,7 @@
   with_items:
     - python-dev
     - python-pip
+    - python-virtualenv
   when: do_install|bool
 
 - name: romanesco | service | stop
@@ -32,7 +33,7 @@
 
 - name: romanesco | install parent | create
   file:
-    path: "{{ romanesco_install_parent }}"
+    path: "{{ romanesco_install_root }}"
     state: directory
   when: do_install|bool
 
@@ -43,15 +44,6 @@
     mode: 0755
   when: do_install|bool
 
-- name: romanesco | data root | owner | set
-  file:
-    path: "{{ romanesco_data_root }}"
-    state: directory
-    group: "{{ romanesco_group }}"
-    owner: "{{ romanesco_user }}"
-    mode: 0775
-  when: do_install|bool
-
 - name: romanesco | repo | sync
   command: >
     rsync -avz --exclude=.git
@@ -60,7 +52,9 @@
   when: do_install|bool
 
 - name: pip
-  pip: requirements={{ romanesco_install_root }}/{{ item }}
+  pip:
+    requirements: "{{ romanesco_install_root }}/{{ item }}"
+    virtualenv: "{{venv_root}}"
   with_items:
     - requirements.txt
     - romanesco/plugins/girder_io/requirements.txt
@@ -73,6 +67,14 @@
     mode: 0755
   when: do_install|bool
 
+- name: romanesco | conf | set
+  template:
+    src: worker.local.cfg.j2
+    dest: "{{ romanesco_install_root }}/romanesco/worker.local.cfg"
+    mode: 0644
+  when: do_install|bool
+
+
 - name: romanesco | conf | owner | set
   file:
     recurse: yes
@@ -80,11 +82,4 @@
     group: "{{ romanesco_group }}"
     mode: 0755
     owner: "{{ romanesco_user }}"
-  when: do_install|bool
-
-- name: romanesco | conf | set
-  template:
-    src: worker.local.cfg.j2
-    dest: "{{ romanesco_install_root }}/romanesco/worker.local.cfg"
-    mode: 0644
   when: do_install|bool

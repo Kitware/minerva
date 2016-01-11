@@ -8,6 +8,5 @@ dependencies:
     group: "{{ girder_group }}"
     description: Girder Data Management Platform -- Web Service
     command: >
-        bash -c "cd {{ girder_install_root }} && python -m girder"
+        bash -c ". {{ venv_root }}/bin/activate && cd {{ girder_install_root }} && python -m girder"
     when: do_install|bool
-

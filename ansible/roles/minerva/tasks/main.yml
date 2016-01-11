@@ -12,6 +12,14 @@
       accept_hostkey: yes
     when: path.stat.exists == False
 
+  - name: minerva | owner | set
+    file:
+        recurse: yes
+        path: "{{ minerva_install_root }}"
+        owner: "{{ girder_user }}"
+        group: "{{ girder_group }}"
+        mode: 0755
+    when: do_install|bool
 
   - name: Install minerva system dependencies
     apt: name={{ item }} state=present update_cache=yes
@@ -30,6 +38,7 @@
   - name: Update pip
     pip:
       name: pip
+      virtualenv: "{{venv_root}}"
       state: latest
 
   # girder-install should take care of this for us,  but for some reason
@@ -40,3 +49,13 @@
   - name: Install minerva python requirements
     pip:
       requirements: "{{minerva_install_root}}/requirements.txt"
+      virtualenv: "{{venv_root}}"
+
+  - name: girder | virtualenv | owner | set
+    file:
+        recurse: yes
+        path: "{{ venv_root }}"
+        owner: "{{ girder_user }}"
+        group: "{{ girder_group }}"
+        mode: 0755
+    when: do_install|bool
