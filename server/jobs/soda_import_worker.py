@@ -149,14 +149,6 @@ def accumulate(data):
                 # add the property to the global list of properties found
                 all_props.add(key)
 
-    # filter out states that have no records
-    # geojson['properties'] = filter(
-    #     lambda f: states.get(
-    #         f.get('properties', {}).get('abbr')
-    #     ).get('num_records', 0) >= 0,
-    #     geojson.get('properties', [])
-    # )
-
     # store the global list of properties
     geojson['properties'] = {
         'values': list(all_props)
