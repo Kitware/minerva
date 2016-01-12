@@ -116,22 +116,31 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 // Assume the dataset provides a reader, so load the data
                 // and adapt the dataset to the map with the reader.
                 dataset.once('m:dataLoaded', function (datasetId) {
+                    console.log('dataLoaded:'+ (Date.now() - startTime));
                     // TODO: allow these datasets to specify a legend.
                     var dataset = this.collection.get(datasetId);
                     var layer = this.map.createLayer('feature');
+                    console.log('layer created:'+(Date.now()-startTime));
 
                     var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
+                    console.log('file reader created:'+(Date.now() - startTime));
                     this.datasetLayers[datasetId] = layer;
 
-                    layer.clear();
+                    //layer.clear();
+                    //console.log('layer cleared:'+(Date.now() - startTime));
 
                     reader.read(dataset.fileData, _.bind(function () {
+                        console.log('reader read:'+(Date.now()- startTime));
                         // Add the UI slider back
-                        this.uiLayer = this.map.createLayer('ui');
+                        //this.uiLayer = this.map.createLayer('ui');
+                        //console.log('ui layer created:'+(Date.now()- startTime));
                         this.map.draw();
+                        console.log('map drawn:'+(Date.now() - startTime));
                     }, this));
                 }, this);
 
+                var startTime = Date.now();
+                console.log('loadData:'+startTime);
                 dataset.loadData();
             }
         }
