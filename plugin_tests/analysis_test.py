@@ -153,7 +153,7 @@ class AnalysisTestCase(base.TestCase):
         )
         expected_meta = {
             u'minerva': {
-                u'analysis_type': u'mmwr_data_import',
+                u'analysis_type': u'mmwr_import_data',
                 u'analysis_name': u'MMWR data import',
                 u'analysis_id': soda_analysis['_id']
             }
