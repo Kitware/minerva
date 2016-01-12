@@ -26,18 +26,19 @@ import time
 
 # Need to set the environment variable before importing girder
 girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
-os.environ['GIRDER_PORT'] = girder_port# noqa
+os.environ['GIRDER_PORT'] = girder_port  # noqa
 
 from tests import base
 from girder_client import GirderClient
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../utility')
+))
 import import_analyses
 
+
 def setUpModule():
-    """
-    Enable the minerva plugin and start the server.
-    """
+    """Enable the minerva plugin and start the server."""
     base.enabledPlugins.append('jobs')
     base.enabledPlugins.append('romanesco')
     base.enabledPlugins.append('gravatar')
@@ -46,28 +47,24 @@ def setUpModule():
 
 
 def tearDownModule():
-    """
-    Stop the server.
-    """
+    """Stop the server."""
     base.stopServer()
 
+
 class AnalysisTestCase(base.TestCase):
-    """
-    Tests of the minerva analysis functionality.
-    """
+    """Tests of the minerva analysis functionality."""
 
     def setUp(self):
-        """
-        Set up the test case with  a user
-        """
+        """Set up the test case with  a user."""
         super(AnalysisTestCase, self).setUp()
 
+        self._import_done = False
         self._user = self.model('user').createUser(
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
     def testAnalysisUtilityEndpoints(self):
-        """ Test the minerva analysis utility endpoints.  """
+        """Test the minerva analysis utility endpoints."""
 
         # at first there is no analysis folder or minerva collection
 
@@ -77,22 +74,34 @@ class AnalysisTestCase(base.TestCase):
 
         response = self.request(path=path, method='GET', user=self._user)
         self.assertStatusOk(response)
-        self.assertEquals(response.json['folder'], None, 'No analysis folder should exist')
+        self.assertEquals(
+            response.json['folder'], None,
+            'No analysis folder should exist'
+        )
 
         # create the analysis folder
 
         response = self.request(path=path, method='POST', user=self._user)
         self.assertStatusOk(response)
-        self.assertNotEquals(response.json['folder'], None, 'An analysis folder should exist')
+        self.assertNotEquals(
+            response.json['folder'], None,
+            'An analysis folder should exist'
+        )
 
         # ensure we can get it
 
         response = self.request(path=path, method='GET', user=self._user)
         self.assertStatusOk(response)
-        self.assertNotEquals(response.json['folder'], None, 'An analysis folder should exist')
+        self.assertNotEquals(
+            response.json['folder'], None,
+            'An analysis folder should exist'
+        )
 
-    def testBsveSearchAnalysis(self):
-        # create the analysis folder
+    def _importAnalysis(self):
+        """Setup and import analyses for bsve tests."""
+        if self._import_done:
+            return
+
         path = '/minerva_analysis/folder'
         response = self.request(path=path, method='POST', user=self._user)
         self.assertStatusOk(response)
@@ -102,34 +111,71 @@ class AnalysisTestCase(base.TestCase):
         client = GirderClient('localhost', girder_port)
         client.authenticate('minervauser', 'password')
 
-        bsve_analysis_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../analyses/bsve'))
+        bsve_analysis_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                '../analyses/bsve'
+            )
+        )
         import_analyses.import_analyses(client, bsve_analysis_path)
 
         path = '/item'
         params = {
             'folderId': analyses_folder['_id']
         }
-        response = self.request(path=path, method='GET', params=params, user=self._user)
+        response = self.request(
+            path=path, method='GET', params=params, user=self._user
+        )
         self.assertStatusOk(response)
-        self.assertEquals(len(response.json), 1, 'Expecting only one analysis')
-        analysis = response.json[0]
-        self.assertEquals(analysis['name'], 'bsve search', 'Expecting analysis name to be "bsve search"')
+        self.assertEquals(
+            len(response.json), 2,
+            'Expecting only one analysis'
+        )
+        for analysis in response.json:
+            if analysis['name'] == 'bsve search':
+                search_analysis = analysis
+            elif analysis['name'] == 'MMWR data import':
+                soda_analysis = analysis
+            else:
+                self.fail(
+                    'Unexpected analysis found "%s".' % analysis['name']
+                )
         expected_meta = {
             u'minerva': {
                 u'analysis_type': u'bsve_search',
                 u'analysis_name': u'bsve search',
-                u'analysis_id': analysis['_id']
+                u'analysis_id': search_analysis['_id']
             }
         }
-        self.assertEquals(analysis['meta'], expected_meta, 'Unexpected value for meta data')
+        self.assertEquals(
+            search_analysis['meta'], expected_meta,
+            'Unexpected value for search meta data'
+        )
+        expected_meta = {
+            u'minerva': {
+                u'analysis_type': u'mmwr_import_data',
+                u'analysis_name': u'MMWR data import',
+                u'analysis_id': soda_analysis['_id']
+            }
+        }
+        self.assertEquals(
+            soda_analysis['meta'], expected_meta,
+            'Unexpected value for soda meta data'
+        )
 
         # create the dataset folder
         path = '/minerva_dataset/folder'
         params = {
             'userId': self._user['_id'],
         }
-        response = self.request(path=path, method='POST', params=params, user=self._user)
+        response = self.request(
+            path=path, method='POST', params=params, user=self._user
+        )
         self.assertStatusOk(response)
+        self._importDone = True
+
+    def testBsveSearchAnalysis(self):
+        self._importAnalysis()
 
         # mock the calls to bsve search
         @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
@@ -138,7 +184,9 @@ class AnalysisTestCase(base.TestCase):
                 return httmock.response(200, '12345')
             else:
                 pluginTestDir = os.path.dirname(os.path.realpath(__file__))
-                filepath = os.path.join(pluginTestDir, 'data', 'bsve_search.json')
+                filepath = os.path.join(
+                    pluginTestDir, 'data', 'bsve_search.json'
+                )
                 with open(filepath) as bsve_search_file:
                     content = {
                         'status': 1,
@@ -148,7 +196,9 @@ class AnalysisTestCase(base.TestCase):
                         'content-length': len(content),
                         'content-type': 'application/json'
                     }
-                    return httmock.response(200, content, headers, request=request)
+                    return httmock.response(
+                        200, content, headers, request=request
+                    )
 
         with HTTMock(bsve_mock):
             response = self.request(
@@ -167,7 +217,10 @@ class AnalysisTestCase(base.TestCase):
             searchResultsFinished = False
             count = 0
             output = job['meta']['minerva']['outputs'][0]
-            self.assertEquals(output['type'], 'dataset', 'Incorrect output type %s' % output['type'])
+            self.assertEquals(
+                output['type'], 'dataset',
+                'Incorrect output type %s' % output['type']
+            )
 
             while not searchResultsFinished and count < 5:
                 # get the dataset and check if it has been updated
@@ -178,6 +231,7 @@ class AnalysisTestCase(base.TestCase):
                     user=self._user
                 )
                 dataset = response.json
+
                 if 'json_row' in dataset:
                     searchResultsFinished = True
                 else:
@@ -185,11 +239,104 @@ class AnalysisTestCase(base.TestCase):
                     count += 1
 
             # ensure the first row of results was added to the dataset
-            self.assertTrue('json_row' in dataset, 'json_row expected in dataset')
-            self.assertTrue('data' in dataset['json_row'], 'data should be in json_row')
-            self.assertTrue('Longitude' in dataset['json_row']['data'], 'data.Longitude should be in json_row')
-            self.assertTrue('geojson_file' in dataset, 'geojson_file key missing')
-            self.assertTrue('dataset_type' in dataset, 'dataset_type key missing')
-            self.assertEquals(dataset['dataset_type'], 'geojson', 'expected dataset_type of geojson')
-            self.assertTrue('original_type' in dataset, 'original_type key missing')
-            self.assertEquals(dataset['original_type'], 'json', 'expected original_type of json')
+            self.assertTrue(
+                'json_row' in dataset,
+                'json_row expected in dataset'
+            )
+            self.assertTrue(
+                'data' in dataset['json_row'],
+                'data should be in json_row'
+            )
+            self.assertTrue(
+                'Longitude' in dataset['json_row']['data'],
+                'data.Longitude should be in json_row'
+            )
+            self.assertTrue(
+                'geojson_file' in dataset,
+                'geojson_file key missing'
+            )
+            self.assertTrue(
+                'dataset_type' in dataset,
+                'dataset_type key missing'
+            )
+            self.assertEquals(
+                dataset['dataset_type'], 'geojson',
+                'expected dataset_type of geojson'
+            )
+            self.assertTrue(
+                'original_type' in dataset,
+                'original_type key missing'
+            )
+            self.assertEquals(
+                dataset['original_type'], 'json',
+                'expected original_type of json'
+            )
+
+    def testBsveSodaAnalysis(self):
+        self._importAnalysis()
+
+        # mock the calls to bsve soda query
+        @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
+        def bsve_mock(url, request):
+            r = url.path.split('/')[-1].lower()
+            if r == 'soda':
+                # the initial search request
+                return httmock.response(200, '{"requestId": "12345", "status": 0}')
+            elif r == '12345':
+                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
+                filepath = os.path.join(
+                    pluginTestDir, 'data', 'soda_dump.json'
+                )
+                with open(filepath) as soda_dump_file:
+                    content = json.load(soda_dump_file)
+                    headers = {
+                        'content-length': len(content),
+                        'content-type': 'application/json'
+                    }
+                    return httmock.response(
+                        200, content, headers, request=request
+                    )
+            else:
+                self.fail('Unexpected BSVE request "%s"' % url.path)
+
+        with HTTMock(bsve_mock):
+            response = self.request(
+                path='/minerva_analysis/mmwr_import',
+                method='POST',
+                params={
+                    'datasetName': 'soda dataset'
+                },
+                user=self._user
+            )
+            self.assertStatusOk(response)
+            job = response.json
+
+            # wait for the async job to complete
+            searchResultsFinished = False
+            count = 0
+            output = job['meta']['minerva']['outputs'][0]
+            self.assertEquals(
+                output['type'], 'dataset',
+                'Incorrect output type %s' % output['type']
+            )
+
+            while not searchResultsFinished and count < 5:
+                # get the dataset and check if it has been updated
+                path = '/minerva_dataset/%s/dataset' % str(output['dataset_id'])
+                response = self.request(
+                    path=path,
+                    method='GET',
+                    user=self._user
+                )
+                dataset = response.json
+                if 'values' in dataset:
+                    searchResultsFinished = True
+                else:
+                    time.sleep(2)
+                    count += 1
+
+            # ensure the first row of results was added to the dataset
+            self.assertTrue(
+                'values' in dataset,
+                '"values" expected in dataset'
+            )

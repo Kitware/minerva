@@ -35,6 +35,7 @@ class Analysis(Resource):
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
+        self.route('POST', ('mmwr_import',), self.bsveMMWRAnalysis)
 
     @access.user
     def getAnalysisFolder(self, params):
@@ -104,3 +105,58 @@ class Analysis(Resource):
         Description('Create the minerva analysis folder, a global resource.')
         .param('datasetName', 'Name of the dataset created by this analysis.')
         .param('bsveSearchParams', 'JSON search parameters to send to bsve.'))
+
+    @access.user
+    def bsveMMWRAnalysis(self, params):
+        currentUser = self.getCurrentUser()
+        datasetName = params['datasetName']
+        count = int(params.get('count', 1000))
+        analysis = findAnalysisByName(currentUser, 'MMWR data import')
+        # TODO in case can't find analysis?
+
+        minerva_metadata = {
+            'dataset_type': 'geojson',
+            'source': 'mmwr_data_import',
+            'original_type': 'json'
+        }
+
+        datasetResource = Dataset()
+        dataset = datasetResource.constructDataset(
+            datasetName,
+            minerva_metadata,
+            'created by MMWR data import'
+        )
+        params = {
+            'count': count
+        }
+
+        # TODO change token to job token
+        user, token = self.getCurrentUser(returnToken=True)
+        kwargs = {
+            'params': params,
+            'user': currentUser,
+            'dataset': dataset,
+            'analysis': analysis,
+            'token': token
+        }
+
+        job = self.model('job', 'jobs').createLocalJob(
+            title='MMWR import: %s' % datasetName,
+            user=currentUser,
+            type='bsve.mmwr',
+            public=False,
+            kwargs=kwargs,
+            module='girder.plugins.minerva.jobs.soda_import_worker',
+            async=True)
+        addJobOutput(job, dataset)
+        self.model('job', 'jobs').scheduleJob(job)
+        return job
+
+    bsveMMWRAnalysis.description = (
+        Description('Create a new accumulated MMWR dataset from the BSVE.')
+        .param('datasetName', 'Name of the dataset created by this analysis.')
+        .param(
+            'count', 'The number of items to get from the server',
+            required=False
+        )
+    )
