@@ -35,6 +35,8 @@ before_install:
     # clone romanesco
     - cd $HOME/build/girder/plugins
     - git clone https://github.com/Kitware/romanesco.git
+    - cd romanesco
+    - git checkout cfdc285fd2d94ac1b8793b33e5ef3b49e59ccbb3 # If we update romanesco past this SHA, we need to update the girder version.
     - cd $HOME/build
 
     - cd girder
