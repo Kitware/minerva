@@ -71,10 +71,17 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         var polygon = layer.createFeature('polygon');
 
         // this is the value accessor for the choropleth
-        var value = function (d) { return d.properties[colorByValue]; };
+        var value = function (_a, _b, d) {
+            if (!d) {
+                return 0;
+            }
+            return d.properties[colorByValue] || 0;
+        };
 
         // the data extent
-        var extent = d3.extent(data, value);
+        var extent = d3.extent(data, function (d) {
+            return d.properties[colorByValue];
+        });
 
         // generate the color scale
         // TODO: make configurable
@@ -83,9 +90,39 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             .domain(domain)
             .range(['#fee8c8','#fdbb84','#e34a33']);
 
-        polygon.style({
+        polygon.polygon(function (d) {
+            if (d.geometry.type === 'Polygon') {
+                return {
+                    outer: d.geometry.coordinates[0],
+                    inner: [],
+                    properties: d.properties
+                };
+            } else if (d.geometry.type === 'MultiPolygon') {
+                return {
+                    outer: d.geometry.coordinates[0][0],
+                    inner: [],
+                    properties: d.properties
+                };
+            } else {
+                console.log('Invalid geometry type for choropleth: ' + d.geometry.type);
+            }
+            return {
+                outer: [],
+                inner: [],
+                properties: {}
+            };
+        }).position(function (d) {
+            return {
+                x: d[0],
+                y: d[1],
+                z: d[2] || 0
+            };
+        }).style({
             fillColor: function (d) {
-                return scale(value(d));
+                var v = value.apply(value, arguments);
+                var c = scale(v);
+                c = geo.util.convertColor(c);
+                return c;
             }
         }).data(data);
 
@@ -144,6 +181,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 dataset.once('m:dataLoaded', _.bind(function () {
                     this._renderChoropleth(dataset, this.map.createLayer('feature'));
                 }, this));
+                dataset.loadData();
             } else {
                 // Assume the dataset provides a reader, so load the data
                 // and adapt the dataset to the map with the reader.
