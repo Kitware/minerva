@@ -234,6 +234,10 @@ def run(job):
         minerva_metadata['dataset_type'] = 'geojson'
         minerva_metadata['values'] = data['properties']['values']
 
+        # set a default "color-by" attribute if possible
+        if data['properties']['values']:
+            minerva_metadata['colorByValue'] = data['properties']['values'][0]
+
         mM(dataset, minerva_metadata)
 
         existing = file_model.findOne({
