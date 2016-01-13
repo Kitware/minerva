@@ -64,6 +64,34 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         );
     },
 
+    // hacktastic choropleth rendering method
+    _renderChoropleth: function (dataset, layer) {
+        var data = JSON.parse(dataset.fileData).features;
+        var colorByValue = dataset.getMinervaMetadata().colorByValue;
+        var polygon = layer.createFeature('polygon');
+
+        // this is the value accessor for the choropleth
+        var value = function (d) { return d.properties[colorByValue]; };
+
+        // the data extent
+        var extent = d3.extent(data, value);
+
+        // generate the color scale
+        // TODO: make configurable
+        var domain = [extent[0], 0.5 * (extent[0] + extent[1]), extent[1]];
+        var scale = d3.scale.linear()
+            .domain(domain)
+            .range(['#fee8c8','#fdbb84','#e34a33']);
+
+        polygon.style({
+            fillColor: function (d) {
+                return scale(value(d));
+            }
+        }).data(data);
+
+        this.map.draw();
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -111,6 +139,11 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 }
                 this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
+            } else if (dataset.getMinervaMetadata().source === 'mmwr_data_import') {
+                // hacktastic special handling of MMWR data
+                dataset.once('m:dataLoaded', _.bind(function () {
+                    this._renderChoropleth(dataset, this.map.createLayer('feature'));
+                }, this));
             } else {
                 // Assume the dataset provides a reader, so load the data
                 // and adapt the dataset to the map with the reader.

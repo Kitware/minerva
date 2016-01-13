@@ -1,0 +1,18 @@
+.modal-dialog
+  .modal-content
+    form#m-choropleth-render-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Choropleth feature rendering options
+      .modal-body
+        .form-group
+          label.control-label(for="m-choropleth-value-source") Color by
+          select.form-control.input-sm#m-choropleth-value-source
+            each value in values
+              option(value=value)= value
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-choropleth-render-button.btn.btn-small.btn-primary(type="submit")
+          i.icon-check
+          | Save
