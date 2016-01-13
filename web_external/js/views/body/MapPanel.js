@@ -66,16 +66,37 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
     // hacktastic choropleth rendering method
     _renderChoropleth: function (dataset, layer) {
-        var data = JSON.parse(dataset.fileData).features;
+        var data = [];
         var colorByValue = dataset.getMinervaMetadata().colorByValue;
         var polygon = layer.createFeature('polygon');
 
+        // Loop through the data and transform multipolygons into
+        // arrays of polygons.  Note: it would also be possible
+        // to generate a polygon feature for each polygon/multipolygon
+        // geometry in the geojson, but this would (1) inefficient, and
+        // (2) make handling mouse events much more difficult.
+        JSON.parse(dataset.fileData).features.forEach(function (f) {
+            if (f.geometry.type === 'Polygon') {
+                data.push({
+                    outer: f.geometry.coordinates[0],
+                    inner: f.geometry.coordinates.slice(1),
+                    properties: f.properties
+                });
+            } else if (f.geometry.type === 'MultiPolygon') {
+                f.geometry.coordinates.forEach(function (p) {
+                    // all of the split polygons share the same property object
+                    data.push({
+                        outer: p[0],
+                        inner: p.slice(1),
+                        properties: f.properties
+                    });
+                });
+            }
+        });
+
         // this is the value accessor for the choropleth
         var value = function (_a, _b, d) {
-            if (!d) {
-                return 0;
-            }
-            return d.properties[colorByValue] || 0;
+            return (d || {}).properties[colorByValue] || 0;
         };
 
         // the data extent
@@ -90,35 +111,14 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             .domain(domain)
             .range(['#fee8c8','#fdbb84','#e34a33']);
 
-        polygon.polygon(function (d) {
-            if (d.geometry.type === 'Polygon') {
-                return {
-                    outer: d.geometry.coordinates[0],
-                    inner: [],
-                    properties: d.properties
-                };
-            } else if (d.geometry.type === 'MultiPolygon') {
-                return {
-                    outer: d.geometry.coordinates[0][0],
-                    inner: [],
-                    properties: d.properties
-                };
-            } else {
-                console.log('Invalid geometry type for choropleth: ' + d.geometry.type);
-            }
-            return {
-                outer: [],
-                inner: [],
-                properties: {}
-            };
-        }).position(function (d) {
+        polygon.position(function (d) {
             return {
                 x: d[0],
                 y: d[1],
                 z: d[2] || 0
             };
         }).style({
-            fillColor: function (d) {
+            fillColor: function () {
                 var v = value.apply(value, arguments);
                 var c = scale(v);
                 c = geo.util.convertColor(c);

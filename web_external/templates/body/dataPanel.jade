@@ -9,7 +9,7 @@ if datasets
         if dataset.metadata()
           .dataset
             span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
-              - var attributes = {'m-dataset-id': dataset.get('_id'), 'm-dataset-source': dataset.get('meta').minerva.source}
+              - var attributes = {'m-dataset-id': dataset.get('_id')}
               if dataset.isRenderable()
                 //- Eye icon to move dataset into current session
                 - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
