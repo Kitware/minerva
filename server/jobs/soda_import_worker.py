@@ -25,8 +25,8 @@ import girder_client
 
 #: geojson of state boundaries source url
 states_source = (
-    'https://gist.githubusercontent.com/jbeezley/82150e34cee8512815cf/'
-    'raw/32549660c18149698a849b00cac6df8ddd2d1f1a/us-states.json'
+    'https://gist.githubusercontent.com/jbeezley/ec21c4a016a84c5def74/'
+    'raw/0eb947eccbba98c01caad6ac7fbc7f8fe8334231/us-states.geojson'
 )
 
 #: cached geojson object
