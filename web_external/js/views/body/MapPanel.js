@@ -29,11 +29,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     _specifyWmsDatasetLayer: function (dataset, layer) {
         var minervaMetadata = dataset.metadata();
         layer.layerName = minervaMetadata.type_name;
-        layer.baseUrl = minervaMetadata.base_url;
-        if (minervaMetadata.hasOwnProperty('credentials')) {
-            layer.baseUrl = '/wms_proxy/' + encodeURIComponent(layer.baseUrl) +
-                    '/' + minervaMetadata.credentials;
-        }
+        layer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
         var projection = 'EPSG:3857';
         layer.gcs(projection);
         layer.tileUrl(
@@ -60,6 +56,9 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     SRS: projection,
                     TILED: true
                 };
+                if (minervaMetadata.hasOwnProperty('credentials')) {
+                    params.minerva_credentials = minervaMetadata.credentials;
+                }
                 return layer.baseUrl + '?' + $.param(params);
             }
         );

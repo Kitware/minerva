@@ -35,10 +35,15 @@ from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 class WmsProxy(object):
     exposed = True
 
-    def GET(self, url, credentials, **params):
-        auth = 'Basic ' + b64encode(decryptCredentials(bytes(credentials)))
-        headers = {'Authorization': auth}
-        r = requests.get(url, params=params, headers=headers)
+    def GET(self, url, **params):
+        if 'minerva_credentials' in params:
+            creds = params['minerva_credentials']
+            del params['minerva_credentials']
+            auth = 'Basic ' + b64encode(decryptCredentials(bytes(creds)))
+            headers = {'Authorization': auth}
+            r = requests.get(url, params=params, headers=headers)
+        else:
+            r = requests.get(url, params=params)
         cherrypy.response.headers['Content-Type'] = r.headers['content-type']
         return r.content
 
