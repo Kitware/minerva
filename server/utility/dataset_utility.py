@@ -104,11 +104,13 @@ def jsonArrayHead(filepath, limit=10):
 class JsonMapper(object):
 
     def __init__(self, objConverter, header='[', footer=']',
-                 jsonDumpser=json.dumps):
+                 jsonDumpser=json.dumps, aggregateFunction=None, endOfLineChar='\n'):
         self.objConverter = objConverter
         self.header = header
         self.footer = footer
         self.jsonDumpser = json.dumps
+        self.aggregateFunction = aggregateFunction
+        self.endOfLineChar = endOfLineChar
 
     def mapToJsonFile(self, tmpdir, objects, outFilepath=None):
         if not outFilepath:
@@ -121,33 +123,27 @@ class JsonMapper(object):
     def mapToJson(self, objects, writer):
         writer.write(self.header)
         writer.write('\n')
+        data = []
         for ind, obj in enumerate(objects):
-            if ind > 0:
-                writer.write(',\n')
+            if self.aggregateFunction is not None:
+                data.append(self.objConverter(obj))
             else:
-                writer.write('\n')
-            writer.write(self.jsonDumpser(self.objConverter(obj)))
+                if ind > 0:
+                        writer.write(','+self.endOfLineChar)
+                else:
+                    writer.write(self.endOfLineChar)
+                    writer.write(self.jsonDumpser(self.objConverter(obj)))
+        if self.aggregateFunction is not None:
+            writer.write(self.jsonDumpser(self.aggregateFunction(data)))
         writer.write(self.footer)
-
 
 class GeoJsonMapper(JsonMapper):
 
     def __init__(self, objConverter=None, mapping=None):
-        geojson_header = """{
-        "type": "FeatureCollection",
-        "crs": {
-            "type": "name",
-            "properties": {
-                "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-            }
-        },
-        "features": [
-        """
+        from geojson import MultiPoint
 
-        geojson_footer = """
-        ]
-        }
-        """
+        geojson_header = ""
+        geojson_footer = ""
 
         if objConverter is None:
             if mapping is None:
@@ -165,13 +161,11 @@ class GeoJsonMapper(JsonMapper):
                     match = long_expr.find(obj)
                     return float(match[0].value)
 
-                point = geojson.Point((extractLong(obj), extractLat(obj)))
-                properties = {"placeholder": 0}
-                feature = geojson.Feature(geometry=point,
-                                          properties=properties)
-                return feature
+                point = (extractLong(obj), extractLat(obj))
+                return point
 
             objConverter = convertToGeoJson
 
         super(GeoJsonMapper, self).__init__(objConverter, geojson_header,
-                                            geojson_footer, geojson.dumps)
+                                            geojson_footer, geojson.dumps,
+                                            geojson.MultiPoint, ',')

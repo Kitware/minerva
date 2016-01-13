@@ -120,11 +120,14 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     var dataset = this.collection.get(datasetId);
                     var layer = this.map.createLayer('feature');
 
+                    console.log(dataset)
+
+
                     var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
                     this.datasetLayers[datasetId] = layer;
 
                     layer.clear();
-
+                    console.log(dataset.fileData);
                     reader.read(dataset.fileData, _.bind(function () {
                         // Add the UI slider back
                         this.uiLayer = this.map.createLayer('ui');
