@@ -23,37 +23,15 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     },
 
     createDataset: function () {
-        // call this after uploading an item to the dataset folder
-        // will ensure that this dataset is usable as a dataset, which
-        // means initializing the minerva metadata on the item and
-        // the geojson exists
-        // TODO may need rethink when this geojson creation occurs
-        // as operations get slower on big files
+        // Call this after uploading an item to the dataset folder,
+        // it will ensure that this dataset is usable as a dataset, which
+        // means initializing the minerva metadata on the item.
         girder.restRequest({
-            path: 'minerva_dataset/' + this.get('_id') + '/dataset',
+            path: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            this.metadata(resp);
-            var minervaMetadata = this.metadata();
-            if (_.has(minervaMetadata, 'geojson_file')) {
-                this.trigger('m:datasetCreated', this);
-            } else {
-                var originalType = minervaMetadata.original_type;
-                if (originalType === 'shapefile') {
-                    this.on('m:geojsonCreated', function () {
-                        this.trigger('m:datasetCreated', this);
-                    }, this);
-                    this.createGeoJson();
-                } else if (originalType === 'csv') {
-                    // cannot do further processing without user input
-                    this.trigger('m:datasetCreated', this);
-                } else if (originalType === 'json') {
-                    // cannot do further processing without user input
-                    this.on('m:jsonrowGot', function () {
-                        this.trigger('m:datasetCreated', this);
-                    }, this).getJsonRow();
-                }
-            }
+            this.metadata(resp.meta.minerva);
+            this.trigger('m:datasetCreated', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {
@@ -66,7 +44,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     },
 
     getDatasetType: function () {
-        // this is the start of trying to build an interface around the minerva metadata
         var minervaMetadata = this.metadata();
         return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
             (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
@@ -346,33 +323,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 this.trigger('m:dataLoaded', this.get('_id'));
             }
         }
-    },
-
-    geocodeTweet: function () {
-        girder.restRequest({
-            path: 'item/' + this.get('_id') + '/geocodetweet',
-            type: 'POST'
-        }).done(_.bind(function (resp) {
-            if (resp._id !== '') {
-                this.geojsonFileId = resp._id;
-                this.trigger('m:tweetGeocoded', this);
-            } else {
-                girder.events.trigger('g:alert', {
-                    icon: 'cancel',
-                    text: 'Could not geocode tweets.',
-                    type: 'error',
-                    timeout: 4000
-                });
-            }
-        }, this)).error(_.bind(function (err) {
-            console.error(err);
-            girder.events.trigger('g:alert', {
-                icon: 'cancel',
-                text: 'Could not geocode tweets.',
-                type: 'error',
-                timeout: 4000
-            });
-        }, this));
     }
 
 });

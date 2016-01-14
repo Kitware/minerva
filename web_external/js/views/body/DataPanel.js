@@ -1,6 +1,7 @@
 minerva.views.DataPanel = minerva.views.Panel.extend({
     events: {
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
+        'click .m-upload-local': 'uploadDialog',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
@@ -26,6 +27,66 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         }
 
     },
+
+    uploadDialog: function () {
+        var container = $('#g-dialog-container');
+
+        this.uploadWidget = new girder.views.UploadWidget({
+            el: container,
+            noParent: true,
+            title: 'Upload a dataset',
+            overrideStart: true,
+            parentView: this.parentView
+        }).on('g:uploadFinished', function () {
+            this.upload = false;
+        }, this).render();
+        this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
+        this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
+        this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
+    },
+
+    /**
+     * Called when the user selects or drops files to be uploaded.
+     */
+    filesSelected: function (files) {
+        var zeroethFileName = null;
+        this.newItemName = null;
+        this.newItemExt = null;
+        if (files && files.length > 0) {
+            zeroethFileName = files[0].name;
+            this.newItemName = zeroethFileName;
+            this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
+            this.newItemType = files[0].type;
+        }
+    },
+
+    /**
+     * Create a new Item for the dataset, then upload all files there.
+     */
+    uploadStarted: function () {
+        this.newDataset = new minerva.models.DatasetModel({
+            name: this.newItemName,
+            folderId: this.collection.folderId
+        }).on('g:saved', function () {
+            this.uploadWidget.parentType = 'item';
+            this.uploadWidget.parent = this.newDataset;
+            this.uploadWidget.uploadNextFile();
+        }, this).on('g:error', function (err) {
+            console.error(err);
+        }).save();
+    },
+
+    /**
+     * Create a Dataset from the Item.
+     */
+    uploadFinished: function () {
+        this.newDataset.on('m:datasetCreated', function () {
+            this.collection.add(this.newDataset);
+        }, this).on('g:error', function (err) {
+            console.error(err);
+        }).createDataset();
+    },
+
 
     mapTableDataset: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');

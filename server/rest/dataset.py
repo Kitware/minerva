@@ -44,7 +44,7 @@ class Dataset(Resource):
         self.route('GET', (), self.listDatasets)
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
-        self.route('POST', (':id', 'dataset'), self.createDataset)
+        self.route('POST', (':id', 'item'), self.createItemDataset)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
@@ -299,32 +299,23 @@ class Dataset(Resource):
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
-    def createDataset(self, item, params):
-        # assuming we have an existing item
-        # create the minerva metadata to make it a dataset
-        # this is likely an intermediate step to making a new model for
-        # a dataset that extends item
-        # TODO want to check if in dataset folder?
-        #
-        # should be called after first created
-        #
-        # 1) get all the files
-        # 2) find their types based on mimetype and extension
-        # one of (geojson, json, csv)
-        # set the original_type and original_file[] meta.minerva fields
-        # with geojson_file if appropriate
-        #
-        # output should be the same the the get returns
-        # which is a blob of minerva dataset metadata
-        #
-        # TODO this switching is based on which file is found first
-        # fairly brittle and should only be called after first upload
-        # perhaps check if this metadata already exists and don't run if so?
-        minerva_metadata = {}
+    def createItemDataset(self, item, params):
+        user = self.getCurrentUser()
+        folder = findDatasetFolder(user, user, create=True)
+        if folder is None:
+            raise RestException('User has no Minerva Dataset folder.')
+        if folder['_id'] != item['folderId']:
+            raise RestException("Items need to be in user's Minerva Dataset " +
+                                "folder.")
+
+        minerva_metadata = {
+            'source_type': 'item'
+        }
         for file in self.model('item').childFiles(item=item, limit=0):
             if 'geojson' in file['exts']:
                 # we found a geojson, assume this is geojson original
                 minerva_metadata['original_type'] = 'geojson'
+                minerva_metadata['dataset_type'] = 'geojson'
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 minerva_metadata['geojson_file'] = {
@@ -332,25 +323,19 @@ class Dataset(Resource):
                 break
             elif 'json' in file['exts']:
                 minerva_metadata['original_type'] = 'json'
+                minerva_metadata['dataset_type'] = 'json'
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
             elif 'csv' in file['exts']:
                 minerva_metadata['original_type'] = 'csv'
+                minerva_metadata['dataset_type'] = 'csv'
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
-        if not minerva_metadata:
-            raise RestException('No valid dataset type found in Item Files.')
-        minerva_metadata['dataset_id'] = item['_id']
-        if 'meta' in item:
-            metadata = item['meta']
-        else:
-            metadata = {}
-        metadata['minerva'] = minerva_metadata
-        self.model('item').setMetadata(item, metadata)
-        return minerva_metadata
-    createDataset.description = (
+        updateMinervaMetadata(item, minerva_metadata)
+        return item
+    createItemDataset.description = (
         Description('Create metadata for an Item, promoting it to a Dataset.')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
