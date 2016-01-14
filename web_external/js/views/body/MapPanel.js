@@ -71,6 +71,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         var colorScheme = dataset.getMinervaMetadata().colorScheme;
         var polygon = layer.createFeature('polygon');
 
+        this.datasetLayers[dataset.id] = layer;
+
         // Loop through the data and transform multipolygons into
         // arrays of polygons.  Note: it would also be possible
         // to generate a polygon feature for each polygon/multipolygon
