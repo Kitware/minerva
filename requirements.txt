@@ -1,4 +1,4 @@
-girder-client==1.0.0
+girder-client==1.1.0
 jsonpath-rw==1.4.0
 geojson==1.1.0
 ijson==2.2.0

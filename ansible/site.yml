@@ -26,6 +26,7 @@
   roles:
     - role: romanesco
       rabbitmq_ansible_group: rabbitmq
+      romaneco_version: "cfdc285fd2d94"
       state: started
       sudo: yes
 
@@ -33,10 +34,12 @@
       mongodb_ansible_group: girder
       girder_admin_user: girder
       girder_admin_password: letmein
+      girder_version: "v1.4.1"
       state: started
       sudo: yes
 
     - role: minerva
+      minerva_version: "minerva-vagrant"
       sudo: yes
 
   tasks:
