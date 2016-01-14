@@ -1,0 +1,14 @@
+- var pt = mouse.geo
+- var ew = pt.x >= 0 ? 'E' : 'W'
+- var ns = pt.y >= 0 ? 'N' : 'S'
+.m-click-info-widget
+  dl.dl-horizontal
+    dt Dataset
+    dd= dataset.id
+    dt Position
+    dd #{Math.abs(pt.y)}° #{ns}, #{Math.abs(pt.x)}° #{ew}
+    each value, key in datum
+      - valuetype = typeof value
+      if valuetype === 'string' || valuetype === 'number'
+        dt= key
+        dd= value

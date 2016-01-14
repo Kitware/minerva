@@ -69,7 +69,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         var data = [];
         var colorByValue = dataset.getMinervaMetadata().colorByValue;
         var colorScheme = dataset.getMinervaMetadata().colorScheme;
-        var polygon = layer.createFeature('polygon');
+        var polygon = layer.createFeature('polygon', {selectionAPI: true});
 
         this.datasetLayers[dataset.id] = layer;
 
@@ -129,6 +129,24 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             // this is temporary... in GeoJS 0.6 we can set opacity per layer
             fillOpacity: 0.75
         }).data(data);
+
+        var clickInfo = new minerva.models.ClickInfoModel();
+
+        polygon.geoOn(geo.event.feature.mouseclick, _.bind(function (d) {
+            clickInfo.set({
+                layer: layer,
+                dataset: dataset,
+                mouse: d.mouse,
+                datum: d.data
+            });
+
+            if (!this.clickInfoWidget) {
+                this.clickInfoWidget = new minerva.views.ClickInfoWidget({
+                    model: clickInfo,
+                    parentView: this
+                });
+            }
+        }, this));
 
         this.map.draw();
     },
