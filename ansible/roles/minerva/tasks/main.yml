@@ -57,5 +57,4 @@
         path: "{{ venv_root }}"
         owner: "{{ girder_user }}"
         group: "{{ girder_group }}"
-        mode: 0755
     when: do_install|bool

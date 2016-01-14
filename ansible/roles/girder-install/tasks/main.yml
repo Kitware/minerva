@@ -106,15 +106,5 @@
         recurse: yes
         path: "{{ girder_install_root }}"
         group: "{{ girder_group }}"
-        mode: 0755
         owner: "{{ girder_user }}"
-    when: do_install|bool
-
-  - name: girder | virtualenv | owner | set
-    file:
-        recurse: yes
-        path: "{{ venv_root }}"
-        owner: "{{ girder_user }}"
-        group: "{{ girder_group }}"
-        mode: 0755
     when: do_install|bool
