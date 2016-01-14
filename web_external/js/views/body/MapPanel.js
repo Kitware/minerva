@@ -68,6 +68,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     _renderChoropleth: function (dataset, layer) {
         var data = [];
         var colorByValue = dataset.getMinervaMetadata().colorByValue;
+        var colorScheme = dataset.getMinervaMetadata().colorScheme;
         var polygon = layer.createFeature('polygon');
 
         // Loop through the data and transform multipolygons into
@@ -105,11 +106,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         });
 
         // generate the color scale
-        // TODO: make configurable
         var domain = [extent[0], 0.5 * (extent[0] + extent[1]), extent[1]];
         var scale = d3.scale.linear()
             .domain(domain)
-            .range(['#fee8c8','#fdbb84','#e34a33']);
+            .range(colorbrewer[colorScheme][3]);
 
         polygon.position(function (d) {
             return {

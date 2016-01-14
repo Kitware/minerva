@@ -11,6 +11,14 @@
           select.form-control.input-sm#m-choropleth-value-source
             each value in values
               option(value=value)= value
+        label(for="m-choropleth-color-config") Color scheme
+        #m-choropleth-color-config.btn-group(role="group")
+          each ramp, name in colors
+            button.btn.btn-default(type="button", data-color-name="#{name}", data-color-length="6")
+              ul.m-color-ramp
+                each color in ramp[6]
+                  li(style="background-color: #{color}")
+
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-choropleth-render-button.btn.btn-small.btn-primary(type="submit")

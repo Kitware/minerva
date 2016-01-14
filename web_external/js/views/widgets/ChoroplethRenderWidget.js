@@ -13,6 +13,7 @@ minerva.views.ChoroplethRenderWidget = minerva.View.extend({
 
             var minervaMetadata = this.dataset.getMinervaMetadata();
             minervaMetadata.colorByValue = $('#m-choropleth-value-source option:selected').text();
+            minervaMetadata.colorScheme = $('#m-choropleth-color-config > button.active').attr('data-color-name');
             this.dataset.saveMinervaMetadata(minervaMetadata);
             this.$el.modal('hide');
         }
@@ -20,9 +21,20 @@ minerva.views.ChoroplethRenderWidget = minerva.View.extend({
 
     render: function () {
         var minervaMetadata = this.dataset.getMinervaMetadata();
+        var scheme = minervaMetadata.colorScheme || 'YlOrRd';
         var modal = this.$el.html(minerva.templates.choroplethRenderWidget({
-            values: minervaMetadata.values
+            values: minervaMetadata.values,
+            colors: colorbrewer
         })).girderModal(this);
+
+        var buttons = this.$('#m-choropleth-color-config > .btn');
+        this.$('button[data-color-name="' + scheme + '"]').addClass('active');
+
+        buttons.click(function () {
+            var $this = $(this);
+            buttons.removeClass('active');
+            $this.addClass('active');
+        });
         modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
     },
 

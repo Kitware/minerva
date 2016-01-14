@@ -3,6 +3,7 @@
         "minerva",
         "geo",
         "Papa",
-        "jsonPath"
+        "jsonPath",
+        "colorbrewer"
     ]
 }

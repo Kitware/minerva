@@ -10,6 +10,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     configureChoropleth: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
+        if (dataset.get('displayed')) {
+            // don't pop up the modal when the dataset is active
+            return;
+        }
         if (!this.choroplethRenderWidget) {
             this.choroplethRenderWidget = new minerva.views.ChoroplethRenderWidget({
                 el: $('#g-dialog-container'),
