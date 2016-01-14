@@ -42,15 +42,20 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   if sync_folders
+    # This is experimental and intended for developers who are
+    # working directly on code in the virtualized instance,
+    # no support, warranty or ganuntee of correctness!
+    GIRDER_UID = GIRDER_GID = 1003
+    ROMANESCO_UID = ROMANESCO_GID = 1002
     if File.directory?("../girder")
-      config.vm.synced_folder "../girder", "/opt/girder", owner: 1003, group: 1003
+      config.vm.synced_folder "../girder", "/opt/girder", owner: GIRDER_UID, group: GIRDER_GID
     end
 
     if File.directory?("../romanesco")
-      config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: 1002, group: 1002
+      config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: ROMANESCO_UID, group: ROMANESCO_GID
     end
 
-    config.vm.synced_folder ".", "/opt/minerva", owner: 1003, group: 1003
+    config.vm.synced_folder ".", "/opt/minerva", owner: GIRDER_UID, group: GIRDER_GID
   end
 
 
