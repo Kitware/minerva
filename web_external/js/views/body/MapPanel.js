@@ -125,7 +125,9 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 var c = scale(v);
                 c = geo.util.convertColor(c);
                 return c;
-            }
+            },
+            // this is temporary... in GeoJS 0.6 we can set opacity per layer
+            fillOpacity: 0.75
         }).data(data);
 
         this.map.draw();
