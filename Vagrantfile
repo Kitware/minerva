@@ -5,6 +5,8 @@ Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
   host_port = ENV["GIRDER_HOST_PORT"] || 8080
 
+  sync_folders = ENV["DEVELOPMENT_SYNC_FOLDERS"] || false
+
   config.vm.network "forwarded_port", guest: 8080, host: host_port
 
   config.vm.define "minerva" do |node| end
@@ -37,17 +39,23 @@ Vagrant.configure(2) do |config|
   end
 
 
-  if File.directory?("../girder")
-    config.vm.synced_folder "../girder", "/opt/girder", owner: 1003, group: 1003
-  end
-
-  if File.directory?("../romanesco")
-    config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: 1002, group: 1002
-  end
-
-
   config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder ".", "/opt/minerva", owner: 1003, group: 1003
+
+  if sync_folders
+    if File.directory?("../girder")
+      config.vm.synced_folder "../girder", "/opt/girder", owner: 1003, group: 1003
+    end
+
+    if File.directory?("../romanesco")
+      config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: 1002, group: 1002
+    end
+
+    config.vm.synced_folder ".", "/opt/minerva", owner: 1003, group: 1003
+  end
+
+
+
+
 
   config.vm.provision "ansible" do |ansible|
     ansible.groups = {
