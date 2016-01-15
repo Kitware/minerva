@@ -256,4 +256,4 @@ with tmpdir(cleanup=True) as output_dir:
 
     # Finally promote item to dataset
     with timer("Promoted item %s to dataset" % output_item_id):
-        client.post('minerva_dataset/%s/dataset' % output_item_id)
+        client.post('minerva_dataset/%s/item' % output_item_id)
