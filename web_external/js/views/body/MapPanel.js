@@ -137,7 +137,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 layer: layer,
                 dataset: dataset,
                 mouse: d.mouse,
-                datum: d.data
+                datum: d.data.properties
             });
 
             if (!this.clickInfoWidget) {

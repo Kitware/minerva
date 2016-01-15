@@ -106,12 +106,15 @@ def accumulate(data):
         _states = requests.get(states_source).json()
     geojson = copy.deepcopy(_states)
 
-    # create a abbr -> properties mapping
-    states = {
-        feature.get('properties', {}).get('abbr'):
-            feature.get('properties', {})
-        for feature in geojson.get('features', [])
-    }
+    # create a abbr -> properties mappin and remove unwanted properties
+    states = {}
+    for feature in geojson.get('features', []):
+        abbr = feature['properties']['abbr']
+        name = feature['properties']['name']
+        feature['properties'].clear()
+        feature['properties']['abbr'] = abbr
+        feature['properties']['name'] = name
+        states[abbr] = feature['properties']
 
     # city, state regex
     citystate = re.compile(r', ([A-Z][A-Z])$')
@@ -237,6 +240,7 @@ def run(job):
         # set a default "color-by" attribute if possible
         if data['properties']['values']:
             minerva_metadata['colorByValue'] = data['properties']['values'][0]
+        minerva_metadata['colorScheme'] = 'YlOrRd'
 
         mM(dataset, minerva_metadata)
 
