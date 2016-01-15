@@ -1,0 +1,12 @@
+---
+
+dependencies:
+  - role: girder-variables
+  - role: upstart
+    name: girder
+    user: "{{ girder_user }}"
+    group: "{{ girder_group }}"
+    description: Girder Data Management Platform -- Web Service
+    command: >
+        bash -c ". {{ venv_root }}/bin/activate && cd {{ girder_install_root }} && python -m girder"
+    when: do_install|bool

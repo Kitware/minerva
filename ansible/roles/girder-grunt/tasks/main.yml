@@ -1,0 +1,26 @@
+  - name: npm | package.json | install
+    npm:
+        path: "{{ girder_install_root }}"
+    when: do_install|bool
+
+  - name: grunt | Gruntfile.js | init
+    shell: >
+        grunt init
+    args:
+        chdir: "{{ girder_install_root }}"
+        executable: /bin/bash
+    when: do_install|bool
+
+  - name: grunt | Gruntfile.js
+    shell: >
+        grunt
+    args:
+        chdir: "{{ girder_install_root }}"
+        executable: /bin/bash
+    when: do_install|bool
+
+  - name: girder | conf | development mode | set
+    command: python setup.py develop
+    args:
+        chdir: "{{ girder_install_root }}"
+    when: do_install|bool

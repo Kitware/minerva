@@ -1,0 +1,7 @@
+---
+
+dependencies:
+  - role: rabbitmq-variables
+  - role: rabbitmq-install
+  - role: rabbitmq-service
+

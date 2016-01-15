@@ -1,0 +1,13 @@
+---
+base_dir: /opt
+
+romanesco_install_root: "{{base_dir}}/romanesco"
+romanesco_version: "master"
+
+girder_install_root: "{{base_dir}}/girder"
+girder_version: "master"
+
+minerva_install_root: "{{base_dir}}/minerva"
+minerva_version: "master"
+
+venv_root: "{{base_dir}}/.girderenv"
