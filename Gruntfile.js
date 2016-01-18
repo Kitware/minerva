@@ -51,22 +51,20 @@ module.exports = function (grunt) {
     }
 
     grunt.config.merge({
-        plugin: {
-            minerva: {
-                root: '<%= pluginDir %>/minerva',
-                external: '<%= plugin.minerva.root %>/web_external',
-                static: '<%= staticDir %>/built/plugins/minerva',
-                source: '<%= plugin.minerva.external %>/js',
-                geojs: '<%= plugin.minerva.root %>/node_modules/geojs',
-                extra: '<%= plugin.minerva.external %>/extra',
-                fontello: '<%= plugin.minerva.external %>/fontello'
-            }
+        minerva: {
+            root: __dirname,
+            external: '<%= minerva.root %>/web_external',
+            static: '<%= staticDir %>/built/plugins/minerva',
+            source: '<%= minerva.external %>/js',
+            geojs: '<%= minerva.root %>/node_modules/geojs',
+            extra: '<%= minerva.external %>/extra',
+            fontello: '<%= minerva.external %>/fontello'
         },
         jade: {
             minerva: {
                 files: [{
-                    src: ['<%= plugin.minerva.external %>/templates/**/*.jade'],
-                    dest: '<%= plugin.minerva.static %>/minerva_templates.js'
+                    src: ['<%= minerva.external %>/templates/**/*.jade'],
+                    dest: '<%= minerva.static %>/minerva_templates.js'
                 }],
                 options: {
                     namespace: 'minerva.templates'
@@ -77,10 +75,10 @@ module.exports = function (grunt) {
             minerva: {
                 files: [{
                     src: [
-                        '<%= plugin.minerva.external %>/stylesheets/main.styl',
-                        '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
+                        '<%= minerva.external %>/stylesheets/main.styl',
+                        '<%= minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
                     ],
-                    dest: '<%= plugin.minerva.static %>/minerva.min.css'
+                    dest: '<%= minerva.static %>/minerva.min.css'
                 }]
             }
         },
@@ -89,40 +87,40 @@ module.exports = function (grunt) {
                 files: [
                     {
                         src: [
-                            '<%= plugin.minerva.source %>/init.js',
-                            '<%= plugin.minerva.static %>/minerva_templates.js',
-                            '<%= plugin.minerva.source %>/minerva-version.js',
-                            '<%= plugin.minerva.source %>/view.js',
-                            '<%= plugin.minerva.source %>/contourJsonReader.js',
-                            '<%= plugin.minerva.source %>/app.js',
-                            '<%= plugin.minerva.source %>/utilities.js',
-                            '<%= plugin.minerva.source %>/MinervaModel.js',
-                            '<%= plugin.minerva.source %>/MinervaCollection.js',
-                            '<%= plugin.minerva.source %>/models/DatasetModel.js',
-                            '<%= plugin.minerva.source %>/models/SourceModel.js',
-                            '<%= plugin.minerva.source %>/models/**/*.js',
-                            '<%= plugin.minerva.source %>/collections/**/*.js',
-                            '<%= plugin.minerva.source %>/views/body/Panel.js',
-                            '<%= plugin.minerva.source %>/views/**/*.js',
-                            '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'
+                            '<%= minerva.source %>/init.js',
+                            '<%= minerva.static %>/minerva_templates.js',
+                            '<%= minerva.source %>/minerva-version.js',
+                            '<%= minerva.source %>/view.js',
+                            '<%= minerva.source %>/contourJsonReader.js',
+                            '<%= minerva.source %>/app.js',
+                            '<%= minerva.source %>/utilities.js',
+                            '<%= minerva.source %>/MinervaModel.js',
+                            '<%= minerva.source %>/MinervaCollection.js',
+                            '<%= minerva.source %>/models/DatasetModel.js',
+                            '<%= minerva.source %>/models/SourceModel.js',
+                            '<%= minerva.source %>/models/**/*.js',
+                            '<%= minerva.source %>/collections/**/*.js',
+                            '<%= minerva.source %>/views/body/Panel.js',
+                            '<%= minerva.source %>/views/**/*.js',
+                            '<%= minerva.root %>/node_modules/colorbrewer/colorbrewer.js'
                         ],
-                        dest: '<%= plugin.minerva.static %>/minerva.min.js'
+                        dest: '<%= minerva.static %>/minerva.min.js'
                     },
                     {
                         src: [
-                            '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
-                            '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
-                            '<%= plugin.minerva.geojs %>/node_modules/pnltri/pnltri.js'
+                            '<%= minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
+                            '<%= minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
+                            '<%= minerva.geojs %>/node_modules/pnltri/pnltri.js'
                         ],
-                        dest: '<%= plugin.minerva.static %>/geo.ext.min.js'
+                        dest: '<%= minerva.static %>/geo.ext.min.js'
                     },
                     {
-                        src: ['<%= plugin.minerva.source %>/main.js'],
-                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                        src: ['<%= minerva.source %>/main.js'],
+                        dest: '<%= minerva.static %>/main.min.js'
                     },
                     {
-                        src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
-                        dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
+                        src: ['<%= minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
+                        dest: '<%= minerva.static %>/jsonpath.min.js'
                     }
                 ]
             }
@@ -132,7 +130,7 @@ module.exports = function (grunt) {
                 command: 'npm install --only=prod',
                 options: {
                     execOptions: {
-                        cwd: '<%= plugin.minerva.geojs %>'
+                        cwd: '<%= minerva.geojs %>'
                     }
                 }
             },
@@ -140,7 +138,7 @@ module.exports = function (grunt) {
                 command: 'npm run build',
                 options: {
                     execOptions: {
-                        cwd: '<%= plugin.minerva.geojs %>'
+                        cwd: '<%= minerva.geojs %>'
                     }
                 }
             }
@@ -150,15 +148,15 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.extra %>',
+                        cwd: '<%= minerva.extra %>',
                         src: ['**'],
-                        dest: '<%= plugin.minerva.static %>'
+                        dest: '<%= minerva.static %>'
                     },
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/dist/built',
+                        cwd: '<%= minerva.geojs %>/dist/built',
                         src: ['geo.min.js'],
-                        dest: '<%= plugin.minerva.static %>'
+                        dest: '<%= minerva.static %>'
                     }
                 ]
             },
@@ -166,7 +164,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.fontello %>',
+                        cwd: '<%= minerva.fontello %>',
                         src: ['font/*', 'css/*'],
                         dest: '<%= staticDir %>/lib/fontello/minerva'
                     }
@@ -176,21 +174,21 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui',
+                        cwd: '<%= minerva.geojs %>/bower_components/jquery-ui',
                         src: ['jquery-ui.min.js'],
-                        dest: '<%= plugin.minerva.static %>'
+                        dest: '<%= minerva.static %>'
                     },
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        cwd: '<%= minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
                         src: ['jquery-ui.min.css'],
-                        dest: '<%= plugin.minerva.static %>'
+                        dest: '<%= minerva.static %>'
                     },
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
+                        cwd: '<%= minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
                         src: ['images/*'],
-                        dest: '<%= plugin.minerva.static %>'
+                        dest: '<%= minerva.static %>'
                     }
                 ]
             }
@@ -226,26 +224,26 @@ module.exports = function (grunt) {
 
     grunt.config.merge({
         watch: {
-            'plugin-minerva-jade-external': {
+            'minerva-jade-external': {
                 files: _.pluck(grunt.config.get('jade.minerva.files'), 'src'),
                 tasks: ['jade:minerva']
             },
-            'plugin-minerva-stylus-external': {
+            'minerva-stylus-external': {
                 files: _.pluck(grunt.config.get('stylus.minerva.files'), 'src'),
                 tasks: ['stylus:minerva']
             },
-            'plugin-minerva-uglify-external': {
+            'minerva-uglify-external': {
                 files: _.pluck(grunt.config.get('uglify.minerva.files'), 'src'),
                 tasks: ['uglify:minerva']
             },
-            'plugin-minerva-build-geojs': {
-                files: ['<%= plugin.minerva.geojs %>/**/*.js'],
+            'minerva-build-geojs': {
+                files: ['<%= minerva.geojs %>/**/*.js'],
                 tasks: ['shell:minerva-geojs']
             },
-            'plugin-minerva-copy-extra': {
+            'minerva-copy-extra': {
                 files: [
-                    '<%= plugin.minerva.extra %>/**',
-                    '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
+                    '<%= minerva.extra %>/**',
+                    '<%= minerva.geojs %>/dist/built/geo.min.js'
                 ],
                 tasks: ['copy:minerva-extras']
             }
@@ -253,17 +251,17 @@ module.exports = function (grunt) {
     });
 
     // make the destination path if it doesn't exist
-    var staticDir = grunt.config.get('plugin.minerva.static');
+    var staticDir = grunt.config.get('minerva.static');
     if (!fs.existsSync(staticDir)) {
         fs.mkdirSync(staticDir);
     }
     grunt.registerTask('test-env-html:minerva', 'Build the phantom test html page for minerava', function () {
         var jade = require('jade');
         var pluginConfig = grunt.file.readYAML(
-            grunt.config.get('plugin.minerva.root') + '/plugin.json'
+            grunt.config.get('minerva.root') + '/plugin.json'
         );
         var pluginDependencies = pluginConfig.dependencies;
-        var staticDir = grunt.config.get('plugin.minerva.static');
+        var staticDir = grunt.config.get('minerva.static');
         var rootStaticDir = grunt.config.get('staticDir') + '/built';
         var pluginsStaticDir = staticDir + '/..';
         var rootStaticLibDir = grunt.config.get('staticDir') + '/lib';
