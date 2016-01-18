@@ -40,24 +40,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         }).on('g:uploadFinished', function () {
             this.upload = false;
         }, this).render();
-        this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
         this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
         this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
-    },
-
-    /**
-     * Called when the user selects or drops files to be uploaded.
-     */
-    filesSelected: function (files) {
-        var zeroethFileName = null;
-        this.newItemName = null;
-        this.newItemExt = null;
-        if (files && files.length > 0) {
-            zeroethFileName = files[0].name;
-            this.newItemName = zeroethFileName;
-            this.newItemExt = zeroethFileName.substr(zeroethFileName.lastIndexOf('.'), zeroethFileName.length);
-            this.newItemType = files[0].type;
-        }
     },
 
     /**
@@ -65,7 +49,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
      */
     uploadStarted: function () {
         this.newDataset = new minerva.models.DatasetModel({
-            name: this.newItemName,
+            name: _.first(this.uploadWidget.files).name,
             folderId: this.collection.folderId
         }).on('g:saved', function () {
             this.uploadWidget.parentType = 'item';
