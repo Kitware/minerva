@@ -1,0 +1,18 @@
+- var pt = mouse.geo
+- var ew = pt.x >= 0 ? 'E' : 'W'
+- var ns = pt.y >= 0 ? 'N' : 'S'
+- var data_props = Object.keys(datum);
+.m-click-info-widget
+  dl.dl-horizontal
+    dt Dataset
+    dd= dataset.name()
+    dt Latitude
+    dd #{Math.abs(pt.y).toFixed(4)}° #{ns}
+    dt Longitude
+    dd #{Math.abs(pt.x).toFixed(4)}° #{ew}
+    each key in data_props.sort()
+      - var value = datum[key]
+      - var valuetype = typeof value
+      if valuetype === 'string' || valuetype === 'number'
+        dt= key
+        dd= value

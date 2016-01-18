@@ -64,6 +64,93 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         );
     },
 
+    // hacktastic choropleth rendering method
+    _renderChoropleth: function (dataset, layer) {
+        var data = [];
+        var colorByValue = dataset.getMinervaMetadata().colorByValue;
+        var colorScheme = dataset.getMinervaMetadata().colorScheme;
+        var polygon = layer.createFeature('polygon', {selectionAPI: true});
+
+        this.datasetLayers[dataset.id] = layer;
+
+        // Loop through the data and transform multipolygons into
+        // arrays of polygons.  Note: it would also be possible
+        // to generate a polygon feature for each polygon/multipolygon
+        // geometry in the geojson, but this would (1) inefficient, and
+        // (2) make handling mouse events much more difficult.
+        JSON.parse(dataset.fileData).features.forEach(function (f) {
+            if (f.geometry.type === 'Polygon') {
+                data.push({
+                    outer: f.geometry.coordinates[0],
+                    inner: f.geometry.coordinates.slice(1),
+                    properties: f.properties
+                });
+            } else if (f.geometry.type === 'MultiPolygon') {
+                f.geometry.coordinates.forEach(function (p) {
+                    // all of the split polygons share the same property object
+                    data.push({
+                        outer: p[0],
+                        inner: p.slice(1),
+                        properties: f.properties
+                    });
+                });
+            }
+        });
+
+        // this is the value accessor for the choropleth
+        var value = function (_a, _b, d) {
+            return (d || {}).properties[colorByValue] || 0;
+        };
+
+        // the data extent
+        var extent = d3.extent(data, function (d) {
+            return d.properties[colorByValue];
+        });
+
+        // generate the color scale
+        var domain = [extent[0], 0.5 * (extent[0] + extent[1]), extent[1]];
+        var scale = d3.scale.linear()
+            .domain(domain)
+            .range(colorbrewer[colorScheme][3]);
+
+        polygon.position(function (d) {
+            return {
+                x: d[0],
+                y: d[1],
+                z: d[2] || 0
+            };
+        }).style({
+            fillColor: function () {
+                var v = value.apply(value, arguments);
+                var c = scale(v);
+                c = geo.util.convertColor(c);
+                return c;
+            },
+            // this is temporary... in GeoJS 0.6 we can set opacity per layer
+            fillOpacity: 0.75
+        }).data(data);
+
+        var clickInfo = new minerva.models.ClickInfoModel();
+
+        polygon.geoOn(geo.event.feature.mouseclick, _.bind(function (d) {
+            clickInfo.set({
+                layer: layer,
+                dataset: dataset,
+                mouse: d.mouse,
+                datum: d.data.properties
+            });
+
+            if (!this.clickInfoWidget) {
+                this.clickInfoWidget = new minerva.views.ClickInfoWidget({
+                    model: clickInfo,
+                    parentView: this
+                });
+            }
+        }, this));
+
+        this.map.draw();
+    },
+
     addDataset: function (dataset) {
         // TODO HACK
         // deleting and re-adding ui layer to keep it on top
@@ -111,6 +198,12 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 }
                 this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
+            } else if (dataset.getMinervaMetadata().source === 'mmwr_data_import') {
+                // hacktastic special handling of MMWR data
+                dataset.once('m:dataLoaded', _.bind(function () {
+                    this._renderChoropleth(dataset, this.map.createLayer('feature'));
+                }, this));
+                dataset.loadData();
             } else {
                 // Assume the dataset provides a reader, so load the data
                 // and adapt the dataset to the map with the reader.

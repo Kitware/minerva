@@ -19,7 +19,10 @@ if datasets
               i(class=classes)&attributes(attributes)
               //- info icon for minerva metadata display
               i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-              if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json' || (dataset.get('meta').minerva.original_type === 'mongo' && !('spatial_field' in dataset.get('meta').minerva))
+              if dataset.get('meta').minerva.source === 'mmwr_data_import'
+                - var classes = 'icon-cog configure-choropleth ' + (dataset.get('displayed') ? 'icon-disabled dataset-in-session' : 'icon-enabled');
+                i(class=classes)&attributes(attributes)
+              else if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json' || (dataset.get('meta').minerva.original_type === 'mongo' && !('spatial_field' in dataset.get('meta').minerva))
                 //- table icon for mapping columns of csv/json
                 - var displayed = dataset.get('displayed')
                 if !displayed && (dataset.get('meta').minerva.original_type === 'json' || dataset.get('meta').minerva.original_type === 'mongo') && (!dataset.get('meta').minerva.json_row)

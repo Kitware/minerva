@@ -76,7 +76,10 @@ module.exports = function (grunt) {
         stylus: {
             minerva: {
                 files: [{
-                    src: ['<%= plugin.minerva.external %>/stylesheets/main.styl'],
+                    src: [
+                        '<%= plugin.minerva.external %>/stylesheets/main.styl',
+                        '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
+                    ],
                     dest: '<%= plugin.minerva.static %>/minerva.min.css'
                 }]
             }
@@ -100,7 +103,8 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/models/**/*.js',
                             '<%= plugin.minerva.source %>/collections/**/*.js',
                             '<%= plugin.minerva.source %>/views/body/Panel.js',
-                            '<%= plugin.minerva.source %>/views/**/*.js'
+                            '<%= plugin.minerva.source %>/views/**/*.js',
+                            '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.min.js'
                     },

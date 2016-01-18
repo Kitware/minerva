@@ -25,8 +25,8 @@ import girder_client
 
 #: geojson of state boundaries source url
 states_source = (
-    'https://gist.githubusercontent.com/jbeezley/82150e34cee8512815cf/'
-    'raw/32549660c18149698a849b00cac6df8ddd2d1f1a/us-states.json'
+    'https://gist.githubusercontent.com/jbeezley/ec21c4a016a84c5def74/'
+    'raw/0eb947eccbba98c01caad6ac7fbc7f8fe8334231/us-states.geojson'
 )
 
 #: cached geojson object
@@ -106,12 +106,15 @@ def accumulate(data):
         _states = requests.get(states_source).json()
     geojson = copy.deepcopy(_states)
 
-    # create a abbr -> properties mapping
-    states = {
-        feature.get('properties', {}).get('abbr'):
-            feature.get('properties', {})
-        for feature in geojson.get('features', [])
-    }
+    # create a abbr -> properties mappin and remove unwanted properties
+    states = {}
+    for feature in geojson.get('features', []):
+        abbr = feature['properties']['abbr']
+        name = feature['properties']['name']
+        feature['properties'].clear()
+        feature['properties']['abbr'] = abbr
+        feature['properties']['name'] = name
+        states[abbr] = feature['properties']
 
     # city, state regex
     citystate = re.compile(r', ([A-Z][A-Z])$')
@@ -233,6 +236,11 @@ def run(job):
         shutil.rmtree(tmpdir)
         minerva_metadata['dataset_type'] = 'geojson'
         minerva_metadata['values'] = data['properties']['values']
+
+        # set a default "color-by" attribute if possible
+        if data['properties']['values']:
+            minerva_metadata['colorByValue'] = data['properties']['values'][0]
+        minerva_metadata['colorScheme'] = 'YlOrRd'
 
         mM(dataset, minerva_metadata)
 
