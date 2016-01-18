@@ -39,7 +39,7 @@
       sudo: yes
 
     - role: minerva
-      minerva_version: "minerva-vagrant"
+      minerva_version: "master"
       sudo: yes
 
   tasks:

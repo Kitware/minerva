@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.network "forwarded_port", guest: 8080, host: host_port
 
-  config.vm.define "minerva" do |node| end
+  config.vm.define "minervagrant" do |node| end
 
   config.vm.provider "virtualbox" do |vb|
     host = RbConfig::CONFIG['host_os']
@@ -63,11 +63,13 @@ Vagrant.configure(2) do |config|
 
 
   config.vm.provision "ansible" do |ansible|
+    ansible.verbose = "vvvv"
+
     ansible.groups = {
-      "all" => ['minerva'],
-      "girder" => ['minerva'],
-      "mongo" => ['minerva'],
-      "rabbitmq" => ['minerva']
+      "all" => ['minervagrant'],
+      "girder" => ['minervagrant'],
+      "mongo" => ['minervagrant'],
+      "rabbitmq" => ['minervagrant']
     }
 
     ansible.extra_vars = {
