@@ -31,17 +31,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         layer.layerName = minervaMetadata.type_name;
         layer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
         var projection = 'EPSG:3857';
-        layer.gcs(projection);
-        layer.tileUrl(
-            function (zoom, x, y) {
-                var xLowerLeft = geo.mercator.tilex2long(x, zoom);
-                var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
-                var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
-                var yUpperRight = geo.mercator.tiley2lat(y, zoom);
-
-                var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
-                var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
-                var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+        layer.url(
+            function (x, y, zoom) {
+                var bb = layer.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+                var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
                 var params = {
                     SERVICE: 'WMS',
                     VERSION: '1.1.1',
@@ -162,7 +155,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
-                var layer = this.map.createLayer('osm', {attribution: null});
+                var layer = this.map.createLayer('osm', {
+                    attribution: null,
+                    keepLower: false
+                });
                 // Set the layer opacity
                 layer.mapOpacity(dataset.get('opacity'));
 
