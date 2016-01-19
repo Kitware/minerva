@@ -44,7 +44,7 @@ class Dataset(Resource):
         self.route('GET', (), self.listDatasets)
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
-        self.route('POST', (':id', 'item'), self.createItemDataset)
+        self.route('POST', (':id', 'item'), self.promoteItemToDataset)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
@@ -299,7 +299,12 @@ class Dataset(Resource):
 
     @access.public
     @loadmodel(model='item', level=AccessType.WRITE)
-    def createItemDataset(self, item, params):
+    def promoteItemToDataset(self, item, params):
+        """
+        Take an Item in the user's Minerva Dataset folder, and promote
+        it to a Minerva Dataset by adding proper Minerva metadata.
+        """
+
         user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
@@ -307,11 +312,16 @@ class Dataset(Resource):
         if folder['_id'] != item['folderId']:
             raise RestException("Items need to be in user's Minerva Dataset " +
                                 "folder.")
+        # Don't overwrite if minerva metadata already exists.
+        if 'meta' in item and 'minerva' in item['meta']:
+            return item
 
         minerva_metadata = {
             'source_type': 'item'
         }
         for file in self.model('item').childFiles(item=item, limit=0):
+            # TODO This switching based on which file is found first is
+            # fairly brittle and should only be called after first upload.
             if 'geojson' in file['exts']:
                 # we found a geojson, assume this is geojson original
                 minerva_metadata['original_type'] = 'geojson'
@@ -335,8 +345,10 @@ class Dataset(Resource):
                 break
         updateMinervaMetadata(item, minerva_metadata)
         return item
-    createItemDataset.description = (
-        Description('Create metadata for an Item, promoting it to a Dataset.')
+    promoteItemToDataset.description = (
+        Description('Create metadata for an Item in a user\'s Minerva Dataset' +
+                    ' folder, promoting the Item to a Dataset.')
+        .responseClass('Item')
         .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
