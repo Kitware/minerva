@@ -251,7 +251,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     contentType: 'application/json',
                     success: _.bind(function (data) {
                         this.fileData = data;
-                        this.geoFileReader = 'contourJsonReader';
+                        this.geoFileReader = 'jsonReader';
                     }, this),
                     complete: _.bind(function () {
                         this.trigger('m:dataLoaded', this.get('_id'));

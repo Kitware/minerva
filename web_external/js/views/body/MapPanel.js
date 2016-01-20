@@ -145,13 +145,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     },
 
     addDataset: function (dataset) {
-        // TODO HACK
-        // deleting and re-adding ui layer to keep it on top
-        //this.map.deleteLayer(this.uiLayer);
-        // this causes a problem when there are at least two feature layers,
-        // so for now it is commented out
-        // this means we keep re-adding the ui layer each time a dataset is
-        // added as a feature layer, which is even more of a HACK
         if (!_.contains(this.datasetLayers, dataset.id)) {
             if (dataset.getDatasetType() === 'wms') {
                 var datasetId = dataset.id;
@@ -192,7 +185,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                         this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
-                this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
             } else if (dataset.getMinervaMetadata().source === 'mmwr_data_import') {
                 // hacktastic special handling of MMWR data
@@ -207,15 +199,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     // TODO: allow these datasets to specify a legend.
                     var dataset = this.collection.get(datasetId);
                     var layer = this.map.createLayer('feature');
-
-                    var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
                     this.datasetLayers[datasetId] = layer;
 
-                    layer.clear();
-
+                    var reader = geo.createFileReader('jsonReader', {layer: layer});
                     reader.read(dataset.fileData, _.bind(function () {
-                        // Add the UI slider back
-                        this.uiLayer = this.map.createLayer('ui');
                         this.map.draw();
                     }, this));
                 }, this);
@@ -307,7 +294,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             this.map.createLayer(this.session.sessionJsonContents.basemap,
                                  _.has(this.session.sessionJsonContents, 'basemap_args') ?
                                  this.session.sessionJsonContents.basemap_args : {});
-            this.uiLayer = this.map.createLayer('ui');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
