@@ -41,6 +41,29 @@ will ssh into your Minerva VM.
 
 will re-provision your Minerva VM with ansible.
 
+#### vagrant provision, now with even more tags
+
+If you already have a provisioned VM, you can set tags through environment variables
+to reprovision a limited number of steps.  You can set the tag like
+
+    export MINERVA_VAGRANT_ANSIBLE_TAGS='minerva-update'
+
+##### minerva
+
+Think of this tag as minerva with dependencies.
+
+This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
+file, install system depenencies and pip dependencies defined in the minerva role,
+then install the minerva plugin to girder and build the client side code.
+
+##### minerva-update
+
+Think of this tag as minerva without dependencies.
+
+This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
+file, then install the minerva plugin to girder and build the client side code.
+
+
 ### vagrant halt
 
     vagrant halt
