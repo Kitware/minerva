@@ -73,17 +73,12 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     getUrl: function (layer_idx, coord) {
 
         var pnt = this.map.gcsToDisplay(coord);
-        var mapBounds = this.map.bounds();
+        var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
 
-        var ne = mapBounds.upperRight;
-        var sw = mapBounds.lowerLeft;
-
-        var neMerc = geo.mercator.ll2m(ne.x, ne.y);
-        var swMerc = geo.mercator.ll2m(sw.x, sw.y);
-        if (swMerc.x > neMerc.x) {
-            neMerc.x = 20037508.34 + (20037508.34 - neMerc.x);
+        if (mapBounds.left > mapBounds.right) {
+            mapBounds.right = 20037508.34 + (20037508.34 - mapBounds.right);
         }
-        var bbox = swMerc.x + ',' + swMerc.y + ',' + neMerc.x + ',' + neMerc.y;
+        var bbox = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
 
         var rUrl = this.layers[layer_idx].baseUrl + '?' + this.fixedParams;
         rUrl += '&version=' + this.version;
