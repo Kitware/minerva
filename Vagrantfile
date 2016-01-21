@@ -65,7 +65,7 @@ Vagrant.configure(2) do |config|
     ansible.verbose = "vvvv"
 
     if ansible_tags
-        ansible.tags = "minerva-update"
+        ansible.tags = ansible_tags
     end
 
     ansible.groups = {

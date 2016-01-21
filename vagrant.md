@@ -44,9 +44,10 @@ will re-provision your Minerva VM with ansible.
 #### vagrant provision, now with even more tags
 
 If you already have a provisioned VM, you can set tags through environment variables
-to reprovision a limited number of steps.  You can set the tag like
+to reprovision a limited number of steps.  You can set the tags as a comma separated
+list like
 
-    export MINERVA_VAGRANT_ANSIBLE_TAGS='minerva-update'
+    export MINERVA_VAGRANT_ANSIBLE_TAGS='minerva-update,test'
 
 ##### minerva
 
