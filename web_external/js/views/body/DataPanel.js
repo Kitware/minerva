@@ -35,15 +35,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         } else if (_.contains(['geojson', 'contour'], geoRenderType)) {
             if (!this.jsonConfigWidget) {
-                    this.jsonConfigWidget = new minerva.views.JsonConfigWidget({
-                        el: $('#g-dialog-container'),
-                        dataset: dataset,
-                        parentView: this
-                    });
-                    this.jsonConfigWidget.render();
-                } else {
-                    this.jsonConfigWidget.setCurrentDataset(dataset);
-                }
+                this.jsonConfigWidget = new minerva.views.JsonConfigWidget({
+                    el: $('#g-dialog-container'),
+                    dataset: dataset,
+                    parentView: this
+                });
+                this.jsonConfigWidget.render();
+            } else {
+                this.jsonConfigWidget.setCurrentDataset(dataset);
+            }
         } else {
             return;
         }

@@ -91,14 +91,14 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * @param {'geojson'|'contour'} GeoJs rendering type to set on this dataset.
      * @returns {Object} Updated minerva metadata of this dataset.
      */
-     overrideGeoRenderType: function (geoRenderType) {
+    overrideGeoRenderType: function (geoRenderType) {
         this.set('geoError', false);
         var mm = this.metadata();
         if (_.contains(['geojson'], geoRenderType)) {
             // TODO 'choropleth' could work here,
             // but we would need a way to extract the values.
             mm.geo_render = {
-                type: geoRenderType,
+                type: geoRenderType
             };
             if (mm.geojson_file) {
                 mm.geo_render.file_id = mm.geojson_file.file_id;

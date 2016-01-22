@@ -21,10 +21,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      * @type {Object.<string, string>}
      * @readonly
      */
-     GEOJS_RENDER_TYPES_FILEREADER: {
+    GEOJS_RENDER_TYPES_FILEREADER: {
         'geojson': 'jsonReader',
-        'contour': 'contourJsonReader',
-     },
+        'contour': 'contourJsonReader'
+    },
 
     changeLayerOpacity: function (dataset) {
         this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
@@ -171,7 +171,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         if (!_.contains(this.datasetLayers, dataset.id)) {
             var renderType = dataset.getGeoRenderType();
             if (renderType === null || !_.contains(this.GEOJS_RENDER_TYPES, renderType)) {
-                console.error('This dataset of render type ['+renderType+']cannot be rendered to the map');
+                console.error('This dataset of render type [' + renderType + ']cannot be rendered to the map');
                 return;
             } else if (renderType === 'wms') {
                 var datasetId = dataset.id;
