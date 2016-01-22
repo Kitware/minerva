@@ -66,7 +66,7 @@ class Analysis(Resource):
 
         minerva_metadata = {
             'dataset_type': 'geojson',
-            'source': 'bsve_search',
+            'source_type': 'bsve_search',
             'bsve_search_params': bsveSearchParams,
             'original_type': 'json'
         }
@@ -116,7 +116,7 @@ class Analysis(Resource):
 
         minerva_metadata = {
             'dataset_type': 'geojson',
-            'source': 'mmwr_data_import',
+            'source_type': 'mmwr_data_import',
             'original_type': 'json'
         }
 
