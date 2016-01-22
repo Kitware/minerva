@@ -1,0 +1,20 @@
+.modal-dialog
+  .modal-content
+    form#m-json-geo-render-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Specify dataset rendering options
+      .modal-body
+        .form-group
+          label.control-label(for="m-geo-render-type") Specify map rendering type
+          select.form-control.input-sm#m-geo-render-type
+            each value in values
+              - var sel=null; if (value === currentGeoRenderType) sel='selected';
+              option(value=value, selected=sel)= value
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-geo-render-button.btn.btn-small.btn-primary(type="submit")
+          i.icon-check
+          | Save

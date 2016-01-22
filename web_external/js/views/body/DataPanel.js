@@ -1,31 +1,52 @@
 minerva.views.DataPanel = minerva.views.Panel.extend({
     events: {
+        // TODO namespace.
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .configure-choropleth': 'configureChoropleth'
+        'click .m-configure-geo-render': 'configureGeoRender'
     },
 
-    configureChoropleth: function (event) {
+    /**
+     * Display a modal dialog allowing configuration of GeoJs rendering
+     * properties for the selected dataset.
+     */
+    configureGeoRender: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        if (dataset.get('displayed')) {
-            // don't pop up the modal when the dataset is active
+        var geoRenderType = dataset.getGeoRenderType();
+        if (dataset.get('displayed') || geoRenderType === null) {
+            // Don't pop up the modal when the dataset is active,
+            // or it can't be configured.
             return;
         }
-        if (!this.choroplethRenderWidget) {
-            this.choroplethRenderWidget = new minerva.views.ChoroplethRenderWidget({
-                el: $('#g-dialog-container'),
-                dataset: dataset,
-                parentView: this
-            });
-            this.choroplethRenderWidget.render();
+        if (geoRenderType === 'choropleth') {
+            if (!this.choroplethRenderWidget) {
+                this.choroplethRenderWidget = new minerva.views.ChoroplethRenderWidget({
+                    el: $('#g-dialog-container'),
+                    dataset: dataset,
+                    parentView: this
+                });
+                this.choroplethRenderWidget.render();
+            } else {
+                this.choroplethRenderWidget.setCurrentDataset(dataset);
+            }
+        } else if (_.contains(['geojson', 'contour'], geoRenderType)) {
+            if (!this.jsonConfigWidget) {
+                    this.jsonConfigWidget = new minerva.views.JsonConfigWidget({
+                        el: $('#g-dialog-container'),
+                        dataset: dataset,
+                        parentView: this
+                    });
+                    this.jsonConfigWidget.render();
+                } else {
+                    this.jsonConfigWidget.setCurrentDataset(dataset);
+                }
         } else {
-            this.choroplethRenderWidget.setCurrentDataset(dataset);
+            return;
         }
-
     },
 
     uploadDialog: function () {
@@ -61,7 +82,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     /**
-     * Create a Dataset from the Item.
+     * Create a Dataset from the Item, add it to the DatasetCollection.
      */
     uploadFinished: function () {
         this.newDataset.on('m:datasetCreated', function () {
@@ -69,36 +90,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         }, this).on('g:error', function (err) {
             console.error(err);
         }).createDataset();
-    },
-
-
-    mapTableDataset: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        // TODO may want to split out json from csv at some point
-        // TODO standardize on callback or else dual calls of getX and getXData
-
-        var datasetType = dataset.getDatasetType();
-        if (datasetType === 'json' || datasetType === 'mongo') {
-            this.keymapWidget = new minerva.views.KeymapWidget({
-                el: $('#g-dialog-container'),
-                dataset: dataset,
-                parentView: this
-            });
-            this.keymapWidget.render();
-        } else {
-            // assuming csv
-            // list the files of this item
-            var filesCallback = _.bind(function () {
-                this.tableWidget = new minerva.views.TableWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.tableWidget.render();
-            }, this);
-            dataset.getCSVFile(filesCallback);
-        }
     },
 
     addDatasetToSessionEvent: function (event) {
@@ -124,8 +115,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     deleteDatasetEvent: function (event) {
-        // TODO wrap icons inside buttons and disable there
-        // TODO remove depedence on DOM
         if ($(event.currentTarget).hasClass('icon-disabled')) {
             return;
         } else {
