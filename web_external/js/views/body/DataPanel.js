@@ -49,6 +49,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         }
     },
 
+    /**
+     * Displays a dialog allowing the user to upload files, that will become
+     * Datasets.
+     */
     uploadDialog: function () {
         var container = $('#g-dialog-container');
 
@@ -82,7 +86,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     /**
-     * Create a Dataset from the Item, add it to the DatasetCollection.
+     * Create a Dataset from the Item, then add it to the DatasetCollection.
      */
     uploadFinished: function () {
         this.newDataset.on('m:datasetCreated', function () {

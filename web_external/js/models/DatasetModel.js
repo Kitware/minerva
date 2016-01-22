@@ -12,10 +12,15 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         geoData: null
     },
 
+    /**
+     * Async function that should be called after uploading a file as an
+     * Item to the user's Minerva/Dataset folder, this function will then
+     * initialize the Item's 'minerva' namespaced metadata, ensuring it is usable
+     * as a Dataset in Minerva;
+     * emits a 'm:datasetCreated' event upon successful Dataset creation
+     * and initialization.
+     */
     createDataset: function () {
-        // Call this after uploading an item to the dataset folder,
-        // it will ensure that this dataset is usable as a dataset, which
-        // means initializing the minerva metadata on the item.
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
