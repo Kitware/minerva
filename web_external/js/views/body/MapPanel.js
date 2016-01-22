@@ -8,6 +8,24 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         }
     },
 
+    /**
+     * List of supported GeoJs rendering types.
+     * @type {Array.<string>}
+     * @readonly
+     */
+    GEOJS_RENDER_TYPES: ['choropleth', 'geojson', 'contour', 'wms'],
+
+    /**
+     * Mapping of supported GeoJs rendering types to file reader types,
+     * for those rendering types with file readers.
+     * @type {Object.<string, string>}
+     * @readonly
+     */
+     GEOJS_RENDER_TYPES_FILEREADER: {
+        'geojson': 'jsonReader',
+        'contour': 'contourJsonReader',
+     },
+
     changeLayerOpacity: function (dataset) {
         this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
         this.map.draw();
@@ -71,7 +89,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         // to generate a polygon feature for each polygon/multipolygon
         // geometry in the geojson, but this would (1) inefficient, and
         // (2) make handling mouse events much more difficult.
-        JSON.parse(dataset.fileData).features.forEach(function (f) {
+        JSON.parse(dataset.get('geoData')).features.forEach(function (f) {
             if (f.geometry.type === 'Polygon') {
                 data.push({
                     outer: f.geometry.coordinates[0],
@@ -144,15 +162,23 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         this.map.draw();
     },
 
+    /**
+     * Add the passed in dataset to the current map as a rendered layer.
+     *
+     * @param {Object} DatasetModel or descendent.
+     */
     addDataset: function (dataset) {
         if (!_.contains(this.datasetLayers, dataset.id)) {
-            if (dataset.getDatasetType() === 'wms') {
+            var renderType = dataset.getGeoRenderType();
+            if (renderType === null || !_.contains(this.GEOJS_RENDER_TYPES, renderType)) {
+                console.error('This dataset of render type ['+renderType+']cannot be rendered to the map');
+                return;
+            } else if (renderType === 'wms') {
                 var datasetId = dataset.id;
                 var layer = this.map.createLayer('osm', {
                     attribution: null,
                     keepLower: false
                 });
-                // Set the layer opacity
                 layer.mapOpacity(dataset.get('opacity'));
 
                 this.datasetLayers[datasetId] = layer;
@@ -186,28 +212,35 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     });
                 }
                 this.map.draw();
-            } else if (dataset.getMinervaMetadata().source === 'mmwr_data_import') {
+            } else if (renderType === 'choropleth') {
                 // hacktastic special handling of MMWR data
-                dataset.once('m:dataLoaded', _.bind(function () {
+                dataset.once('m:geoDataLoaded', _.bind(function () {
                     this._renderChoropleth(dataset, this.map.createLayer('feature'));
                 }, this));
-                dataset.loadData();
-            } else {
-                // Assume the dataset provides a reader, so load the data
-                // and adapt the dataset to the map with the reader.
-                dataset.once('m:dataLoaded', function (datasetId) {
+                dataset.loadGeoData();
+            } else if (_.has(this.GEOJS_RENDER_TYPES_FILEREADER, renderType)) {
+                // Load the data and adapt the dataset to the map with the reader.
+                dataset.once('m:geoDataLoaded', function () {
                     // TODO: allow these datasets to specify a legend.
-                    var dataset = this.collection.get(datasetId);
+                    var datasetId = dataset.get('_id');
                     var layer = this.map.createLayer('feature');
                     this.datasetLayers[datasetId] = layer;
-
-                    var reader = geo.createFileReader('jsonReader', {layer: layer});
-                    reader.read(dataset.fileData, _.bind(function () {
+                    try {
+                        var reader = geo.createFileReader(this.GEOJS_RENDER_TYPES_FILEREADER[renderType], {layer: layer});
+                        reader.read(dataset.get('geoData'), _.bind(function () {
+                            this.map.draw();
+                        }, this));
+                    } catch (err) {
+                        console.error('This dataset cannot be rendered to the map');
+                        console.error(err);
+                        dataset.set('geoError', true);
+                        if (layer) {
+                            layer.clear();
+                        }
                         this.map.draw();
-                    }, this));
+                    }
                 }, this);
-
-                dataset.loadData();
+                dataset.loadGeoData();
             }
         }
     },
