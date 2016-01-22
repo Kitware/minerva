@@ -7,7 +7,10 @@ include ../layout/panelMixins.jade
     ul.datasets
       each dataset, index in datasets
         li.dataset= dataset.get('name')
-          i.icon-eye-off.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+          if dataset.get('geoError')
+            i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+          else
+            i.icon-eye-off.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           .m-layer-control-container
             each option in layersOrderOptions
               if ((index === 0 && option.class.indexOf('up') > -1) || (index === datasets.length - 1 && option.class.indexOf('down') > -1 ))
