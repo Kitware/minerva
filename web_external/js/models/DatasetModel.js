@@ -1,25 +1,15 @@
 minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     defaults: {
-        geojsonFileId: null,
+        // TODO revise and rename these.
         displayed: false,
         files: null,
         opacity: 1,
         order: null,
-        stack: 0
-    },
-
-    isRenderable: function () {
-        // Really this function should be defined in each data model subclass,
-        // OR - based on whether or not geoFileReader is defined (better because
-        // then readability is based on whether GeoJS has a reader for this type)
-        // but to do that we would have to be persisting geoFileReader to the server
-        // which would require some things being rearranged.
-
-        // For now we know that if original_type is 'json' it's ACTUALLY contour json,
-        // which is the only renderable type of DatasetModel.
-        return $.inArray(this.getMinervaMetadata().original_type,
-            ['json', 'mongo']);
+        stack: 0,
+        // GeoJs related attributes.
+        geoError: false,
+        geoData: null
     },
 
     createDataset: function () {
@@ -49,279 +39,147 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
     },
 
-    // functions dealing with json type
-    // TODO split out to a subclass
+    ////////////////////////////////////////////////////////
+    // GeoJs rendering api.                               //
+    ////////////////////////////////////////////////////////
 
-    getJsonRow: function () {
-        var minervaMetadata = this.metadata();
-        if (!_.has(minervaMetadata, 'json_row')) {
-            girder.restRequest({
-                path: 'minerva_dataset/' + this.get('_id') + '/jsonrow',
-                type: 'POST'
-            }).done(_.bind(function (resp) {
-                this.metadata(resp);
-                this.trigger('m:jsonrowGot', this);
-            }, this)).error(_.bind(function (err) {
-                console.error(err);
-                girder.events.trigger('g:alert', {
-                    icon: 'cancel',
-                    text: 'Could not get jsonrow in dataset item.',
-                    type: 'error',
-                    timeout: 4000
-                });
-            }, this));
-        } else {
-            this.trigger('m:jsonrowGot', this);
-        }
-    },
-
-    getJsonRowData: function () {
-        // assumes jsonrow is available in metdata
-        var minervaMetadata = this.metadata();
-        return _.has(minervaMetadata, 'json_row') ? minervaMetadata.json_row : null;
-    },
-
-    // TODO organize
-
-    createGeoJson: function (dateKeypath, startTime, endTime) {
-        var data = {};
-        // TODO protect if params undefined
-        if (dateKeypath) {
-            data = {
-                dateField: dateKeypath,
-                startTime: startTime,
-                endTime: endTime
-            };
-        }
-        girder.restRequest({
-            path: 'minerva_dataset/' + this.get('_id') + '/geojson',
-            type: 'POST',
-            data: data
-        }).done(_.bind(function (resp) {
-            this.metadata(resp);
-            this.trigger('m:geojsonCreated', this);
-        }, this)).error(_.bind(function (err) {
-            console.error(err);
-            girder.events.trigger('g:alert', {
-                icon: 'cancel',
-                text: 'Could not create geojson in dataset item.',
-                type: 'error',
-                timeout: 4000
-            });
-        }, this));
-    },
-
-    getAllFiles: function (callback) {
-        if (!this.files) {
-            this.files = new girder.collections.FileCollection();
-            this.files.resourceName = 'item/' + this.get('_id') + '/files';
-            this.files.append = true; // Append, don't replace pages
-            this.files.on('g:changed', function () {
-                callback(this);
-            }, this).fetch();
-        } else {
-            callback(this);
-        }
-    },
-
-    // TODO split CSV functionality out possibly to a subclass
-
-    getCSVFile: function (callback) {
-        var processCSVFile = _.bind(function () {
-            // TODO get the csv in some smarter way
-            // the file object has a mimeType, which could check for text/csv
-            // TODO better dealing with getting model from collection
-            $.ajax({
-                url: girder.apiRoot + '/file/' + this.files.models[0].id + '/download',
-                type: 'GET',
-                headers: {
-                    'Girder-Token': girder.cookie.find('girderToken'),
-                    Accept: 'text/csv; charset=utf-8',
-                    'Content-Type': 'text/csv; charset=utf-8'
-                },
-                success: _.bind(function (resp) {
-                    this.csv = Papa.parse(resp, {skipEmptyLines: true});
-                    callback();
-                }, this),
-                error: function (err) {
-                    console.error(err);
-                    girder.events.trigger('g:alert', {
-                        icon: 'cancel',
-                        text: 'Could not download dataset csv contents.',
-                        type: 'error',
-                        timeout: 4000
-                    });
-                }
-            });
-
-        }, this);
-        if (this.files) {
-            processCSVFile();
-        } else {
-            this.getAllFiles(processCSVFile);
-        }
-    },
-
-    createGeoJsonFromTabular: function () {
-        // this is goofy, we are creating geojson from csv on the client
-        // and then saving it to the server in the item as a file
-        // then setting the geojson metadata pointer to the file
-        //
-        // already have the data client side when doing this, have to think
-        // about whether to do all this server or client side
-        var minervaMeta = this.metadata();
-        var originalType = minervaMeta.original_type;
-        if (originalType !== 'csv' && originalType !== 'json') {
-            console.error('You should only use this for csv or json');
-            return;
-        }
-        if (!minervaMeta.mapper) {
-            console.error('mapper');
-        }
-        if (!minervaMeta.mapper.longitudeColumn) {
-            console.error('long');
-        }
-        if (!minervaMeta.mapper.latitudeColumn) {
-            console.error('lat');
-        }
-        if (!minervaMeta.mapper || !minervaMeta.mapper.longitudeColumn || !minervaMeta.mapper.latitudeColumn) {
-            console.error('lat/long column mapping not set for this csv/json dataset.');
-            return;
-        }
-        var longitudeColumn = minervaMeta.mapper.longitudeColumn;
-        var latitudeColumn = minervaMeta.mapper.latitudeColumn;
-        if (!this.csv || !this.csv.data) {
-            console.error('This dataset lacks csv data to create geojson on the client.');
-            return;
-        }
-
-        var geoJsonData = {
-            type: 'FeatureCollection',
-            features: []
-        };
-        // look at this.csv.data, an array
-        // create a point feature for each row
-        // use the mapper to get lat and long
-        _.each(this.csv.data, function (row) {
-            var point = {
-                type: 'Feature',
-                // TODO need to get other property column, just hardcoding elevation for now
-                properties: { elevation: Number(0) },
-                geometry: {
-                    type: 'Point',
-                    coordinates: [Number(row[longitudeColumn]), Number(row[latitudeColumn])]
-                }
-            };
-            geoJsonData.features.push(point);
-        }, this);
-        this.fileData = JSON.stringify(geoJsonData);
-        this.geoJsonFile = new girder.models.FileModel();
-        this.geoJsonFile.on('g:upload.complete', function () {
-            minervaMeta.geojson_file = {
-                _id: this.geoJsonFile.get('_id'),
-                name: this.geoJsonFile.get('name')
-            };
-            this.on('m:minervaMetadataSaved', function () {
-                this.trigger('m:geojsonCreatedFromTabular');
-            }, this);
-            this.saveMinervaMetadata(minervaMeta);
-        }, this).uploadToItem(this, this.fileData, this.get('name') + '.geojson', 'application/json');
-    },
-
-    loadData: function () {
-        // underscore doesn't have a deep has() unction?
-
-        if (this.geoJsonAvailable) {
-            this.loadGeoJsonData();
-        } else {
-            var file_id;
-            var minervaMeta = this.metadata();
-            // Manage contourJson style files here
-            // for now. (will refactor this and loadGeoJsonData later)
-            try {
-                // need better API here or something -  why doesn't underscore
-                // have a recursive _.has()? e.g., _.has(minervaMeta, "original_files", 0, "_id")
-                file_id = minervaMeta.original_files[0]._id;
-            } catch (e) {
-                file_id = false;
-            }
-            if (file_id) {
-                $.ajax({
-                    url: girder.apiRoot + '/file/' + minervaMeta.original_files[0]._id + '/download',
-                    contentType: 'application/json',
-                    success: _.bind(function (data) {
-                        this.fileData = data;
-                        this.geoFileReader = 'jsonReader';
-                    }, this),
-                    complete: _.bind(function () {
-                        this.trigger('m:dataLoaded', this.get('_id'));
-                    }, this)
-                });
-            }
-        }
-    },
-
-    loadGeoJsonData: function () {
-        if (this.geoJsonAvailable) {
-            var minervaMeta = this.metadata();
-            if (minervaMeta.geojson_file) {
-                // just download from the endpoint
-                $.ajax({
-                    url: girder.apiRoot + '/file/' + minervaMeta.geojson_file._id + '/download',
-                    contentType: 'application/json',
-                    success: _.bind(function (data) {
-                        this.fileData = data;
-                    }, this),
-                    complete: _.bind(function () {
-                        this.trigger('m:dataLoaded', this.get('_id'));
-                    }, this)
-                });
-            } else if (minervaMeta.geojson) {
-                this.filedata = minervaMeta.geojson.data;
-                this.geoFileReader = 'jsonReader';
-                this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-                this.trigger('m:dataLoaded', this.get('_id'));
-            } else if (minervaMeta.original_type === 'mongo') {
-                $.ajax({
-                    url: girder.apiRoot + '/minerva_dataset_mongo/' + minervaMeta.dataset_id + '/geojson',
-                    contentType: 'application/json',
-                    success: _.bind(function (data) {
-                        this.fileData = data;
-                    }, this),
-                    complete: _.bind(function () {
-                        this.geoFileReader = 'jsonReader';
-                        this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-                        this.trigger('m:dataLoaded', this.get('_id'));
-                    }, this)
-                });
-            }
-        } else {
-            if (this.latLongMapper) {
-
-                var geoJsonData = {
-                    type: 'FeatureCollection',
-                    features: []
-                };
-                // look at this.csv.data, an array
-                // create a point feature for each row
-                // use the mapper to get lat and long
-                _.each(this.csv.data, function (row) {
-                    var point = {
-                        type: 'Feature',
-                        // TODO need to get other property column, just hardcoding elevation for now
-                        properties: { elevation: Number(0) },
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [Number(row[this.latLongMapper.longitudeColumn]), Number(row[this.latLongMapper.latitudeColumn])]
-                        }
+    /**
+     * Initialize the GeoJs rendering type along with any secondary data needed for
+     * GeoJs rendering, inferring the rendering type based on
+     * the dataset's metadata, and saving the dataset's metadata if changed.
+     *
+     * @returns {Object} Updated minerva metadata of this dataset.
+     */
+    _initGeoRender: function () {
+        var mm = this.metadata();
+        if (!mm.geo_render) {
+            mm.geo_render = null;
+            if (mm.dataset_type === 'geojson') {
+                if (mm.source_type === 'mmwr_data_import') {
+                    mm.geo_render = {
+                        type: 'choropleth',
+                        file_id: mm.geojson_file._id
                     };
-                    geoJsonData.features.push(point);
-                }, this);
-                this.fileData = JSON.stringify(geoJsonData);
-                this.geoFileReader = 'jsonReader';
-                this.trigger('m:geoJsonDataLoaded', this.get('_id'));
-                this.trigger('m:dataLoaded', this.get('_id'));
+                } else {
+                    mm.geo_render = {
+                        type: 'geojson',
+                        file_id: mm.geojson_file._id
+                    };
+                }
+            } else if (mm.dataset_type === 'json') {
+                // Guess contour json as a default for a json file.
+                mm.geo_render = {
+                    type: 'contour',
+                    file_id: mm.original_files[0]._id
+                };
+            } else if (mm.dataset_type === 'wms') {
+                mm.geo_render = {
+                    type: 'wms'
+                };
             }
+            this.saveMinervaMetadata(mm);
+        }
+        return mm;
+    },
+
+    /**
+     * Override the GeoJs rendering type and set any secondary data needed for
+     * GeoJs rendering based on the dataset's metadata,
+     * and saving the dataset's metadata if changed;
+     * will also reset the geoError property to false.
+     *
+     * @param {'geojson'|'contour'} GeoJs rendering type to set on this dataset.
+     * @returns {Object} Updated minerva metadata of this dataset.
+     */
+     overrideGeoRenderType: function (geoRenderType) {
+        this.set('geoError', false);
+        var mm = this.metadata();
+        if (_.contains(['geojson'], geoRenderType)) {
+            // TODO 'choropleth' could work here,
+            // but we would need a way to extract the values.
+            mm.geo_render = {
+                type: geoRenderType,
+            };
+            if (mm.geojson_file) {
+                mm.geo_render.file_id = mm.geojson_file.file_id;
+            } else {
+                mm.geo_render.file_id = mm.original_files[0]._id;
+            }
+            console.log(mm);
+        } else if (geoRenderType === 'contour') {
+            mm.geo_render = {
+                type: 'contour',
+                file_id: mm.original_files[0]._id
+            };
+        }
+        this.saveMinervaMetadata(mm);
+        return mm;
+    },
+
+    /**
+     * Getter for the GeoJs rendering type of the dataset, initializing it if
+     * necessary by inference from the dataset's metadata, and saving
+     * the dataset's metadata if changed.
+     *
+     * @returns {'choropleth'|'geojson'|'contour'|'wms'|null} GeoJs rendering type of this dataset, will
+     * be null if no rendering type can be inferred.
+     */
+    getGeoRenderType: function () {
+        var mm = this._initGeoRender();
+        return mm.geo_render ? mm.geo_render.type : mm.geo_render;
+    },
+
+    /**
+     * Gets the download URL for the file data needed by GeoJs to render
+     * this dataset, if one exists; initializing it if
+     * necessary by inference from the dataset's metadata, and saving
+     * the dataset's metadata if changed.
+     *
+     * @returns {String|null} Download URL for the file data, if one exists.
+     */
+    _getGeoRenderDownloadUrl: function () {
+        var mm = this._initGeoRender();
+        if (mm.geo_render && mm.geo_render.file_id) {
+            return girder.apiRoot + '/file/' + mm.geo_render.file_id + '/download';
+        } else {
+            return null;
+        }
+    },
+
+    /**
+     * Gets whether GeoJs can render this dataset, initializing it if
+     * necessary by inference from the dataset's metadata, and saving
+     * the dataset's metadata if changed.
+     *
+     * @returns {Boolean} Whether GeoJs can render this dataset.
+     */
+    isGeoRenderable: function () {
+        var mm = this._initGeoRender();
+        return (mm.geo_render !== null);
+    },
+
+    /*
+     * Async function that loads any data needed by this dataset to render in GeoJs,
+     * sets that data as an attribute on this dataset named 'geoData',
+     * emitting the 'm:geoDataLoaded' event and passing a reference to this dataset
+     * when data is loaded or if this dataset did not need to load any data to render in GeoJs.
+     */
+    loadGeoData: function () {
+        var mm = this._initGeoRender();
+        if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
+            this.trigger('m:geoDataLoaded', this);
+        } else {
+            var url = this._getGeoRenderDownloadUrl();
+            $.ajax({
+                url: url,
+                contentType: 'application/json',
+                success: _.bind(function (data) {
+                    this.set('geoData', data);
+                }, this),
+                complete: _.bind(function () {
+                    this.trigger('m:geoDataLoaded', this);
+                }, this)
+            });
         }
     }
 
