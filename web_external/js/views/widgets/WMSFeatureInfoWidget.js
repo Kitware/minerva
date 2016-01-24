@@ -73,9 +73,11 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     getUrl: function (layer_idx, coord) {
 
         var pnt = this.map.gcsToDisplay(coord);
+        // Spherical Mercator projection.
         var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
 
         if (mapBounds.left > mapBounds.right) {
+            // 20037508.34 is the maximum extent of the Spherical Mercator projection.
             mapBounds.right = 20037508.34 + (20037508.34 - mapBounds.right);
         }
         var bbox = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
