@@ -49,7 +49,7 @@
     % endfor
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
+    <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
 
    </body>
 </html>

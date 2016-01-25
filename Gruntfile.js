@@ -109,7 +109,7 @@ module.exports = function (grunt) {
                     },
                     {
                         src: ['<%= plugin.minerva.source %>/main.js'],
-                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                        dest: '<%= plugin.minerva.static %>/minerva.main.min.js'
                     },
                  ]
             },
