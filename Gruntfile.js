@@ -212,6 +212,21 @@ module.exports = function (grunt) {
                 ]
             }
         },
+        concat: {
+            'minerva-ext': {
+                files: {
+                    '<%= plugin.minerva.static %>/minerva.ext.min.js':
+                    [
+                        '<%= plugin.minerva.static %>/minerva.geo.ext.min.js',
+                        '<%= plugin.minerva.static %>/geo.min.js',
+                        '<%= plugin.minerva.static %>/jsonpath.min.js',
+                        '<%= plugin.minerva.static %>/papaparse.min.js',
+                        '<%= plugin.minerva.static %>/colorbrewer.min.js',
+                        '<%= plugin.minerva.static %>/jquery-ui.min.js'
+                    ],
+                },
+            }
+        },
         init: {
             'shell:minerva-geojs-install': {
                 dependencies: ['shell:plugin-install']
@@ -233,6 +248,9 @@ module.exports = function (grunt) {
             },
             'uglify:minerva-ext': {
                 dependencies: ['shell:minerva-geojs-install']
+            },
+            'concat:minerva-ext': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build', 'copy:papaparse', 'copy:geojs', 'copy:jquery-ui', 'uglify:minerva-ext']
             }
         },
         default: {
