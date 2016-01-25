@@ -15,7 +15,7 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/app.min.css">
+          href="${staticRoot}/built/girder.app.min.css">
     % for plugin in pluginCss:
         <link rel="stylesheet" href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
     % endfor
@@ -28,10 +28,10 @@
     <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
     <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js"></script>
-    <script src="${staticRoot}/built/libs.min.js"></script>
+    <script src="${staticRoot}/built/girder.ext.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/geo.min.js"></script>
-    <script src="${staticRoot}/built/app.min.js"></script>
+    <script src="${staticRoot}/built/girder.app.min.js"></script>
     ## We want to include client side resources from all loaded plugins,
     ## which allows Minerva to be extended by other plugins and have the
     ## client side resources of the downstream plugins be served by the
