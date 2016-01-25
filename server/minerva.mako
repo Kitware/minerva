@@ -16,13 +16,8 @@
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/app.min.css">
-    <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/minerva.min.css">
     % for plugin in pluginCss:
-        % if plugin != 'minerva':
-            <link rel="stylesheet"
-            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endif
+        <link rel="stylesheet" href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
     % endfor
 
     <link rel="icon"

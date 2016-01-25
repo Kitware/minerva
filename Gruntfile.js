@@ -80,7 +80,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
                         '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
                     ],
-                    dest: '<%= plugin.minerva.static %>/minerva.min.css'
+                    dest: '<%= plugin.minerva.static %>/plugin.min.css'
                 }]
             }
         },
