@@ -47,11 +47,12 @@
     % for plugin in pluginJs:
         % if plugin != 'minerva':
             <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
+        % else:
+            <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
         % endif
     % endfor
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
 
    </body>
