@@ -27,7 +27,7 @@
   <body>
     <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-    <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js"></script>
+    <script src="${staticRoot}/built/plugins/minerva/minerva.geo.ext.min.js"></script>
     <script src="${staticRoot}/built/girder.ext.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/colorbrewer.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js"></script>
