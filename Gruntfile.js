@@ -158,14 +158,19 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            'minerva-extras': {
+            'papaparse': {
                 files: [
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.extra %>',
-                        src: ['**'],
+                        src: ['papaparse.min.js'],
                         dest: '<%= plugin.minerva.static %>'
-                    },
+                    }
+                ]
+            },
+            'geojs': {
+                files: [
+
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.geojs %>/dist/built',
@@ -214,11 +219,14 @@ module.exports = function (grunt) {
             'shell:minerva-geojs-build': {
                 dependencies: ['shell:minerva-geojs-install']
             },
-            'copy:minerva-extras': {
+            'copy:papaparse': {
+                dependencies: []
+            },
+            'copy:geojs': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             },
             'copy:minerva-fontello': {
-                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+                dependencies: []
             },
             'copy:jquery-ui': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
@@ -257,12 +265,11 @@ module.exports = function (grunt) {
                 files: ['<%= plugin.minerva.geojs %>/**/*.js'],
                 tasks: ['shell:minerva-geojs']
             },
-            'plugin-minerva-copy-extra': {
+            'plugin-minerva-copy-geojs': {
                 files: [
-                    '<%= plugin.minerva.extra %>/**',
                     '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
                 ],
-                tasks: ['copy:minerva-extras']
+                tasks: ['copy:geojs']
             }
         }
     });
