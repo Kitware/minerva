@@ -15,6 +15,10 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
+          href="${staticRoot}/built/plugins/minerva/jquery.dataTables.css">
+    <link rel="stylesheet"
+          href="${staticRoot}/built/plugins/minerva/buttons.dataTables.css">
+    <link rel="stylesheet"
           href="${staticRoot}/built/girder.app.min.css">
     % for plugin in pluginCss:
         <link rel="stylesheet" href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
