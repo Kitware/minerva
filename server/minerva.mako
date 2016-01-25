@@ -29,6 +29,7 @@
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
     <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js"></script>
     <script src="${staticRoot}/built/girder.ext.min.js"></script>
+    <script src="${staticRoot}/built/plugins/minerva/colorbrewer.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/geo.min.js"></script>
     <script src="${staticRoot}/built/girder.app.min.js"></script>

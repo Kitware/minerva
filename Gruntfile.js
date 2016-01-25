@@ -104,10 +104,17 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/collections/**/*.js',
                             '<%= plugin.minerva.source %>/views/body/Panel.js',
                             '<%= plugin.minerva.source %>/views/**/*.js',
-                            '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.min.js'
                     },
+                    {
+                        src: ['<%= plugin.minerva.source %>/main.js'],
+                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                    },
+                 ]
+            },
+            'minerva-ext': {
+                files: [
                     {
                         src: [
                             '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
@@ -117,13 +124,18 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>/geo.ext.min.js'
                     },
                     {
-                        src: ['<%= plugin.minerva.source %>/main.js'],
-                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                        src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
+                        dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
                     },
                     {
                         src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
                         dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
-                    }
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'],
+                        dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
+                    },
+
                 ]
             }
         },
@@ -210,6 +222,9 @@ module.exports = function (grunt) {
             },
             'copy:jquery-ui': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'uglify:minerva-ext': {
+                dependencies: ['shell:minerva-geojs-install']
             }
         },
         default: {
