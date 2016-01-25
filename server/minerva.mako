@@ -44,7 +44,7 @@
         % if plugin != 'minerva':
             <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
         % else:
-            <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
+            <script src="${staticRoot}/built/plugins/minerva/minerva.app.min.js"></script>
         % endif
     % endfor
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>

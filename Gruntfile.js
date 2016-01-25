@@ -105,7 +105,7 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/views/body/Panel.js',
                             '<%= plugin.minerva.source %>/views/**/*.js',
                         ],
-                        dest: '<%= plugin.minerva.static %>/minerva.min.js'
+                        dest: '<%= plugin.minerva.static %>/minerva.app.min.js'
                     },
                     {
                         src: ['<%= plugin.minerva.source %>/main.js'],
