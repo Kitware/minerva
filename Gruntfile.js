@@ -103,14 +103,14 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/models/**/*.js',
                             '<%= plugin.minerva.source %>/collections/**/*.js',
                             '<%= plugin.minerva.source %>/views/body/Panel.js',
-                            '<%= plugin.minerva.source %>/views/**/*.js',
+                            '<%= plugin.minerva.source %>/views/**/*.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.app.min.js'
                     },
                     {
                         src: ['<%= plugin.minerva.source %>/main.js'],
                         dest: '<%= plugin.minerva.static %>/minerva.main.min.js'
-                    },
+                    }
                  ]
             },
             'minerva-ext': {
@@ -138,8 +138,7 @@ module.exports = function (grunt) {
                     {
                         src: ['<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'],
                         dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
-                    },
-
+                    }
                 ]
             }
         },
@@ -228,7 +227,7 @@ module.exports = function (grunt) {
                         cwd: '<%= plugin.minerva.root %>/node_modules/datatables.net-buttons-dt/css',
                         src: ['buttons.dataTables.css'],
                         dest: '<%= plugin.minerva.static %>'
-                    },
+                    }
                 ]
             }
         },
@@ -245,8 +244,8 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/jquery.dataTables.min.js',
                         '<%= plugin.minerva.static %>/dataTables.buttons.js'
-                     ],
-                },
+                     ]
+                }
             }
         },
         init: {
