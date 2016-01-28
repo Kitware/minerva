@@ -6,7 +6,7 @@ You'll need to have the following installed
 
   * Virtualbox
   * Vagrant
-  * Ansible [known to work on version 1.9.3 and higher]
+  * Ansible [version >= 1.9.3 and < 2.0]
 
 ## Vagrant commands
 
