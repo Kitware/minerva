@@ -5,7 +5,6 @@ import sys
 import tempfile
 import traceback
 import copy
-import re
 import math
 
 import requests
@@ -21,7 +20,6 @@ import girder_client
 
 # This job will accumulate and append metadata into
 # the us states geojson properties.
-
 
 #: geojson of state boundaries source url
 states_source = (
@@ -109,25 +107,22 @@ def accumulate(data):
     # create a abbr -> properties mappin and remove unwanted properties
     states = {}
     for feature in geojson.get('features', []):
-        abbr = feature['properties']['abbr']
-        name = feature['properties']['name']
+        abbr = feature['properties']['abbr'].upper()
+        name = feature['properties']['name'].upper()
         feature['properties'].clear()
         feature['properties']['abbr'] = abbr
         feature['properties']['name'] = name
-        states[abbr] = feature['properties']
-
-    # city, state regex
-    citystate = re.compile(r', ([A-Z][A-Z])$')
+        states[name] = feature['properties']
 
     # store all properties encountered here
     all_props = set()
 
     # loop over records
     for record in data:
-        m = citystate.search(record.get('reporting_area', ''))
-        if m and m.group(1) in states:  # it is a valid state
+        m = record.get('location_1', {}).get('human_address', {}).get('state', '').upper()
+        if m in states:  # it is a valid state
 
-            props = states[m.group(1)]
+            props = states[m]
             props['num_records'] = props.get('num_records', 0) + 1
 
             for key, value in record.iteritems():
