@@ -28,7 +28,7 @@ before_install:
     - cd $HOME/build
     # remove existing girder dir, it remains from caching operations
     - rm -rf girder
-    - git clone https://github.com/girder/girder.git --branch v1.4.1
+    - git clone https://github.com/girder/girder.git --branch 7872249a3
     - mv Kitware/minerva girder/plugins
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
 
@@ -36,7 +36,7 @@ before_install:
     - cd $HOME/build/girder/plugins
     - git clone https://github.com/Kitware/romanesco.git
     - cd romanesco
-    - git checkout cfdc285fd2d94ac1b8793b33e5ef3b49e59ccbb3 # If we update romanesco past this SHA, we need to update the girder version.
+    - git checkout da82cd17 # If we update romanesco past this SHA, we need to update the girder version.
     - cd $HOME/build
 
     - cd girder
