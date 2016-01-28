@@ -335,8 +335,8 @@ class AnalysisTestCase(base.TestCase):
                     time.sleep(2)
                     count += 1
 
-            # ensure the first row of results was added to the dataset
+            # ensure that the values were accumulated correctly
             self.assertTrue(
-                'values' in dataset,
-                '"values" expected in dataset'
+                'babesiosis_cum_2014' in dataset.get('values', []),
+                '"babesiosis_cum_2014" expected in dataset values'
             )
