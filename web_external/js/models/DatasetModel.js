@@ -84,6 +84,10 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 mm.geo_render = {
                     type: 'wms'
                 };
+            } else if (mm.dataset_type === 'csv') {
+                mm.geo_render = {
+                    type: 'csv'
+                };
             }
             this.saveMinervaMetadata(mm);
         }
@@ -189,6 +193,24 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 }, this)
             });
         }
+    },
+
+    getCsvFile: function (id) {
+        girder.restRequest({
+            //path: 'minerva_dataset/' + this.get('_id') + '/item',
+            path: 'minerva_dataset/file/' + id + '/download',
+            type: 'GET'
+        }).done(_.bind(function (resp) {
+            this.trigger('m:csvDownloaded', resp);
+        }, this)).error(_.bind(function (err) {
+            console.error(err);
+            girder.events.trigger('g:alert', {
+                icon: 'cancel',
+                text: 'Could not download the file.',
+                type: 'error',
+                timeout: 4000
+            });
+        }, this));
     }
 
 });

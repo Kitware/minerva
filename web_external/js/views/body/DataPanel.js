@@ -44,6 +44,16 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             } else {
                 this.jsonConfigWidget.setCurrentDataset(dataset);
             }
+
+        } else if (geoRenderType === 'csv') {
+            // First download the file, then open it in the csv viewer widget
+            var fileId = dataset.get('meta').minerva.original_files[0]._id;
+            var csvFile = new minerva.models.DatasetModel({});
+            csvFile.on('g:csvDownloaded', function (csv) {
+                console.log(csv)
+            }, this).on('g:error', function (err) {
+                console.error(err);
+            }).getCsvFile(fileId);
         } else {
             return;
         }
