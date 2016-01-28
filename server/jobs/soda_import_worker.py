@@ -119,7 +119,8 @@ def accumulate(data):
 
     # loop over records
     for record in data:
-        m = record.get('location_1', {}).get('human_address', {}).get('state', '').upper()
+        m = (record.get('location_1', {}).get('human_address', {})
+             .get('state', '').upper())
         if m in states:  # it is a valid state
 
             props = states[m]
