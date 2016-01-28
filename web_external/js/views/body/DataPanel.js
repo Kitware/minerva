@@ -70,6 +70,18 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     /**
+     * Test if the uploaded file is csv or not.
+     */
+    _isCsvFile: function (file) {
+        var REGEX = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+        if (REGEX.test(file[0].name.toLowerCase())) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    /**
      * Create a new Item for the dataset, then upload all files there.
      */
     uploadStarted: function () {
@@ -89,11 +101,30 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
      * Create a Dataset from the Item, then add it to the DatasetCollection.
      */
     uploadFinished: function () {
+        var params = {};
+        // If the file is csv, parse the first 10 rows and save in minerva metadata
+        if (this._isCsvFile(this.uploadWidget.files)) {
+            var ROWS_PREVIEW = 10;
+            if (typeof (FileReader) !== "undefined") {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    // get file content
+                    var csv = e.target.result;
+                    var parsedCSV = Papa.parse(csv, { skipEmptyLines: true, header: true, preview: ROWS_PREVIEW });
+                    if (parsedCSV.data) {
+                        params.csvPreview = parsedCSV.data;
+                    }
+                }.bind(this);
+                reader.readAsText(this.uploadWidget.files[0]);
+            } else {
+                alert("This browser does not support HTML5.");
+            }
+        }
         this.newDataset.on('m:datasetCreated', function () {
             this.collection.add(this.newDataset);
         }, this).on('g:error', function (err) {
             console.error(err);
-        }).createDataset();
+        }).createDataset(params);
     },
 
     addDatasetToSessionEvent: function (event) {

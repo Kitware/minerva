@@ -20,11 +20,14 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * emits a 'm:datasetCreated' event upon successful Dataset creation
      * and initialization.
      */
-    createDataset: function () {
+    createDataset: function (params) {
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
-            type: 'POST'
+            type: 'POST',
+            params: params
         }).done(_.bind(function (resp) {
+            // TODO: To discuss the right approach to update metadata
+            resp.meta.minerva.csvPreview = params.csvPreview;
             this.metadata(resp.meta.minerva);
             this.trigger('m:datasetCreated', this);
         }, this)).error(_.bind(function (err) {
