@@ -54,7 +54,7 @@ list like
 Think of this tag as minerva with dependencies.
 
 This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
-file, install system depenencies and pip dependencies defined in the minerva role,
+file, install system dependencies and pip dependencies defined in the minerva role,
 then install the minerva plugin to girder and build the client side code.
 
 ##### minerva-update
