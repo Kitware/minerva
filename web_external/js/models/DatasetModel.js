@@ -134,7 +134,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      */
     getGeoRenderType: function () {
         var mm = this.metadata();
-        return mm.geo_render ? mm.geo_render.type : mm.geo_render;
+        return mm.geo_render ? mm.geo_render.type : null;
     },
 
     /**
