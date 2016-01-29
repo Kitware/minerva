@@ -15,18 +15,18 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     /**
      * Async function that should be called after uploading a file as an
      * Item to the user's Minerva/Dataset folder, this function will then
-     * initialize the Item's 'minerva' namespaced metadata, ensuring it is usable
-     * as a Dataset in Minerva;
-     * emits a 'm:datasetCreated' event upon successful Dataset creation
-     * and initialization.
+     * promote the Item to a Minerva Dataset, which means
+     * initializing the Item's 'minerva' namespaced metadata.
+     *
+     * @fires 'minerva.dataset.promoted' event upon successful Dataset promotion.
      */
-    createDataset: function () {
+    promoteToDataset: function () {
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
         }).done(_.bind(function (resp) {
             this.metadata(resp.meta.minerva);
-            this.trigger('m:datasetCreated', this);
+            this.trigger('minerva.dataset.promoted', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {

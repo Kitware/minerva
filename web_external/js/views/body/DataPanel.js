@@ -86,14 +86,14 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     /**
-     * Create a Dataset from the Item, then add it to the DatasetCollection.
+     * Promote an Item to a Dataset, then add it to the DatasetCollection.
      */
     uploadFinished: function () {
-        this.newDataset.on('m:datasetCreated', function () {
+        this.newDataset.on('minerva.dataset.promoted', function () {
             this.collection.add(this.newDataset);
         }, this).on('g:error', function (err) {
             console.error(err);
-        }).createDataset();
+        }).promoteToDataset();
     },
 
     addDatasetToSessionEvent: function (event) {
