@@ -1,5 +1,4 @@
 /*global File*/
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class contourJsonReader
  *
@@ -7,11 +6,10 @@
  * @extends geo.fileReader
  * @returns {geo.contourJsonReader}
  */
-//////////////////////////////////////////////////////////////////////////////
 geo.contourJsonReader = function (arg) {
     'use strict';
     if (!(this instanceof geo.contourJsonReader)) {
-        return new geo.contourJsonReader(arg);
+        return new geo.contourJsonReader(arg); // eslint-disable-line new-cap
     }
 
     var m_this = this, m_style = arg.style || {};
@@ -28,7 +26,7 @@ geo.contourJsonReader = function (arg) {
     this.canRead = function (file) {
         if (file instanceof File) {
             return (file.type === 'application/json' || file.name.match(/\.json$/));
-        } else if (typeof file === 'string') {
+        } else if (_.isString(file)) {
             try {
                 JSON.parse(file);
             } catch (e) {
@@ -47,7 +45,7 @@ geo.contourJsonReader = function (arg) {
     this._readObject = function (file, done, progress) {
         var object;
         function onDone(fileString) {
-            if (typeof fileString !== 'string') {
+            if (!_.isString(fileString)) {
                 done(false);
             }
 
@@ -75,7 +73,7 @@ geo.contourJsonReader = function (arg) {
 
         if (file instanceof File) {
             m_this._getString(file, onDone, progress);
-        } else if (typeof file === 'string') {
+        } else if (_.isString(file)) {
             onDone(file);
         } else {
             done(file);
@@ -87,7 +85,6 @@ geo.contourJsonReader = function (arg) {
     };
 
     this.read = function (file, done, progress) {
-
         function _done(data) {
             var contour = m_this.layer().createFeature('contour')
                     .data(data.position || data.values)

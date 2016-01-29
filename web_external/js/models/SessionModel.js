@@ -136,6 +136,5 @@ minerva.models.SessionModel = girder.models.ItemModel.extend({
             // delete any in files and not in features
             // add any in features and not in files
         }, this).updateContents(JSON.stringify(this.sessionJsonContents));
-
     }
 });

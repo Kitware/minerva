@@ -7,9 +7,9 @@ minerva.views.AddElasticsearchSourceWidget = minerva.View.extend({
         'submit #m-add-elasticsearch-source-form': function (e) {
             e.preventDefault();
             var params = {
-                name:     this.$('#m-elasticsearch-name').val(),
-                baseURL:  this.$('#m-elasticsearch-uri').val(),
-                index:  this.$('#m-elasticsearch-index').val(),
+                name: this.$('#m-elasticsearch-name').val(),
+                baseURL: this.$('#m-elasticsearch-uri').val(),
+                index: this.$('#m-elasticsearch-index').val(),
                 username: this.$('#m-elasticsearch-username').val(),
                 password: this.$('#m-elasticsearch-password').val()
             };

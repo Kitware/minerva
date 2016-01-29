@@ -41,7 +41,6 @@ minerva.views.ElasticsearchWidget = minerva.View.extend({
                 girder.events.trigger('m:job.created');
                 this.$el.modal('hide');
             }, this));
-
         }
     },
 

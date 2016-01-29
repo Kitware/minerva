@@ -90,19 +90,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     addDatasetToSessionEvent: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        var stackValues = _.map(this.collection.models, function (dataset) {
-            return dataset.get('stack');
-        });
-
-        // Retrieve the last stack value in the collection
-        var lastValueInStack =
-            _.last(
-                stackValues.sort(function (a, b) {
-                    return a - b;
-                })
-            );
+        var datasetId = $(event.currentTarget).attr('m-dataset-id'),
+            dataset = this.collection.get(datasetId),
+            stackValues = _.invoke(this.collection.models, 'get', 'stack'),
+            lastValueInStack = _.max(stackValues);
 
         if (!dataset.get('displayed')) {
             dataset.set('stack', lastValueInStack + 1);

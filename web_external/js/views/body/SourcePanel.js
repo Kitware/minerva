@@ -30,7 +30,6 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
             folderId: source.metadata().folder_id,
             parentView: this
         });
-
     },
 
     displayMongoCollections: function (evt) {

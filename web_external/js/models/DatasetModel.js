@@ -41,13 +41,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     getDatasetType: function () {
         var minervaMetadata = this.metadata();
-        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
-            (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
+        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type
+            : (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
     },
-
-    ////////////////////////////////////////////////////////
-    // GeoJs rendering api.                               //
-    ////////////////////////////////////////////////////////
 
     /**
      * Initialize the GeoJs rendering type along with any secondary data needed for

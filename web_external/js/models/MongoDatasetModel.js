@@ -1,8 +1,6 @@
 minerva.models.MongoDatasetModel = minerva.models.DatasetModel.extend({
 
-    isRenderable: function () {
-        return true;
-    },
+    isRenderable: _.constant(true),
 
     getExternalMongoLimits: function (field) {
         var data = { field: field };
@@ -16,7 +14,6 @@ minerva.models.MongoDatasetModel = minerva.models.DatasetModel.extend({
             this.trigger('m:externalMongoLimitsGot', this);
         }, this));
     },
-
 
     createMongoDataset: function (params) {
         girder.restRequest({

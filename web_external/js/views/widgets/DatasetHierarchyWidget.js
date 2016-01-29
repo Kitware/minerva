@@ -8,7 +8,7 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
     initialize: function (settings) {
         // this.folderAccess = settings.folderAccess || false;
         this.folderAccess = false;
-        this.dataset =  settings.dataset;
+        this.dataset = settings.dataset;
         this.folderId = settings.folderId;
         this.folder = new girder.models.FolderModel();
 
@@ -25,7 +25,6 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
             this._createHierarchyWidget();
             this.render();
         }, this).fetch();
-
     },
 
     updateModelWithSelectedItems: function () {
@@ -44,7 +43,6 @@ minerva.views.DatasetHierarchyWidget = minerva.View.extend({
     },
 
     _createHierarchyWidget: function () {
-
         this.hierarchyWidget = new minerva.views.ReadOnlyHierarchyWidget({
             parentView: this,
             parentModel: this.folder,

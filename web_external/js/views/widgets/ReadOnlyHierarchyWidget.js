@@ -9,7 +9,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
     },
 
     _initFolderViewSubwidgets: function () {
-
         this.itemListView = new minerva.views.ItemListWidget({
             folderId: this.parentModel.get('_id'),
             checkboxes: this._checkboxes,
@@ -24,7 +23,6 @@ minerva.views.ReadOnlyHierarchyWidget = girder.views.HierarchyWidget.extend({
                 this.itemCount = this.itemListView.collection.length;
                 this._childCountCheck();
             }, this);
-
     },
 
     _fetchToRoot: function (folder) {

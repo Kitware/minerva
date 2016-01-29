@@ -16,7 +16,7 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
             var selectedDatasetItem = dataset.metadata().selectedItems[0];
 
             girder.restRequest({
-                path: 'item/' + selectedDatasetItem  + '/files',
+                path: 'item/' + selectedDatasetItem + '/files',
                 type: 'GET',
                 data: {
                     limit: 1
@@ -24,42 +24,42 @@ minerva.views.GeoJsContourWidget = minerva.View.extend({
                 contentType: 'application/json'
             }).done(_.bind(function (files) {
                 var data = {
-                        inputs: {
-                            host: {
-                                format: 'json',
-                                data: window.location.hostname
-                            },
-                            port: {
-                                format: 'json',
-                                data: window.location.port
-                            },
-                            token: {
-                                format: 'json',
-                                data: girder.cookie.find('girderToken')
-                            },
-                            fileId: {
-                                format: 'json',
-                                name: 'fileId',
-                                data: files[0]._id
-                            },
-                            variable: {
-                                format: 'json',
-                                data: parameter
-                            },
-                            timestep: {
-                                format: 'number',
-                                data: Number.parseInt(timestep)
-                            }
+                    inputs: {
+                        host: {
+                            format: 'json',
+                            data: window.location.hostname
                         },
-                        outputs: {
-                            result: {
-                                format: 'json'
-                            }
+                        port: {
+                            format: 'json',
+                            data: window.location.port
+                        },
+                        token: {
+                            format: 'json',
+                            data: girder.cookie.find('girderToken')
+                        },
+                        fileId: {
+                            format: 'json',
+                            name: 'fileId',
+                            data: files[0]._id
+                        },
+                        variable: {
+                            format: 'json',
+                            data: parameter
+                        },
+                        timestep: {
+                            format: 'number',
+                            data: Number.parseInt(timestep, 10)
                         }
-                    };
+                    },
+                    outputs: {
+                        result: {
+                            format: 'json'
+                        }
+                    }
+                };
 
                 girder.restRequest({
-                    path: 'item/' + itemId  + '/romanesco',
+                    path: 'item/' + itemId + '/romanesco',
                     type: 'POST',
                     data: JSON.stringify(data),
                     contentType: 'application/json'

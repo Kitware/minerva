@@ -325,8 +325,9 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 })
             });
             this.map.createLayer(this.session.sessionJsonContents.basemap,
-                                 _.has(this.session.sessionJsonContents, 'basemap_args') ?
-                                 this.session.sessionJsonContents.basemap_args : {});
+                                 _.has(this.session.sessionJsonContents, 'basemap_args')
+                                 ? this.session.sessionJsonContents.basemap_args : {});
+            this.uiLayer = this.map.createLayer('ui');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {

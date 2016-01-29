@@ -71,7 +71,6 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     },
 
     getUrl: function (layer_idx, coord) {
-
         var pnt = this.map.gcsToDisplay(coord);
         // Spherical Mercator projection.
         var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
