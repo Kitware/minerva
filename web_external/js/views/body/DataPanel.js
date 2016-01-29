@@ -44,8 +44,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             } else {
                 this.jsonConfigWidget.setCurrentDataset(dataset);
             }
-        } else {
-            return;
         }
     },
 
