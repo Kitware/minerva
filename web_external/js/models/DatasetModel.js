@@ -23,8 +23,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     createDataset: function (params) {
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
-            type: 'POST',
-            params: params
+            type: 'POST'
         }).done(_.bind(function (resp) {
             // TODO: To discuss the right approach to update metadata
             resp.meta.minerva.csvPreview = params.csvPreview;
@@ -197,11 +196,13 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     getCsvFile: function (id) {
         girder.restRequest({
-            //path: 'minerva_dataset/' + this.get('_id') + '/item',
-            path: 'minerva_dataset/file/' + id + '/download',
-            type: 'GET'
+            // TODO: Make sure this is the right approach
+            path: '/file/' + id + '/download?contentDisposition=inline',
+            type: 'GET',
+            dataType: 'text'
         }).done(_.bind(function (resp) {
-            this.trigger('m:csvDownloaded', resp);
+            //this.get('meta').minerva.csv = resp;
+            this.trigger('g:csvDownloaded', resp);
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {

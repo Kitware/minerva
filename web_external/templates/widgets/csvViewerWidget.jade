@@ -1,0 +1,32 @@
+.modal-dialog.m.table-main-container
+    .modal-content
+        form#m-add-csv-viewer-form.modal-form(role="form")
+            .modal-header
+                button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+                h4.modal-title
+                    | CSV Viewer
+
+            .m-tableDataContainer
+                .m-ableDataContainerHeader
+                    h4.modal-title.csv-title
+                        | #{title}
+                .m-table-container
+                    table.table-hover#data
+                    h5.modal-title
+                        | Total number of rows: #{totalRows}
+
+            if !source
+
+                .modal-footer
+
+                    button.m-load-more-rows-button.btn.btn-small.btn-primary
+                        i.icon-plus-squared
+                        | Load more rows
+
+                    button.m-upload-another-file-button.btn.btn-small.btn-primary
+                        i.icon-upload
+                        | Upload another file
+
+                    button.m-add-source-button.btn.btn-small.btn-primary
+                        i.icon-plus-squared
+                        | Add source

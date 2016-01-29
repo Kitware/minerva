@@ -9,6 +9,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-configure-geo-render': 'configureGeoRender'
     },
 
+    renderCsvViewer: function (csv) {
+        new minerva.views.CsvViewerWidget({
+            el               : $('#g-dialog-container'),
+            collection       : this.collection,
+            parentView       : this,
+            data             : csv
+        }).render();
+    },
+
     /**
      * Display a modal dialog allowing configuration of GeoJs rendering
      * properties for the selected dataset.
@@ -50,7 +59,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             var fileId = dataset.get('meta').minerva.original_files[0]._id;
             var csvFile = new minerva.models.DatasetModel({});
             csvFile.on('g:csvDownloaded', function (csv) {
-                console.log(csv)
+                // Open the csv in the csv viewer widget
+                this.renderCsvViewer(csv);
             }, this).on('g:error', function (err) {
                 console.error(err);
             }).getCsvFile(fileId);
