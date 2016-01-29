@@ -20,6 +20,10 @@
           href="${staticRoot}/built/app.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/minerva.min.css">
+    <link rel="stylesheet"
+          href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
+    <link rel="stylesheet"
+          href="http:////cdn.datatables.net/buttons/1.1.0/css/buttons.dataTables.min.css">
     % for plugin in pluginCss:
         % if plugin != 'minerva':
             <link rel="stylesheet"
@@ -53,6 +57,9 @@
         % endif
     % endfor
     <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>
+    <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/buttons.colVis.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
     <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>

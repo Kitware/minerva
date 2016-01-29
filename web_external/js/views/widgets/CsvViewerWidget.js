@@ -55,10 +55,20 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
     }
   },
 
+  _parseCsv: function (data) {
+    var parsedCSV = Papa.parse(data, { skipEmptyLines: true, preview: this.rows });
+    if (!parsedCSV || !parsedCSV.data) {
+      console.error('error with parser');
+      return;
+    }
+    return parsedCSV.data;
+  },
+
+
   initialize: function (settings) {
-    this.source        = settings.source;
-    this.collection    = settings.collection;
-    this.data           = settings.data;
+    this.source      = settings.source;
+    this.collection  = settings.collection;
+    this.data        = this._parseCsv(settings.data);
   },
 
   render: function () {
