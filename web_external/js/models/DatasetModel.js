@@ -26,6 +26,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'POST'
         }).done(_.bind(function (resp) {
             this.metadata(resp.meta.minerva);
+            this._initGeoRender();
             this.trigger('minerva.dataset.promoted', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
@@ -132,7 +133,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * be null if no rendering type can be inferred.
      */
     getGeoRenderType: function () {
-        var mm = this._initGeoRender();
+        var mm = this.metadata();
         return mm.geo_render ? mm.geo_render.type : mm.geo_render;
     },
 
@@ -145,7 +146,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * @returns {String|null} Download URL for the file data, if one exists.
      */
     _getGeoRenderDownloadUrl: function () {
-        var mm = this._initGeoRender();
+        var mm = this.metadata();
         if (mm.geo_render && mm.geo_render.file_id) {
             return girder.apiRoot + '/file/' + mm.geo_render.file_id + '/download';
         } else {
@@ -161,7 +162,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * @returns {Boolean} Whether GeoJs can render this dataset.
      */
     isGeoRenderable: function () {
-        var mm = this._initGeoRender();
+        var mm = this.metadata();
         return (mm.geo_render !== null);
     },
 
@@ -172,7 +173,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * when data is loaded or if this dataset did not need to load any data to render in GeoJs.
      */
     loadGeoData: function () {
-        var mm = this._initGeoRender();
+        var mm = this.metadata();
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
             this.trigger('m:geoDataLoaded', this);
         } else {
