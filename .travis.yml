@@ -28,7 +28,10 @@ before_install:
     - cd $HOME/build
     # remove existing girder dir, it remains from caching operations
     - rm -rf girder
-    - git clone https://github.com/girder/girder.git --branch 7872249a3
+    - git clone https://github.com/girder/girder.git
+    - cd girder
+    - git checkout 7872249a3
+    - cd $HOME/build
     - mv Kitware/minerva girder/plugins
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
 
