@@ -125,9 +125,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     },
 
     /**
-     * Getter for the GeoJs rendering type of the dataset, initializing it if
-     * necessary by inference from the dataset's metadata, and saving
-     * the dataset's metadata if changed.
+     * Getter for the GeoJs rendering type of the dataset.
      *
      * @returns {'choropleth'|'geojson'|'contour'|'wms'|null} GeoJs rendering type of this dataset, will
      * be null if no rendering type can be inferred.
@@ -138,26 +136,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     },
 
     /**
-     * Gets the download URL for the file data needed by GeoJs to render
-     * this dataset, if one exists; initializing it if
-     * necessary by inference from the dataset's metadata, and saving
-     * the dataset's metadata if changed.
-     *
-     * @returns {String|null} Download URL for the file data, if one exists.
-     */
-    _getGeoRenderDownloadUrl: function () {
-        var mm = this.metadata();
-        if (mm.geo_render && mm.geo_render.file_id) {
-            return girder.apiRoot + '/file/' + mm.geo_render.file_id + '/download';
-        } else {
-            return null;
-        }
-    },
-
-    /**
-     * Gets whether GeoJs can render this dataset, initializing it if
-     * necessary by inference from the dataset's metadata, and saving
-     * the dataset's metadata if changed.
+     * Gets whether GeoJs can render this dataset.
      *
      * @returns {Boolean} Whether GeoJs can render this dataset.
      */
@@ -177,17 +156,24 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
             this.trigger('minerva.dataset.geo.dataLoaded', this);
         } else {
-            var url = this._getGeoRenderDownloadUrl();
-            $.ajax({
-                url: url,
+            var path = '/file/' + mm.geo_render.file_id + '/download';
+            girder.restRequest({
+                path: path,
                 contentType: 'application/json',
-                success: _.bind(function (data) {
-                    this.set('geoData', data);
-                }, this),
-                complete: _.bind(function () {
-                    this.trigger('minerva.dataset.geo.dataLoaded', this);
-                }, this)
-            });
+                // Prevent json from getting parsed.
+                dataType: null
+            }).done(_.bind(function (data) {
+                this.set('geoData', data);
+                this.trigger('minerva.dataset.geo.dataLoaded', this);
+            }, this)).error(_.bind(function (err) {
+                console.error(err);
+                girder.events.trigger('g:alert', {
+                    icon: 'cancel',
+                    text: 'Could not download geoData in Dataset.',
+                    type: 'error',
+                    timeout: 4000
+                });
+            }, this));
         }
     }
 
