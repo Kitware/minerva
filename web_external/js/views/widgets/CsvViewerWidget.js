@@ -6,51 +6,10 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
   events: {
     'click .m-update-dataset': function (e) {
         e.preventDefault();
-        // Let the end user specify the columns related to long and lat
-        var longitude = $('#m-longitude option:selected').text();
-        var latitude  = $('#m-latitude option:selected').text();
-        this.longitudeIndex = _.indexOf(this.csv[0], longitude);
-        this.latitudeIndex = _.indexOf(this.csv[0], latitude);
-        // Create geojson
-        this.createGeoJsonFromTabular(this.dataset);
+        // TODO: Let the end user specify the columns related to long and lat
     }
   },
-
-  createGeoJsonFromTabular: function (dataset) {
-    var minervaMeta = dataset.metadata();
-    var originalType = minervaMeta.original_type;
-    if (originalType !== 'csv' && originalType !== 'json') {
-      console.error('You should only use this for csv or json');
-      return;
-    }
-    if (!this.csv) {
-      console.error('This dataset lacks csv data to create geojson on the client.');
-      return;
-    }
-    var geoJsonData = {
-      type: 'FeatureCollection',
-      features: []
-    };
-    _.each(this.csv, function (row) {
-      if ( Number(row[this.latitudeIndex]) && Number(row[this.longitudeIndex]) ) {
-        var point = {
-          type: 'Feature',
-          // TODO need to get other property column, just hardcoding elevation for now
-          properties: {elevation: Number(0)},
-          geometry: {
-            type: 'Point',
-            coordinates: [Number(row[this.longitudeIndex]), Number(row[this.latitudeIndex])]
-          }
-        };
-        geoJsonData.features.push(point);
-      }
-    }, this);
-    var geoData = JSON.stringify(geoJsonData);
-    // TODO: WIP
-    console.log(geoData);
-  },
-
-
+  
   _parseCsv: function (data, headers) {
     var parsedCSV = Papa.parse(data, { skipEmptyLines: true, headers: headers, preview: this.rows });
     if (!parsedCSV || !parsedCSV.data) {

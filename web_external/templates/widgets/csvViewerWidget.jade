@@ -6,17 +6,6 @@
                 h4.modal-title
                     | CSV Viewer
 
-                .form-group
-                    label.control-label(for="m-longitude") Longitude
-                    select.form-control.input-sm#m-longitude
-                        each column in columns
-                            option(value='#{column.title}') #{column.title}
-                .form-group
-                    label.control-label(for="m-latitude") Latitude
-                    select.form-control.input-sm#m-latitude
-                        each column in columns
-                            option(value='#{column.title}') #{column.title}
-
             .m-tableDataContainer
                 .m-ableDataContainerHeader
                     h4.modal-title.csv-title
