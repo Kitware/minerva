@@ -48,7 +48,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                 autoWidth: true,
                 hover: true,
                 ordering: true,
-                pagingType: "full",
+                pagingType: 'full',
                 dom: 'Bfrtip',
                 buttons: [
                     {
