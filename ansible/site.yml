@@ -57,7 +57,9 @@
       shell: ". {{venv_root}}/bin/activate && girder-install plugin -s -f {{base_dir}}/minerva {{base_dir}}/romanesco"
       become: yes
       become_user: "{{girder_user}}"
-      tags: test
+      tags:
+        - test
+        - minerva-update
 
 # Configure plugins and girder
 - hosts: girder
