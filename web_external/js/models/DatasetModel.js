@@ -25,7 +25,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
         }).done(_.bind(function (resp) {
-            // TODO: To discuss the right approach to update metadata
+            // TODO: Is it the right approach to update metadata?
             resp.meta.minerva.csvPreview = params.csvPreview;
             this.metadata(resp.meta.minerva);
             this.trigger('m:datasetCreated', this);
@@ -200,7 +200,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             type: 'GET',
             dataType: 'text'
         }).done(_.bind(function (resp) {
-            //this.get('meta').minerva.csv = resp;
             this.trigger('g:csvDownloaded', resp);
         }, this)).error(_.bind(function (err) {
             console.error(err);
