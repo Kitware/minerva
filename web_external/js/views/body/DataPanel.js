@@ -126,7 +126,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         // If the file is csv, parse the first 10 rows and save in minerva metadata
         if (this._isCsvFile(this.uploadWidget.files)) {
             var ROWS_PREVIEW = 10;
-            if (typeof (FileReader) !== "undefined") {
+            if (typeof (FileReader) !== 'undefined') {
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     // get file content
@@ -138,7 +138,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
                 }.bind(this);
                 reader.readAsText(this.uploadWidget.files[0]);
             } else {
-                alert("This browser does not support HTML5.");
+                alert('This browser does not support HTML5.');
             }
         }
         this.newDataset.on('m:datasetCreated', function () {
