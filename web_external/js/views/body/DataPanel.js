@@ -128,7 +128,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             var ROWS_PREVIEW = 10;
             if (typeof (FileReader) !== "undefined") {
                 var reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     // get file content
                     var csv = e.target.result;
                     var parsedCSV = Papa.parse(csv, { skipEmptyLines: true, header: true, preview: ROWS_PREVIEW });
