@@ -168,14 +168,14 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     /*
      * Async function that loads any data needed by this dataset to render in GeoJs,
-     * sets that data as an attribute on this dataset named 'geoData',
-     * emitting the 'm:geoDataLoaded' event and passing a reference to this dataset
-     * when data is loaded or if this dataset did not need to load any data to render in GeoJs.
+     * setting that data as an attribute on this dataset named 'geoData'.
+     *
+     * @fires 'minerva.dataset.geo.dataLoaded' event upon the geo data being loaded.
      */
     loadGeoData: function () {
         var mm = this.metadata();
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
-            this.trigger('m:geoDataLoaded', this);
+            this.trigger('minerva.dataset.geo.dataLoaded', this);
         } else {
             var url = this._getGeoRenderDownloadUrl();
             $.ajax({
@@ -185,7 +185,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     this.set('geoData', data);
                 }, this),
                 complete: _.bind(function () {
-                    this.trigger('m:geoDataLoaded', this);
+                    this.trigger('minerva.dataset.geo.dataLoaded', this);
                 }, this)
             });
         }

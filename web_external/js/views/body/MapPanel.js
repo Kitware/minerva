@@ -214,13 +214,13 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 this.map.draw();
             } else if (renderType === 'choropleth') {
                 // hacktastic special handling of MMWR data
-                dataset.once('m:geoDataLoaded', _.bind(function () {
+                dataset.once('minerva.dataset.geo.dataLoaded', _.bind(function () {
                     this._renderChoropleth(dataset, this.map.createLayer('feature'));
                 }, this));
                 dataset.loadGeoData();
             } else if (_.has(this.GEOJS_RENDER_TYPES_FILEREADER, renderType)) {
                 // Load the data and adapt the dataset to the map with the reader.
-                dataset.once('m:geoDataLoaded', function () {
+                dataset.once('minerva.dataset.geo.dataLoaded', function () {
                     // TODO: allow these datasets to specify a legend.
                     var datasetId = dataset.get('_id');
                     var layer = this.map.createLayer('feature');
