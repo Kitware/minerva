@@ -196,7 +196,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     getCsvFile: function (id) {
         girder.restRequest({
-            // TODO: Make sure this is the right approach
             path: '/file/' + id + '/download?contentDisposition=inline',
             type: 'GET',
             dataType: 'text'

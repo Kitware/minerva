@@ -9,11 +9,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-configure-geo-render': 'configureGeoRender'
     },
 
-    renderCsvViewer: function (csv) {
+    renderCsvViewer: function (csv, dataset) {
         new minerva.views.CsvViewerWidget({
             el               : $('#g-dialog-container'),
             collection       : this.collection,
             parentView       : this,
+            dataset          : dataset,
             data             : csv
         }).render();
     },
@@ -60,7 +61,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             var csvFile = new minerva.models.DatasetModel({});
             csvFile.on('g:csvDownloaded', function (csv) {
                 // Open the csv in the csv viewer widget
-                this.renderCsvViewer(csv);
+                this.renderCsvViewer(csv, dataset);
             }, this).on('g:error', function (err) {
                 console.error(err);
             }).getCsvFile(fileId);

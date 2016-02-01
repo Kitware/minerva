@@ -6,6 +6,17 @@
                 h4.modal-title
                     | CSV Viewer
 
+                .form-group
+                    label.control-label(for="m-longitude") Longitude
+                    select.form-control.input-sm#m-longitude
+                        each column in columns
+                            option(value='#{column.title}') #{column.title}
+                .form-group
+                    label.control-label(for="m-latitude") Latitude
+                    select.form-control.input-sm#m-latitude
+                        each column in columns
+                            option(value='#{column.title}') #{column.title}
+
             .m-tableDataContainer
                 .m-ableDataContainerHeader
                     h4.modal-title.csv-title
@@ -13,8 +24,9 @@
                 .m-table-container
                     table.table-hover#data
 
-            if !source
-                .modal-footer
-                    button.m-add-source-button.btn.btn-small.btn-primary
-                        i.icon-plus-squared
-                        | Add source
+
+            .modal-footer
+                a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+                button.m-update-dataset.btn.btn-small.btn-primary(type="submit")
+                    i.icon-check
+                    | Save

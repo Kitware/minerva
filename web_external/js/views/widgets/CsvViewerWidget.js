@@ -4,59 +4,55 @@
 minerva.views.CsvViewerWidget = minerva.View.extend({
 
   events: {
-    'click .m-add-source-button': function (e) {
-      //e.preventDefault();
-      //var parsedCSV = Papa.parse(this.csvData, { skipEmptyLines: true });
-      //if (!parsedCSV || !parsedCSV.data) {
-      //  console.error('This dataset lacks csv data to create geojson on the client.');
-      //  return;
-      //}
-      //var params = {
-      //  name: this.title,
-      //  csvData: JSON.stringify(parsedCSV.data)
-      //};
-      //var csvSource = new minerva.models.CsvSourceModel({});
-      //csvSource.on('m:csvSourceReceived', function () {
-      //  this.$el.modal('hide');
-      //  // TODO: might need to be added to a new panel/data sources ?
-      //  this.collection.add(csvSource);
-      //}, this).createSource(params);
-    },
-
-    'click .m-upload-another-file-button': function (e) {
-
-      //e.preventDefault();
-      //
-      //new minerva.views.AddCSVSourceWidget({
-      //  el: $('#g-dialog-container'),
-      //  parentView: this,
-      //  parentCollection: this.collection
-      //}).render();
-    },
-
-    'click .m-load-more-rows-button': function (e) {
-
-      //e.preventDefault();
-      //
-      //this.rows += this.requestedRows;
-      //this.data = this.parseCsv();
-      //
-      //var table = $('table#data').dataTable();
-      //
-      //// Clear the table then render the new data
-      //table.fnClearTable();
-      //table.fnAddData(this.data);
-      //
-      //// Disable the `show more rows` btn when reach the max number of rows
-      //if (this.rows >= this.totalRows) {
-      //  $('.m-load-more-rows-button').addClass('disabled');
-      //}
-
+    'click .m-update-dataset': function (e) {
+        e.preventDefault();
+        // Let the end user specify the columns related to long and lat
+        var longitude = $('#m-longitude option:selected').text();
+        var latitude  = $('#m-latitude option:selected').text();
+        this.longitudeIndex = _.indexOf(this.csv[0], longitude);
+        this.latitudeIndex = _.indexOf(this.csv[0], latitude);
+        // Create geojson
+        this.createGeoJsonFromTabular(this.dataset);
     }
   },
 
-  _parseCsv: function (data) {
-    var parsedCSV = Papa.parse(data, { skipEmptyLines: true, preview: this.rows });
+  createGeoJsonFromTabular: function (dataset) {
+    var minervaMeta = dataset.metadata();
+    var originalType = minervaMeta.original_type;
+    if (originalType !== 'csv' && originalType !== 'json') {
+      console.error('You should only use this for csv or json');
+      return;
+    }
+    if (!this.csv) {
+      console.error('This dataset lacks csv data to create geojson on the client.');
+      return;
+    }
+    var geoJsonData = {
+      type: 'FeatureCollection',
+      features: []
+    };
+    _.each(this.csv, function (row) {
+      if ( Number(row[this.latitudeIndex]) && Number(row[this.longitudeIndex]) ) {
+        var point = {
+          type: 'Feature',
+          // TODO need to get other property column, just hardcoding elevation for now
+          properties: {elevation: Number(0)},
+          geometry: {
+            type: 'Point',
+            coordinates: [Number(row[this.longitudeIndex]), Number(row[this.latitudeIndex])]
+          }
+        };
+        geoJsonData.features.push(point);
+      }
+    }, this);
+    var geoData = JSON.stringify(geoJsonData);
+    // TODO: WIP
+    console.log(geoData);
+  },
+
+
+  _parseCsv: function (data, headers) {
+    var parsedCSV = Papa.parse(data, { skipEmptyLines: true, headers: headers, preview: this.rows });
     if (!parsedCSV || !parsedCSV.data) {
       console.error('error with parser');
       return;
@@ -67,8 +63,10 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
 
   initialize: function (settings) {
     this.source      = settings.source;
+    this.dataset     = settings.dataset;
     this.collection  = settings.collection;
-    this.data        = this._parseCsv(settings.data);
+    this.csv         = this._parseCsv(settings.data, true);
+    this.data        = this._parseCsv(settings.data, false);
   },
 
   render: function () {
@@ -78,9 +76,10 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
     });
 
     var modal = this.$el.html(minerva.templates.csvViewerWidget({
-      title: this.title,
-      source : this.source,
-      totalRows: this.totalRows
+      title     : this.title,
+      source    : this.source,
+      totalRows : this.totalRows,
+      columns   : this.colNames
     })).girderModal(this).on('shown.bs.modal', function () {
     }).on('hidden.bs.modal', function () {
     }).on('ready.girder.modal', _.bind(function () {
@@ -100,11 +99,6 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         ]
       });
     }, this));
-
-    //// Disable the `show more rows` btn when reach the max rows
-    //if (this.rows >= this.totalRows) {
-    //  $('.m-load-more-rows-button').addClass('disabled');
-    //}
 
     modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
