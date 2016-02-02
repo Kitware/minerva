@@ -59,11 +59,14 @@ Vagrant.configure(2) do |config|
   end
 
 
-
-
+  ansible_tags = ENV["MINERVA_VAGRANT_ANSIBLE_TAGS"] || false
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "vvvv"
+
+    if ansible_tags
+        ansible.tags = ansible_tags
+    end
 
     ansible.groups = {
       "all" => ['minervagrant'],

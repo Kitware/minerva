@@ -6,7 +6,7 @@ You'll need to have the following installed
 
   * Virtualbox
   * Vagrant
-  * Ansible [known to work on version 1.9.3 and higher]
+  * Ansible [version >= 1.9.3 and < 2.0]
 
 ## Vagrant commands
 
@@ -40,6 +40,30 @@ will ssh into your Minerva VM.
     vagrant provision
 
 will re-provision your Minerva VM with ansible.
+
+#### vagrant provision, now with even more tags
+
+If you already have a provisioned VM, you can set tags through environment variables
+to reprovision a limited number of steps.  You can set the tags as a comma separated
+list like
+
+    export MINERVA_VAGRANT_ANSIBLE_TAGS='minerva-update,test'
+
+##### minerva
+
+Think of this tag as minerva with dependencies.
+
+This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
+file, install system dependencies and pip dependencies defined in the minerva role,
+then install the minerva plugin to girder and build the client side code.
+
+##### minerva-update
+
+Think of this tag as minerva without dependencies.
+
+This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
+file, then install the minerva plugin to girder and build the client side code.
+
 
 ### vagrant halt
 
