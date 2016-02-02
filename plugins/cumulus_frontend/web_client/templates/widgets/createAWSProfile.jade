@@ -1,0 +1,31 @@
+.modal-dialog
+  .modal-content
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+            | Create AWS Profile
+        .modal-body
+          .form-group
+            label.control-label(for="m-name-awsprofile") Profile Name
+            input.input-sm#m-name-awsprofile.form-control(type="text", placeholder="Profile name")
+          .form-group
+            label.control-label(for="m-accessKeyId-awsprofile") AWS Access Key ID
+            input.input-sm#m-accessKeyId-awsprofile.form-control(type="text", placeholder="AWS Access Key ID")
+          .form-group
+            label.control-label(for="m-secretAccessKey-awsprofile") AWS Secret Access Key
+            input.input-sm#m-secretAccessKey-awsprofile.form-control(type="text", placeholder="AWS Secret Access Key")
+          //- TODO: make dropdown
+          .form-group
+            label.control-label(for="m-regionName-awsprofile") Region Name
+            input.input-sm#m-regionName-awsprofile.form-control(type="text", placeholder="Region Name")
+
+          .form-group
+            label.control-label(for="m-availabilityZone-awsprofile") Availability Zone
+            input.input-sm#m-availabilityZone-awsprofile.form-control(type="text", placeholder="Enter secret access key")
+          .g-validation-failed-message
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        a.m-create-aws-profile-button.btn.btn-small.btn-primary
+              i.icon-plus-squared
+              | Create Profile
