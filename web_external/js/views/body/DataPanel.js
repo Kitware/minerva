@@ -22,28 +22,23 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             // or it can't be configured.
             return;
         }
-        if (geoRenderType === 'choropleth') {
-            if (!this.choroplethRenderWidget) {
-                this.choroplethRenderWidget = new minerva.views.ChoroplethRenderWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.choroplethRenderWidget.render();
-            } else {
-                this.choroplethRenderWidget.setCurrentDataset(dataset);
-            }
-        } else if (_.contains(['geojson', 'contour'], geoRenderType)) {
-            if (!this.jsonConfigWidget) {
-                this.jsonConfigWidget = new minerva.views.JsonConfigWidget({
-                    el: $('#g-dialog-container'),
-                    dataset: dataset,
-                    parentView: this
-                });
-                this.jsonConfigWidget.render();
-            } else {
-                this.jsonConfigWidget.setCurrentDataset(dataset);
-            }
+        var configureWidgets = {
+            'choropleth': minerva.views.ChoroplethRenderWidget,
+            'geojson': minerva.views.JsonConfigWidget,
+            'contour': minerva.views.JsonConfigWidget
+        };
+        if (!this.configureWidgets) {
+            this.configureWidgets = {};
+        }
+        if (!this.configureWidgets[geoRenderType]) {
+            this.configureWidgets[geoRenderType] = new (configureWidgets[geoRenderType])({
+                el: $('#g-dialog-container'),
+                dataset: dataset,
+                parentView: this
+            });
+            this.configureWidgets[geoRenderType].render();
+        } else {
+            this.configureWidgets[geoRenderType].setCurrentDataset(dataset);
         }
     },
 
