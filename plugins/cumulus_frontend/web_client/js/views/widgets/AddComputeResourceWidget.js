@@ -37,16 +37,17 @@ minerva.views.AddComputeResourceWidget = minerva.View.extend({
             }
 
         };
+
+        return this;
     },
 
 
     render: function () {
-        var view = this;
         var modal = this.$el.html(girder.templates.addComputeResourceWidget({
             resources: this.model,
             resourceTypes: this.resourceTypes
         })).girderModal(this);
 
-
+        return this;
     }
 })

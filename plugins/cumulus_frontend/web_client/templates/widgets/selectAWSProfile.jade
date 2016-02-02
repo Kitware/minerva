@@ -6,12 +6,16 @@
           | Select AWS Profile
       .modal-body
         div.list-group
-        each profile in profiles
-          - var buttonClasses = "m-select-profile list-group-item"
-          button(id=profile._id, class=buttonClasses)
-            label #{profile.name}
+        if profiles.length
+          each profile in profiles
+            - var buttonClasses = "m-select-profile list-group-item"
+            button(id=profile._id, class=buttonClasses)
+              label #{profile.name}
+              i.m-aws-delete-profile.icon-trash(style='float:right')
+        else
+          p No profiles exist yet!
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-        button.m-create-aws-profile-button.btn.btn-small.btn-primary
+        button.m-create-new-aws-profile-button.btn.btn-small.btn-primary
               i.icon-plus-squared
-              | Create Profile
+              | Create New Profile
