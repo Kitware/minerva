@@ -11,8 +11,8 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
             e.preventDefault();
             this.$('.g-validation-failed-message').text('');
 
-            var geoRenderType = this.$('#m-geo-render-type option:selected').text();
-            this.dataset.overrideGeoRenderType(geoRenderType);
+            var overrideGeoRenderType = this.$('#m-geo-render-type option:selected').text();
+            this.dataset._initGeoRender(overrideGeoRenderType);
             this.$el.modal('hide');
         }
     },

@@ -52,27 +52,39 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     /**
      * Initialize the GeoJs rendering type along with any secondary data needed for
      * GeoJs rendering, inferring the rendering type based on
-     * the dataset's metadata, and saving the dataset's metadata if changed.
+     * the dataset's metadata, or else forcing the rendering type to be
+     * 'geojson' or 'contour' if overrideGeoRenderType is provided,
+     * finally saving the dataset's metadata if changed.
      *
+     * @param {'geojson'|'contour'} overrideGeoRenderType GeoJs rendering type to set on this dataset,
+     * if passed will also reset the geoError property of this dataset to false.
      * @returns {Object} Updated minerva metadata of this dataset.
      */
-    _initGeoRender: function () {
+    _initGeoRender: function (overrideGeoRenderType) {
         var mm = this.metadata();
-        if (!mm.geo_render) {
+        if (overrideGeoRenderType) {
+            this.set('geoError', false);
+        }
+        if (!mm.geo_render || overrideGeoRenderType) {
             mm.geo_render = null;
-            if (mm.dataset_type === 'geojson') {
+            if ((overrideGeoRenderType && overrideGeoRenderType === 'geojson') || mm.dataset_type === 'geojson') {
                 if (mm.source_type === 'mmwr_data_import') {
+                    // Currently no other way to set a choropleth.
                     mm.geo_render = {
                         type: 'choropleth',
                         file_id: mm.geojson_file._id
                     };
                 } else {
                     mm.geo_render = {
-                        type: 'geojson',
-                        file_id: mm.geojson_file._id
+                        type: 'geojson'
                     };
+                    if (mm.geojson_file) {
+                        mm.geo_render.file_id = mm.geojson_file.file_id;
+                    } else {
+                        mm.geo_render.file_id = mm.original_files[0]._id;
+                    }
                 }
-            } else if (mm.dataset_type === 'json') {
+            } else if ((overrideGeoRenderType && overrideGeoRenderType === 'contour') || mm.dataset_type === 'json') {
                 // Guess contour json as a default for a json file.
                 mm.geo_render = {
                     type: 'contour',
@@ -87,40 +99,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             }
             this.saveMinervaMetadata(mm);
         }
-        return mm;
-    },
-
-    /**
-     * Override the GeoJs rendering type and set any secondary data needed for
-     * GeoJs rendering based on the dataset's metadata,
-     * and saving the dataset's metadata if changed;
-     * will also reset the geoError property to false.
-     *
-     * @param {'geojson'|'contour'} GeoJs rendering type to set on this dataset.
-     * @returns {Object} Updated minerva metadata of this dataset.
-     */
-    overrideGeoRenderType: function (geoRenderType) {
-        this.set('geoError', false);
-        var mm = this.metadata();
-        if (_.contains(['geojson'], geoRenderType)) {
-            // TODO 'choropleth' could work here,
-            // but we would need a way to extract the values.
-            mm.geo_render = {
-                type: geoRenderType
-            };
-            if (mm.geojson_file) {
-                mm.geo_render.file_id = mm.geojson_file.file_id;
-            } else {
-                mm.geo_render.file_id = mm.original_files[0]._id;
-            }
-            console.log(mm);
-        } else if (geoRenderType === 'contour') {
-            mm.geo_render = {
-                type: 'contour',
-                file_id: mm.original_files[0]._id
-            };
-        }
-        this.saveMinervaMetadata(mm);
         return mm;
     },
 
