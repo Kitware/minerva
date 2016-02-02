@@ -13,18 +13,15 @@
     <link rel="stylesheet"
           href="${staticRoot}/lib/fontello/minerva/css/fontello.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/jquery.gridster.min.css">
-    <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/app.min.css">
+          href="${staticRoot}/built/plugins/minerva/jquery.dataTables.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/minerva.min.css">
+          href="${staticRoot}/built/plugins/minerva/buttons.dataTables.css">
+    <link rel="stylesheet"
+          href="${staticRoot}/built/girder.app.min.css">
     % for plugin in pluginCss:
-        % if plugin != 'minerva':
-            <link rel="stylesheet"
-            href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endif
+        <link rel="stylesheet" href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
     % endfor
 
     <link rel="icon"
@@ -34,28 +31,29 @@
   <body>
     <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-    <script src="${staticRoot}/built/plugins/minerva/geo.ext.min.js"></script>
-    <script src="${staticRoot}/built/libs.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/jquery.gridster.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/jquery-ui.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/geo.min.js"></script>
-    <script src="${staticRoot}/built/app.min.js"></script>
+
+    <script src="${staticRoot}/built/girder.ext.min.js"></script>
+    <script src="${staticRoot}/built/girder.app.min.js"></script>
+
+    <script src="${staticRoot}/built/plugins/minerva/minerva.ext.min.js"></script>
+
     ## We want to include client side resources from all loaded plugins,
+    ## in their proper dependency ordering,
     ## which allows Minerva to be extended by other plugins and have the
     ## client side resources of the downstream plugins be served by the
     ## Minerva application.
-    ## We don't want to serve the plugin.min.[cs|j]s resources for Minerva
-    ## since these are related to the Girder plugins page.
-    ## Same applies to CSS above.
+
     % for plugin in pluginJs:
         % if plugin != 'minerva':
             <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
+        % else:
+            ## We don't want to serve the plugin.min.js resource for Minerva
+            ## since this is related to the Girder Admin configure plugins page for Minerva.
+            <script src="${staticRoot}/built/plugins/minerva/minerva.app.min.js"></script>
         % endif
     % endfor
-    <script src="${staticRoot}/built/plugins/minerva/papaparse.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/jsonpath.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/minerva.min.js"></script>
-    <script src="${staticRoot}/built/plugins/minerva/main.min.js"></script>
+
+    <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
 
    </body>
 </html>
