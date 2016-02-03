@@ -79,7 +79,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                         type: 'geojson'
                     };
                     if (mm.geojson_file) {
-                        mm.geo_render.file_id = mm.geojson_file.file_id;
+                        mm.geo_render.file_id = mm.geojson_file._id;
                     } else {
                         mm.geo_render.file_id = mm.original_files[0]._id;
                     }
@@ -110,6 +110,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      */
     getGeoRenderType: function () {
         var mm = this.metadata();
+        if (!mm.geo_render) {
+            this._initGeoRender();
+        }
         return mm.geo_render ? mm.geo_render.type : null;
     },
 
