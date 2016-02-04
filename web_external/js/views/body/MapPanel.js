@@ -171,7 +171,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         if (!_.contains(this.datasetLayers, dataset.id)) {
             var renderType = dataset.getGeoRenderType();
             if (renderType === null || !_.contains(this.GEOJS_RENDER_TYPES, renderType)) {
-                console.error('This dataset of render type [' + renderType + ']cannot be rendered to the map');
+                console.error('This dataset of render type [' + renderType + '] cannot be rendered to the map');
+                dataset.set('geoError', true);
                 return;
             } else if (renderType === 'wms') {
                 var datasetId = dataset.id;
