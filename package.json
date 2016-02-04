@@ -6,7 +6,7 @@
   "repository": "https://github.com/Kitware/minerva.git",
   "dependencies": {
     "JSONPath": "0.10.0",
-    "geojs": "git+https://github.com/OpenGeoscience/geojs.git#v0.6.0",
+    "geojs": "0.7.0",
     "underscore": "~1.5",
     "jade": "1.3.1",
     "colorbrewer": "1.0.0"
