@@ -191,8 +191,9 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
-        }, this).listenTo(this.collection, 'change', function () {
-            this.render();
+        /*}, this).listenTo(this.collection, 'change', function () {
+            console.log('2');
+            this.render();*/
         }, this).listenTo(this.collection, 'change:meta', function () {
             this.render();
         }, this).listenTo(this.collection, 'change:displayed', function () {

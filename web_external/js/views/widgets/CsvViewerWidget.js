@@ -11,7 +11,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
     },
 
     _parseCsv: function (data, headers) {
-        var parsedCSV = Papa.parse(data, { skipEmptyLines: true, headers: headers, preview: this.rows });
+        var parsedCSV = Papa.parse(data, { skipEmptyLines: true, headers: headers });
         if (!parsedCSV || !parsedCSV.data) {
             console.error('error with parser');
             return;
@@ -42,7 +42,17 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
-            $('table#data').DataTable({
+            var mm = this.dataset.metadata();
+            var fileId = mm.original_files[0]._id;
+            $('table#data').on('xhr.dt', function ( e, settings, json, xhr ) {
+               console.log(json);
+            }).DataTable({
+                //ajax: {
+                //    url: '/api/v1/file/' + fileId + '/download?contentDisposition=inline',
+                //},
+                //scrollY:        200,
+                deferRender:    true,
+                scroller:       true,
                 data: this.data,
                 columns: this.colNames,
                 autoWidth: true,
