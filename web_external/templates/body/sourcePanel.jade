@@ -9,7 +9,7 @@ if sources
       each source in sources
         if source.metadata()
           .m-source
-            span(title=source.get('name'))= source.get('name').length > 13 ? source.get('name').slice(0,13) + "..." : source.get('name')
+            span(title=source.get('name'))= source.get('name').length > 20 ? source.get('name').slice(0,20) + "..." : source.get('name')
               - var attributes = {'cid': source.cid}
               - var sourceType = sourceTypes[source.getSourceType()]
 
