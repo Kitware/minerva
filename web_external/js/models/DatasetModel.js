@@ -71,7 +71,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         }
         if (!mm.geo_render || overrideGeoRenderType) {
             mm.geo_render = null;
-            if ((overrideGeoRenderType && overrideGeoRenderType === 'geojson') || mm.dataset_type === 'geojson') {
+            if ((overrideGeoRenderType && overrideGeoRenderType === 'geojson') || mm.dataset_type === 'geojson' || mm.geojson) {
                 if (mm.source_type === 'mmwr_data_import') {
                     // Currently no other way to set a choropleth.
                     mm.geo_render = {
@@ -137,6 +137,10 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     loadGeoData: function () {
         var mm = this.metadata();
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
+            if (mm.geojson && mm.geojson.data) {
+                // Some datasets have geojson in the metadata.
+                this.set('geoData', mm.geojson.data);
+            }
             this.trigger('minerva.dataset.geo.dataLoaded', this);
         } else {
             var path = '/file/' + mm.geo_render.file_id + '/download';
