@@ -185,7 +185,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
                 this.datasetLayers[datasetId] = layer;
                 this._specifyWmsDatasetLayer(dataset, layer);
-
+                
                 this.legendWidget[datasetId] = new minerva.views.LegendWidget({
                     el: $('.m-map-legend-container'),
                     parentView: this,
