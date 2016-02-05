@@ -6,7 +6,7 @@ include ../widgets/legendWidget.jade
 +panel-content('collapse in')
   .layersList
     ul.datasets
-      each dataset, index in datasets
+      each dataset, index in datasets.sort(function (set) {  return set.get('stack'); }).reverse()
         li.dataset= dataset.get('name')
           if dataset.get('geoError')
             i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
@@ -19,7 +19,6 @@ include ../widgets/legendWidget.jade
               else
                 - var disable = ''
               i(title='#{option.title}' class='icon-angle-#{option.class} m-order-layer #{disable}')&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
-          if dataset.getDatasetType() === 'wms'
             .m-layer-control-container
               i.icon-ajust
               input.m-opacity-range&attributes({'m-dataset-id': dataset.get('_id')})(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))

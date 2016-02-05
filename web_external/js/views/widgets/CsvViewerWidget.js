@@ -30,6 +30,10 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
 
     render: function () {
 
+        // Set number of rows in datatable
+        var DEFAULT_NUMBER_ROWS = 30;
+        var dataTableSource = this.data.slice(1);
+
         this.colNames = _.map(this.data[0], function (name) {
             return { title: name };
         });
@@ -42,23 +46,15 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
-            var mm = this.dataset.metadata();
-            var fileId = mm.original_files[0]._id;
-            $('table#data').on('xhr.dt', function ( e, settings, json, xhr ) {
-               console.log(json);
-            }).DataTable({
-                //ajax: {
-                //    url: '/api/v1/file/' + fileId + '/download?contentDisposition=inline',
-                //},
-                //scrollY:        200,
-                deferRender:    true,
-                scroller:       true,
-                data: this.data,
+            $('table#data').dataTable({
+                // Use this.data.shift() to remove the headers
+                data: dataTableSource,
                 columns: this.colNames,
                 autoWidth: true,
                 hover: true,
                 ordering: true,
-                pagingType: 'full',
+                iDisplayLength: DEFAULT_NUMBER_ROWS,
+                pagingType: "full",
                 dom: 'Bfrtip',
                 buttons: [
                     {
