@@ -84,7 +84,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     };
                     if (mm.geojson_file) {
                         mm.geo_render.file_id = mm.geojson_file._id;
-                    } else {
+                    } else if (mm.original_files) {
                         mm.geo_render.file_id = mm.original_files[0]._id;
                     }
                 }
