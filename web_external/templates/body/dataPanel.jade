@@ -8,9 +8,10 @@ if datasets
     .datasets
       each dataset in datasets
         if dataset.metadata()
-          .dataset
+          - var attributes = {'m-dataset-id': dataset.get('_id')}
+          - var classes = (dataset.get('highlighted') ? 'm-dataset-highlight dataset' : 'dataset')
+          div(class=classes)&attributes(attributes)
             span(title=dataset.get('name'))= dataset.get('name').length > 20 ? dataset.get('name').slice(0,20) + "..." : dataset.get('name')
-              - var attributes = {'m-dataset-id': dataset.get('_id')}
 
               //- Eye icon to move dataset into current session
               if dataset.isGeoRenderable()

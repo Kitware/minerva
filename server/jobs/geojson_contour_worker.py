@@ -6,6 +6,7 @@ import tempfile
 import traceback
 import copy
 import math
+import time
 
 import requests
 import numpy as np
@@ -145,6 +146,8 @@ def run(job):
             'name': existing['name'], '_id': existing['_id']}]
 
         mM(outputDataset, minerva_metadata)
+        # Sleep to allow the job status to update in the correct order on the client.
+        time.sleep(2)
         job_model.updateJob(job, status=JobStatus.SUCCESS)
     except Exception:
         t, val, tb = sys.exc_info()

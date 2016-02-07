@@ -207,7 +207,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);
             if (status === girder.jobs_JobStatus.SUCCESS) {
-                this.collection.fetch({}, true);
+                var outputs = event.data.meta.minerva.outputs;
+                var datasetId = event.data.meta.minerva.outputs[0].dataset_id;
+                var dataset = new minerva.models.DatasetModel({
+                    _id: datasetId
+                });
+                dataset.on('g:fetched', function () {
+                    dataset.set('highlighted', true);
+                    this.collection.add(dataset);
+                }, this).fetch();
             }
         }, this));
 
@@ -226,6 +234,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             isGeoConfigurable: isGeoConfigurable,
             isTableDisplayable: isTableDisplayable
         }));
+        _.each(this.collection.models, function(dataset) {
+            dataset.set('highlighted', false);
+        });
+
+
+        window.setTimeout(_.bind(function () {
+            var datasets = $('.m-dataset-highlight').removeClass('m-dataset-highlight');
+        }, this), 1000);
+
 
         // TODO pagination and search?
 
