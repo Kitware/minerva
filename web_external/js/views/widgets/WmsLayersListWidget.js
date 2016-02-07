@@ -25,7 +25,7 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
 
                     wmsDataset.once('m:wmsDatasetAdded', function () {
                         this.$el.modal('hide');
-                        this.collection.add(wmsDataset);
+                        this.collection.addDataset(wmsDataset);
                     }, this).createWmsDataset(params);
                 }
             }, this));

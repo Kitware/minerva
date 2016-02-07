@@ -14,6 +14,11 @@ minerva.collections.DatasetCollection = minerva.collections.MinervaCollection.ex
     getInitData: function () {
         var initData = { userId: girder.currentUser.get('_id') };
         return initData;
+    },
+
+    addDataset: function(dataset) {
+        dataset.set('highlighted', true);
+        this.add(dataset);
     }
 
 });

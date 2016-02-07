@@ -21,7 +21,7 @@ minerva.views.AddMongoDatasetWidget = minerva.View.extend({
                         var mongoDataset = new minerva.models.MongoDatasetModel({});
                         mongoDataset.once('m:mongoDatasetAdded', function () {
                             this.$el.modal('hide');
-                            this.collection.add(mongoDataset);
+                            this.collection.addDataset(mongoDataset);
                         }, this).createMongoDataset(params);
                     }
                 }, this));

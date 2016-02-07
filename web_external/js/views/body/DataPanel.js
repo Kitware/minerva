@@ -137,7 +137,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         }
         this.newDataset.on('minerva.dataset.promoted', function () {
-            this.collection.add(this.newDataset);
+            this.collection.addDataset(this.newDataset);
         }, this).on('g:error', function (err) {
             console.error(err);
         }).promoteToDataset(params);
@@ -213,8 +213,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
                     _id: datasetId
                 });
                 dataset.on('g:fetched', function () {
-                    dataset.set('highlighted', true);
-                    this.collection.add(dataset);
+                    this.collection.addDataset(dataset);
                 }, this).fetch();
             }
         }, this));
