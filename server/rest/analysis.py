@@ -36,6 +36,7 @@ class Analysis(Resource):
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
         self.route('POST', ('mmwr_import',), self.bsveMMWRAnalysis)
+        self.route('POST', ('geojson_contour',), self.geojsonContourAnalysis)
 
     @access.user
     def getAnalysisFolder(self, params):
@@ -159,4 +160,56 @@ class Analysis(Resource):
             'count', 'The number of items to get from the server',
             required=False
         )
+    )
+
+    @access.user
+    def geojsonContourAnalysis(self, params):
+        currentUser = self.getCurrentUser()
+        datasetName = params['datasetName']
+        datasetId = params['datasetId']
+        analysis = findAnalysisByName(currentUser, 'Contour geojson points')
+        # TODO in case can't find analysis?
+
+        minerva_metadata = {
+            'dataset_type': 'json',
+            'source_type': 'geojson',
+            'source_dataset_id': datasetId
+        }
+
+        datasetResource = Dataset()
+        dataset = datasetResource.constructDataset(
+            datasetName,
+            minerva_metadata,
+            'created by Geojson Contour'
+        )
+        params = {
+            'datasetId': datasetId
+        }
+
+        # TODO change token to job token
+        user, token = self.getCurrentUser(returnToken=True)
+        kwargs = {
+            'params': params,
+            'user': currentUser,
+            'dataset': dataset,
+            'analysis': analysis,
+            'token': token
+        }
+
+        job = self.model('job', 'jobs').createLocalJob(
+            title='Geojson contour: %s' % datasetName,
+            user=currentUser,
+            type='geojson.contour.mmwr',
+            public=False,
+            kwargs=kwargs,
+            module='girder.plugins.minerva.jobs.geojson_contour_worker',
+            async=True)
+        addJobOutput(job, dataset)
+        self.model('job', 'jobs').scheduleJob(job)
+        return job
+
+    geojsonContourAnalysis.description = (
+        Description('Create a new contoured json from a Geojson point file.')
+        .param('datasetName', 'Name of the dataset created by this analysis.')
+        .param('datasetId', 'ID of the source geojson dataset.')
     )

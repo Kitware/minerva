@@ -1,0 +1,24 @@
+.modal-dialog
+  .modal-content.m-contour-geojson-widget
+    form#m-contour-geojson-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Contour geojson points
+        .modal-body
+          .form-group.m-contour-geojson-dataset-name
+            label.control-label(for="m-contour-geojson-dataset-name") Output Dataset Name
+            input.input-sm#m-contour-geojson-dataset-name.form-control(type="text")
+          .form-group.m-contour-geojson-input-dataset
+            label.control-label(for="m-contour-geojson-input-dataset") Select a geojson points dataset
+            select.form-control.input-sm#m-geojs-contour-input-dataset
+              each dataset in datasets
+                option(value=dataset.cid)= dataset.get('name')
+          .form-group
+            .g-validation-failed-message
+
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-run-contour-geojson-points.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run
