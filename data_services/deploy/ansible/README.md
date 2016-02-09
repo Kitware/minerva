@@ -41,3 +41,9 @@ Note: You may need to change the IP configuration in the VagrantFile to a valid 
 
     $ vagrant up minerva_dataservices
     $ vagrant ssh minerva_dataservices
+    
+    
+Note: You may need to bring the vagrant box down and up for geonode to work.  
+
+    $ vagrant halt
+    $ vagrant up
