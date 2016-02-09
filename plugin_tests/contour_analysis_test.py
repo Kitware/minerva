@@ -137,7 +137,7 @@ class ContourAnalysesTestCase(base.TestCase):
         import_folder_id = response.json['folderId']
 
         # Wait for import to occur
-        time.sleep(1)
+        time.sleep(10)
 
         path = '/item'
         params = {
