@@ -10,6 +10,11 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     /**
+     * Length of dataset name prefix to display.
+     */
+    DATASET_NAME_LENGTH: 20,
+
+    /**
      * Display a modal dialog allowing configuration of GeoJs rendering
      * properties for the selected dataset.
      */
@@ -164,8 +169,18 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             return dataset.metadata();
         });
 
+        // Utility method to control dataset display name.
+        var getDisplayName = _.bind(function (dataset) {
+            var name = dataset.get('name');
+            if (name.length > this.DATASET_NAME_LENGTH) {
+                name = name.slice(0, this.DATASET_NAME_LENGTH) + "...";
+            }
+            return name;
+        }, this);
+
         this.$el.html(minerva.templates.dataPanel({
-            datasets: datasets
+            datasets: datasets,
+            getDisplayName: getDisplayName
         }));
 
         // TODO pagination and search?
