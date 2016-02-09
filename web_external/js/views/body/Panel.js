@@ -3,7 +3,7 @@ minerva.views.Panel = minerva.View.extend({
      * The panel view isn't meant to be instantiated on it's own.
      **/
     events: {
-        'click .icon-cancel': 'removePanel',
+        'click .m-remove-panel': 'removePanel',
         'show.bs.collapse': 'expandPanel',
         'hide.bs.collapse': 'collapsePanel'
     },
