@@ -77,7 +77,7 @@ module.exports = function (grunt) {
             minerva: {
                 files: [{
                     src: [
-                        '<%= plugin.minerva.external %>/stylesheets/main.styl',
+                        '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
                         '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
                     ],
                     dest: '<%= plugin.minerva.static %>/minerva.min.css'

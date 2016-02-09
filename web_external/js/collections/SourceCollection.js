@@ -17,7 +17,7 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
             }
         }
 
-        console.error('Source collection includes unknown source type');
+        console.error('Source collection includes unknown source type ' + attrs.meta.minerva.source_type);
         console.error(attrs);
         girder.events.trigger('g:alert', {
             icon: 'cancel',
