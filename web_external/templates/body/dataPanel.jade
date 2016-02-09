@@ -7,27 +7,26 @@ if datasets
   +panel-content('collapse in')
     .datasets
       each dataset in datasets
-        if dataset.metadata()
-          .dataset
-            span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
-              - var attributes = {'m-dataset-id': dataset.get('_id')}
+        .dataset
+          span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
+            - var attributes = {'m-dataset-id': dataset.get('_id')}
 
-              //- Eye icon to move dataset into current session
-              if dataset.isGeoRenderable()
-                - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
-                i(class=classes)&attributes(attributes)
-
-              //- Trash icon to delete dataset
-              - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
+            //- Eye icon to move dataset into current session
+            if dataset.isGeoRenderable()
+              - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
               i(class=classes)&attributes(attributes)
 
-              //- Info icon for minerva metadata display
-              i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-              - var geoRenderType = dataset.getGeoRenderType()
+            //- Trash icon to delete dataset
+            - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
+            i(class=classes)&attributes(attributes)
 
-              //- Cog icon for geo rendering configuration
-              if geoRenderType !== null && geoRenderType !== 'wms'
-                - var classes = 'icon-cog m-configure-geo-render'
-                - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-                - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
-                i(class=classes)&attributes(attributes)
+            //- Info icon for minerva metadata display
+            i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
+            - var geoRenderType = dataset.getGeoRenderType()
+
+            //- Cog icon for geo rendering configuration
+            if geoRenderType !== null && geoRenderType !== 'wms'
+              - var classes = 'icon-cog m-configure-geo-render'
+              - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+              - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+              i(class=classes)&attributes(attributes)

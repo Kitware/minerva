@@ -160,8 +160,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     render: function () {
+        var datasets = _.filter(this.collection.models, function (dataset) {
+            return dataset.metadata();
+        });
+
         this.$el.html(minerva.templates.dataPanel({
-            datasets: this.collection.models
+            datasets: datasets
         }));
 
         // TODO pagination and search?
