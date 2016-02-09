@@ -1,6 +1,7 @@
 include ../layout/panelMixins.jade
 
-+panel-title('Available Datasets', 'm-data-panel')
++panel-title('Datasets', 'm-data-panel')
+  i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
 
 if datasets
   +panel-content('collapse in')
@@ -10,23 +11,23 @@ if datasets
           .dataset
             span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
               - var attributes = {'m-dataset-id': dataset.get('_id')}
-              if dataset.isRenderable()
-                //- Eye icon to move dataset into current session
+
+              //- Eye icon to move dataset into current session
+              if dataset.isGeoRenderable()
                 - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
                 i(class=classes)&attributes(attributes)
-              //- trash icon to delete dataset
+
+              //- Trash icon to delete dataset
               - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
               i(class=classes)&attributes(attributes)
-              //- info icon for minerva metadata display
+
+              //- Info icon for minerva metadata display
               i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-              if dataset.get('meta').minerva.source === 'mmwr_data_import'
-                - var classes = 'icon-cog configure-choropleth ' + (dataset.get('displayed') ? 'icon-disabled dataset-in-session' : 'icon-enabled');
-                i(class=classes)&attributes(attributes)
-              else if dataset.get('meta').minerva.original_type === 'csv' || dataset.get('meta').minerva.original_type === 'json' || (dataset.get('meta').minerva.original_type === 'mongo' && !('spatial_field' in dataset.get('meta').minerva))
-                //- table icon for mapping columns of csv/json
-                - var displayed = dataset.get('displayed')
-                if !displayed && (dataset.get('meta').minerva.original_type === 'json' || dataset.get('meta').minerva.original_type === 'mongo') && (!dataset.get('meta').minerva.json_row)
-                  //- when there is no json data, disable the table icon, as if the dataset was displayed
-                  - displayed = true
-                - var classes = (displayed ? 'icon-table csv-mapping icon-disabled dataset-in-session' : 'icon-table csv-mapping icon-enabled')
+              - var geoRenderType = dataset.getGeoRenderType()
+
+              //- Cog icon for geo rendering configuration
+              if geoRenderType !== null && geoRenderType !== 'wms'
+                - var classes = 'icon-cog m-configure-geo-render'
+                - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                 i(class=classes)&attributes(attributes)

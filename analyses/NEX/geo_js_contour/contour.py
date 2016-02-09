@@ -68,7 +68,7 @@ output_file_name = input_file_name.replace('.nc', '.json')
 
 try:
     # Now download the dataset
-    
+
     (fd, filepath) = tempfile.mkstemp()
     os.close(fd)
 
@@ -94,7 +94,7 @@ try:
 
     # Finally promote item to dataset
     with timer("Promoted item %s to dataset" % output_item_id):
-        client.post('minerva_dataset/%s/dataset' % output_item_id)
+        client.post('minerva_dataset/%s/item' % output_item_id)
 
 finally:
     if filepath and os.path.exists(filepath):

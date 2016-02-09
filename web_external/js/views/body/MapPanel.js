@@ -8,6 +8,24 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         }
     },
 
+    /**
+     * List of supported GeoJs rendering types.
+     * @type {Array.<string>}
+     * @readonly
+     */
+    GEOJS_RENDER_TYPES: ['choropleth', 'geojson', 'contour', 'wms'],
+
+    /**
+     * Mapping of supported GeoJs rendering types to file reader types,
+     * for those rendering types with file readers.
+     * @type {Object.<string, string>}
+     * @readonly
+     */
+    GEOJS_RENDER_TYPES_FILEREADER: {
+        'geojson': 'jsonReader',
+        'contour': 'contourJsonReader'
+    },
+
     changeLayerOpacity: function (dataset) {
         this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
         this.map.draw();
@@ -71,7 +89,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         // to generate a polygon feature for each polygon/multipolygon
         // geometry in the geojson, but this would (1) inefficient, and
         // (2) make handling mouse events much more difficult.
-        JSON.parse(dataset.fileData).features.forEach(function (f) {
+        JSON.parse(dataset.get('geoData')).features.forEach(function (f) {
             if (f.geometry.type === 'Polygon') {
                 data.push({
                     outer: f.geometry.coordinates[0],
@@ -144,22 +162,23 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         this.map.draw();
     },
 
+    /**
+     * Add the passed in dataset to the current map as a rendered layer.
+     *
+     * @param {Object} DatasetModel or descendent.
+     */
     addDataset: function (dataset) {
-        // TODO HACK
-        // deleting and re-adding ui layer to keep it on top
-        //this.map.deleteLayer(this.uiLayer);
-        // this causes a problem when there are at least two feature layers,
-        // so for now it is commented out
-        // this means we keep re-adding the ui layer each time a dataset is
-        // added as a feature layer, which is even more of a HACK
         if (!_.contains(this.datasetLayers, dataset.id)) {
-            if (dataset.getDatasetType() === 'wms') {
+            var renderType = dataset.getGeoRenderType();
+            if (renderType === null || !_.contains(this.GEOJS_RENDER_TYPES, renderType)) {
+                console.error('This dataset of render type [' + renderType + ']cannot be rendered to the map');
+                return;
+            } else if (renderType === 'wms') {
                 var datasetId = dataset.id;
                 var layer = this.map.createLayer('osm', {
                     attribution: null,
                     keepLower: false
                 });
-                // Set the layer opacity
                 layer.mapOpacity(dataset.get('opacity'));
 
                 this.datasetLayers[datasetId] = layer;
@@ -192,35 +211,36 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                         this.featureInfoWidget.callInfo(0, evt.geo);
                     });
                 }
-                this.uiLayer = this.map.createLayer('ui');
                 this.map.draw();
-            } else if (dataset.getMinervaMetadata().source === 'mmwr_data_import') {
+            } else if (renderType === 'choropleth') {
                 // hacktastic special handling of MMWR data
-                dataset.once('m:dataLoaded', _.bind(function () {
+                dataset.once('minerva.dataset.geo.dataLoaded', _.bind(function () {
                     this._renderChoropleth(dataset, this.map.createLayer('feature'));
                 }, this));
-                dataset.loadData();
-            } else {
-                // Assume the dataset provides a reader, so load the data
-                // and adapt the dataset to the map with the reader.
-                dataset.once('m:dataLoaded', function (datasetId) {
+                dataset.loadGeoData();
+            } else if (_.has(this.GEOJS_RENDER_TYPES_FILEREADER, renderType)) {
+                // Load the data and adapt the dataset to the map with the reader.
+                dataset.once('minerva.dataset.geo.dataLoaded', function () {
                     // TODO: allow these datasets to specify a legend.
-                    var dataset = this.collection.get(datasetId);
+                    var datasetId = dataset.get('_id');
                     var layer = this.map.createLayer('feature');
-
-                    var reader = geo.createFileReader(dataset.geoFileReader, {layer: layer});
                     this.datasetLayers[datasetId] = layer;
-
-                    layer.clear();
-
-                    reader.read(dataset.fileData, _.bind(function () {
-                        // Add the UI slider back
-                        this.uiLayer = this.map.createLayer('ui');
+                    try {
+                        var reader = geo.createFileReader(this.GEOJS_RENDER_TYPES_FILEREADER[renderType], {layer: layer});
+                        reader.read(dataset.get('geoData'), _.bind(function () {
+                            this.map.draw();
+                        }, this));
+                    } catch (err) {
+                        console.error('This dataset cannot be rendered to the map');
+                        console.error(err);
+                        dataset.set('geoError', true);
+                        if (layer) {
+                            layer.clear();
+                        }
                         this.map.draw();
-                    }, this));
+                    }
                 }, this);
-
-                dataset.loadData();
+                dataset.loadGeoData();
             }
         }
     },
@@ -307,7 +327,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             this.map.createLayer(this.session.sessionJsonContents.basemap,
                                  _.has(this.session.sessionJsonContents, 'basemap_args') ?
                                  this.session.sessionJsonContents.basemap_args : {});
-            this.uiLayer = this.map.createLayer('ui');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {

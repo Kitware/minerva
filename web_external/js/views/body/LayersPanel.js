@@ -92,6 +92,9 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         this.listenTo(this.collection, 'change:displayed change:order', function () {
             this.render();
         }, this);
+        this.listenTo(this.collection, 'change:geoError', function () {
+            this.render();
+        }, this);
 
         minerva.views.Panel.prototype.initialize.apply(this);
     },
