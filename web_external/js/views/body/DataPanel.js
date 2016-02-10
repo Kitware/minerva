@@ -167,7 +167,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     /**
      * Render the DatasetPanel view.
      */
-     render: function () {
+    render: function () {
         var datasets = _.filter(this.collection.models, function (dataset) {
             return dataset.metadata();
         });
@@ -178,10 +178,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
          * @param {dataset} dataset the dataset model
          * @returns {string} display name for the passed in dataset.
          */
-         var getDisplayName = _.bind(function (dataset) {
+        var getDisplayName = _.bind(function (dataset) {
             var name = dataset.get('name');
             if (name.length > this.DATASET_NAME_LENGTH) {
-                name = name.slice(0, this.DATASET_NAME_LENGTH) + "...";
+                name = name.slice(0, this.DATASET_NAME_LENGTH) + '...';
             }
             return name;
         }, this);
@@ -194,12 +194,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
          * @returns {string|false} classes for the visualization icon to render
          * the dataset in the map, or false if the dataset cannot be rendered in the map.
          */
-         var getGeoRenderingClasses = _.bind(function (dataset) {
+        var getGeoRenderingClasses = _.bind(function (dataset) {
             if (dataset.isGeoRenderable()) {
                 var classes =  dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-add-dataset-to-session';
                 return classes;
             } else {
-              return false;
+                return false;
             }
         }, this);
 
@@ -211,7 +211,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
          * @returns {string|false} classes for the delete icon,
          * or false if the dataset cannot be rendered in the map.
          */
-         var getDatasetDeleteClasses = _.bind(function (dataset) {
+        var getDatasetDeleteClasses = _.bind(function (dataset) {
             return dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-delete-dataset';
         }, this);
 
@@ -224,14 +224,14 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
          * or false if the dataset does not have the ability to have map rendering configured.
          */
         var getGeoRenderingConfigClasses = _.bind(function (dataset) {
-            var geoRenderType = dataset.getGeoRenderType()
+            var geoRenderType = dataset.getGeoRenderType();
             if (geoRenderType !== null && geoRenderType !== 'wms') {
-              var classes = 'm-configure-geo-render';
-              classes += (dataset.get('displayed') ? ' m-icon-disabled' : ' m-icon-enabled');
-              classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
-              return classes;
+                var classes = 'm-configure-geo-render';
+                classes += (dataset.get('displayed') ? ' m-icon-disabled' : ' m-icon-enabled');
+                classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+                return classes;
             } else {
-              return false;
+                return false;
             }
         }, this);
 
