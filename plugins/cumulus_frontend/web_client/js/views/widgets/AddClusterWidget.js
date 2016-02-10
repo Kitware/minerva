@@ -1,23 +1,6 @@
 minerva.views.AddClusterWidget = minerva.View.extend({
     events: {
-        'click .m-cluster-launch-button': function(e) {
-            girder.restRequest({
-                path: '/clusters',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(this.params())
-            }).done(_.bind(function (resp) {
-                girder.restRequest({
-                    path: '/clusters/' + resp._id + '/launch',
-                    type: 'PUT'
-                }).done(_.bind(function (resp) {
-                    this.parentView.collection.fetch();
-
-                    // Hide modal (@todo better way to do this)
-                    $('.modal-footer a[data-dismiss="modal"]').click();
-                }, this));
-            }, this));
-        }
+        'click .m-cluster-launch-button': 'launchCluster'
     },
 
     initialize: function(settings) {
@@ -55,5 +38,24 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         });
 
         return params;
+    },
+
+    launchCluster: function (e) {
+        girder.restRequest({
+            path: '/clusters',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(this.params())
+        }).done(_.bind(function (resp) {
+            girder.restRequest({
+                path: '/clusters/' + resp._id + '/launch',
+                type: 'PUT'
+            }).done(_.bind(function (resp) {
+                this.parentView.collection.fetch();
+
+                // Hide modal (@todo better way to do this)
+                $('.modal-footer a[data-dismiss="modal"]').click();
+            }, this));
+        }, this));
     }
 });

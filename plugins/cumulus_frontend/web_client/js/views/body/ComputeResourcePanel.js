@@ -21,35 +21,10 @@
 minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
     events: {
         'click .m-add-computeresource': 'addComputeResourceDialog',
-        'click .m-cluster-details': function (e) {
-            var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
-
-            new minerva.views.ComputeResourceDetailWidget({
-                el: $('#g-dialog-container'),
-                model: resource,
-                parentView: this
-            }).render(true);
-        },
-        'click .m-terminate-cluster': function (e) {
-            var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
-            e.stopPropagation();
-
-            if (!_.contains(['error', 'terminating', 'terminated'], resource.get('status'))) {
-                girder.restRequest({
-                    path: '/clusters/' + resource.id + '/terminate',
-                    type: 'PUT'
-                });
-            } else {
-                resource.destroy();
-            }
-        },
-        'click .m-remove-cluster': function (e) {
-            var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
-            e.stopPropagation();
-            resource.destroy();
-        }
+        'click .m-cluster-details': 'viewClusterDetails',
+        'click .m-terminate-cluster': 'terminateCluster',
+        'click .m-remove-cluster': 'removeCluster'
     },
-
 
     initialize: function () {
         minerva.views.Panel.prototype.initialize.apply(this);
@@ -98,5 +73,35 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
             collection: this.collection,
             parentView: this
         }).render();
+    },
+
+    viewClusterDetails: function (e) {
+        var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
+
+        new minerva.views.ComputeResourceDetailWidget({
+            el: $('#g-dialog-container'),
+            model: resource,
+            parentView: this
+        }).render(true);
+    },
+
+    terminateCluster: function (e) {
+        var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
+        e.stopPropagation();
+
+        if (!_.contains(['error', 'terminating', 'terminated'], resource.get('status'))) {
+            girder.restRequest({
+                path: '/clusters/' + resource.id + '/terminate',
+                type: 'PUT'
+            });
+        } else {
+            resource.destroy();
+        }
+    },
+
+    removeCluster: function (e) {
+        var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
+        e.stopPropagation();
+        resource.destroy();
     }
 });

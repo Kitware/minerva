@@ -1,28 +1,6 @@
 minerva.views.CreateAWSProfile = minerva.View.extend({
     events: {
-        'click .m-create-aws-profile-button': function (e) {
-            e.preventDefault();
-
-            var settings = {
-                el: $('#g-dialog-container'),
-                parentView: this.parentView
-            };
-
-            girder.restRequest({
-                path: 'user/' + girder.currentUser.id + '/aws/profiles',
-                type: 'POST',
-                data: JSON.stringify(this.params()),
-                contentType: 'application/json'
-            }).done(function (resp) {
-                girder.restRequest({
-                    path: 'user/' + girder.currentUser.id + '/aws/profiles',
-                    type: 'GET'
-                }).done(_.bind(function(profiles) {
-                    settings.profiles = profiles;
-                    new minerva.views.SelectAWSProfile(settings).render();
-                }, this));
-            }, this);
-        }
+        'click .m-create-aws-profile-button': 'createAwsProfile'
     },
 
     params: function () {
@@ -38,5 +16,29 @@ minerva.views.CreateAWSProfile = minerva.View.extend({
     render: function () {
         this.$el.html(girder.templates.createAWSProfile({}));
         return this;
+    },
+
+    createAwsProfile: function (e) {
+        e.preventDefault();
+
+        var settings = {
+            el: $('#g-dialog-container'),
+            parentView: this.parentView
+        };
+
+        girder.restRequest({
+            path: 'user/' + girder.currentUser.id + '/aws/profiles',
+            type: 'POST',
+            data: JSON.stringify(this.params()),
+            contentType: 'application/json'
+        }).done(function (resp) {
+            girder.restRequest({
+                path: 'user/' + girder.currentUser.id + '/aws/profiles',
+                type: 'GET'
+            }).done(_.bind(function(profiles) {
+                settings.profiles = profiles;
+                new minerva.views.SelectAWSProfile(settings).render();
+            }, this));
+        }, this);
     }
 });
