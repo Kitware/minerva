@@ -12,14 +12,14 @@ if datasets
           span(title=name)= name
             - var attributes = {'m-dataset-id': dataset.get('_id')}
 
-            // Render the dataset in the map
+            // Render the dataset in the map.
             - var geoRenderClasses = getGeoRenderingClasses(dataset)
             if geoRenderClasses
               i(class='icon-eye ' + geoRenderClasses)&attributes(attributes)
 
-            //- Trash icon to delete dataset
-            - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
-            i(class=classes)&attributes(attributes)
+            // Delete the dataset.
+            - var deleteClasses = getDatasetDeleteClasses(dataset)
+            i(class='icon-trash ' + deleteClasses)&attributes(attributes)
 
             //- Info icon for minerva metadata display
             i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)

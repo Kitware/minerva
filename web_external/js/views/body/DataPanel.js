@@ -3,7 +3,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         // TODO namespace.
         'click .m-add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
-        'click .delete-dataset': 'deleteDatasetEvent',
+        'click .m-delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender'
@@ -188,10 +188,16 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         }, this);
 
+        // Utility function to display classes for delete icon.
+        var getDatasetDeleteClasses = _.bind(function (dataset) {
+            return dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-delete-dataset';
+        }, this);
+
         this.$el.html(minerva.templates.dataPanel({
             datasets: datasets,
             getDisplayName: getDisplayName,
-            getGeoRenderingClasses: getGeoRenderingClasses
+            getGeoRenderingClasses: getGeoRenderingClasses,
+            getDatasetDeleteClasses: getDatasetDeleteClasses
         }));
 
         // TODO pagination and search?
