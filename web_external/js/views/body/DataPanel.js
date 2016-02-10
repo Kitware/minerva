@@ -164,13 +164,21 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         minerva.views.Panel.prototype.initialize.apply(this);
     },
 
-    render: function () {
+    /**
+     * Render the DatasetPanel view.
+     */
+     render: function () {
         var datasets = _.filter(this.collection.models, function (dataset) {
             return dataset.metadata();
         });
 
-        // Utility function to control dataset display name.
-        var getDisplayName = _.bind(function (dataset) {
+        /**
+         * Utility function to control dataset display name.
+         *
+         * @param {dataset} dataset the dataset model
+         * @returns {string} display name for the passed in dataset.
+         */
+         var getDisplayName = _.bind(function (dataset) {
             var name = dataset.get('name');
             if (name.length > this.DATASET_NAME_LENGTH) {
                 name = name.slice(0, this.DATASET_NAME_LENGTH) + "...";
@@ -178,8 +186,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             return name;
         }, this);
 
-        // Utility function to display event classes for visualization icon.
-        var getGeoRenderingClasses = _.bind(function (dataset) {
+        /**
+         * Utility function to display event classes for visualization icon, depending
+         * on the current state of the dataset.
+         *
+         * @param {dataset} dataset the dataset model
+         * @returns {string|false} classes for the visualization icon to render
+         * the dataset in the map, or false if the dataset cannot be rendered in the map.
+         */
+         var getGeoRenderingClasses = _.bind(function (dataset) {
             if (dataset.isGeoRenderable()) {
                 var classes =  dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-add-dataset-to-session';
                 return classes;
@@ -188,16 +203,44 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         }, this);
 
-        // Utility function to display classes for delete icon.
-        var getDatasetDeleteClasses = _.bind(function (dataset) {
+        /**
+         * Utility function to display event classes for delete icon, depending
+         * on the current state of the dataset.
+         *
+         * @param {dataset} dataset the dataset model
+         * @returns {string|false} classes for the delete icon,
+         * or false if the dataset cannot be rendered in the map.
+         */
+         var getDatasetDeleteClasses = _.bind(function (dataset) {
             return dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-delete-dataset';
+        }, this);
+
+        /**
+         * Utility function to display event classes for map rendering config icon, depending
+         * on the current state of the dataset.
+         *
+         * @param {dataset} dataset the dataset model
+         * @returns {string|false} classes for the map rendering config icon,
+         * or false if the dataset does not have the ability to have map rendering configured.
+         */
+        var getGeoRenderingConfigClasses = _.bind(function (dataset) {
+            var geoRenderType = dataset.getGeoRenderType()
+            if (geoRenderType !== null && geoRenderType !== 'wms') {
+              var classes = 'm-configure-geo-render';
+              classes += (dataset.get('displayed') ? ' m-icon-disabled' : ' m-icon-enabled');
+              classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+              return classes;
+            } else {
+              return false;
+            }
         }, this);
 
         this.$el.html(minerva.templates.dataPanel({
             datasets: datasets,
             getDisplayName: getDisplayName,
             getGeoRenderingClasses: getGeoRenderingClasses,
-            getDatasetDeleteClasses: getDatasetDeleteClasses
+            getDatasetDeleteClasses: getDatasetDeleteClasses,
+            getGeoRenderingConfigClasses: getGeoRenderingConfigClasses
         }));
 
         // TODO pagination and search?

@@ -24,10 +24,7 @@ if datasets
             // Display the minerva metadata.
             i.icon-info-circled.m-icon-enabled.m-dataset-info&attributes(attributes)
 
-            - var geoRenderType = dataset.getGeoRenderType()
-            //- Cog icon for geo rendering configuration
-            if geoRenderType !== null && geoRenderType !== 'wms'
-              - var classes = 'icon-cog m-configure-geo-render'
-              - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-              - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
-              i(class=classes)&attributes(attributes)
+            // Map rendering configuration.
+            - var geoRenderingConfigClasses = getGeoRenderingConfigClasses(dataset)
+            if geoRenderingConfigClasses
+              i(class='icon-cog ' + geoRenderingConfigClasses)&attributes(attributes)
