@@ -21,10 +21,10 @@ if datasets
             - var deleteClasses = getDatasetDeleteClasses(dataset)
             i(class='icon-trash ' + deleteClasses)&attributes(attributes)
 
-            //- Info icon for minerva metadata display
-            i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-            - var geoRenderType = dataset.getGeoRenderType()
+            // Display the minerva metadata.
+            i.icon-info-circled.m-icon-enabled.m-dataset-info&attributes(attributes)
 
+            - var geoRenderType = dataset.getGeoRenderType()
             //- Cog icon for geo rendering configuration
             if geoRenderType !== null && geoRenderType !== 'wms'
               - var classes = 'icon-cog m-configure-geo-render'

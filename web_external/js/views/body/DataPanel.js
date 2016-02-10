@@ -5,7 +5,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-upload-local': 'uploadDialog',
         'click .m-delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
-        'click .dataset-info': 'displayDatasetInfo',
+        'click .m-dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender'
     },
 
