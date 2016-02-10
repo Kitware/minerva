@@ -10,13 +10,12 @@ if datasets
         .dataset
           - var name = getDisplayName(dataset)
           span(title=name)= name
-
             - var attributes = {'m-dataset-id': dataset.get('_id')}
 
-            //- Eye icon to move dataset into current session
-            if dataset.isGeoRenderable()
-              - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
-              i(class=classes)&attributes(attributes)
+            // Render the dataset in the map
+            - var geoRenderClasses = getGeoRenderingClasses(dataset)
+            if geoRenderClasses
+              i(class='icon-eye ' + geoRenderClasses)&attributes(attributes)
 
             //- Trash icon to delete dataset
             - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')

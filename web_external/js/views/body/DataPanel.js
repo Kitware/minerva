@@ -1,7 +1,7 @@
 minerva.views.DataPanel = minerva.views.Panel.extend({
     events: {
         // TODO namespace.
-        'click .add-dataset-to-session': 'addDatasetToSessionEvent',
+        'click .m-add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .csv-mapping': 'mapTableDataset',
@@ -169,7 +169,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             return dataset.metadata();
         });
 
-        // Utility method to control dataset display name.
+        // Utility function to control dataset display name.
         var getDisplayName = _.bind(function (dataset) {
             var name = dataset.get('name');
             if (name.length > this.DATASET_NAME_LENGTH) {
@@ -178,9 +178,20 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             return name;
         }, this);
 
+        // Utility function to display event classes for visualization icon.
+        var getGeoRenderingClasses = _.bind(function (dataset) {
+            if (dataset.isGeoRenderable()) {
+                var classes =  dataset.get('displayed') ? 'm-icon-disabled m-dataset-in-session' : 'm-icon-enabled m-add-dataset-to-session';
+                return classes;
+            } else {
+              return false;
+            }
+        }, this);
+
         this.$el.html(minerva.templates.dataPanel({
             datasets: datasets,
-            getDisplayName: getDisplayName
+            getDisplayName: getDisplayName,
+            getGeoRenderingClasses: getGeoRenderingClasses
         }));
 
         // TODO pagination and search?
