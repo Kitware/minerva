@@ -34,7 +34,7 @@
       mongodb_ansible_group: girder
       girder_admin_user: girder
       girder_admin_password: letmein
-      girder_version: "7872249a3"
+      girder_version: "e61477c"
       state: started
       sudo: yes
 
