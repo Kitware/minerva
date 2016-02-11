@@ -12,11 +12,10 @@
  * In the need for keeping the panel list up to date, 2 main types of event
  * handling need to happen:
  * 1) When the collection changes (via reset or remove) this view needs
- * to be re-rendered but ALSO listen to changes in status on any individual
- * model in the collection as this effects what type of icon would be displayed.
+ * to be re-rendered.
  * 2) When the Girder event stream triggers a g:event.cluster.status, this indicates
  * that one of the cluster models has changed status - and as such it gets set on the
- * appropriate model. This action triggers a re-render through item 1.
+ * appropriate model and the panel is re-rendered.
  **/
 minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
     events: {
@@ -30,28 +29,16 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         minerva.views.Panel.prototype.initialize.apply(this);
         this.collection = new minerva.collections.ComputeResourceCollection();
 
-        // When the collection is fetched (it gets reset), re-render and ensure that
-        // each model listens for a status change and re-renders.
-        this.listenTo(this.collection, 'reset', _.bind(function (collection) {
-            collection.each(_.bind(function (model) {
-                this.listenTo(model, 'change:status', _.bind(this.render, this));
-            }, this));
-
-            this.render();
-        }, this));
-
-        // When clusters are removed, stop listening and re-render
-        this.listenTo(this.collection, 'remove', _.bind(function (model) {
-            this.stopListening(model);
-            this.render();
-        }, this));
+        // When clusters are removed/refetched, re-render
+        this.listenTo(this.collection, 'remove', _.bind(this.render, this));
+        this.listenTo(this.collection, 'reset', _.bind(this.render, this));
 
         // When a new status is received from a cluster, change the model.
-        // The changes to the model will propagate to the above listeners, which will
-        // re-render this panel, updating icons/text.
+        // This will re-render the panel to update icons/text
         girder.eventStream.on('g:event.cluster.status', function (e) {
             var cluster = this.collection.get(e.data._id);
             cluster.set('status', e.data.status);
+            this.render();
         }, this);
 
         this.collection.fetch();
