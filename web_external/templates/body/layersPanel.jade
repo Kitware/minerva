@@ -1,4 +1,5 @@
 include ../layout/panelMixins.jade
+include ../widgets/legendWidget.jade
 
 +panel-title('Session Layers', 'm-layer-panel')
 
@@ -22,3 +23,5 @@ include ../layout/panelMixins.jade
             .m-layer-control-container
               i.icon-ajust
               input.m-opacity-range&attributes({'m-dataset-id': dataset.get('_id')})(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))
+              - var legend = 'data:image/png;base64,' + dataset.metadata().legend
+              +legend(dataset.get('_id'), legend)
