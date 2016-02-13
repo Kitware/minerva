@@ -74,6 +74,7 @@ to parse and postprocess the geojson specially.  If a set of points was displaye
 
 **geo_render** Contains 'type' of GeoJs rendering, among ('choropleth', 'contour', 'geojson', 'wms').  Also 'file_id' pointing to file data in Girder, if required by the rendering `type`.
 
+**geojson** Contains the geojson data directly in the metadata under this key.
 
 Analysis
 ~~~~~~~~
