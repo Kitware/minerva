@@ -19,7 +19,6 @@ include ../widgets/legendWidget.jade
               else
                 - var disable = ''
               i(title='#{option.title}' class='icon-angle-#{option.class} m-order-layer #{disable}')&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
-          if dataset.getDatasetType() === 'wms'
             .m-layer-control-container
               i.icon-ajust
               input.m-opacity-range&attributes({'m-dataset-id': dataset.get('_id')})(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))
