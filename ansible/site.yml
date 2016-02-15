@@ -34,7 +34,7 @@
       mongodb_ansible_group: girder
       girder_admin_user: girder
       girder_admin_password: letmein
-      girder_version: "e61477c"
+      girder_version: "{{ lookup('file', '../.girder-version') }}"
       state: started
       sudo: yes
 
