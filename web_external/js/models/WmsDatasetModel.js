@@ -1,6 +1,8 @@
 minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
 
-    isRenderable: _.constant(true),
+    isRenderable: function () { // eslint-disable-line underscore/prefer-constant
+        return true;
+    },
 
     createWmsDataset: function (params) {
         girder.restRequest({

@@ -1,6 +1,8 @@
 minerva.models.MongoDatasetModel = minerva.models.DatasetModel.extend({
 
-    isRenderable: _.constant(true),
+    isRenderable: function () { // eslint-disable-line underscore/prefer-constant
+        return true;
+    },
 
     getExternalMongoLimits: function (field) {
         var data = { field: field };
