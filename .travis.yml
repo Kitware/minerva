@@ -30,7 +30,7 @@ before_install:
     - rm -rf girder
     - git clone https://github.com/girder/girder.git
     - cd girder
-    - git checkout e61477c
+    - git checkout `cat $TRAVIS_BUILD_DIR/.girder-version`
     - cd $HOME/build
     - mv Kitware/minerva girder/plugins
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
