@@ -56,7 +56,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * if passed will also reset the geoError property of this dataset to false.
      * @returns {Object} Updated minerva metadata of this dataset.
      */
-    _initGeoRender: function (overrideGeoRenderType) {
+    _initGeoRender: function (overrideGeoRenderType) { // eslint-disable-line complexity
         var mm = this.metadata();
         if (overrideGeoRenderType) {
             this.set('geoError', false);

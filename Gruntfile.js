@@ -107,7 +107,7 @@ module.exports = function (grunt) {
                         src: ['<%= plugin.minerva.source %>/main.js'],
                         dest: '<%= plugin.minerva.static %>/minerva.main.min.js'
                     }
-                 ]
+                ]
             },
             'minerva-ext': {
                 files: [
@@ -240,7 +240,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/jquery.dataTables.min.js',
                         '<%= plugin.minerva.static %>/dataTables.buttons.js'
-                     ]
+                    ]
                 }
             }
         },
