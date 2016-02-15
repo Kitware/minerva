@@ -39,7 +39,7 @@ before_install:
     - cd $HOME/build/girder/plugins
     - git clone https://github.com/Kitware/romanesco.git
     - cd romanesco
-    - git checkout da82cd17 # If you update this version, be sure that it works with your chose girder version above.
+    - git checkout `cat $TRAVIS_BUILD_DIR/.romanesco-version` # If you update this version, be sure that it works with your chose girder version above.
     - cd $HOME/build
 
     - cd girder
