@@ -11,6 +11,9 @@ What is Minerva?
 
 Minerva is an open source platform for geospatial visualization using `Girder`_ as its datastore.
 
+Currently Minerva is pegged to Girder version `e61477c`.  To update the version of Girder that Minerva
+depends on, update the version here, in `.travis.yml`, and `girder_version` in `ansible/site.yml`.
+
 Glossary
 --------
 
@@ -71,6 +74,7 @@ to parse and postprocess the geojson specially.  If a set of points was displaye
 
 **geo_render** Contains 'type' of GeoJs rendering, among ('choropleth', 'contour', 'geojson', 'wms').  Also 'file_id' pointing to file data in Girder, if required by the rendering `type`.
 
+**geojson** Contains the geojson data directly in the metadata under this key.
 
 Analysis
 ~~~~~~~~

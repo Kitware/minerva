@@ -76,7 +76,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
                         '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
                     ],
-                    dest: '<%= plugin.minerva.static %>/minerva.min.css'
+                    dest: '<%= plugin.minerva.static %>/plugin.min.css'
                 }]
             }
         },
@@ -99,26 +99,41 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/models/**/*.js',
                             '<%= plugin.minerva.source %>/collections/**/*.js',
                             '<%= plugin.minerva.source %>/views/body/Panel.js',
-                            '<%= plugin.minerva.source %>/views/**/*.js',
-                            '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'
+                            '<%= plugin.minerva.source %>/views/**/*.js'
                         ],
-                        dest: '<%= plugin.minerva.static %>/minerva.min.js'
+                        dest: '<%= plugin.minerva.static %>/minerva.app.min.js'
                     },
+                    {
+                        src: ['<%= plugin.minerva.source %>/main.js'],
+                        dest: '<%= plugin.minerva.static %>/minerva.main.min.js'
+                    }
+                 ]
+            },
+            'minerva-ext': {
+                files: [
                     {
                         src: [
                             '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
                             '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
                             '<%= plugin.minerva.geojs %>/node_modules/pnltri/pnltri.js'
                         ],
-                        dest: '<%= plugin.minerva.static %>/geo.ext.min.js'
-                    },
-                    {
-                        src: ['<%= plugin.minerva.source %>/main.js'],
-                        dest: '<%= plugin.minerva.static %>/main.min.js'
+                        dest: '<%= plugin.minerva.static %>/minerva.geo.ext.min.js'
                     },
                     {
                         src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
                         dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/datatables.net/js/jquery.dataTables.js'],
+                        dest: '<%= plugin.minerva.static %>/jquery.dataTables.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/datatables.net-buttons/js/dataTables.buttons.js'],
+                        dest: '<%= plugin.minerva.static %>/dataTables.buttons.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'],
+                        dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
                     }
                 ]
             }
@@ -142,14 +157,19 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            'minerva-extras': {
+            'papaparse': {
                 files: [
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.extra %>',
-                        src: ['**'],
+                        src: ['papaparse.min.js'],
                         dest: '<%= plugin.minerva.static %>'
-                    },
+                    }
+                ]
+            },
+            'geojs': {
+                files: [
+
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.geojs %>/dist/built',
@@ -189,6 +209,39 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
+            },
+            'dataTables': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.root %>/node_modules/datatables.net-dt/css',
+                        src: ['jquery.dataTables.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.root %>/node_modules/datatables.net-buttons-dt/css',
+                        src: ['buttons.dataTables.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
+            }
+        },
+        concat: {
+            'minerva-ext': {
+                files: {
+                    '<%= plugin.minerva.static %>/minerva.ext.min.js':
+                    [
+                        '<%= plugin.minerva.static %>/minerva.geo.ext.min.js',
+                        '<%= plugin.minerva.static %>/geo.min.js',
+                        '<%= plugin.minerva.static %>/jsonpath.min.js',
+                        '<%= plugin.minerva.static %>/papaparse.min.js',
+                        '<%= plugin.minerva.static %>/colorbrewer.min.js',
+                        '<%= plugin.minerva.static %>/jquery-ui.min.js',
+                        '<%= plugin.minerva.static %>/jquery.dataTables.min.js',
+                        '<%= plugin.minerva.static %>/dataTables.buttons.js'
+                     ]
+                }
             }
         },
         init: {
@@ -198,14 +251,26 @@ module.exports = function (grunt) {
             'shell:minerva-geojs-build': {
                 dependencies: ['shell:minerva-geojs-install']
             },
-            'copy:minerva-extras': {
+            'copy:papaparse': {
+                dependencies: []
+            },
+            'copy:geojs': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
             },
             'copy:minerva-fontello': {
-                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+                dependencies: []
             },
             'copy:jquery-ui': {
                 dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+            },
+            'copy:dataTables': {
+                dependencies: []
+            },
+            'uglify:minerva-ext': {
+                dependencies: ['shell:minerva-geojs-install']
+            },
+            'concat:minerva-ext': {
+                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build', 'copy:papaparse', 'copy:geojs', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
             }
         },
         default: {
@@ -238,12 +303,11 @@ module.exports = function (grunt) {
                 files: ['<%= plugin.minerva.geojs %>/**/*.js'],
                 tasks: ['shell:minerva-geojs']
             },
-            'plugin-minerva-copy-extra': {
+            'plugin-minerva-copy-geojs': {
                 files: [
-                    '<%= plugin.minerva.extra %>/**',
                     '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
                 ],
-                tasks: ['copy:minerva-extras']
+                tasks: ['copy:geojs']
             }
         }
     });
