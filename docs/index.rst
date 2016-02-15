@@ -11,7 +11,7 @@ What is Minerva?
 
 Minerva is an open source platform for geospatial visualization using `Girder`_ as its datastore.
 
-Currently Minerva is pegged to Girder version `e61477c`.  To update the version of Girder that Minerva
+Currently Minerva is pegged to Girder version |girder-version|.  To update the version of Girder that Minerva
 depends on, update the version here, in `.travis.yml`, and `girder_version` in `ansible/site.yml`.
 
 Glossary
