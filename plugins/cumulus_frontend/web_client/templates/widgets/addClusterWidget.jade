@@ -1,0 +1,31 @@
+- var instanceTypes = ["t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large"];
+
+.modal-dialog
+  .modal-content
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+            | Launch a Cluster
+        .modal-body
+          form.create-aws-profile-form
+            .form-group
+              label.control-label(for="m-cluster-name") Cluster Name
+              input.input-sm#m-cluster-name.form-control(type="text", placeholder="Cluster name")
+            .form-group
+              label.control-label(for="m-cluster-aws-keyname") AWS Keyname
+              input.input-sm#m-cluster-aws-keyname.form-control(type="text", placeholder="AWS Keyname")
+            .form-group
+              label.control-label(for="m-cluster-instance-type") Instance Type
+              select.input-sm#m-cluster-instance-type.form-control
+                each instanceType in instanceTypes
+                  option(value=instanceType)= instanceType
+            .form-group
+              label.control-label(for="m-cluster-instance-count") Instance Count
+              input.input-sm#m-cluster-instance-count.form-control(type="text", placeholder="1", value="1")
+            .g-validation-failed-message
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        a.m-cluster-launch-button.btn.btn-small.btn-primary
+              i.icon-plus-squared
+              | Launch Cluster
