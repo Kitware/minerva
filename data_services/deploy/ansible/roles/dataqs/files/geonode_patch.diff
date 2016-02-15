@@ -11,10 +11,10 @@ index 10f2581..5349416 100644
  __version__ = (2, 4, 0, 'alpha', 0)
 
 diff --git a/geonode/celery_app.py b/geonode/celery_app.py
-index 0a22b10..38eaf72 100644
+index 0a22b10..d079943 100644
 --- a/geonode/celery_app.py
 +++ b/geonode/celery_app.py
-@@ -5,8 +5,15 @@ from celery import Celery
+@@ -5,8 +5,14 @@ from celery import Celery
 
  os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'geonode.settings')
 
@@ -26,17 +26,20 @@ index 0a22b10..38eaf72 100644
  app.config_from_object('django.conf:settings')
 +app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 +
-+
 +@app.task(bind=True)
 +def debug_task(self):
 +    print('Request: {0!r}'.format(self.request))
 diff --git a/geonode/settings.py b/geonode/settings.py
-index 8c9ca4b..3badc89 100644
+index bbced0e..ca86eed 100644
 --- a/geonode/settings.py
 +++ b/geonode/settings.py
-@@ -918,3 +918,5 @@ if 'geonode.geoserver' in INSTALLED_APPS:
+@@ -929,4 +929,6 @@ if 'geonode.geoserver' in INSTALLED_APPS:
+     }
      baselayers = MAP_BASELAYERS
      MAP_BASELAYERS = [LOCAL_GEOSERVER]
-     MAP_BASELAYERS.extend(baselayers)
+-    MAP_BASELAYERS.extend(baselayers)
+\ No newline at end of file
++    MAP_BASELAYERS.extend(baselayers)
 +
 +INSTALLED_APPS += DATAQS_APPS
+\ No newline at end of file

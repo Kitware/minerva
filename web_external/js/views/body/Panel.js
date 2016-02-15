@@ -1,6 +1,6 @@
 minerva.views.Panel = minerva.View.extend({
     /**
-     * The panel view isn't meant to be instantiated on it's own.
+     * The panel view isn't meant to be instantiated on its own.
      **/
     events: {
         'click .m-remove-panel': 'removePanel',
@@ -26,12 +26,15 @@ minerva.views.Panel = minerva.View.extend({
      * enables the save button.
      **/
     removePanel: function () {
-        if (confirm('Are you sure you want to remove this panel?')) {
-            this.getSessionView().disablePanel(this.el.id);
-            this.getSessionView()._enableSave();
-            this.remove();
-            minerva.View.prototype.remove.call(this);
-        }
+        girder.confirm({
+            text: 'Are you sure you want to remove this panel?',
+            confirmCallback: _.bind(function () {
+                this.getSessionView().disablePanel(this.el.id);
+                this.getSessionView()._enableSave();
+                this.remove();
+                minerva.View.prototype.remove.call(this);
+            }, this)
+        });
     },
 
     /**

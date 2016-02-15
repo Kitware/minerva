@@ -10,6 +10,8 @@
     - python-dev
     - python-pip
     - python-virtualenv
+    - libjpeg-dev
+    - zlib1g-dev
   when: do_install|bool
 
 - name: romanesco | service | stop
