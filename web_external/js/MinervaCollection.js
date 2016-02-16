@@ -1,6 +1,7 @@
 minerva.collections.MinervaCollection = girder.Collection.extend({
     // minerva collections are items in a specific folder
     resourceName: 'item',
+    model: minerva.models.MinervaModel,
     pageLimit: 100,
     getInitData: function () { return {}; },
 

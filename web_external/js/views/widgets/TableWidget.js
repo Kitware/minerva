@@ -39,7 +39,6 @@ minerva.views.TableWidget = minerva.View.extend({
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('button.m-save-table-mapping').removeClass('disabled');
             }, this).saveMinervaMetadata();
-
         },
         'click .hide-table-preview': function () {
             this.$('.hide-table-preview').hide();

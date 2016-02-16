@@ -1,6 +1,6 @@
 minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
 
-    isRenderable: function () {
+    isRenderable: function () { // eslint-disable-line underscore/prefer-constant
         return true;
     },
 

@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* jshint node: true */
-
 module.exports = function (grunt) {
-
     var path = require('path');
 
     // This gruntfile is only designed to be used with girder's build system.
@@ -111,7 +107,7 @@ module.exports = function (grunt) {
                         src: ['<%= plugin.minerva.source %>/main.js'],
                         dest: '<%= plugin.minerva.static %>/minerva.main.min.js'
                     }
-                 ]
+                ]
             },
             'minerva-ext': {
                 files: [
@@ -244,7 +240,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/jquery.dataTables.min.js',
                         '<%= plugin.minerva.static %>/dataTables.buttons.js'
-                     ]
+                    ]
                 }
             }
         },
@@ -369,7 +365,7 @@ module.exports = function (grunt) {
             pretty: true
         });
 
-        var cssFiles =  [
+        var cssFiles = [
             // ?? href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
             '/' + rootStaticLibDir + '/bootstrap/css/bootstrap.min.css',
             '/' + rootStaticLibDir + '/fontello/css/fontello.css',
