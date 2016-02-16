@@ -85,6 +85,9 @@ before_install:
 
 install:
     - cd $HOME/build/girder
+    - mkdir _build
+    - export GIRDER_SOURCE_DIR="$PWD"
+    - export GIRDER_BUILD_DIR="$PWD/_build"
     - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
     # create the Romanesco config and enable spark plugin
     - cp /home/travis/build/girder/plugins/romanesco/romanesco/worker.dist.cfg /home/travis/build/girder/plugins/romanesco/romanesco/worker.local.cfg
@@ -97,7 +100,5 @@ install:
     - npm install
 
 script:
-    - mkdir _build
-    - cd _build
-    - cmake -DPYTHON_COVERAGE:BOOL=${PY_COVG} -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} -D SPARK_TEST_MASTER_URL:STRING="spark://localhost:7077" ..
-    - JASMINE_TIMEOUT=15000 ctest -R minerva -VV
+    - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
+    - if [ -f _build/test_failed ] ; then false ; fi
