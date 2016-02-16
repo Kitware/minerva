@@ -26,7 +26,7 @@
   roles:
     - role: romanesco
       rabbitmq_ansible_group: rabbitmq
-      romanesco_version: "da82cd17"
+      romanesco_version: "{{ lookup('file', '../.romanesco-version') }}"
       state: started
       sudo: yes
 
@@ -34,7 +34,7 @@
       mongodb_ansible_group: girder
       girder_admin_user: girder
       girder_admin_password: letmein
-      girder_version: "e61477c"
+      girder_version: "{{ lookup('file', '../.girder-version') }}"
       state: started
       sudo: yes
 

@@ -103,6 +103,4 @@ The username/password for the Minerva and Girder admin user are
 
 ## Setting a specific version of Girder, Romanesco, or Minerva
 
-Set `girder_version`, `romanesco_version`, or `minerva_version` in the `ansible\site.yml` file
-to whatever git versions of each of the projects you would like provisioned.  This can be a branch,
-a tag, or a SHA.
+Girder and Romanesco versions can be set using the files `.girder-version` and `.romanesco-version` respectively. The Minerva version is configured within `ansible/site.yml` under the key `minerva_version`. Versions can be a branch, tag, or SHA.

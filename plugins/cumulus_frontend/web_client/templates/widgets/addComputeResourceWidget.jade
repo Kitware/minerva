@@ -1,0 +1,15 @@
+.modal-dialog
+  .modal-content
+    .modal-header
+      button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+      h4.modal-title
+          | Add a Compute Resource
+      .modal-body
+        div.list-group
+          each properties, resourceType in resourceTypes
+            - var id = 'm-' + resourceType + '-source'
+            - var buttonClasses = "m-add-resource-type list-group-item " + properties.icon
+            button(id=id, class=buttonClasses)
+              label #{properties.label}
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel

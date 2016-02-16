@@ -433,6 +433,10 @@ def main():
         default=None
     )
 
+    subparsers.add_parser(
+        'auth', help='Generate an authentication header.'
+    )
+
     args = parser.parse_args()
 
     if not (args.user and args.apikey and args.secretkey):
@@ -476,6 +480,8 @@ def main():
         output = bsve.soda_dump(
             count=args.count
         )
+    elif args.command == 'auth':
+        output = bsve._auth_header()
 
     if isinstance(output, (dict, list, tuple)):
         output = json.dumps(output, indent=2)

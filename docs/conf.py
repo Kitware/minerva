@@ -269,3 +269,11 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+# Allow references to the .girder-version file in the root of Minerva
+with open(os.path.join(os.path.dirname(__file__), os.pardir, '.girder-version')) as infile:
+    girder_version = infile.read().strip()
+
+rst_epilog = """
+.. |girder-version| replace:: %s
+""" % girder_version
