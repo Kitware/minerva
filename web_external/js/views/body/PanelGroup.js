@@ -7,7 +7,7 @@ minerva.views.PanelGroup = minerva.View.extend({
     render: function () {
         // Render each of our panels
         _.each(this.panelViews, function (panelViewSpec) {
-            var panelView = new panelViewSpec.view({
+            var panelView = new panelViewSpec.view({ // eslint-disable-line new-cap
                 parentView: this,
                 session: this.parentView
             });

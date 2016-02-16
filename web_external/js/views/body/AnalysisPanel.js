@@ -1,13 +1,12 @@
 (function () {
-
     var analysisTypeToWidgetName = function (type) {
-        var name =  type.replace(/(\_\w)|(^\w)/g, function (m) {
-            var index = m[0]  === '_' ? 1 : 0;
+        var name = type.replace(/(\_\w)|(^\w)/g, function (m) {
+            var index = m[0] === '_' ? 1 : 0;
 
             return m[index].toUpperCase();
         });
 
-        return name  + 'Widget';
+        return name + 'Widget';
     };
 
     minerva.views.AnalysisPanel = minerva.views.Panel.extend({
@@ -47,12 +46,12 @@
             }
 
             var analysisWidget = new minerva.views[analysisWidgetName]({
-                    el: $('#g-dialog-container'),
-                    parentView: this,
-                    datasetCollection: this.datasetCollection,
-                    sourceCollection: this.sourceCollection,
-                    analysis: analysis
-                });
+                el: $('#g-dialog-container'),
+                parentView: this,
+                datasetCollection: this.datasetCollection,
+                sourceCollection: this.sourceCollection,
+                analysis: analysis
+            });
             analysisWidget.render();
         },
 

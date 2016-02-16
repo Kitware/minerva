@@ -7,8 +7,8 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
         'submit #m-add-wms-source-form': function (e) {
             e.preventDefault();
             var params = {
-                name:     this.$('#m-wms-name').val(),
-                baseURL:  this.$('#m-wms-uri').val(),
+                name: this.$('#m-wms-name').val(),
+                baseURL: this.$('#m-wms-uri').val(),
                 username: this.$('#m-wms-username').val(),
                 password: this.$('#m-wms-password').val()
             };

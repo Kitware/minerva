@@ -41,13 +41,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
 
     getDatasetType: function () {
         var minervaMetadata = this.metadata();
-        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type :
-            (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
+        return _.has(minervaMetadata, 'dataset_type') ? minervaMetadata.dataset_type
+            : (_.has(minervaMetadata, 'original_type') ? minervaMetadata.original_type : null);
     },
-
-    ////////////////////////////////////////////////////////
-    // GeoJs rendering api.                               //
-    ////////////////////////////////////////////////////////
 
     /**
      * Initialize the GeoJs rendering type along with any secondary data needed for
@@ -60,7 +56,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * if passed will also reset the geoError property of this dataset to false.
      * @returns {Object} Updated minerva metadata of this dataset.
      */
-    _initGeoRender: function (overrideGeoRenderType) {
+    _initGeoRender: function (overrideGeoRenderType) { // eslint-disable-line complexity
         var mm = this.metadata();
         if (overrideGeoRenderType) {
             this.set('geoError', false);

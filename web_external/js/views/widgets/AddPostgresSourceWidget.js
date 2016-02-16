@@ -7,9 +7,9 @@ minerva.views.AddPostgresSourceWidget = minerva.View.extend({
         'submit #m-add-postgres-source-form': function (e) {
             e.preventDefault();
             var params = {
-                name:     this.$('#m-postgres-name').val(),
-                baseURL:  this.$('#m-postgres-uri').val(),
-                dbname:  this.$('#m-postgres-dbname').val(),
+                name: this.$('#m-postgres-name').val(),
+                baseURL: this.$('#m-postgres-uri').val(),
+                dbname: this.$('#m-postgres-dbname').val(),
                 username: this.$('#m-postgres-username').val(),
                 password: this.$('#m-postgres-password').val()
             };

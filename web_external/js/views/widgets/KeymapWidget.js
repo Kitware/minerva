@@ -41,7 +41,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
         },
         'change #m-latitude-mapper': function () {
             var jsonpathLat = this.$('#m-latitude-mapper').val();
-            var latExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLat); // jshint ignore:line
+            var latExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLat);
             // TODO npm installs v 0.10.0 of jsonPath, v 0.11.0 creates a new
             // public method called evalaute so these jshint ignores won't be necessary
             // upgrade to v 0.11.0 from source repo or once updated in npm
@@ -49,7 +49,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
         },
         'change #m-longitude-mapper': function () {
             var jsonpathLong = this.$('#m-longitude-mapper').val();
-            var longExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLong); // jshint ignore:line
+            var longExampleVal = jsonPath.eval(this.jsonrowData, jsonpathLong);
             this.$('#m-longitude-example-value').val(longExampleVal);
         },
         'click .hide-keymap-preview': function () {
@@ -84,8 +84,8 @@ minerva.views.KeymapWidget = minerva.View.extend({
         if (!this.create) {
             longitudeKeypath = this.minervaMetadata.mapper.longitudeKeypath;
             latitudeKeypath = this.minervaMetadata.mapper.latitudeKeypath;
-            latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath); // jshint ignore:line
-            longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath); // jshint ignore:line
+            latExampleVal = jsonPath.eval(this.jsonrowData, latitudeKeypath);
+            longExampleVal = jsonPath.eval(this.jsonrowData, longitudeKeypath);
         }
         var modal = this.$el.html(minerva.templates.keymapWidget({
             create: this.create,

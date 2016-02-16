@@ -21,7 +21,7 @@ minerva.views.AddSourceWidget = minerva.View.extend({
             };
 
             if (_.has(this.sourceTypes, sourceType)) {
-                var widget = new this.sourceTypes[sourceType].widget(settings);
+                var widget = new this.sourceTypes[sourceType].widget(settings); // eslint-disable-line new-cap
                 widget.render();
             } else {
                 console.error('Unknown source type');

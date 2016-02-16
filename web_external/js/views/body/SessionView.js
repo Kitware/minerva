@@ -90,7 +90,7 @@ minerva.views.SessionView = minerva.View.extend({
     },
 
     getPanelGroup: function (id) {
-        return _.find(this.layout.panelGroups, function (panelGroup) {
+        return _.find(this.layout.panelGroups, function (panelGroup) { // eslint-disable-line underscore/matches-shorthand
             return panelGroup.id === id;
         });
     },
@@ -191,13 +191,13 @@ minerva.views.SessionView = minerva.View.extend({
             // each panel view
             girder.events.trigger('m:pre-render-panel-groups', this);
             _.each(this.getEnabledPanelGroups(), function (panelGroupSpec) {
-                var panelGroup = new panelGroupSpec.view({
+                var panelGroup = new panelGroupSpec.view({ // eslint-disable-line new-cap
                     parentView: this,
                     session: this.model,
                     panelViews: this.getEnabledPanelViews(panelGroupSpec)
                 });
 
-                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id  + '"></div>');
+                this.$('#m-panel-groups').append('<div id="' + panelGroupSpec.id + '"></div>');
                 panelGroup.setElement(this.$('#' + panelGroupSpec.id)).render();
             }, this);
 
