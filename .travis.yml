@@ -89,7 +89,7 @@ install:
     - mkdir _build
     - export GIRDER_SOURCE_DIR="$PWD"
     - export GIRDER_BUILD_DIR="$PWD/_build"
-    - scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
+    - pip install -r "${GIRDER_SOURCE_DIR}/plugins/minerva/cmake/travis-pip-freeze.txt" -U
     # create the Romanesco config and enable spark plugin
     - cp /home/travis/build/girder/plugins/romanesco/romanesco/worker.dist.cfg /home/travis/build/girder/plugins/romanesco/romanesco/worker.local.cfg
     - sed -i 's/plugins_enabled=/plugins_enabled=spark/' /home/travis/build/girder/plugins/romanesco/romanesco/worker.local.cfg
