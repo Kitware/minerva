@@ -103,6 +103,8 @@ install:
     - npm prune
     # build and install girder
     - npm install
+    # replace girder's ctest config with minerva's
+    - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
 
 script:
     - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true

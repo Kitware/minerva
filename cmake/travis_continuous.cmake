@@ -1,7 +1,7 @@
 set(CTEST_SOURCE_DIRECTORY "$ENV{GIRDER_SOURCE_DIR}")
 set(CTEST_BINARY_DIRECTORY "$ENV{GIRDER_BUILD_DIR}")
 
-include(${CTEST_SOURCE_DIRECTORY}/plugins/minerva/cmake/CTestConfig.cmake)
+include(${CTEST_SOURCE_DIRECTORY}/CTestConfig.cmake)
 set(CTEST_SITE "Travis")
 set(CTEST_BUILD_NAME "Linux-$ENV{TRAVIS_BRANCH}")
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
