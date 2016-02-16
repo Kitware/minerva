@@ -4,7 +4,7 @@ minerva.views.JobsPanel = minerva.views.Panel.extend({
         var columnEnum = girder.views.jobs_JobListWidget.prototype.columnEnum;
         var columns = columnEnum.COLUMN_STATUS_ICON |
                       columnEnum.COLUMN_TITLE;
-        this.jobListWidget = new girder.views.jobs_JobListWidget({
+        this.jobListWidget = new girder.views.jobs_JobListWidget({ // eslint-disable-line new-cap
             columns: columns,
             showHeader: false,
             pageLimit: 10,

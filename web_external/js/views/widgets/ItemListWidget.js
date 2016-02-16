@@ -1,4 +1,3 @@
-
 minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
 
     initialize: function () {
@@ -53,8 +52,8 @@ minerva.views.ItemListWidget = girder.views.ItemListWidget.extend({
             }
 
             view.trigger('g:checkboxesChanged');
-
         });
+
         return this;
     }
 });
