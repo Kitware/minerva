@@ -9,7 +9,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         stack: 0,
         // GeoJs related attributes.
         geoError: false,
-        geoData: null
+        geoData: null,
+        // Tabular data related attributes.
+        tableData: null
     },
 
     /**
@@ -18,13 +20,18 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * promote the Item to a Minerva Dataset, which means
      * initializing the Item's 'minerva' namespaced metadata.
      *
+     * @param {object} params set of params to the created dataset, possibly including
+     * {csvPreview}.
      * @fires 'minerva.dataset.promoted' event upon successful Dataset promotion.
      */
-    promoteToDataset: function () {
+    promoteToDataset: function (params) {
         girder.restRequest({
             path: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
         }).done(_.bind(function (resp) {
+            if (params && params.csvPreview) {
+                resp.meta.minerva.csv_preview = params.csvPreview;
+            }
             this.metadata(resp.meta.minerva);
             this._initGeoRender();
             this.trigger('minerva.dataset.promoted', this);
@@ -91,7 +98,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     type: 'wms'
                 };
             } else {
-                console.error('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
+                console.log('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
             }
             this.saveMinervaMetadata(mm);
         }
@@ -156,6 +163,43 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 });
             }, this));
         }
-    }
+    },
 
+    ////////////////////////////////////////////////////////
+    // Tabular data api.                                  //
+    ////////////////////////////////////////////////////////
+
+    /*
+     * Async function that loads any table data needed by this dataset to display
+     * in a table view, setting that data as an attribute on this dataset named 'tableData'.
+     *
+     * @fires 'minerva.dataset.table.dataLoaded' event upon the table data being loaded.
+     */
+    loadTabularData: function () {
+        // TODO looks similar enough to loadGeoData, consider unification.
+        var mm = this.metadata();
+        if (this.get('tableData') !== null) {
+            this.trigger('minerva.dataset.table.dataLoaded', this);
+        } else {
+            // TODO for now making the poorly supported assumption that tabular data exists.
+            var fileId = mm.original_files[0]._id;
+            girder.restRequest({
+                path: '/file/' + fileId + '/download?contentDisposition=inline',
+                type: 'GET',
+                dataType: 'text'
+            }).done(_.bind(function (resp) {
+                this.set('tableData', resp);
+                this.trigger('minerva.dataset.table.dataLoaded', this);
+            }, this)).error(_.bind(function (err) {
+                console.error(err);
+                girder.events.trigger('g:alert', {
+                    icon: 'cancel',
+                    text: 'Could not download the tabular data file.',
+                    type: 'error',
+                    timeout: 4000
+                });
+
+            }, this));
+        }
+    }
 });
