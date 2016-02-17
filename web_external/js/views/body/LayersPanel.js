@@ -33,13 +33,10 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         var option = $(event.currentTarget).attr('m-order-option');
         var dataset = this.collection.get(datasetId);
 
-        var currentDatasetIndex = _.indexOf(this.collection.models, dataset);
         var displayedDatasets = _.filter(this.collection.models, function (set) {
             return set.get('displayed');
         });
-
-        var numberOfPossibleLayers = this.collection.models.length;
-        var numberOfLayersInSession = displayedDatasets.length;
+        var currentDatasetIndex = _.indexOf(displayedDatasets, dataset);
 
         if (displayedDatasets[currentDatasetIndex - 1]) {
             prevDataset = displayedDatasets[currentDatasetIndex - 1];
@@ -49,7 +46,7 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
             nextDataset = displayedDatasets[currentDatasetIndex + 1];
         }
 
-        var stackValues = _.invoke(this.collection.models, 'get', 'stack');
+        var stackValues = _.invoke(displayedDatasets, 'get', 'stack');
 
         var currentStack = dataset.get('stack');
         // Retrieve the first and last stack value in the collection
@@ -59,16 +56,16 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         if (option === 'moveToTop' && currentStack !== lastValueInStack) {
             dataset.set('stack', lastValueInStack + 1);
             this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveToBottom' && currentStack !== (numberOfPossibleLayers - numberOfLayersInSession)) {
+        } else if (option === 'moveToBottom' && currentStack !== firstValueInStack) {
             dataset.set('stack', firstValueInStack - 1);
             this.reorderDisplayedLayers(option, dataset);
         } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
-            (prevDataset || nextDataset).set('stack', currentStack);
             dataset.set('stack', currentStack + 1);
-            this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveDown' && (currentStack === 1 ? currentStack : currentStack - 1) !== (numberOfPossibleLayers - numberOfLayersInSession)) {
             (nextDataset || prevDataset).set('stack', currentStack);
+            this.reorderDisplayedLayers(option, dataset);
+        } else if (option === 'moveDown' && (currentStack !== firstValueInStack)) {
             dataset.set('stack', currentStack - 1);
+            (prevDataset || nextDataset).set('stack', currentStack);
             this.reorderDisplayedLayers(option, dataset);
         }
     },

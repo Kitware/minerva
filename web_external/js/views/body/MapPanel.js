@@ -27,7 +27,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     },
 
     changeLayerOpacity: function (dataset) {
-        this.datasetLayers[dataset.id].mapOpacity(dataset.get('opacity'));
+        var layer = this.datasetLayers[dataset.get('_id')];
+        layer.opacity(dataset.get('opacity'));
         this.map.draw();
     },
 
