@@ -20,6 +20,11 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
     },
 
 
+    _getTotalRows: function (dataTableSource) {
+      return dataTableSource.length;
+    },
+
+
     initialize: function (settings) {
         this.source      = settings.source;
         this.dataset     = settings.dataset;
@@ -32,37 +37,56 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
 
         // Set number of rows in datatable
         var DEFAULT_NUMBER_ROWS = 30;
-        var dataTableSource = this.data.slice(1);
+        // Add extra rows to be views in datatables
+        var EXTRA_ROWS = 10;
+        // Remove the headers
+        var dataTableSource = this.csv.slice(1);
+        var dataLength = this._getTotalRows(dataTableSource);
 
         this.colNames = _.map(this.data[0], function (name) {
-            return { title: name };
+            return { 'title': name };
         });
 
         var modal = this.$el.html(minerva.templates.csvViewerWidget({
             title     : this.dataset.get('name'),
             source    : this.source,
-            totalRows : this.totalRows,
             columns   : this.colNames
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
             $('table#data').dataTable({
-                // Use this.data.shift() to remove the headers
-                data: dataTableSource,
-                columns: this.colNames,
-                autoWidth: true,
-                hover: true,
-                ordering: true,
-                iDisplayLength: DEFAULT_NUMBER_ROWS,
-                pagingType: "full",
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(:first-child)'
+                'columns': this.colNames,
+                'scrollCollapse': true,
+                'serverSide': true,
+                'autoWidth': false,
+                'ordering': true,
+                'searching': false,
+                'ajax': _.bind(function (data, callback, settings) {
+                    var output = [], i, ien;
+                    for (i = data.start, ien = (data.start + data.length) + EXTRA_ROWS; i < ien; i++) {
+                        output.push(dataTableSource[i]);
                     }
-                ]
-            });
+                    callback({
+                        'draw': data.draw,
+                        'data': output,
+                        'recordsTotal': dataLength,
+                        'recordsFiltered': dataLength
+                    });
+                }, this),
+                'scroller': {
+                    'loadingIndicator': true,
+                    'trace': true
+                },
+                'deferRender': true,
+                'scrollY': 400,
+                'dom': 'Bfrtip',
+                'buttons': [
+                   {
+                        'extend': 'colvis',
+                        'columns': ':not(:first-child)'
+                   }
+                 ]
+           });
         }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));

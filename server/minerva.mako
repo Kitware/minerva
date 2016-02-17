@@ -15,7 +15,11 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/jquery.dataTables.css">
+          href="http:////cdn.datatables.net/1.10.7/css/jquery.dataTables.css">
+    <link rel="stylesheet"
+          href="http:////cdn.datatables.net/buttons/1.1.0/css/buttons.dataTables.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/scroller/1.4.1/css/scroller.dataTables.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/buttons.dataTables.css">
     <link rel="stylesheet"
@@ -54,6 +58,10 @@
     % endfor
 
     <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
+    <script src="https://cdn.datatables.net/scroller/1.4.1/js/dataTables.scroller.min.js"></script>
+    <script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
+    <script src="http://cdn.datatables.net/buttons/1.1.0/js/buttons.colVis.min.js"></script>
 
    </body>
 </html>
