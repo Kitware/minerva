@@ -17,11 +17,11 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         var dataset = this.collection.get(datasetId);
         dataset.on('minerva.dataset.table.dataLoaded', function () {
             new minerva.views.CsvViewerWidget({
-                el               : $('#g-dialog-container'),
-                collection       : this.collection,
-                parentView       : this,
-                dataset          : dataset,
-                data             : dataset.get('tableData')
+                el: $('#g-dialog-container'),
+                collection: this.collection,
+                parentView: this,
+                dataset: dataset,
+                data: dataset.get('tableData')
             }).render();
         }, this).loadTabularData();
     },
@@ -104,7 +104,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         if (this.uploadWidget.files &&
             this.uploadWidget.files.length > 0 &&
             this.uploadWidget.files[0].type === 'text/csv') {
-
             var ROWS_PREVIEW = 10;
             if (typeof (FileReader) !== 'undefined') {
                 var reader = new FileReader();
