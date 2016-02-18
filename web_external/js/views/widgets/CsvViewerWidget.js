@@ -19,24 +19,19 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         return parsedCSV.data;
     },
 
-
     _getTotalRows: function (dataTableSource) {
-      return dataTableSource.length;
+        return dataTableSource.length;
     },
 
-
     initialize: function (settings) {
-        this.source      = settings.source;
-        this.dataset     = settings.dataset;
-        this.collection  = settings.collection;
-        this.csv         = this._parseCsv(settings.data, true);
-        this.data        = this._parseCsv(settings.data, false);
+        this.source = settings.source;
+        this.dataset = settings.dataset;
+        this.collection = settings.collection;
+        this.csv = this._parseCsv(settings.data, true);
+        this.data = this._parseCsv(settings.data, false);
     },
 
     render: function () {
-
-        // Set number of rows in datatable
-        var DEFAULT_NUMBER_ROWS = 30;
         // Add extra rows to be views in datatables
         var EXTRA_ROWS = 10;
         // Remove the headers
@@ -48,9 +43,9 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         });
 
         var modal = this.$el.html(minerva.templates.csvViewerWidget({
-            title     : this.dataset.get('name'),
-            source    : this.source,
-            columns   : this.colNames
+            title: this.dataset.get('name'),
+            source: this.source,
+            columns: this.colNames
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
@@ -81,12 +76,12 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                 'scrollY': 400,
                 'dom': 'Bfrtip',
                 'buttons': [
-                   {
+                    {
                         'extend': 'colvis',
                         'columns': ':not(:first-child)'
-                   }
-                 ]
-           });
+                    }
+                ]
+            });
         }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));

@@ -115,7 +115,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
                     if (parsedCSV.data) {
                         params.csvPreview = parsedCSV.data;
                     }
-                }.bind(this);
+                };
                 reader.readAsText(this.uploadWidget.files[0]);
             } else {
                 alert('This browser does not support HTML5.');

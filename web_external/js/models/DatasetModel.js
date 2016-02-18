@@ -165,9 +165,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         }
     },
 
-    ////////////////////////////////////////////////////////
-    // Tabular data api.                                  //
-    ////////////////////////////////////////////////////////
+    //
+    // Tabular data api.
+    //
 
     /*
      * Async function that loads any table data needed by this dataset to display
@@ -198,7 +198,6 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     type: 'error',
                     timeout: 4000
                 });
-
             }, this));
         }
     }
