@@ -43,9 +43,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         });
 
         var modal = this.$el.html(minerva.templates.csvViewerWidget({
-            title: this.dataset.get('name'),
-            source: this.source,
-            columns: this.colNames
+            dataset: this.dataset
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {

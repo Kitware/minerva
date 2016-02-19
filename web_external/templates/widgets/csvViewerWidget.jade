@@ -4,12 +4,14 @@
             .modal-header
                 button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
                 h4.modal-title
+                  - var title = dataset.get('name')
                   | #{title}
 
             table#data
-
+            
             .modal-footer
-                a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-                button.m-update-dataset.btn.btn-small.btn-primary(type="submit")
-                    i.icon-check
-                    | Save
+                if (!dataset.get('readOnly'))
+                    a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+                    button.m-update-dataset.btn.btn-small.btn-primary(type="submit")
+                        i.icon-check
+                        | Save
