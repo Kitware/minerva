@@ -100,3 +100,11 @@ def load(info):
     info['apiRoot'].minerva_source_mongo = mongo_source.MongoSource()
     info['apiRoot'].minerva_dataset_mongo = mongo_dataset.MongoDataset()
     info['serverRoot'].wms_proxy = WmsProxy()
+
+    # If we are started up in testing mode, then serve minerva's sources as well
+    # for debugging client tests.
+    if '/test' in info['config']:
+        info['config']['/test/minerva'] = {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'plugins/minerva/web_external'
+        }
