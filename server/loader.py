@@ -104,7 +104,11 @@ def load(info):
     # If we are started up in testing mode, then serve minerva's sources as well
     # for debugging client tests.
     if '/test' in info['config']:
-        info['config']['/test/minerva'] = {
+        info['config']['/src/minerva'] = {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'plugins/minerva/web_external'
+        }
+        info['config']['/test/minerva'] = {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'plugins/minerva/plugin_tests/client'
         }
