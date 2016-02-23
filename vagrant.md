@@ -53,16 +53,16 @@ list like
 
 Think of this tag as minerva with dependencies.
 
-This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
-file, install system dependencies and pip dependencies defined in the minerva role,
+This tag will pull the git version of minerva on your VM that is your current git revision on your host,
+install system dependencies and pip dependencies defined in the minerva role,
 then install the minerva plugin to girder and build the client side code.
 
 ##### minerva-update
 
 Think of this tag as minerva without dependencies.
 
-This tag will pull the git version of minerva defined in `minerva_version` in your site.yml
-file, then install the minerva plugin to girder and build the client side code.
+This tag will pull the git version of minerva on your VM that is your current git revision on your host,
+then install the minerva plugin to girder and build the client side code.
 
 
 ### vagrant halt
@@ -103,4 +103,11 @@ The username/password for the Minerva and Girder admin user are
 
 ## Setting a specific version of Girder, Romanesco, or Minerva
 
-Girder and Romanesco versions can be set using the files `.girder-version` and `.romanesco-version` respectively. The Minerva version is configured within `ansible/site.yml` under the key `minerva_version`. Versions can be a branch, tag, or SHA.
+Girder and Romanesco versions can be set using the files `.girder-version` and `.romanesco-version` respectively.
+
+The Minerva version is taken from the current git revision on your host, e.g., if you have your host Minerva repo on
+git branch `foo_la_la`, then the VM will be provisioned with Minerva branch `foo_la_la`, as that branch currently
+exists on GitHub.  If you want to change the provisioned Minerva to a different version, you can change the value
+configured within `ansible/site.yml` under the key `minerva_version`. Versions can be a branch, tag, or SHA.  Note
+that if you have changes local to your host Minerva repo, these will not be accessible to the provisioned VM, unless
+you have filesyncing between your host and VM, which is experimental and not officially supported.
