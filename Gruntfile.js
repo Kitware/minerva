@@ -124,14 +124,6 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
                     },
                     {
-                        src: ['<%= plugin.minerva.root %>/node_modules/datatables.net/js/jquery.dataTables.js'],
-                        dest: '<%= plugin.minerva.static %>/jquery.dataTables.min.js'
-                    },
-                    {
-                        src: ['<%= plugin.minerva.root %>/node_modules/datatables.net-buttons/js/dataTables.buttons.js'],
-                        dest: '<%= plugin.minerva.static %>/dataTables.buttons.min.js'
-                    },
-                    {
                         src: ['<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'],
                         dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
                     }
@@ -214,14 +206,20 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.root %>/node_modules/datatables.net-dt/css',
-                        src: ['jquery.dataTables.css'],
+                        cwd: '<%= plugin.minerva.extra %>',
+                        src: ['datatables.min.js'],
                         dest: '<%= plugin.minerva.static %>'
                     },
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.root %>/node_modules/datatables.net-buttons-dt/css',
-                        src: ['buttons.dataTables.css'],
+                        cwd: '<%= plugin.minerva.extra %>',
+                        src: ['datatables.min.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.extra %>',
+                        src: ['DataTables-1.10.11/images/*'],
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
@@ -238,8 +236,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/papaparse.min.js',
                         '<%= plugin.minerva.static %>/colorbrewer.min.js',
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
-                        '<%= plugin.minerva.static %>/jquery.dataTables.min.js',
-                        '<%= plugin.minerva.static %>/dataTables.buttons.js'
+                        '<%= plugin.minerva.static %>/datatables.min.js'
                     ]
                 }
             }
