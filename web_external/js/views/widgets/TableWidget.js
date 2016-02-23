@@ -27,7 +27,7 @@ minerva.views.TableWidget = minerva.View.extend({
 
             // save the dataset with updated metadata
             this.$('button.m-save-table-mapping').addClass('disabled');
-            this.dataset.once('m:minervaMetadataSaved', function () {
+            this.dataset.once('minerva.metadata.saved', function () {
                 this.dataset.on('m:geojsonCreatedFromTabular', function () {
                     this.$el.modal('hide');
                     // TODO is this ok to do?

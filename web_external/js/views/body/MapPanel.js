@@ -2,8 +2,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-save-current-baselayer': function () {
-            this.session.sessionJsonContents.center = this.map.center();
-            this.session.sessionJsonContents.zoom = this.map.zoom();
+            this.session.metadata().map.center = this.map.center();
+            this.session.metadata().map.zoom = this.map.zoom();
             this.session.saveSession();
         }
     },
@@ -275,7 +275,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             // TODO for now only dealing with center
             if (this.map) {
                 // TODO could better separate geojs needs from session storage
-                this.map.center(this.session.sessionJsonContents.center);
+                this.map.center(this.session.metadata().map.center);
             }
         });
         this.datasetLayers = {};
@@ -313,10 +313,11 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
     renderMap: function () {
         if (!this.map) {
+            var mapSettings = this.session.metadata().map;
             this.map = geo.map({
                 node: '.m-map-panel-map',
-                center: this.session.sessionJsonContents.center,
-                zoom: this.session.sessionJsonContents.zoom,
+                center: mapSettings.center,
+                zoom: mapSettings.zoom,
                 interactor: geo.mapInteractor({
                     map: this.map,
                     click: {
@@ -325,9 +326,9 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     }
                 })
             });
-            this.map.createLayer(this.session.sessionJsonContents.basemap,
-                                 _.has(this.session.sessionJsonContents, 'basemap_args')
-                                 ? this.session.sessionJsonContents.basemap_args : {});
+            this.map.createLayer(mapSettings.basemap,
+                                 _.has(mapSettings, 'basemap_args')
+                                 ? mapSettings.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
