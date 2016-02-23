@@ -39,7 +39,7 @@
       sudo: yes
 
     - role: minerva
-      minerva_version: "master"
+      minerva_version: "{{ lookup('pipe', 'git rev-parse --abbrev-ref HEAD 2>/dev/null || echo master') }}"
       sudo: yes
 
   tasks:

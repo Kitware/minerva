@@ -1,11 +1,6 @@
-
 dbpath=/var/lib/mongodb
 logpath=/var/log/mongodb.log
 logappend=true
-bind_ip={{ hostvars[inventory_hostname]
-                   ["ansible_" + mongodb_net_interface]
-                   ["ipv4"]
-                   ["address"] }}
+bind_ip=0.0.0.0
 port={{ mongodb_port }}
 journal=true
-
