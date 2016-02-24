@@ -174,13 +174,13 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * Async function that loads any table data needed by this dataset to display
      * in a table view, setting that data as an attribute on this dataset named 'tableData'.
      *
-     * @fires 'minerva.dataset.table.dataLoaded' event upon the table data being loaded.
+     * @fires 'm:dataset_table_dataLoaded' event upon the table data being loaded.
      */
     loadTabularData: function () {
         // TODO looks similar enough to loadGeoData, consider unification.
         var mm = this.metadata();
         if (this.get('tableData') !== null) {
-            this.trigger('minerva.dataset.table.dataLoaded', this);
+            this.trigger('m:dataset_table_dataLoaded', this);
         } else {
             // TODO for now making the poorly supported assumption that tabular data exists.
             var fileId = mm.original_files[0]._id;
@@ -190,7 +190,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 dataType: 'text'
             }).done(_.bind(function (resp) {
                 this.set('tableData', resp);
-                this.trigger('minerva.dataset.table.dataLoaded', this);
+                this.trigger('m:dataset_table_dataLoaded', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);
                 girder.events.trigger('g:alert', {

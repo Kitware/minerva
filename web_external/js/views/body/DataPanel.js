@@ -15,7 +15,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     displayTableDataset: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        dataset.on('minerva.dataset.table.dataLoaded', function () {
+        dataset.on('m:dataset_table_dataLoaded', function () {
             new minerva.views.CsvViewerWidget({
                 el: $('#g-dialog-container'),
                 collection: this.collection,
