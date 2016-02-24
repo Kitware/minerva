@@ -333,7 +333,7 @@ module.exports = function (grunt) {
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
-            '/' + staticDir + '/geo.ext.min.js',
+            '/' + staticDir + '/minerva.geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
             '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',
