@@ -32,11 +32,17 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
     },
 
     render: function () {
-        // Add extra rows to be views in datatables
-        var EXTRA_ROWS = 10;
         // Remove the headers
         var dataTableSource = this.csv.slice(1);
-        var dataLength = this._getTotalRows(dataTableSource);
+
+        // Infinite scrolling configuration
+        var tableScrollConfig = {
+            dataSize: this._getTotalRows(dataTableSource),
+            // The amount of data that Scroller should pre-buffer
+            displayBuffer: 20,
+            // Activate vertical scrolling
+            scrollY: 400
+        };
 
         this.colNames = _.map(this.data[0], function (name) {
             return { 'title': name };
@@ -56,22 +62,23 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                 'searching': false,
                 'ajax': _.bind(function (data, callback, settings) {
                     var output = [], i, ien;
-                    for (i = data.start, ien = (data.start + data.length) + EXTRA_ROWS; i < ien; i++) {
+                    for (i = data.start, ien = data.start + data.length; i < ien; i++) {
                         output.push(dataTableSource[i]);
                     }
                     callback({
                         'draw': data.draw,
                         'data': output,
-                        'recordsTotal': dataLength,
-                        'recordsFiltered': dataLength
+                        'recordsTotal': tableScrollConfig.dataSize,
+                        'recordsFiltered': tableScrollConfig.dataSize
                     });
                 }, this),
                 'scroller': {
                     'loadingIndicator': true,
-                    'trace': true
+                    'trace': true,
+                    'displayBuffer': tableScrollConfig.displayBuffer
                 },
                 'deferRender': true,
-                'scrollY': 400,
+                'scrollY': tableScrollConfig.scrollY,
                 'dom': 'Bfrtip',
                 'buttons': [
                     {
