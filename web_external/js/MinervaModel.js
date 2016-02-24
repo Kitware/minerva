@@ -9,7 +9,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
-    /*
+    /**
      * Utility method to get this model's current minerva metadata as
      * it exists on the client, updating this model's minerva metadata to the
      * minervaMetadata param if passed, but will not save the update.
@@ -25,7 +25,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
-    /*
+    /**
      * Gets this model's current minerva metadata as it exists on the client.
      *
      * @returns {object} current minerva metadata of this model.
@@ -41,7 +41,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         }
     },
 
-    /*
+    /**
      * Sets this model's minerva metadata to the passed object, but does not save
      * the update.
      *
@@ -56,7 +56,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
         return minervaMetadata;
     },
 
-    /*
+    /**
      * Async function that saves the metadata on this model, either the current minerva
      * metadata on the model, or if a minervaMetadata param is passed, first updating the
      * minerva metadata on this model to the passed object and then saving.
