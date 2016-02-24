@@ -56,7 +56,7 @@ minerva.models.SessionModel = minerva.models.MinervaModel.extend({
      * Async function that initializes the session with minerva metadata, including some defaults
      * for the map.
      *
-     * @fires 'minerva.session.saved' event upon successful Session creation.
+     * @fires 'm:session_saved' event upon successful Session creation.
      */
     createSessionMetadata: function () {
         var metadata = this.metadata() || {};
@@ -71,19 +71,19 @@ minerva.models.SessionModel = minerva.models.MinervaModel.extend({
         map.zoom = 4;
         map.features = [];
         metadata.map = map;
-        this.on('minerva.metadata.saved', function () {
-            this.trigger('minerva.session.saved', this);
+        this.on('m:metadata_saved', function () {
+            this.trigger('m:session_saved', this);
         }, this).saveMinervaMetadata(metadata);
     },
 
     /**
      * Async function that saves the session's minerva metadata.
      *
-     * @fires 'minerva.session.saved' event upon successful Session save.
+     * @fires 'm:session_saved' event upon successful Session save.
      */
     saveSession: function () {
-        this.on('minerva.metadata.saved', function () {
-            this.trigger('minerva.session.saved', this);
+        this.on('m:metadata_saved', function () {
+            this.trigger('m:session_saved', this);
         }, this).saveMinervaMetadata();
     }
 });

@@ -26,7 +26,7 @@ minerva.views.KeymapWidget = minerva.View.extend({
 
             // save the dataset with updated metadata
             this.$('button.m-save-keymap-mapping').addClass('disabled');
-            this.dataset.once('minerva.metadata.saved', function () {
+            this.dataset.once('m:metadata_saved', function () {
                 this.dataset.on('m:geojsonCreated', function () {
                     this.$el.modal('hide');
                     // TODO is this ok to do?

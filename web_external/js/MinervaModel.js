@@ -62,7 +62,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
      * minerva metadata on this model to the passed object and then saving.
      *
      * @param {minervaMetadata} the object to set as this model's minerva metadata before saving.
-     * @fires 'minerva.metadata.saved' event upon the metadata being saved.
+     * @fires 'm:metadata_saved' event upon the metadata being saved.
      */
     saveMinervaMetadata: function (minervaMetadata) {
         if (minervaMetadata) {
@@ -74,7 +74,7 @@ minerva.models.MinervaModel = girder.models.ItemModel.extend({
             contentType: 'application/json',
             data: JSON.stringify(this.get('meta'))
         }).done(_.bind(function () {
-            this.trigger('minerva.metadata.saved', this);
+            this.trigger('m:metadata_saved', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {

@@ -70,7 +70,7 @@ minerva.views.EditSessionWidget = minerva.View.extend({
         }));
         session.on('g:saved', function () {
             this.$el.modal('hide');
-            session.on('minerva.session.saved', function () {
+            session.on('m:session_saved', function () {
                 this.trigger('g:saved', session);
             }, this);
             session.createSessionMetadata();

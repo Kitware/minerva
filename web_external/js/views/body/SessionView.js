@@ -128,7 +128,7 @@ minerva.views.SessionView = minerva.View.extend({
         this.listenTo(this.model, 'change', function () {
             this._enableSave();
         });
-        this.listenTo(this.model, 'minerva.session.saved', function () {
+        this.listenTo(this.model, 'm:session_saved', function () {
             this._disableSave();
         });
 

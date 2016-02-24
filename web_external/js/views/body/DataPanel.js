@@ -82,7 +82,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
      * Promote an Item to a Dataset, then add it to the DatasetCollection.
      */
     uploadFinished: function () {
-        this.newDataset.on('minerva.dataset.promoted', function () {
+        this.newDataset.on('m:dataset_promoted', function () {
             this.collection.add(this.newDataset);
         }, this).on('g:error', function (err) {
             console.error(err);
