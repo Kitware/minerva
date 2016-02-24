@@ -66,26 +66,26 @@ minerva.views.SessionView = minerva.View.extend({
     },
 
     getEnabledPanelGroups: function () {
-        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+        if (!_.has(this.model.metadata(), 'layout')) {
             return this.layout.panelGroups;
         }
 
         return _.filter(this.layout.panelGroups, function (panelGroup) {
-            return !(_.has(this.model.sessionJsonContents.layout, panelGroup.id) &&
-                     _.has(this.model.sessionJsonContents.layout[panelGroup.id], 'disabled') &&
-                     this.model.sessionJsonContents.layout[panelGroup.id].disabled === true);
+            return !(_.has(this.model.metadata().layout, panelGroup.id) &&
+                     _.has(this.model.metadata().layout[panelGroup.id], 'disabled') &&
+                     this.model.metadata().layout[panelGroup.id].disabled === true);
         }, this);
     },
 
     getEnabledPanelViews: function (panelGroup) {
-        if (!_.has(this.model.sessionJsonContents, 'layout')) {
+        if (!_.has(this.model.metadata(), 'layout')) {
             return panelGroup.panelViews;
         }
 
         return _.filter(panelGroup.panelViews, function (panelView) {
-            return !(_.has(this.model.sessionJsonContents.layout, panelView.id) &&
-                     _.has(this.model.sessionJsonContents.layout[panelView.id], 'disabled') &&
-                     this.model.sessionJsonContents.layout[panelView.id].disabled === true);
+            return !(_.has(this.model.metadata().layout, panelView.id) &&
+                     _.has(this.model.metadata().layout[panelView.id], 'disabled') &&
+                     this.model.metadata().layout[panelView.id].disabled === true);
         }, this);
     },
 
@@ -128,7 +128,7 @@ minerva.views.SessionView = minerva.View.extend({
         this.listenTo(this.model, 'change', function () {
             this._enableSave();
         });
-        this.listenTo(this.model, 'm:saved', function () {
+        this.listenTo(this.model, 'm:session_saved', function () {
             this._disableSave();
         });
 
@@ -202,8 +202,8 @@ minerva.views.SessionView = minerva.View.extend({
             }, this);
 
             // Restore state of collapsed panels
-            if (_.has(this.model.sessionJsonContents, 'layout')) {
-                _.each(this.model.sessionJsonContents.layout, function (panelView, panelViewId) {
+            if (_.has(this.model.metadata(), 'layout')) {
+                _.each(this.model.metadata().layout, function (panelView, panelViewId) {
                     if (_.has(panelView, 'collapsed') && panelView.collapsed === true) {
                         $('#' + panelViewId).find('i.icon-up-open').trigger('click');
                     }
@@ -224,7 +224,7 @@ minerva.router.route('session/:id', 'session', function (id) {
     var session = new minerva.models.SessionModel();
     session.set({
         _id: id
-    }).once('m:fetched', function () {
+    }).once('g:fetched', function () {
         var datasetsCollection = new minerva.collections.DatasetCollection();
         datasetsCollection.once('g:changed', function () {
             var analysisCollection = new minerva.collections.AnalysisCollection();

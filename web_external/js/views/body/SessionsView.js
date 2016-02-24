@@ -3,7 +3,7 @@ minerva.views.SessionsView = minerva.View.extend({
     events: {
         'click a.m-session-link': function (event) {
             var cid = $(event.currentTarget).attr('m-session-cid');
-            minerva.router.navigate('session/' + this.collection.get(cid).id, {trigger: true});
+            minerva.router.navigate('session/' + this.collection.get(cid).get('_id'), {trigger: true});
         },
 
         'click .m-session-create-button': 'createDialog'

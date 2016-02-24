@@ -23,7 +23,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      *
      * @param {object} params set of params to the created dataset, possibly including
      * {csvPreview}.
-     * @fires 'minerva.dataset.promoted' event upon successful Dataset promotion.
+     * @fires 'm:dataset_promoted' event upon successful Dataset promotion.
      */
     promoteToDataset: function (params) {
         girder.restRequest({
@@ -35,7 +35,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
             }
             this.metadata(resp.meta.minerva);
             this._initGeoRender();
-            this.trigger('minerva.dataset.promoted', this);
+            this.trigger('m:dataset_promoted', this);
         }, this)).error(_.bind(function (err) {
             console.error(err);
             girder.events.trigger('g:alert', {
@@ -134,7 +134,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * Async function that loads any data needed by this dataset to render in GeoJs,
      * setting that data as an attribute on this dataset named 'geoData'.
      *
-     * @fires 'minerva.dataset.geo.dataLoaded' event upon the geo data being loaded.
+     * @fires 'm:dataset_geo_dataLoaded' event upon the geo data being loaded.
      */
     loadGeoData: function () {
         var mm = this.metadata();
@@ -143,7 +143,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 // Some datasets have geojson in the metadata.
                 this.set('geoData', mm.geojson.data);
             }
-            this.trigger('minerva.dataset.geo.dataLoaded', this);
+            this.trigger('m:dataset_geo_dataLoaded', this);
         } else {
             var path = '/file/' + mm.geo_render.file_id + '/download';
             girder.restRequest({
@@ -153,7 +153,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 dataType: null
             }).done(_.bind(function (data) {
                 this.set('geoData', data);
-                this.trigger('minerva.dataset.geo.dataLoaded', this);
+                this.trigger('m:dataset_geo_dataLoaded', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);
                 girder.events.trigger('g:alert', {
