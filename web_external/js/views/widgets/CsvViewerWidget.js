@@ -95,10 +95,6 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
             table.fnSettings().oScroll.sY = tableScrollConfig.scrollY;
             table.fnDraw();
             table.fnSettings().oScroller.fnMeasure();
-            // HACK: Realign the columns after the data draw
-            _.defer(function () {
-                table.fnAdjustColumnSizing();
-            });
         }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
