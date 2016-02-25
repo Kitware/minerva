@@ -6,11 +6,20 @@ set(CTEST_SITE "Travis")
 set(CTEST_BUILD_NAME "Linux-$ENV{TRAVIS_BRANCH}")
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 set(MINERVA_COVERAGE_CONFIG "${CTEST_SOURCE_DIRECTORY}/plugins/minerva/plugin_tests/minerva.coveragerc")
+set(config_opts "")
+
+list(APPEND config_opts
+  "-DPYTHON_COVERAGE=$ENV{PY_COVG}"
+  "-DPYTHON_VERSION=$ENV{TRAVIS_PYTHON_VERSION}"
+  "-DSPARK_TEST_MASTER_URL=spark://localhost:7077"
+  "-DPYTHON_COVERAGE_CONFIG=${MINERVA_COVERAGE_CONFIG}"
+  "-DCOVERAGE_MINIMUM_PASS=69"
+  "-DJS_COVERAGE_MINIMUM_PASS=23"
+)
 
 ctest_start("Continuous")
 ctest_configure(
-  OPTIONS
-  "-DPYTHON_COVERAGE=$ENV{PY_COVG};-DPYTHON_VERSION=$ENV{TRAVIS_PYTHON_VERSION};-DSPARK_TEST_MASTER_URL=spark://localhost:7077;-DPYTHON_COVERAGE_CONFIG=${MINERVA_COVERAGE_CONFIG}"
+  OPTIONS "${config_opts}"
 )
 ctest_build()
 ctest_test(
