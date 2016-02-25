@@ -31,3 +31,9 @@ if datasets
                 - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
                 - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                 i(class=classes)&attributes(attributes)
+
+              //- Table icon for csv
+              if dataset.getDatasetType() === 'csv'
+                - var classes = 'icon-table m-display-dataset-table'
+                - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                i(class=classes)&attributes(attributes)
