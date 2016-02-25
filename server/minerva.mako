@@ -15,9 +15,7 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/jquery-ui.min.css">
     <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/jquery.dataTables.css">
-    <link rel="stylesheet"
-          href="${staticRoot}/built/plugins/minerva/buttons.dataTables.css">
+          href="${staticRoot}/built/plugins/minerva/datatables.min.css">
     <link rel="stylesheet"
           href="${staticRoot}/built/girder.app.min.css">
     % for plugin in pluginCss:
@@ -54,6 +52,7 @@
     % endfor
 
     <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/t/dt/dt-1.10.11,b-1.1.2,b-colvis-1.1.2,sc-1.4.1/datatables.min.js"></script>
 
    </body>
 </html>

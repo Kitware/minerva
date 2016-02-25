@@ -60,11 +60,15 @@ Type/Format of a dataset is independent of the source, e.g. a json file stored i
 `geojson`: A dataset that contains a geojson file or a geojson file derived from some other file that is in the Dataset.  Ideally this could be rendered by GeoJs passing it to the 'json' reader, but it isn't so simple.  Choropleth geojson needs
 to parse and postprocess the geojson specially.  If a set of points was displayed but we wanted to specify clustering properties, we would also need to do that using specific rendering properties, and couldn't just pass it to the 'json' reader.
 
+`csv`: A dataset that contains tabular, csv data.
+
 **source_type** A partial attempt at provenance tracking and a partial implementation of a replacement for Source as a domain model.  'item', 'mmwr_data_import', 'bsve_search' are examples.
 
 **original_type** The type of file originally uploaded to the Item.  A half-hearted attempt at provenance tracking.  Used for datasets that have json as the output of some analysis, but where we already know the structure of the json and can immediately convert it to some renderable type (usually geojson) using a known mapping.
 
 **geojson_file** 'name' and '_id' of a geojson file, if the Dataset has a geojson file.
+
+**csv_preview**  A preview of a small subset of csv rows from the head of the file.
 
 **json_row** An example row of a json array.  Can be used to present a mapping UI to the user, so they can select examine and select properties or trigger a conversion.
 
