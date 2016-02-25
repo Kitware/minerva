@@ -4,9 +4,26 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
         'click .delete-dataset': 'deleteDatasetEvent',
-        'click .csv-mapping': 'mapTableDataset',
+        'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender'
+    },
+
+    /**
+     * Displays the selected dataset's tabular data in a CSV viewer widget.
+     */
+    displayTableDataset: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        dataset.on('m:dataset_table_dataLoaded', function () {
+            new minerva.views.CsvViewerWidget({
+                el: $('#g-dialog-container'),
+                collection: this.collection,
+                parentView: this,
+                dataset: dataset,
+                data: dataset.get('tableData')
+            }).render();
+        }, this).loadTabularData();
     },
 
     /**
@@ -82,11 +99,32 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
      * Promote an Item to a Dataset, then add it to the DatasetCollection.
      */
     uploadFinished: function () {
-        this.newDataset.on('minerva.dataset.promoted', function () {
+        var params = {};
+        // If the file is csv, parse the first 10 rows and save in minerva metadata
+        if (this.uploadWidget.files &&
+            this.uploadWidget.files.length > 0 &&
+            this.uploadWidget.files[0].type === 'text/csv') {
+            var ROWS_PREVIEW = 10;
+            if (typeof (FileReader) !== 'undefined') {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    // get file content
+                    var csv = e.target.result;
+                    var parsedCSV = Papa.parse(csv, { skipEmptyLines: true, header: true, preview: ROWS_PREVIEW });
+                    if (parsedCSV.data) {
+                        params.csvPreview = parsedCSV.data;
+                    }
+                };
+                reader.readAsText(this.uploadWidget.files[0]);
+            } else {
+                alert('This browser does not support HTML5.');
+            }
+        }
+        this.newDataset.on('m:dataset_promoted', function () {
             this.collection.add(this.newDataset);
         }, this).on('g:error', function (err) {
             console.error(err);
-        }).promoteToDataset();
+        }).promoteToDataset(params);
     },
 
     addDatasetToSessionEvent: function (event) {

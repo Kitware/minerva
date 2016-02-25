@@ -70,9 +70,10 @@ minerva.views.EditSessionWidget = minerva.View.extend({
         }));
         session.on('g:saved', function () {
             this.$el.modal('hide');
-            session.createSessionJson(_.bind(function () {
+            session.on('m:session_saved', function () {
                 this.trigger('g:saved', session);
-            }, this));
+            }, this);
+            session.createSessionMetadata();
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.m-save-phase').removeClass('disabled');
