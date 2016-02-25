@@ -54,8 +54,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
             var table = $('table#data').dataTable({
-                'columns': this.colNames,
-                'scrollCollapse': true,
+                // 'scrollCollapse': true,
                 'serverSide': true,
                 'autoWidth': false,
                 'ordering': true,
@@ -89,12 +88,16 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                         'extend': 'colvis',
                         'columns': ':not(:first-child)'
                     }
-                ]
+                ],
+                'columns': this.colNames
             });
             $('.dataTables_scrollBody').height(tableScrollConfig.scrollY);
             table.fnSettings().oScroll.sY = tableScrollConfig.scrollY;
             table.fnDraw();
             table.fnSettings().oScroller.fnMeasure();
+            $(".dataTables_scrollHeadInner").css({"width":"100%"});
+
+            $("table.dataTable").addClass('dataTable-width');
         }, this));
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
