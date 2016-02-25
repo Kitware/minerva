@@ -39,9 +39,9 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         var tableScrollConfig = {
             dataSize: this._getTotalRows(dataTableSource),
             // The amount of data that Scroller should pre-buffer
-            displayBuffer: 20,
+            displayBuffer: 40,
             // Activate vertical scrolling
-            scrollY: 400
+            scrollY: '950px'
         };
 
         this.colNames = _.map(this.data[0], function (name) {
@@ -53,25 +53,29 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
-            $('table#data').dataTable({
+            var table = $('table#data').dataTable({
                 'columns': this.colNames,
                 'scrollCollapse': true,
                 'serverSide': true,
                 'autoWidth': false,
                 'ordering': true,
+                'jQueryUI': true,
+                'renderer': 'bootstrap',
                 'searching': false,
                 'ajax': _.bind(function (data, callback, settings) {
+                    if (data.length > tableScrollConfig.dataSize) {
+                        data.length = tableScrollConfig.dataSize;
+                    }
                     var output = [], i, ien;
                     for (i = data.start, ien = data.start + data.length; i < ien; i++) {
                         output.push(dataTableSource[i]);
                     }
                     callback({
-                        'draw': data.draw,
                         'data': output,
                         'recordsTotal': tableScrollConfig.dataSize,
                         'recordsFiltered': tableScrollConfig.dataSize
                     });
-                }, this),
+                }),
                 'scroller': {
                     'loadingIndicator': true,
                     'trace': true,
@@ -86,6 +90,14 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                         'columns': ':not(:first-child)'
                     }
                 ]
+            });
+            $('.dataTables_scrollBody').height(tableScrollConfig.scrollY);
+            table.fnSettings().oScroll.sY = tableScrollConfig.scrollY;
+            table.fnDraw();
+            table.fnSettings().oScroller.fnMeasure();
+            // HACK: Realign the columns after the data draw
+            _.defer(function () {
+                table.fnAdjustColumnSizing();
             });
         }, this));
 
