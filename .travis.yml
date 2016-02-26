@@ -3,6 +3,10 @@ python:
     - "2.7"
 #    - "3.4" For now romanesco doesn't support Python 3
 
+env:
+  - MINERVA_TEST_GROUP=server
+  - MINERVA_TEST_GROUP=client
+
 cache:
   directories:
   - $HOME/virtualenv/python2.7.9

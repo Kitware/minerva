@@ -14,25 +14,30 @@
 #  limitations under the License.
 ###############################################################################
 
-add_python_test(dataset PLUGIN minerva)
-add_python_test(source PLUGIN minerva)
-add_python_test(session PLUGIN minerva)
-add_python_test(analysis PLUGIN minerva)
-add_python_test(geonames PLUGIN minerva)
-add_python_test(s3_dataset PLUGIN minerva)
-add_python_test(s3_source PLUGIN minerva)
-add_python_test(import_analyses PLUGIN minerva)
-add_python_test(contour_analysis PLUGIN minerva)
-add_python_test(wms PLUGIN minerva)
-add_python_test(elasticsearch PLUGIN minerva)
-add_python_test(geojson PLUGIN minerva)
-add_python_test(postgres PLUGIN minerva)
-add_python_test(mongo_dataset PLUGIN minerva)
+function(add_minerva_server_test name)
+  add_python_test("${name}" PLUGIN minerva)
+  set_property(TEST "server_minerva.${name}" PROPERTY LABELS minerva_server)
+endfunction()
+
+add_minerva_server_test(dataset)
+add_minerva_server_test(source)
+add_minerva_server_test(session)
+add_minerva_server_test(analysis)
+add_minerva_server_test(geonames)
+add_minerva_server_test(s3_dataset)
+add_minerva_server_test(s3_source)
+add_minerva_server_test(import_analyses)
+add_minerva_server_test(contour_analysis)
+add_minerva_server_test(wms)
+add_minerva_server_test(elasticsearch)
+add_minerva_server_test(geojson)
+add_minerva_server_test(postgres)
+add_minerva_server_test(mongo_dataset)
 
 
 set(SPARK_TEST_MASTER_URL  "" CACHE STRING "Spark master URL")
 if (SPARK_TEST_MASTER_URL)
-    add_python_test(mean_contour_analysis PLUGIN minerva)
+    add_minerva_server_test(mean_contour_analysis)
     set_property(TEST server_minerva.mean_contour_analysis APPEND PROPERTY ENVIRONMENT "SPARK_TEST_MASTER_URL=${SPARK_TEST_MASTER_URL}")
 endif()
 
@@ -67,3 +72,13 @@ add_web_client_test(
     BASEURL "/static/built/testEnvMinerva.html"
     TEST_MODULE "plugin_tests.web_client_test"
 )
+set_property(TEST web_client_minerva PROPERTY LABELS minerva_client)
+
+set_property(TEST js_coverage_reset APPEND PROPERTY LABELS minerva_client)
+set_property(TEST js_coverage_combine_report APPEND PROPERTY LABELS minerva_client)
+
+set_property(TEST py_coverage_reset APPEND PROPERTY LABELS minerva_server)
+set_property(TEST py_coverage_combine APPEND PROPERTY LABELS minerva_server)
+set_property(TEST py_coverage APPEND PROPERTY LABELS minerva_server)
+set_property(TEST py_coverage_html APPEND PROPERTY LABELS minerva_server)
+set_property(TEST py_coverage_xml APPEND PROPERTY LABELS minerva_server)
