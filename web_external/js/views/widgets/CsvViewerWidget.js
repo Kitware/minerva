@@ -91,11 +91,8 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                 ],
                 'columns': this.colNames
             });
-            $('.dataTables_scrollBody').height(tableScrollConfig.scrollY);
-            table.fnSettings().oScroll.sY = tableScrollConfig.scrollY;
-            table.fnDraw();
-            table.fnSettings().oScroller.fnMeasure();
-            // HACK: Attempt to fix headers miss alignment
+            // HACK to fix headers misalignment
+            $('table').css('table-layout', 'fixed');
             $('.dataTables_scrollHeadInner').css({'width': '100%'});
             $('table.dataTable').addClass('dataTable-width');
         }, this));
