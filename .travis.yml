@@ -3,6 +3,10 @@ python:
     - "2.7"
 #    - "3.4" For now romanesco doesn't support Python 3
 
+env:
+  - MINERVA_TEST_GROUP=server
+  - MINERVA_TEST_GROUP=client
+
 cache:
   directories:
   - $HOME/virtualenv/python2.7.9
@@ -107,5 +111,5 @@ install:
     - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
 
 script:
-    - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
+    - JASMINE_TIMEOUT=15000 PYTHONPATH="$PYTHONPATH:$GIRDER_SOURCE_DIR/plugins/minerva" ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
     - if [ -f _build/test_failed ] ; then false ; fi
