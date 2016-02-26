@@ -19,6 +19,20 @@ function(add_minerva_server_test name)
   set_property(TEST "server_minerva.${name}" PROPERTY LABELS minerva_server)
 endfunction()
 
+function(add_minerva_python_style_test name path)
+  set(test_name "pep8_style_minerva_${name}")
+  add_python_style_test("${test_name}" "${PROJECT_SOURCE_DIR}/plugins/minerva/${path}")
+  set_property(TEST "${test_name}" PROPERTY LABELS minerva_server)
+endfunction()
+
+function(add_minerva_eslint_test name path)
+  add_eslint_test(
+    "${name}" "${PROJECT_SOURCE_DIR}/plugins/minerva/${path}"
+    ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/plugins/minerva/.eslintrc.js"
+  )
+  set_property(TEST "eslint_${name}" PROPERTY LABELS minerva_client)
+endfunction()
+
 add_minerva_server_test(dataset)
 add_minerva_server_test(source)
 add_minerva_server_test(session)
@@ -43,28 +57,15 @@ endif()
 
 
 
-add_python_style_test(pep8_style_minerva_constants
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/constants.py")
-add_python_style_test(pep8_style_minerva_geonames
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/geonames")
-add_python_style_test(pep8_style_minerva_rest
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/rest")
-add_python_style_test(pep8_style_minerva_utility
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/utility")
-add_python_style_test(pep8_style_minerva_bsve
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/utility/bsve")
-add_python_style_test(pep8_style_minerva_jobs
-                      "${PROJECT_SOURCE_DIR}/plugins/minerva/server/jobs")
+add_minerva_python_style_test(constants "server/constants.py")
+add_minerva_python_style_test(geonames "server/geonames")
+add_minerva_python_style_test(rest "server/rest")
+add_minerva_python_style_test(utility "server/utility")
+add_minerva_python_style_test(bsve "server/utility/bsve")
+add_minerva_python_style_test(jobs "server/jobs")
 
-add_eslint_test(
-  minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/web_external/js"
-  ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/plugins/minerva/.eslintrc.js"
-)
-
-add_eslint_test(
-  minerva-gruntfile "${PROJECT_SOURCE_DIR}/plugins/minerva/Gruntfile.js"
-  ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/plugins/minerva/.eslintrc.js"
-)
+add_minerva_eslint_test(minerva "web_external/js")
+add_minerva_eslint_test(minerva-gruntfile "Gruntfile.js")
 
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
