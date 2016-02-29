@@ -141,6 +141,16 @@ module.exports = function (grunt) {
             }
         },
         copy: {
+            'assets': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.external %>/assets/',
+                        src: ['*.png'],
+                        dest: '<%= plugin.minerva.static %>/assets/'
+                    }
+                ]
+            },
             'papaparse': {
                 files: [
                     {
@@ -234,6 +244,9 @@ module.exports = function (grunt) {
             }
         },
         init: {
+            'copy:assets': {
+                dependencies: []
+            },
             'shell:minerva-geojs-build': {
                 dependencies: ['shell:plugin-install']
             },
