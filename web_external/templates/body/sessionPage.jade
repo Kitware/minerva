@@ -1,4 +1,6 @@
 .m-session-header
+  .m-session-title= session.get('name')
+  .m-session-description= session.get('description')
   .m-session-header-buttons
     if (accessLevel >= girder.AccessType.WRITE)
       button.m-save-session-button.btn.bn-small(title="Save session", disabled="disabled")
@@ -27,8 +29,4 @@
                 a.m-delete-session(role="menuitem")
                   i.icon-trash
                   | Delete session
-
-  .m-session-title= session.get('name')
-  .m-session-description= session.get('description')
-
 #m-panel-groups

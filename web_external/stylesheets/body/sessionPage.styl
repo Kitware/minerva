@@ -1,19 +1,25 @@
 .m-session-header
-  padding 12px 15px
-  margin-bottom 10px
-  padding-bottom 5px
-  min-height 40px
+  display flex
+  align-items center
+  position absolute
+  top $headerHeight
+  left $leftColWidth
+  right 0
+  padding .5em 1em 
+  background-color rgba(242,239,233,.7);
+  z-index 9 
 
   .m-session-title
-    font-weight bold
-    font-size 21px
-    color #222
+    flex 1
+    font-size 1.2em
+    color #333
 
   .m-session-description
-    color #666
+    flex 1
+    color #333
 
   .m-session-header-buttons
-    float right
+    //float right
 
   .m-save-session-button
     margin-right 10px
