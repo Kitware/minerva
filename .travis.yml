@@ -28,6 +28,9 @@ addons:
     - libnetcdf-dev
 
 before_install:
+    # update pip for binary wheel caching
+    - pip install -U pip virtualenv
+
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
     - cd $HOME/build
