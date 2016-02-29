@@ -131,14 +131,6 @@ module.exports = function (grunt) {
             }
         },
         shell: {
-            'minerva-geojs-install': {
-                command: 'npm install --only=prod',
-                options: {
-                    execOptions: {
-                        cwd: '<%= plugin.minerva.geojs %>'
-                    }
-                }
-            },
             'minerva-geojs-build': {
                 command: 'npm run build',
                 options: {
@@ -242,32 +234,29 @@ module.exports = function (grunt) {
             }
         },
         init: {
-            'shell:minerva-geojs-install': {
-                dependencies: ['shell:plugin-install']
-            },
             'shell:minerva-geojs-build': {
-                dependencies: ['shell:minerva-geojs-install']
+                dependencies: ['shell:plugin-install']
             },
             'copy:papaparse': {
                 dependencies: []
             },
             'copy:geojs': {
-                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+                dependencies: ['shell:minerva-geojs-build']
             },
             'copy:minerva-fontello': {
                 dependencies: []
             },
             'copy:jquery-ui': {
-                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build']
+                dependencies: ['shell:minerva-geojs-build']
             },
             'copy:dataTables': {
                 dependencies: []
             },
             'uglify:minerva-ext': {
-                dependencies: ['shell:minerva-geojs-install']
+                dependencies: ['shell:plugin-install']
             },
             'concat:minerva-ext': {
-                dependencies: ['shell:minerva-geojs-install', 'shell:minerva-geojs-build', 'copy:papaparse', 'copy:geojs', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
+                dependencies: ['shell:minerva-geojs-build', 'copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
             }
         },
         default: {
@@ -327,9 +316,10 @@ module.exports = function (grunt) {
         var i, plugin, pluginJs, pluginCss;
         var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
         var dependencies = [
-            '/clients/web/test/testUtils.js',
             '/clients/web/static/built/libs.min.js',
-            '/' + staticDir + '/geo.ext.min.js',
+            '/test/minerva/minervaTestUtils.js',
+            '/clients/web/test/testUtils.js',
+            '/' + staticDir + '/minerva.geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
             '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',
