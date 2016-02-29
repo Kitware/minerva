@@ -54,7 +54,6 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
             $('table#data').dataTable({
-                // 'scrollCollapse': true,
                 'serverSide': true,
                 'autoWidth': false,
                 'ordering': true,
