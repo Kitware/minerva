@@ -70,15 +70,7 @@ before_install:
     - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
 
     # install spark
-    - cd $HOME
-    - wget http://www.scala-lang.org/files/archive/scala-2.10.5.tgz
-    - tar xzvf scala-2.10.5.tgz -C ~
-    - export SCALA_HOME=$HOME/scala-2.10.5
-    - export PATH=$PATH:$SCALA_HOME/bin
-    # spark may be cached
-    - export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
-    - if [ ! -f $SPARK_HOME/sbin/start-master.sh ]; then wget http://d3kbcqa49mib13.cloudfront.net/spark-1.3.1-bin-hadoop2.4.tgz; fi
-    - if [ ! -f $SPARK_HOME/sbin/start-master.sh ]; then tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~; fi
+    - CACHE=$HOME/.cache SCALA_VERSION=2.10.5 SPARK_VERSION=1.3.1 source $HOME/build/girder/plugins/minerva/.travis/install_spark.sh
     - export SPARK_MASTER_IP=localhost
     - $SPARK_HOME/sbin/start-master.sh
     - sleep 3
