@@ -1,3 +1,6 @@
+/* NOTE: This file has been modified as part of the fix to the misaligned header of dataTable.
+   Changes compared to the downloaded version:
+   div.DTS tbody td{white-space:nowrap} becomes div.DTS tbody td{white-space:pre-wrap}
 /*
  * This combined file was created by the DataTables downloader builder:
  *   https://datatables.net/download
