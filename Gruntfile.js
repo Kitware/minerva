@@ -115,7 +115,7 @@ module.exports = function (grunt) {
                         src: [
                             '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
                             '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
-                            '<%= plugin.minerva.geojs %>/node_modules/pnltri/pnltri.js'
+                            '<%= plugin.minerva.root %>/node_modules/pnltri/pnltri.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.geo.ext.min.js'
                     },
@@ -128,16 +128,6 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
                     }
                 ]
-            }
-        },
-        shell: {
-            'minerva-geojs-build': {
-                command: 'npm run build',
-                options: {
-                    execOptions: {
-                        cwd: '<%= plugin.minerva.geojs %>'
-                    }
-                }
             }
         },
         copy: {
@@ -156,7 +146,7 @@ module.exports = function (grunt) {
 
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/dist/built',
+                        cwd: '<%= plugin.minerva.geojs %>',
                         src: ['geo.min.js'],
                         dest: '<%= plugin.minerva.static %>'
                     }
@@ -234,29 +224,26 @@ module.exports = function (grunt) {
             }
         },
         init: {
-            'shell:minerva-geojs-build': {
-                dependencies: ['shell:plugin-install']
-            },
             'copy:papaparse': {
                 dependencies: []
             },
             'copy:geojs': {
-                dependencies: ['shell:minerva-geojs-build']
+                dependencies: ['shell:plugin-minerva']
             },
             'copy:minerva-fontello': {
                 dependencies: []
             },
             'copy:jquery-ui': {
-                dependencies: ['shell:minerva-geojs-build']
+                dependencies: ['shell:plugin-minerva']
             },
             'copy:dataTables': {
                 dependencies: []
             },
             'uglify:minerva-ext': {
-                dependencies: ['shell:plugin-install']
+                dependencies: ['shell:plugin-minerva']
             },
             'concat:minerva-ext': {
-                dependencies: ['shell:minerva-geojs-build', 'copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
+                dependencies: ['copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
             }
         },
         default: {
@@ -285,13 +272,9 @@ module.exports = function (grunt) {
                 files: _.pluck(grunt.config.get('uglify.minerva.files'), 'src'),
                 tasks: ['uglify:minerva']
             },
-            'plugin-minerva-build-geojs': {
-                files: ['<%= plugin.minerva.geojs %>/**/*.js'],
-                tasks: ['shell:minerva-geojs']
-            },
             'plugin-minerva-copy-geojs': {
                 files: [
-                    '<%= plugin.minerva.geojs %>/dist/built/geo.min.js'
+                    '<%= plugin.minerva.geojs %>/geo.min.js'
                 ],
                 tasks: ['copy:geojs']
             }
