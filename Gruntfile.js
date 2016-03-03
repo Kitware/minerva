@@ -115,7 +115,7 @@ module.exports = function (grunt) {
                         src: [
                             '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
                             '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
-                            '<%= plugin.minerva.geojs %>/node_modules/pnltri/pnltri.js'
+                            '<%= plugin.minerva.root %>/node_modules/pnltri/pnltri.js'
                         ],
                         dest: '<%= plugin.minerva.static %>/minerva.geo.ext.min.js'
                     },
