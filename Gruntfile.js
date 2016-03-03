@@ -225,19 +225,19 @@ module.exports = function (grunt) {
         },
         init: {
             'copy:papaparse': {
-                dependencies: []
+                dependencies: ['shell:plugin-minerva']
             },
             'copy:geojs': {
                 dependencies: ['shell:plugin-minerva']
             },
             'copy:minerva-fontello': {
-                dependencies: []
+                dependencies: ['shell:plugin-minerva']
             },
             'copy:jquery-ui': {
                 dependencies: ['shell:plugin-minerva']
             },
             'copy:dataTables': {
-                dependencies: []
+                dependencies: ['shell:plugin-minerva']
             },
             'uglify:minerva-ext': {
                 dependencies: ['shell:plugin-minerva']
