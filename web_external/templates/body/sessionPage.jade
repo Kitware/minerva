@@ -1,5 +1,15 @@
 .m-session-header
-  .m-session-title= session.get('name')
+  .m-sessions-list
+    .m-sessions-list-button.dropdown-toggle(
+        data-toggle="dropdown", title="Sessions list")
+      .m-session-title.= session.get('name') 
+        i.icon-angle-circled-down
+    ul.m-sessions-list-menu.dropdown-menu
+      li(role="presentation")
+        a(role="menuitem")
+          session name1
+      li(role="presentation")
+          session name2
   .m-session-description= session.get('description')
   .m-session-header-buttons
     if (accessLevel >= girder.AccessType.WRITE)
@@ -15,6 +25,10 @@
             |  Actions
             i.icon-down-dir
           ul.m-session-actions-menu.dropdown-menu.pull-right(role="menu")
+            li(role="presentation")
+              a.m-add-session(role="menuitem")
+                i.icon-plus
+                | New session
             li(role="presentation")
               a.m-edit-session(role="menuitem")
                 i.icon-edit
