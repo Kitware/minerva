@@ -5,11 +5,10 @@
       .m-session-title.= session.get('name') 
         i.icon-angle-circled-down
     ul.m-sessions-list-menu.dropdown-menu
-      li(role="presentation")
-        a(role="menuitem")
-          session name1
-      li(role="presentation")
-          session name2
+      each session in sessionsList
+        li(role="presentation")
+          a.m-session-link(m-session-cid="#{session.cid}")= session.get('name')
+          .m-session-description= session.get('description')
   .m-session-description= session.get('description')
   .m-session-header-buttons
     if (accessLevel >= girder.AccessType.WRITE)

@@ -42,6 +42,10 @@ minerva.views.SessionView = minerva.View.extend({
                     });
                 }, this)
             });
+        },
+        'click a.m-session-link': function (event) {
+            var cid = $(event.currentTarget).attr('m-session-cid');
+            minerva.router.navigate('session/' + this.collection.get(cid).get('_id'), {trigger: true});
         }
     },
 
@@ -123,6 +127,16 @@ minerva.views.SessionView = minerva.View.extend({
     },
 
     initialize: function (settings) {
+        girder.cancelRestRequests('fetch');
+        this.collection = new minerva.collections.SessionCollection();
+        if (girder.currentUser) {
+            this.collection.fetch();
+        } else {
+            this.render();
+        }
+        this.collection.on('g:changed', function () {
+            this.render();
+        }, this);
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;
         this.analysisCollection = settings.analysisCollection;
@@ -198,9 +212,14 @@ minerva.views.SessionView = minerva.View.extend({
         // TODO different approach could be load the page
         // and adjust whatever is needed after access is loaded
         // just set some minimum default and let the page render
+        var sessionsList = _.filter(this.collection.models, function (model) {
+            return this.model.get('_id') !== model.get('_id');
+        }, this);
+
         this.model.getAccessLevel(_.bind(function (accessLevel) {
             this.$el.html(minerva.templates.sessionPage({
                 session: this.model,
+                sessionsList: sessionsList,
                 accessLevel: accessLevel,
                 girder: girder
             }));
