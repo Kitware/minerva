@@ -1,17 +1,11 @@
 minerva.views.SessionView = minerva.View.extend({
 
     events: {
+        'click a.m-add-session': function () {
+            this._createNewSession();
+        },
         'click a.m-edit-session': function () {
-            if (!this.editSessionWidget) {
-                this.editSessionWidget = new minerva.views.EditSessionWidget({
-                    el: $('#g-dialog-container'),
-                    model: this.model,
-                    parentView: this
-                }).on('g:saved', function () {
-                    this.render();
-                }, this);
-            }
-            this.editSessionWidget.render();
+            this._editSession();
         },
         'click button.m-save-session-button': function () {
             this.model.saveSession();
@@ -49,6 +43,30 @@ minerva.views.SessionView = minerva.View.extend({
                 }, this)
             });
         }
+    },
+
+    _createNewSession: function () {
+        new minerva.views.EditSessionWidget({
+            el: $('#g-dialog-container'),
+            parentView: this,
+            parentCollection: this.collection
+        }).on('g:saved', function (session) {
+            this.collection.add(session);
+            this._gotoSession(session);
+        }, this).render();
+    },
+
+    _editSession: function () {
+        if (!this.editSessionWidget) {
+            this.editSessionWidget = new minerva.views.EditSessionWidget({
+                el: $('#g-dialog-container'),
+                model: this.model,
+                parentView: this
+            }).on('g:saved', function () {
+                this.render();
+            }, this);
+        }
+        this.editSessionWidget.render();
     },
 
     _gotoSession: function (session) {
