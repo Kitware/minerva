@@ -37,8 +37,29 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         // This will re-render the panel to update icons/text
         girder.eventStream.on('g:event.cluster.status', function (e) {
             var cluster = this.collection.get(e.data._id);
-            cluster.set('status', e.data.status);
-            this.render();
+
+            if (cluster) {
+                if (Number.isInteger(e.data.status)) {
+                cluster.set('status',  {
+                    0:   'creating',
+                    10:  'created',
+                    20:  'launching',
+                    30:  'launched',
+                    40:  'provisioning',
+                    50:  'provisioned',
+                    60:  'terminating',
+                    70:  'terminated',
+                    101: 'stopped',
+                    102: 'running'}[e.data.status]);
+
+                    if (_.isUndefined(cluster.get('status'))) {
+                        cluster.set('status', 'error');
+                    }
+                } else {
+                    cluster.set('status', e.data.status);
+                }
+                this.render();
+            }
         }, this);
 
         this.collection.fetch();

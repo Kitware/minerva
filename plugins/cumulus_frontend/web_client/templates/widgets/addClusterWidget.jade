@@ -12,9 +12,6 @@
               label.control-label(for="m-cluster-name") Cluster Name
               input.input-sm#m-cluster-name.form-control(type="text", placeholder="Cluster name")
             .form-group
-              label.control-label(for="m-cluster-aws-keyname") AWS Keyname
-              input.input-sm#m-cluster-aws-keyname.form-control(type="text", placeholder="AWS Keyname")
-            .form-group
               label.control-label(for="m-cluster-instance-type") Instance Type
               select.input-sm#m-cluster-instance-type.form-control
                 each instanceType in instanceTypes
@@ -22,6 +19,9 @@
             .form-group
               label.control-label(for="m-cluster-instance-count") Instance Count
               input.input-sm#m-cluster-instance-count.form-control(type="text", placeholder="1", value="1")
+            .form-group
+              label.control-label(for="m-cluster-ami") AMI
+              input.input-sm#m-cluster-ami.form-control(type="text", placeholder="ami-id")
             .g-validation-failed-message
 
       .modal-footer

@@ -21,19 +21,20 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         // Defaults
         var params = {
             type: 'ansible',
-            template: {
-                playbook: 'default'
-            },
+            playbook: 'default',
+            cluster_config: {},
             profile: this.profileId
         };
 
         // Deep copy
         $.extend(true, params, {
             name: this.$('#m-cluster-name').val(),
-            template: {
-                aws_keyname: this.$('#m-cluster-aws-keyname').val(),
-                instance_type: this.$('#m-cluster-instance-type').val(),
-                instance_count: this.$('#m-cluster-instance-count').val()
+            cluster_config: {
+                master_instance_type: this.$('#m-cluster-instance-type').val(),
+                node_instance_type: this.$('#m-cluster-instance-type').val(),
+                node_instance_count: this.$('#m-cluster-instance-count').val(),
+                master_instance_ami: this.$('#m-cluster-ami').val(),
+                node_instance_ami: this.$('#m-cluster-ami').val()
             }
         });
 
