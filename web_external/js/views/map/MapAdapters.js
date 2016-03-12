@@ -26,12 +26,16 @@ minerva.models.MapLayerModel = Backbone.Model.extend({
 });
 
 /** */
-minerva.models.GeojsonMapLayerModel = minerva.models.MapLayerModel.extend({
+minerva.models.ReaderMapLayerModel = minerva.models.MapLayerModel.extend({
+    defaults: {
+        readerType: 'jsonReader'
+    },
+
     /** */
     renderable: function () {
         this.dataset.once('m:dataset_geo_dataLoaded', function () {
             try {
-                var reader = geo.createFileReader('jsonReader', {layer: this.geoJsLayer});
+                var reader = geo.createFileReader(this.get('readerType'), {layer: this.geoJsLayer});
                 reader.read(this.dataset.get('geoData'), _.bind(function () {
                     this.trigger('m:map_layer_renderable');
                 }, this));
@@ -44,7 +48,16 @@ minerva.models.GeojsonMapLayerModel = minerva.models.MapLayerModel.extend({
             }
         }, this);
         this.dataset.loadGeoData();
-    },
+    }
+});
+
+/** */
+minerva.models.GeojsonMapLayerModel = minerva.models.ReaderMapLayerModel.extend({});
+/** */
+minerva.models.ContourjsonMapLayerModel = minerva.models.ReaderMapLayerModel.extend({
+    defaults: {
+        readerType: 'contourJsonReader'
+    }
 });
 
 /** */
@@ -55,6 +68,17 @@ minerva.views.MapAdapter.geojson = {
     /** */
     createMapLayer: function (dataset, adapter, geoJsMap) {
         return new minerva.models.GeojsonMapLayerModel({
+            dataset: dataset,
+            adapter: adapter,
+            geoJsLayer: geoJsMap.createLayer('feature')
+        });
+    }
+};
+/** */
+minerva.views.MapAdapter.contour = {
+    /** */
+    createMapLayer: function (dataset, adapter, geoJsMap) {
+        return new minerva.models.ContourjsonMapLayerModel({
             dataset: dataset,
             adapter: adapter,
             geoJsLayer: geoJsMap.createLayer('feature')
