@@ -56,6 +56,27 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 }, this).once('m:map_layer_renderError', function () {
                     this.map.deleteLayer(layer.geoJsLayer);
                 }, this).renderable();
+
+                // => MapLayerView
+                // Something like
+                //
+                // var mapAdapter = minerva.views.MapAdapter[renderType];
+                // var adapter = {colorMap: colorMap};
+                // var mapLayerModel = mapAdapter.createMapLayerModel(dataset, adapter);
+                // var mapLayerView = mapAdapter.createMapLayerView(mapLayerModel, this);
+                // this.datasetLayers[dataset.get('_id')] = {
+                //     model: mapLayerModel,
+                //     view: mapLayerView
+                // };
+                // mapLayerModel.once('m:map_layer_renderable', function () {
+                //    this.map.draw();
+                //}, this).once('m:map_layer_renderError', function () {
+                //    this.removeLayer(dataset.get('_id'));
+                //}, this).renderable();
+                //
+                // Possibly even better would be to have
+                // mapModel = new MapModel(mapLayerModelList)
+                // new MapPanel(mapModel)
             }
         }
     },
