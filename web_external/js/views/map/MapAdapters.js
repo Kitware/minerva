@@ -11,6 +11,24 @@ minerva.models.MapLayerModel = Backbone.Model.extend({
 
     /** */
     renderable: function () {
+        this.trigger('m:map_layer_renderError');
+    },
+
+    /** */
+    deleteLayer: function (geoJsMap) {
+        geoJsMap.deleteLayer(this.geoJsLayer);
+    },
+
+    /** */
+    setOpacity: function (opacity) {
+        this.geoJsLayer.opacity(opacity);
+    }
+});
+
+/** */
+minerva.models.GeojsonMapLayerModel = minerva.models.MapLayerModel.extend({
+    /** */
+    renderable: function () {
         this.dataset.once('m:dataset_geo_dataLoaded', function () {
             try {
                 var reader = geo.createFileReader('jsonReader', {layer: this.geoJsLayer});
@@ -27,16 +45,6 @@ minerva.models.MapLayerModel = Backbone.Model.extend({
         }, this);
         this.dataset.loadGeoData();
     },
-
-    /** */
-    deleteLayer: function (geoJsMap) {
-        geoJsMap.deleteLayer(this.geoJsLayer);
-    },
-
-    /** */
-    setOpacity: function (opacity) {
-        this.geoJsLayer.opacity(opacity);
-    }
 });
 
 /** */
@@ -46,7 +54,7 @@ minerva.views.MapAdapter = {};
 minerva.views.MapAdapter.geojson = {
     /** */
     createMapLayer: function (dataset, adapter, geoJsMap) {
-        return new minerva.models.MapLayerModel({
+        return new minerva.models.GeojsonMapLayerModel({
             dataset: dataset,
             adapter: adapter,
             geoJsLayer: geoJsMap.createLayer('feature')
