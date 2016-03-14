@@ -48,25 +48,32 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
         // the event stream
         this.listenTo(this.model, 'remove', _.bind(this._destroy, this));
 
-        // If the compute resource is working, then we'll be populating
-        // the user friendly logs as they come in.
-        // Otherwise we need to user-friendly-itize them now
-        if (this.model.hasPendingOperation()) {
-            this.startEventStream();
-        } else {
-            this.model.set('log', []);
-            this.model.set('abbrev_log', []);
 
-            girder.restRequest({
-                path: '/clusters/' + this.model.id + '/log'
-            }).done(_.bind(function (resp) {
-                this.model.set('log', resp.log);
+        this.model.set('log', []);
+        this.model.set('abbrev_log', []);
 
-                _.each(resp.log, _.bind(function (msg) {
-                    this.processLogEvent(msg);
-                }, this));
+        girder.restRequest({
+            path: '/clusters/' + this.model.id + '/log'
+        }).done(_.bind(function (resp) {
+            this.model.set('log', resp.log, { silent: true });
+
+            /**
+             * If pulling a clusters entire log history at once, each processLogEvent
+             * call will trigger change on the model - re-rendering the modal. This
+             * is fine when logs are coming in one at a time, but when loading the
+             * modal and fetching (potentially) hundreds of logs this becomes
+             * unusable. Trigger a change on the model once after fetching all logs.
+             **/
+            _.each(resp.log, _.bind(function (msg) {
+                this.processLogEvent(msg, true);
             }, this));
-        }
+
+            this.model.trigger('change');
+
+            if (this.model.hasPendingOperation()) {
+                this.startEventStream();
+            }
+        }, this));
 
         return this;
     },
@@ -104,7 +111,6 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
      **/
     startEventStream: function () {
         if (!_.has(this, 'eventStream')) {
-            this.model.set('abbrev_log', []);
             this.eventStream = new girder.EventStream({
                 streamPath: '/clusters/' + this.model.id + '/log/stream'
             });
@@ -121,19 +127,21 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
      * This processes an event thrown by a log (i.e. ansible playbooks).
      * It formats it into a user friendly log.
      **/
-    processLogEvent: function (event) {
+    processLogEvent: function (event, inhibitEvents) {
+        var setOptions = (inhibitEvents === true) ? { silent: true }: {}
+
         if (event.status === 'starting') {
             this.model.set('abbrev_log',
                            this.model.get('abbrev_log').concat({
                                message: event.message
-                           }));
+                           }), setOptions);
         } else {
-            var logs = _.clone(this.model.get('abbrev_log'));
+            var logs = this.model.get('abbrev_log');
             logs[logs.length - 1].status = event.status;
-            this.model.set('abbrev_log', logs);
+            this.model.set('abbrev_log', logs, setOptions);
         }
 
-        this.model.set('log', this.model.get('log').concat(event));
+        this.model.set('log', this.model.get('log').concat(event), setOptions);
     },
 
     _destroy: function () {
