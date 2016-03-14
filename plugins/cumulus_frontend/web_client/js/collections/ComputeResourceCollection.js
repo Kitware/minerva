@@ -13,6 +13,10 @@ minerva.models.ComputeResourceModel = girder.Model.extend({
     hasPendingOperation: function () {
         return _.contains(['creating', 'launching', 'provisioning', 'terminating'],
                           this.get('status'));
+    },
+
+    isProvisionable: function () {
+        return _.contains(['launched', 'provisioned', 'running'], this.get('status'));
     }
 });
 

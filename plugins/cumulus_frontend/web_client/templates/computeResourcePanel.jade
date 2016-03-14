@@ -11,9 +11,13 @@ include ../../../minerva/web_external/templates/layout/panelMixins.jade
       - var attributes = {'m-resource-id': resource.get('_id')}
       .m-resource
         .m-cluster-details&attributes(attributes)= resource.get('name') + '-' + resource.get('status')
-          if resource.hasPendingOperation()
-            i(class='icon-spin5 animate-spin', style='float:right')&attributes(attributes)
-          else if resource.get('status') == 'terminated'
-            i(class='icon-cancel m-remove-cluster', style='float:right')&attributes(attributes)
-          else
-            i(class='icon-off m-terminate-cluster', style='float:right')&attributes(attributes)
+          .m-cluster-actions(style='float:right')
+            if resource.hasPendingOperation()
+              i(class='icon-spin5 animate-spin')&attributes(attributes)
+            else if resource.get('status') == 'terminated'
+              i(class='icon-cancel m-remove-cluster')&attributes(attributes)
+            else if resource.isProvisionable()
+              i(class='icon-tasks m-provision-cluster', title='Provision Cluster')&attributes(attributes)
+              i(class='icon-off m-terminate-cluster')&attributes(attributes)
+            else
+              i(class='icon-off m-terminate-cluster')&attributes(attributes)

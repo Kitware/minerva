@@ -21,6 +21,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
     events: {
         'click .m-add-computeresource': 'addComputeResourceDialog',
         'click .m-cluster-details': 'viewClusterDetails',
+        'click .m-provision-cluster': 'provisionCluster',
         'click .m-terminate-cluster': 'terminateCluster',
         'click .m-remove-cluster': 'removeCluster'
     },
@@ -91,6 +92,24 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
             model: resource,
             parentView: this
         }).render(true);
+    },
+
+    provisionCluster: function (e) {
+        var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
+        e.stopPropagation();
+
+        if (resource.isProvisionable()) {
+            girder.restRequest({
+                path: '/clusters/' + resource.id + '/provision',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    playbook: 'gridengine/site'
+                })
+            }).done(_.bind(function (response) {
+                console.log(response);
+            })).error(console.error);
+        }
     },
 
     terminateCluster: function (e) {

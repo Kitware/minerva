@@ -21,7 +21,7 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         // Defaults
         var params = {
             type: 'ansible',
-            playbook: 'default',
+            playbook: 'sge',
             cluster_config: {},
             profile: this.profileId
         };
