@@ -12,6 +12,9 @@
               label.control-label(for="m-cluster-name") Cluster Name
               input.input-sm#m-cluster-name.form-control(type="text", placeholder="Cluster name")
             .form-group
+              label.control-label(for="m-cluster-user") Cluster User
+              input.input-sm#m-cluster-user.form-control(type="text", placeholder="Cluster user")
+            .form-group
               label.control-label(for="m-cluster-instance-type") Instance Type
               select.input-sm#m-cluster-instance-type.form-control
                 each instanceType in instanceTypes

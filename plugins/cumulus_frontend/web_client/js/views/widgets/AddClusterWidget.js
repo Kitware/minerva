@@ -34,7 +34,8 @@ minerva.views.AddClusterWidget = minerva.View.extend({
                 node_instance_type: this.$('#m-cluster-instance-type').val(),
                 node_instance_count: this.$('#m-cluster-instance-count').val(),
                 master_instance_ami: this.$('#m-cluster-ami').val(),
-                node_instance_ami: this.$('#m-cluster-ami').val()
+                node_instance_ami: this.$('#m-cluster-ami').val(),
+                user: this.$('#m-cluster-user').val()
             }
         });
 
