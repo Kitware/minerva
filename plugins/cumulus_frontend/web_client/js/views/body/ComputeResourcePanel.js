@@ -116,7 +116,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
         e.stopPropagation();
 
-        if (!_.contains(['error', 'terminating', 'terminated'], resource.get('status'))) {
+        if (!_.contains(['terminating', 'terminated'], resource.get('status'))) {
             girder.restRequest({
                 path: '/clusters/' + resource.id + '/terminate',
                 type: 'PUT'
