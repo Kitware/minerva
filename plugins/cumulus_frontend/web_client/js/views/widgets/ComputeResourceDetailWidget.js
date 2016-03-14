@@ -37,7 +37,7 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
         // any event stream that might be open since we won't be receiving any more
         // messages.
         this.listenTo(this.model, 'change', _.bind(function () {
-            if (!this.model.isWorking() && _.has(this, 'eventStream')) {
+            if (!this.model.hasPendingOperation() && _.has(this, 'eventStream')) {
                 this.eventStream.close();
             }
 
@@ -51,7 +51,7 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
         // If the compute resource is working, then we'll be populating
         // the user friendly logs as they come in.
         // Otherwise we need to user-friendly-itize them now
-        if (this.model.isWorking()) {
+        if (this.model.hasPendingOperation()) {
             this.startEventStream();
         } else {
             this.model.set('log', []);

@@ -10,7 +10,7 @@ minerva.models.ComputeResourceModel = girder.Model.extend({
     },
     resourceName: 'clusters',
 
-    isWorking: function () {
+    hasPendingOperation: function () {
         return _.contains(['creating', 'launching', 'provisioning', 'terminating'],
                           this.get('status'));
     }
