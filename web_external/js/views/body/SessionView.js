@@ -204,8 +204,6 @@ minerva.views.SessionView = minerva.View.extend({
                 }
             ]
         };
-
-        this.render();
     },
 
     render: function () {
