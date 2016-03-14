@@ -3,7 +3,7 @@
 
 $headerHeight = 3.5em
 $portraitHeight = 38px
-$headerColor = #268c95
+$headerColor = #fff
 $leftColWidth = 280px
 
 .m-header-wrapper
@@ -20,14 +20,15 @@ $leftColWidth = 280px
   .m-logo-wrapper
     display flex
     align-items center
-    justify-content center
+    justify-content flex-start
     width $leftColWidth
+    padding-left 2em
     background-color #fff
     img
       height 2.5em
 
   a, a:visited
-    color #fff
+    color #333
     &:hover
       text-decoration underline !important
 
@@ -41,7 +42,6 @@ $leftColWidth = 280px
     border-radius 50%
     display inline-block
     margin-right 10px
-    background-color #d6d6d6
     height $portraitHeight
     width $portraitHeight
     background-size $portraitHeight $portraitHeight
