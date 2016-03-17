@@ -1,87 +1,108 @@
-/** */
-minerva.models.MapLayerModel = Backbone.Model.extend({
-    /** */
-    initialize: function (settings) {
-        this.dataset = settings.dataset;
-        this.adapter = settings.adapter;
-        // => MapLayerView
-        this.geoJsLayer = settings.geoJsLayer;
-        var opacity = _.isUndefined(settings.opacity) || _.isNull(settings.opacity) ? 1 : settings.opacity;
-        // => MapLayerView
+minerva.adapters = minerva.adapters || {};
+
+(function () {
+    function MapAdapterRegistry() {
+        this.registry = {};
+        this.register = function (layerType, mapLayerDefinition) {
+            this.registry[layerType] = mapLayerDefinition;
+        };
+        this.createLayer = function (mapContainer, dataset, layerType) {
+            if (layerType === null || !_.has(this.registry, layerType)) {
+                console.error('This dataset cannot be adapted to a map layer of type [' + layerType + '].');
+                this.trigger('m:map_adapter_error', dataset, layerType);
+                return;
+            } else {
+                var adapter = this.registry[layerType];
+                var layerRepr = _.extend(new adapter(), Backbone.Events);
+                var visProperties = layerRepr.collectUserInput(dataset);
+                dataset.once('m:dataset_geo_dataLoaded', function () {
+                    layerRepr.once('m:map_layer_renderable', function (layer) {
+                        this.trigger('m:map_adapter_layerCreated', layer);
+                    }, this).once('m:map_layer_error', function (layer) {
+                        this.trigger('m:map_adapter_layerError', layer);
+                    }, this).initLayer(mapContainer, dataset, dataset.get('geoData'), visProperties);
+                }, this).loadGeoData();
+                //
+                // Instead of dataset.loadGeoData, ideally something like
+                // girder.RestRequest({
+                //     type: "POST"
+                //     url: "adapter/" + dataset._id + "/" + layerType.toString()(),
+                //     params: userInput,
+                // }).success(function (data){
+                //     createLayer
+                // });
+            }
+        };
+    }
+    minerva.adapters.MapAdapterRegistry = _.extend(new MapAdapterRegistry(), Backbone.Events);
+})();
+
+minerva.representations = minerva.representations || {};
+minerva.representations.defineMapLayer = function (layerType, layerDefinition, parentDefinition) {
+    if (parentDefinition) {
+        layerDefinition.prototype = new parentDefinition();
+    }
+    minerva.adapters.MapAdapterRegistry.register(layerType, layerDefinition);
+    return layerDefinition;
+}
+
+minerva.representations.MapLayer = minerva.representations.defineMapLayer('map', function () {
+    this.deleteLayer = function (mapContainer) {
+        mapContainer.deleteGeoJsLayer(this.geoJsLayer);
+    },
+
+    this.setOpacity = function (opacity) {
         this.geoJsLayer.opacity(opacity);
     },
 
-    /** */
-    renderable: function () {
-        this.trigger('m:map_layer_renderError');
-    },
-
-    /** */
-    deleteLayer: function (geoJsMap) {
-        // => MapLayerView
-        geoJsMap.deleteLayer(this.geoJsLayer);
-    },
-
-    /** */
-    setOpacity: function (opacity) {
-        this.geoJsLayer.opacity(opacity);
+    this.collectUserInput = function (dataset) {
+        return {};
     }
 });
 
-/** */
-minerva.models.ReaderMapLayerModel = minerva.models.MapLayerModel.extend({
-    defaults: {
-        readerType: 'jsonReader'
-    },
+minerva.representations.JsonReaderMapLayer = minerva.representations.defineMapLayer('geojson', function () {
+    this.readerType = 'jsonReader',
 
-    uponGeoDataLoaded: function () {
+    this.initLayer = function (mapContainer, dataset, data, visProperties) {
+        this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
         try {
-            var reader = geo.createFileReader(this.get('readerType'), {layer: this.geoJsLayer});
-            reader.read(this.dataset.get('geoData'), _.bind(function () {
-                this.trigger('m:map_layer_renderable');
+            var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
+            reader.read(data, _.bind(function () {
+                this.trigger('m:map_layer_renderable', this);
             }, this));
         } catch (err) {
-            console.error('This dataset cannot be rendered to the map');
+            console.error('This layer cannot be rendered to the map');
             console.error(err);
-            this.dataset.set('geoError', true);
-            // => MapLayerView
-            this.geoJsLayer.clear();
-            this.trigger('m:map_layer_renderError');
+            this.trigger('m:map_layer_error', this);
         }
+    }
+}, minerva.representations.MapLayer);
+
+minerva.representations.ContourJsonReaderMapLayer = minerva.representations.defineMapLayer('contour', function () {
+    this.readerType = 'contourJsonReader'
+}, minerva.representations.JsonReaderMapLayer);
+
+minerva.representations.ChoroplethMapLayer = minerva.representations.defineMapLayer('choropleth', function () {
+    this.collectUserInput = function (dataset) {
+        return {
+            colorByValue: dataset.getMinervaMetadata().colorByValue,
+            colorScheme: dataset.getMinervaMetadata().colorScheme
+        };
     },
 
-    /** */
-    renderable: function () {
-        this.dataset.once('m:dataset_geo_dataLoaded', function () {
-            this.uponGeoDataLoaded();
-        }, this);
-        this.dataset.loadGeoData();
-    }
-});
-
-/** */
-minerva.models.GeojsonMapLayerModel = minerva.models.ReaderMapLayerModel.extend({});
-/** */
-minerva.models.ContourjsonMapLayerModel = minerva.models.ReaderMapLayerModel.extend({
-    defaults: {
-        readerType: 'contourJsonReader'
-    }
-});
-/** */
-minerva.models.ChoroplethMapLayerModel = minerva.models.GeojsonMapLayerModel.extend({
-    uponGeoDataLoaded: function () {
+    this.initLayer = function (mapContainer, dataset, jsonData, visProperties) {
+        this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
         var data = [];
-        var colorByValue = this.dataset.getMinervaMetadata().colorByValue;
-        var colorScheme = this.dataset.getMinervaMetadata().colorScheme;
-//>> => MapLayerView
-        var polygon = this.geoJsLayer.createFeature('polygon', {selectionAPI: true});
+        var colorByValue = visProperties.colorByValue;
+        var colorScheme = visProperties.colorScheme;
 
+        var polygon = this.geoJsLayer.createFeature('polygon', {selectionAPI: true});
         // Loop through the data and transform multipolygons into
         // arrays of polygons.  Note: it would also be possible
         // to generate a polygon feature for each polygon/multipolygon
         // geometry in the geojson, but this would (1) inefficient, and
         // (2) make handling mouse events much more difficult.
-        JSON.parse(this.dataset.get('geoData')).features.forEach(function (f) {
+        JSON.parse(jsonData).features.forEach(function (f) {
             if (f.geometry.type === 'Polygon') {
                 data.push({
                     outer: f.geometry.coordinates[0],
@@ -100,21 +121,20 @@ minerva.models.ChoroplethMapLayerModel = minerva.models.GeojsonMapLayerModel.ext
             }
         });
 
-        // this is the value accessor for the choropleth
         var value = function (_a, _b, d) {
-            return (d || {}).properties[colorByValue] || 0;
+            return (d || {}).properties[visProperties.colorByValue] || 0;
         };
 
         // the data extent
         var extent = d3.extent(data, function (d) {
-            return d.properties[colorByValue];
+            return d.properties[visProperties.colorByValue];
         });
 
         // generate the color scale
         var domain = [extent[0], 0.5 * (extent[0] + extent[1]), extent[1]];
         var scale = d3.scale.linear()
             .domain(domain)
-            .range(colorbrewer[colorScheme][3]);
+            .range(colorbrewer[visProperties.colorScheme][3]);
 
         polygon.position(function (d) {
             return {
@@ -130,52 +150,24 @@ minerva.models.ChoroplethMapLayerModel = minerva.models.GeojsonMapLayerModel.ext
                 return c;
             },
         }).data(data);
-//<< => MapLayerView
 
-        this.trigger('m:map_layer_renderable');
-    }
-});
+        var clickInfo = new minerva.models.ClickInfoModel();
 
-/** */
-minerva.views.MapAdapter = {};
-/** */
-minerva.views.MapAdapter.geojson = {
-    /** */
-    createMapLayer: function (dataset, adapter, geoJsMap) {
-        return new minerva.models.GeojsonMapLayerModel({
-            dataset: dataset,
-            adapter: adapter,
-            // => MapLayerView
-            geoJsLayer: geoJsMap.createLayer('feature')
-        });
-    }
-};
-/** */
-minerva.views.MapAdapter.contour = {
-    /** */
-    createMapLayer: function (dataset, adapter, geoJsMap) {
-        return new minerva.models.ContourjsonMapLayerModel({
-            dataset: dataset,
-            adapter: adapter,
-            // => MapLayerView
-            geoJsLayer: geoJsMap.createLayer('feature')
-        });
-    }
-};
-/** */
-minerva.views.MapAdapter.choropleth = {
-    /** */
-    createMapLayer: function (dataset, adapter, geoJsMap) {
-        var mapLayer = new minerva.models.ChoroplethMapLayerModel({
-            dataset: dataset,
-            adapter: adapter,
-            // => MapLayerView
-            geoJsLayer: geoJsMap.createLayer('feature')
-        });
-        // TODO better place to do this?
-        // TODO set slider value.
-        mapLayer.setOpacity(0.75);
+        polygon.geoOn(geo.event.feature.mouseclick, _.bind(function (d) {
+            clickInfo.set({
+                layer: this.geoJsLayer,
+                dataset: dataset,
+                mouse: d.mouse,
+                datum: d.data.properties
+            });
 
-        return mapLayer;
+            if (!this.clickInfoWidget) {
+                this.clickInfoWidget = new minerva.views.ClickInfoWidget({
+                    model: clickInfo,
+                    parentView: mapContainer.getMapView()
+                });
+            }
+        }, this));
+        this.trigger('m:map_layer_renderable', this);
     }
-};
+}, minerva.representations.MapLayer);

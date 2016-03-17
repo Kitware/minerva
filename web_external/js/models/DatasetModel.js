@@ -99,7 +99,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     type: 'wms'
                 };
             } else {
-                console.log('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
+                // console.log('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
             }
             this.saveMinervaMetadata(mm);
         }

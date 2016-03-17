@@ -10,23 +10,36 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
     changeLayerOpacity: function (dataset) {
         // TODO ideally move opacity from the Dataset to the Layer.
-        var layer = this.datasetLayers[dataset.get('_id')];
-        layer.setOpacity(dataset.get('opacity'));
-        this.map.draw();
+        var layerRepr = this.datasetLayerReprs[dataset.get('_id')];
+        layerRepr.setOpacity(dataset.get('opacity'));
     },
 
     changeLayerZIndex: function (dataset) {
         var baseMapZIndex = 1;
         if (dataset.get('order')) {
-            this.datasetLayers[dataset.id][dataset.get('order')]();
+            this.datasetLayerReprs[dataset.id][dataset.get('order')]();
         }
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
         if (dataset.get('order') === 'moveToBottom') {
-            this.datasetLayers[dataset.id].moveUp(baseMapZIndex);
+            this.datasetLayerReprs[dataset.id].moveUp(baseMapZIndex);
         }
         this.map.draw();
     },
+
+    // MapContainer Interface >>
+    deleteGeoJsLayer: function (geoJsLayer) {
+        this.map.deleteLayer(geoJsLayer);
+    },
+
+    createGeoJsLayer: function (geoJsLayerType) {
+        return this.map.createLayer(geoJsLayerType);
+    },
+
+    getMapView: function () {
+        return this;
+    },
+    // << MapContainer Interface
 
     /**
      * TODO REDO
@@ -35,61 +48,39 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      * @param {Object} DatasetModel or descendent.
      */
     addDataset: function (dataset) {
-        if (!_.contains(this.datasetLayers, dataset.id)) {
-            var renderType = dataset.getGeoRenderType();
-
-            if (renderType === null || !_.has(minerva.views.MapAdapter, renderType)) {
-                console.error('This dataset of render type [' + renderType + ']cannot be rendered to the map');
-                return;
-            } else {
-                var mapAdapter = minerva.views.MapAdapter[renderType];
-                // TODO addDataset maybe should take an adapter that wraps a dataset
-                // or else provide the adapter properties to the mapAdapter
-                // adapter properties are a "mapping" from a renderable type to a rendering
-                // containing e.g. colorMap
-                var adapter = {};
-                var layer = mapAdapter.createMapLayer(dataset, adapter, this.map);
-                layer.once('m:map_layer_renderable', function () {
-                    var datasetId = layer.dataset.get('_id');
-                    this.datasetLayers[datasetId] = layer;
-                    this.map.draw();
-                }, this).once('m:map_layer_renderError', function () {
-                    this.map.deleteLayer(layer.geoJsLayer);
-                }, this).renderable();
-
-                // => MapLayerView
-                // Something like
-                //
-                // var mapAdapter = minerva.views.MapAdapter[renderType];
-                // var adapter = {colorMap: colorMap};
-                // var mapLayerModel = mapAdapter.createMapLayerModel(dataset, adapter);
-                // var mapLayerView = mapAdapter.createMapLayerView(mapLayerModel, this);
-                // this.datasetLayers[dataset.get('_id')] = {
-                //     model: mapLayerModel,
-                //     view: mapLayerView
-                // };
-                // mapLayerModel.once('m:map_layer_renderable', function () {
-                //    this.map.draw();
-                //}, this).once('m:map_layer_renderError', function () {
-                //    this.removeLayer(dataset.get('_id'));
-                //}, this).renderable();
-                //
-                // Possibly even better would be to have
-                // mapModel = new MapModel(mapLayerModelList)
-                // new MapPanel(mapModel)
-            }
+        var datasetId = dataset.get('_id');
+        if (!_.contains(this.datasetLayerReprs, datasetId)) {
+            // For now, get the layerType directly from the dataset,
+            // but we should really allow the user to specify the desired
+            // layerType.
+            var layerType = dataset.getGeoRenderType();
+            var registry = minerva.adapters.MapAdapterRegistry;
+            registry.once('m:map_adapter_layerCreated', function (layerRepr) {
+                this.datasetLayerReprs[datasetId] = layerRepr;
+                this.map.draw();
+            }, this).once('m:map_adapter_error', function (dataset, layerType) {
+                dataset.set('geoError', true);
+            }, this).once('m:map_adapter_layerError', function (layerRepr) {
+                if (layerRepr) {
+                    layerRepr.deleteLayer(this);
+                    dataset.set('geoError', true);
+                }
+            }, this).createLayer(this, dataset, layerType);
         }
     },
 
     /** */
     removeDataset: function (dataset) {
-        var datasetId = dataset.id;
-        var layer = this.datasetLayers[datasetId];
-        if (layer) {
-            layer.deleteLayer(this.map);
+        var datasetId = dataset.get('_id');
+        var layerRepr = this.datasetLayerReprs[datasetId];
+        if (layerRepr) {
+            layerRepr.deleteLayer(this);
+            this.map.draw();
         }
-        delete this.datasetLayers[datasetId];
+        delete this.datasetLayerReprs[datasetId];
     },
+
+
 
     initialize: function (settings) {
         this.session = settings.session.model;
@@ -100,7 +91,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 this.map.center(this.session.metadata().map.center);
             }
         });
-        this.datasetLayers = {};
+        this.datasetLayerReprs = {};
         this.legendWidget = {};
 
         this.collection = settings.session.datasetsCollection;
