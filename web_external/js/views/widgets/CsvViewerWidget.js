@@ -53,8 +53,7 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
         })).girderModal(this).on('shown.bs.modal', function () {
         }).on('hidden.bs.modal', function () {
         }).on('ready.girder.modal', _.bind(function () {
-            var table = $('table#data').dataTable({
-                // 'scrollCollapse': true,
+            $('table#data').dataTable({
                 'serverSide': true,
                 'autoWidth': false,
                 'ordering': true,
@@ -91,11 +90,8 @@ minerva.views.CsvViewerWidget = minerva.View.extend({
                 ],
                 'columns': this.colNames
             });
-            $('.dataTables_scrollBody').height(tableScrollConfig.scrollY);
-            table.fnSettings().oScroll.sY = tableScrollConfig.scrollY;
-            table.fnDraw();
-            table.fnSettings().oScroller.fnMeasure();
-            // HACK: Attempt to fix headers miss alignment
+            // HACK to fix headers misalignment
+            $('table').css('table-layout', 'fixed');
             $('.dataTables_scrollHeadInner').css({'width': '100%'});
             $('table.dataTable').addClass('dataTable-width');
         }, this));

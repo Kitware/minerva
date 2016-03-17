@@ -181,7 +181,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);
             if (status === girder.jobs_JobStatus.SUCCESS) {
-                this.collection.fetch({}, true);
+                if (event.data && event.data.meta && event.data.meta.minerva &&
+                   event.data.meta.minerva.outputs && event.data.meta.minerva.outputs.length > 0 &&
+                   event.data.meta.minerva.outputs[0].dataset_id) {
+                    var datasetId = event.data.meta.minerva.outputs[0].dataset_id;
+                    var dataset = new minerva.models.DatasetModel({ _id: datasetId });
+                    dataset.on('g:fetched', function () {
+                        this.collection.add(dataset);
+                    }, this).fetch();
+                }
             }
         }, this));
 
