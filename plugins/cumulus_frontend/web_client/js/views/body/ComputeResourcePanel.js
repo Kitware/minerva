@@ -102,16 +102,11 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         e.stopPropagation();
 
         if (resource.isProvisionable()) {
-            girder.restRequest({
-                path: '/clusters/' + resource.id + '/provision',
-                type: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    playbook: 'gridengine/site'
-                })
-            }).done(_.bind(function (response) {
-                console.log(response);
-            })).error(console.error);
+            new minerva.views.ProvisionClusterWidget({
+                el: $('#g-dialog-container'),
+                model: resource,
+                parentView: this
+            }).render();
         }
     },
 
