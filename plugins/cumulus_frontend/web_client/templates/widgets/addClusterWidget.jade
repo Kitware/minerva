@@ -7,7 +7,7 @@
         h4.modal-title
             | Launch a Cluster
         .modal-body
-          form.create-aws-profile-form
+          form.create-cluster-form
             .form-group
               label.control-label(for="m-cluster-name") Cluster Name
               input.input-sm#m-cluster-name.form-control(type="text", placeholder="Cluster name")
@@ -25,8 +25,14 @@
             .form-group
               label.control-label(for="m-cluster-ami") AMI
               input.input-sm#m-cluster-ami.form-control(type="text", placeholder="ami-id")
+            .form-group
+              label.control-label(for="m-cluster-creation-playbook") Playbook
+              select.input-sm#m-cluster-creation-playbook.form-control
+                option(value='default') Default
+                option(value='sge') SunGrid Engine
             .g-validation-failed-message
 
+            i.icon-plus#m-add-cluster-add-field Add advanced field
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         a.m-cluster-launch-button.btn.btn-small.btn-primary

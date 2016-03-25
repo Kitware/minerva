@@ -1,6 +1,7 @@
 minerva.views.AddClusterWidget = minerva.View.extend({
     events: {
-        'click .m-cluster-launch-button': 'launchCluster'
+        'click .m-cluster-launch-button': 'launchCluster',
+        'click #m-add-cluster-add-field': 'addField'
     },
 
     initialize: function(settings) {
@@ -17,11 +18,14 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         return this;
     },
 
+    addField: function (e) {
+        $('form.create-cluster-form').append(girder.templates.advancedClusterKeyValueWidget());
+    },
+
     params: function () {
         // Defaults
         var params = {
             type: 'ansible',
-            playbook: 'sge',
             cluster_config: {},
             profile: this.profileId
         };
@@ -29,6 +33,7 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         // Deep copy
         $.extend(true, params, {
             name: this.$('#m-cluster-name').val(),
+            playbook: this.$('#m-cluster-creation-playbook').val(),
             cluster_config: {
                 master_instance_type: this.$('#m-cluster-instance-type').val(),
                 node_instance_type: this.$('#m-cluster-instance-type').val(),
@@ -36,6 +41,19 @@ minerva.views.AddClusterWidget = minerva.View.extend({
                 master_instance_ami: this.$('#m-cluster-ami').val(),
                 node_instance_ami: this.$('#m-cluster-ami').val(),
                 ansible_ssh_user: this.$('#m-cluster-user').val()
+            }
+        });
+
+        // Extend cluster_config with advanced variables
+        var advancedKeyValuePairs = _.zip($('form.create-cluster-form input.cluster-advanced-key'),
+                                          $('form.create-cluster-form input.cluster-advanced-value'));
+
+        _.each(advancedKeyValuePairs, function (keyValuePair) {
+            var key = $(keyValuePair[0]).val(),
+                val = $(keyValuePair[1]).val();
+
+            if (key != '' && val != '') {
+                params.cluster_config[key] = val;
             }
         });
 
