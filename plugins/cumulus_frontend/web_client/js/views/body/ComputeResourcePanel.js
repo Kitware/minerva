@@ -26,27 +26,6 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         'click .m-remove-cluster': 'removeCluster'
     },
 
-    _clusterStatus: function (status) {
-        if (_.isUndefined(status)) {
-            return 'error';
-        } else if (Number.isInteger(status)) {
-            return {
-                0:   'creating',
-                10:  'created',
-                20:  'launching',
-                30:  'launched',
-                40:  'provisioning',
-                50:  'provisioned',
-                60:  'terminating',
-                70:  'terminated',
-                101: 'stopped',
-                102: 'running'
-            }[status];
-        } else {
-            return status;
-        }
-    },
-
     initialize: function () {
         minerva.views.Panel.prototype.initialize.apply(this);
         this.collection = new minerva.collections.ComputeResourceCollection();
@@ -61,7 +40,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
             var cluster = this.collection.get(e.data._id);
 
             if (cluster) {
-                cluster.set('status', this._clusterStatus(e.data.status));
+                cluster.set('status', e.data.status);
                 this.render();
             }
         }, this);
