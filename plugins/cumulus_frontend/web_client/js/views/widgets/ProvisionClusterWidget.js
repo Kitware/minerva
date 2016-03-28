@@ -17,7 +17,7 @@ minerva.views.ProvisionClusterWidget = minerva.View.extend({
         return this;
     },
 
-    provisionCluster: function (e) {
+    provisionCluster: _.debounce(function (e) {
         if (this.model.isProvisionable()) {
             girder.restRequest({
                 path: '/clusters/' + this.model.id + '/provision',
@@ -27,9 +27,8 @@ minerva.views.ProvisionClusterWidget = minerva.View.extend({
                     playbook: $('#m-cluster-provision-playbook').val()
                 }),
             }).done(_.bind(function (response) {
-                console.log(response);
                 $('.modal-footer a[data-dismiss="modal"]').click();
             })).error(console.error);
         }
-    }
+    }, 500, true)
 });

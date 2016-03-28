@@ -110,7 +110,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         }
     },
 
-    terminateCluster: function (e) {
+    terminateCluster: _.debounce(function (e) {
         var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
         e.stopPropagation();
 
@@ -122,7 +122,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         } else {
             resource.destroy();
         }
-    },
+    }, 500, true),
 
     removeCluster: function (e) {
         var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));

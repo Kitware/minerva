@@ -60,7 +60,7 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         return params;
     },
 
-    launchCluster: function (e) {
+    launchCluster: _.debounce(function (e) {
         girder.restRequest({
             path: '/clusters',
             type: 'POST',
@@ -77,5 +77,5 @@ minerva.views.AddClusterWidget = minerva.View.extend({
                 $('.modal-footer a[data-dismiss="modal"]').click();
             }, this));
         }, this));
-    }
+    }, 500, true)
 });
