@@ -1,28 +1,36 @@
 @import 'nib'
 
-$headerHeight = 54px
+
+$headerHeight = 3.5em
 $portraitHeight = 38px
+$headerColor = #fff
+$leftColWidth = 280px
 
 .m-header-wrapper
-  height $headerHeight
-  padding-right 20px
-  padding-left 20px
-  background-color rgba(255, 255, 255, 0.88)
-  transition background-color 0.4s ease-in-out
+  display flex
   position fixed
   top 0
+  left 0
   width 100%
+  height $headerHeight
+  background-color $headerColor
+  transition background-color 0.4s ease-in-out
   z-index 10
 
-  &:hover
-    background-color white
+  .m-logo-wrapper
+    display flex
+    align-items center
+    justify-content flex-start
+    width $leftColWidth
+    padding-left 2em
+    background-color #fff
+    img
+      height 2.5em
 
-  .m-user-link
-    color #444
-    font-size 16px
-
+  a, a:visited
+    color #333
     &:hover
-      color #66a
+      text-decoration underline !important
 
   .m-login-link-wrapper
     font-size 16px
@@ -34,17 +42,20 @@ $portraitHeight = 38px
     border-radius 50%
     display inline-block
     margin-right 10px
-    background-color #d6d6d6
     height $portraitHeight
     width $portraitHeight
     background-size $portraitHeight $portraitHeight
 
-  .m-current-user-text > *
-    vertical-align middle
-    line-height $headerHeight
-
   .m-current-user-wrapper
-    float right
+    display flex
+    flex 1
+    justify-content flex-end
+    padding 0 1em
+    color #fff
+
+  .m-current-user-text
+    display: flex
+    align-items center
 
   .m-icons-wrapper
     display inline
@@ -67,12 +78,11 @@ $portraitHeight = 38px
         background linear-gradient(bottom, white 60%, #f6f6f6 100%)
 
 #g-app-body-container
+  position relative
+  width 100%
+  height 100%
   margin 0
-  min-height 0
-  height 100%
+  padding 0
 
-body
-  height 100%
-
-html
+html, body
   height 100%

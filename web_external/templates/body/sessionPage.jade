@@ -1,4 +1,15 @@
 .m-session-header
+  .m-sessions-list
+    .m-sessions-list-button.dropdown-toggle(
+        data-toggle="dropdown", title="Sessions list")
+      .m-session-title.= session.get('name') 
+        i.icon-angle-circled-down
+    ul.m-sessions-list-menu.dropdown-menu
+      each session in sessionsList
+        li(role="presentation")
+          a.m-session-link(m-session-cid="#{session.cid}")= session.get('name')
+          .m-session-description= session.get('description')
+  .m-session-description= session.get('description')
   .m-session-header-buttons
     if (accessLevel >= girder.AccessType.WRITE)
       button.m-save-session-button.btn.bn-small(title="Save session", disabled="disabled")
@@ -14,6 +25,10 @@
             i.icon-down-dir
           ul.m-session-actions-menu.dropdown-menu.pull-right(role="menu")
             li(role="presentation")
+              a.m-add-session(role="menuitem")
+                i.icon-plus
+                | New session
+            li(role="presentation")
               a.m-edit-session(role="menuitem")
                 i.icon-edit
                 | Edit session
@@ -27,8 +42,4 @@
                 a.m-delete-session(role="menuitem")
                   i.icon-trash
                   | Delete session
-
-  .m-session-title= session.get('name')
-  .m-session-description= session.get('description')
-
 #m-panel-groups
