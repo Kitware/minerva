@@ -17,7 +17,7 @@ describe('Main view', function () {
 
     beforeEach(function () {
         waitsFor(function () {
-            return $('.m-sessions-search-container:visible').length === 1;
+            return $('.m-session-actions-button:visible').length === 1;
         }, 'the main panel to be visible');
     });
 
