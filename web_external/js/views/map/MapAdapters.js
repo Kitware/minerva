@@ -171,3 +171,45 @@ minerva.representations.ChoroplethMapLayer = minerva.representations.defineMapLa
         this.trigger('m:map_layer_renderable', this);
     }
 }, minerva.representations.MapLayer);
+
+
+minerva.representations.WmsMapLayer = minerva.representations.defineMapLayer('wms', function () {
+
+    this.initLayer = function (mapContainer, dataset, jsonData, visProperties) {
+        this.geoJsLayer = mapContainer.createGeoJsLayer('osm', {
+                              attribution: null,
+                              keepLower: false
+                          });
+        mapContainer.addFeatureInfoLayer(this.geoJsLayer);
+        var minervaMetadata = dataset.metadata();
+        this.geoJsLayer.layerName = minervaMetadata.type_name;
+        this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
+        var projection = 'EPSG:3857';
+        this.geoJsLayer.url(
+            _.bind(function (x, y, zoom) {
+                var bb = this.geoJsLayer.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+                var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
+                var params = {
+                    SERVICE: 'WMS',
+                    VERSION: '1.1.1',
+                    REQUEST: 'GetMap',
+                    LAYERS: this.geoJsLayer.layerName,
+                    STYLES: '',
+                    BBOX: bbox_mercator,
+                    WIDTH: 256,
+                    HEIGHT: 256,
+                    FORMAT: 'image/png',
+                    TRANSPARENT: true,
+                    SRS: projection,
+                    TILED: true
+                };
+                if (minervaMetadata.hasOwnProperty('credentials')) {
+                    params.minerva_credentials = minervaMetadata.credentials;
+                }
+                return this.geoJsLayer.baseUrl + '?' + $.param(params);
+            }, this)
+        );
+        this.trigger('m:map_layer_renderable', this);
+    }
+
+}, minerva.representations.MapLayer);

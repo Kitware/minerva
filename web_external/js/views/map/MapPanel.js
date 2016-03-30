@@ -32,12 +32,20 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         this.map.deleteLayer(geoJsLayer);
     },
 
-    createGeoJsLayer: function (geoJsLayerType) {
-        return this.map.createLayer(geoJsLayerType);
+    createGeoJsLayer: function (geoJsLayerType, properties) {
+        return this.map.createLayer(geoJsLayerType, properties || {});
     },
 
     getMapView: function () {
         return this;
+    },
+
+    addFeatureInfoLayer: function (layer) {
+        if (this.map && this.map.featureInfoWidget) {
+            this.map.featureInfoWidget.layers.push(layer);
+        } else {
+            console.error('Attempting to addFeatureInfoLayer, but widget uninitialized');
+        }
     },
     // << MapContainer Interface
 
@@ -74,6 +82,13 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         var datasetId = dataset.get('_id');
         var layerRepr = this.datasetLayerReprs[datasetId];
         if (layerRepr) {
+            if (this.map.featureInfoWidget) {
+                var layerIndex = $.inArray(layerRepr.geoJsLayer,
+                    this.map.featureInfoWidget.layers);
+                if (layerIndex > -1) {
+                    this.map.featureInfoWidget.layers.splice(layerIndex, 1);
+                }
+            }
             layerRepr.deleteLayer(this);
             this.map.draw();
         }
@@ -149,6 +164,20 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     this.addDataset(dataset);
                 }
             }, this);
+            this.map.featureInfoWidget =
+                new minerva.views.WmsFeatureInfoWidget({
+                    map: this.map,
+                    version: '1.1.1',
+                    layers: [],
+                    callback: 'getLayerFeatures',
+                    session: this.session,
+                    parentView: this
+                });
+                this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
+                this.map.geoOn(geo.event.mouseclick, function (evt) {
+                    this.featureInfoWidget.content = '';
+                    this.featureInfoWidget.callInfo(0, evt.geo);
+                });
         }
         this.map.draw();
     },
