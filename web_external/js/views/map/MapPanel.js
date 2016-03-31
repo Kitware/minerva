@@ -40,6 +40,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         return this;
     },
 
+    drawMap: function () {
+        this.map.draw();
+    },
+
     addFeatureInfoLayer: function (layer) {
         if (this.map && this.map.featureInfoWidget) {
             this.map.featureInfoWidget.layers.push(layer);
@@ -55,25 +59,27 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      *
      * @param {Object} DatasetModel or descendent.
      */
-    addDataset: function (dataset) {
+    addDataset: function (dataset, layerType, mapping) {
         var datasetId = dataset.get('_id');
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
-            var layerType = dataset.getGeoRenderType();
-            var registry = minerva.adapters.MapAdapterRegistry;
-            registry.once('m:map_adapter_layerCreated', function (layerRepr) {
-                this.datasetLayerReprs[datasetId] = layerRepr;
-                this.map.draw();
+            layerType = dataset.getGeoRenderType();
+            // For now, set the mapping here, but this should come from the user at
+            // the same time they designate the layerType.
+            mapping = {};
+            minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
+                this.datasetLayerReprs[datasetId] = repr;
+                repr.render(this);
             }, this).once('m:map_adapter_error', function (dataset, layerType) {
                 dataset.set('geoError', true);
-            }, this).once('m:map_adapter_layerError', function (layerRepr) {
-                if (layerRepr) {
-                    layerRepr.deleteLayer(this);
+            }, this).once('m:map_adapter_layerError', function (repr) {
+                if (repr) {
+                    repr.deleteLayer(this);
                     dataset.set('geoError', true);
                 }
-            }, this).createLayer(this, dataset, layerType);
+            }, this).createRepresentation(this, dataset, layerType, mapping);
         }
     },
 

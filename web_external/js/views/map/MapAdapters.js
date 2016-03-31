@@ -1,12 +1,12 @@
-minerva.adapters = minerva.adapters || {};
+minerva.core = minerva.core || {};
 
 (function () {
-    function MapAdapterRegistry() {
+    function AdapterRegistry() {
         this.registry = {};
         this.register = function (layerType, mapLayerDefinition) {
             this.registry[layerType] = mapLayerDefinition;
         };
-        this.createLayer = function (mapContainer, dataset, layerType) {
+        this.createRepresentation = function (mapContainer, dataset, layerType, mapping) {
             if (layerType === null || !_.has(this.registry, layerType)) {
                 console.error('This dataset cannot be adapted to a map layer of type [' + layerType + '].');
                 this.trigger('m:map_adapter_error', dataset, layerType);
@@ -14,13 +14,12 @@ minerva.adapters = minerva.adapters || {};
             } else {
                 var adapter = this.registry[layerType];
                 var layerRepr = _.extend(new adapter(), Backbone.Events);
-                var visProperties = layerRepr.collectUserInput(dataset);
                 dataset.once('m:dataset_geo_dataLoaded', function () {
                     layerRepr.once('m:map_layer_renderable', function (layer) {
                         this.trigger('m:map_adapter_layerCreated', layer);
                     }, this).once('m:map_layer_error', function (layer) {
                         this.trigger('m:map_adapter_layerError', layer);
-                    }, this).initLayer(mapContainer, dataset, dataset.get('geoData'), visProperties);
+                    }, this).initLayer(mapContainer, dataset, dataset.get('geoData'), mapping);
                 }, this).loadGeoData();
                 //
                 // Instead of dataset.loadGeoData, ideally something like
@@ -34,7 +33,7 @@ minerva.adapters = minerva.adapters || {};
             }
         };
     }
-    minerva.adapters.MapAdapterRegistry = _.extend(new MapAdapterRegistry(), Backbone.Events);
+    minerva.core.AdapterRegistry = _.extend(new AdapterRegistry(), Backbone.Events);
 })();
 
 minerva.representations = minerva.representations || {};
@@ -42,7 +41,7 @@ minerva.representations.defineMapLayer = function (layerType, layerDefinition, p
     if (parentDefinition) {
         layerDefinition.prototype = new parentDefinition();
     }
-    minerva.adapters.MapAdapterRegistry.register(layerType, layerDefinition);
+    minerva.core.AdapterRegistry.register(layerType, layerDefinition);
     return layerDefinition;
 }
 
@@ -55,8 +54,8 @@ minerva.representations.MapLayer = minerva.representations.defineMapLayer('map',
         this.geoJsLayer.opacity(opacity);
     },
 
-    this.collectUserInput = function (dataset) {
-        return {};
+    this.render = function (mapContainer) {
+        mapContainer.drawMap();
     }
 });
 
@@ -83,14 +82,11 @@ minerva.representations.ContourJsonReaderMapLayer = minerva.representations.defi
 }, minerva.representations.JsonReaderMapLayer);
 
 minerva.representations.ChoroplethMapLayer = minerva.representations.defineMapLayer('choropleth', function () {
-    this.collectUserInput = function (dataset) {
-        return {
-            colorByValue: dataset.getMinervaMetadata().colorByValue,
-            colorScheme: dataset.getMinervaMetadata().colorScheme
-        };
-    },
-
     this.initLayer = function (mapContainer, dataset, jsonData, visProperties) {
+        // Set the visProperties from the dataset, though they should come from visProperties.
+        visProperties.colorByValue = dataset.getMinervaMetadata().colorByValue;
+        visProperties.colorScheme = dataset.getMinervaMetadata().colorScheme;
+
         this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
         var data = [];
         var colorByValue = visProperties.colorByValue;
