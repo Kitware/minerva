@@ -49,6 +49,5 @@ minerva.views.AddComputeResourceWidget = minerva.View.extend({
         } else {
             console.error('Unknown source type');
         }
-
     }
 })

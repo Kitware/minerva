@@ -5,21 +5,18 @@
         h4.modal-title
             | #{resource.get('name')} [#{resource.get('status')}]
         .modal-body
-          h5 Template
+          h5 Configuration
           table.table.table-hover
             tbody
               tr
-                td AWS Keyname
-                td #{resource.get('template').aws_keyname}
-              tr
                 td Instance Count
-                td #{resource.get('template').instance_count}
+                td #{resource.get('cluster_config').node_instance_count}
               tr
                 td Instance Type
-                td #{resource.get('template').instance_type}
+                td #{resource.get('cluster_config').node_instance_type}
               tr
-                td Playbook
-                td #{resource.get('template').playbook}
+                td Creation Playbook
+                td #{resource.get('cluster_config').playbook}
 
 
           ul.nav.nav-tabs(role='tablist')
