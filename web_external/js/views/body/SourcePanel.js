@@ -2,7 +2,7 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-add-source': 'addSourceDialog',
-        'click .m-display-wms-layers-list': 'displayWmsLayersList',
+        'click .m-display-wms-layers-list': 'displayLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
@@ -49,7 +49,7 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
         }
     },
 
-    displayWmsLayersList: function (evt) {
+    displayLayersList: function (evt) {
         // TODO this looks like a good interface for a generalized source-action
         // Then we could just have a single source-action event handler
         // which would pull the source type from the set of classes
@@ -114,6 +114,10 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
         // query here.  All the source types register themselves upon definition,
         // and we query here upon instantation.
         this.sourceTypes = {
+            wfs: {
+                icon: 'icon-layers',
+                action: 'm-display-wms-layers-list'
+            },
             wms: {
                 icon: 'icon-layers',
                 action: 'm-display-wms-layers-list'
