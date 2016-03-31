@@ -18,15 +18,23 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                     var params = {
                         typeName: typeName,
                         name: layerName,
-                        wmsSourceId: wmsSource.get('_id')
                     };
 
-                    var wmsDataset = new minerva.models.WmsDatasetModel({});
-
-                    wmsDataset.once('m:wmsDatasetAdded', function () {
-                        this.$el.modal('hide');
-                        this.collection.add(wmsDataset);
-                    }, this).createWmsDataset(params);
+                    if (wmsSource.getSourceType() === 'wms') {
+                        params.wmsSourceId = wmsSource.get('_id');
+                        var wmsDataset = new minerva.models.WmsDatasetModel({});
+                        wmsDataset.once('m:wmsDatasetAdded', function () {
+                            this.$el.modal('hide');
+                            this.collection.add(wmsDataset);
+                        }, this).createWmsDataset(params);
+                    } else {
+                        params.wfsSourceId = wmsSource.get('_id');
+                        var wfsDataset = new minerva.models.WfsDatasetModel({});
+                        wfsDataset.once('m:wfsDatasetAdded', function () {
+                            this.$el.modal('hide');
+                            this.collection.add(wfsDataset);
+                        }, this).createWfsDataset(params);
+                    }
                 }
             }, this));
         },
