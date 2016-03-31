@@ -133,7 +133,7 @@ minerva.views.ComputeResourceDetailWidget = minerva.View.extend({
         if (event.status === 'starting') {
             this.model.set('abbrev_log',
                            this.model.get('abbrev_log').concat({
-                               message: event.message
+                               message: event.msg
                            }), setOptions);
         } else {
             var logs = this.model.get('abbrev_log');
