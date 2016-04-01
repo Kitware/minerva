@@ -1,0 +1,21 @@
+.modal-dialog
+  .modal-content
+    form#m-add-wfs-source-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Enter WFS Service details
+
+      .modal-body
+        .form-group
+          label.control-label(for="m-wfs-name") Name
+          input.input-sm#m-wfs-name.form-control(type="text", placeholder="Enter WFS name")
+        .form-group
+          label.control-label(for="m-wfs-uri") WFS baseURL
+          input.input-sm#m-wfs-uri.form-control(type="text", placeholder="http://geodata.company.com/geoserver/wfs")
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-add-service-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Add WFS Source

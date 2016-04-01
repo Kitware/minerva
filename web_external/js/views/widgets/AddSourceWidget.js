@@ -45,6 +45,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 icon: 'icon-layers',
                 widget: minerva.views.AddWmsSourceWidget
             },
+            wfs: {
+                label: 'WFS',
+                icon: 'icon-layers',
+                widget: minerva.views.AddWfsSourceWidget
+            },
             elasticsearch: {
                 label: 'Elasticsearch',
                 icon: 'icon-search',
