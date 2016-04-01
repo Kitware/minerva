@@ -61,15 +61,101 @@ minerva.representations.MapLayer = minerva.representations.defineMapLayer('map',
 });
 
 minerva.representations.JsonReaderMapLayer = minerva.representations.defineMapLayer('geojson', function () {
-    this.readerType = 'jsonReader',
+    /**
+     * Temporary method that mutates a geojson data object to get around geojs limitations.
+     * Returns an object containing arrays of `point`, `line`, and `polygon` geometries.
+     * @private
+     */
+    function flattenFeatures(data) {
+        if (_.isString(data)) {
+            data = JSON.parse(data);
+        }
+        if (data.type !== 'FeatureCollection') {
+            throw new Error('Unsupported GeoJSON type');
+        }
+
+        var geoms = _.chain(data.features || [])
+            .where({type: 'Feature'})
+            .pluck('geometry')
+            .map(function (geom) {
+                // mutate polygon features into line features to avoid slow triangulation
+                geom = geom || {};
+                if (geom.type === 'Polygon') {
+                    geom.type = 'MultiLineString';
+                    geom.coordinates = geom.coordinates;
+                } else if (geom.type === 'MultiPolygon') {
+                    geom.type = 'MultiLineString';
+                    geom.coordinates = _.flatten(geom.coordinates, true);
+
+                // transform Lines into MultiLines
+                } else if (geom.type === 'LineString') {
+                    geom.type = 'MultiLineString';
+                    geom.coordinates = [geom.coordinates];
+
+                // transform points in to multipoints
+                } else if (geom.type === 'Point') {
+                    geom.type = 'MultiPoint';
+                    geom.coordinates = [geom.coordinates];
+                }
+
+                return geom;
+            })
+            .groupBy('type')
+            .value();
+
+       function flatten(geom) {
+            return _.chain(geom || [])
+                .pluck('coordinates')
+                .flatten(true)
+                .value();
+       }
+       return {
+           points: flatten(geoms.MultiPoint),
+           lines: flatten(geoms.MultiLineString),
+           polygons: flatten(geoms.MultiPolygon)
+       }
+    }
+
+    function position(d) {
+        return {
+            x: d[0],
+            y: d[1],
+            z: d[2] || 0
+        };
+    }
+
+    this.readerType = 'jsonReader';
 
     this.initLayer = function (mapContainer, dataset, data, visProperties) {
+
         this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
         try {
-            var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
-            reader.read(data, _.bind(function () {
-                this.trigger('m:map_layer_renderable', this);
-            }, this));
+            data = flattenFeatures(data);
+
+            if (data.points.length) {
+                this.geoJsLayer.createFeature('point')
+                    .position(position)
+                    .style({
+                        fillColor: 'red',
+                        strokeColor: 'black'
+                    })
+                    .data(data.points);
+            }
+
+            if (data.lines.length) {
+                this.geoJsLayer.createFeature('line')
+                    .position(position)
+                    .style({
+                        strokeColor: 'black'
+                    })
+                    .data(data.lines);
+            }
+
+            // TODO:
+            // polygon = this.geoJsLayer.createFeature('polygon');
+
+
+            this.trigger('m:map_layer_renderable', this);
         } catch (err) {
             console.error('This layer cannot be rendered to the map');
             console.error(err);
