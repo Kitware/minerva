@@ -98,6 +98,10 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 mm.geo_render = {
                     type: 'wms'
                 };
+            } else if (mm.dataset_type === 'wfs') {
+                mm.geo_render = {
+                    type: 'geojson'
+                };
             } else {
                 // console.log('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
             }
