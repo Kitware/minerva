@@ -40,6 +40,9 @@ girder.formatDate = function (datestr, resolution) {
  * prefixes.
  */
 girder.formatSize = function (sizeBytes) {
+    if (!sizeBytes) {
+        return;
+    }
     if (sizeBytes < 20000) {
         return sizeBytes + ' B';
     }

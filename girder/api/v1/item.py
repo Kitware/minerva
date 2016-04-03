@@ -18,6 +18,13 @@
 ###############################################################################
 
 import cherrypy
+import urllib, urllib2, requests, zipfile, StringIO
+import glob
+from mimetypes import MimeTypes
+import json
+
+
+
 
 from ..describe import Description, describeRoute
 from ..rest import Resource, RestException, filtermodel, loadmodel
@@ -38,9 +45,60 @@ class Item(Resource):
         self.route('GET', (':id', 'download'), self.download)
         self.route('GET', (':id', 'rootpath'), self.rootpath)
         self.route('POST', (), self.createItem)
+        self.route('POST', ('url',), self.readUrl)
         self.route('PUT', (':id',), self.updateItem)
         self.route('POST', (':id', 'copy'), self.copyItem)
         self.route('PUT', (':id', 'metadata'), self.setMetadata)
+
+
+    @access.public
+    @describeRoute(
+        Description('Read url content.')
+        .responseClass('Item')
+        .param('url', "Url.",
+               required=True)
+    )
+    def readUrl(self, params):
+        if 'url' in params:
+            url = params['url']
+            file_name = url.split('/')[-1]
+            u = urllib2.urlopen(url)
+            mime = MimeTypes()
+            mime_type = mime.guess_type(url)
+            f = open(file_name, 'wb')
+            meta = u.info()
+            file_size = int(meta.getheaders("Content-Length")[0])
+            print "Downloading: %s Bytes: %s" % (file_name, file_size)
+
+            file_size_dl = 0
+            block_sz = 8192
+            while True:
+                buffer = u.read(block_sz)
+                if not buffer:
+                    break
+
+                file_size_dl += len(buffer)
+                f.write(buffer)
+                status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+                status = status + chr(8)*(len(status)+1)
+            path = './zip_file/*'
+            files = glob.glob(path)
+            for file in files:
+                name = file.split('/')[-1]
+                f = open(file, 'r').read()
+                # mime_type = mime.guess_type(f)
+                return {
+                    'name': name,
+                    'size': file_size,
+                    'file': unicode(f, errors='ignore'),
+                    'mimeType': mime_type[0]
+                }
+
+            f.close()
+
+
+        else:
+            raise RestException('url must be provided.')
 
     @access.public
     @filtermodel(model='item')
@@ -113,6 +171,7 @@ class Item(Resource):
         .responseClass('Item')
         .param('folderId', 'The ID of the parent folder.')
         .param('name', 'Name for the item.')
+        .param('url', 'A valid URL.', required=False)
         .param('description', "Description for the item.", required=False)
         .errorResponse()
         .errorResponse('Write access was denied on the parent folder.', 403)
