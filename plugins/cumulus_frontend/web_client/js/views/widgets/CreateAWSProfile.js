@@ -18,7 +18,7 @@ minerva.views.CreateAWSProfile = minerva.View.extend({
         return this;
     },
 
-    createAwsProfile: function (e) {
+    createAwsProfile: _.debounce(function (e) {
         e.preventDefault();
 
         var settings = {
@@ -40,5 +40,5 @@ minerva.views.CreateAWSProfile = minerva.View.extend({
                 new minerva.views.SelectAWSProfile(settings).render();
             }, this));
         }, this);
-    }
+    }, 500, true)
 });

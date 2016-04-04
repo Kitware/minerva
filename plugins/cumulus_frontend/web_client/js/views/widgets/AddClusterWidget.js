@@ -1,6 +1,7 @@
 minerva.views.AddClusterWidget = minerva.View.extend({
     events: {
-        'click .m-cluster-launch-button': 'launchCluster'
+        'click .m-cluster-launch-button': 'launchCluster',
+        'click #m-add-cluster-add-field': 'addField'
     },
 
     initialize: function(settings) {
@@ -17,30 +18,49 @@ minerva.views.AddClusterWidget = minerva.View.extend({
         return this;
     },
 
+    addField: function (e) {
+        $('form.create-cluster-form').append(girder.templates.advancedClusterKeyValueWidget());
+    },
+
     params: function () {
         // Defaults
         var params = {
             type: 'ansible',
-            template: {
-                playbook: 'default'
-            },
+            cluster_config: {},
             profile: this.profileId
         };
 
         // Deep copy
         $.extend(true, params, {
             name: this.$('#m-cluster-name').val(),
-            template: {
-                aws_keyname: this.$('#m-cluster-aws-keyname').val(),
-                instance_type: this.$('#m-cluster-instance-type').val(),
-                instance_count: this.$('#m-cluster-instance-count').val()
+            playbook: this.$('#m-cluster-creation-playbook').val(),
+            cluster_config: {
+                master_instance_type: this.$('#m-cluster-instance-type').val(),
+                node_instance_type: this.$('#m-cluster-instance-type').val(),
+                node_instance_count: this.$('#m-cluster-instance-count').val(),
+                master_instance_ami: this.$('#m-cluster-ami').val(),
+                node_instance_ami: this.$('#m-cluster-ami').val(),
+                ansible_ssh_user: this.$('#m-cluster-user').val()
+            }
+        });
+
+        // Extend cluster_config with advanced variables
+        var advancedKeyValuePairs = _.zip($('form.create-cluster-form input.cluster-advanced-key'),
+                                          $('form.create-cluster-form input.cluster-advanced-value'));
+
+        _.each(advancedKeyValuePairs, function (keyValuePair) {
+            var key = $(keyValuePair[0]).val(),
+                val = $(keyValuePair[1]).val();
+
+            if (key != '' && val != '') {
+                params.cluster_config[key] = val;
             }
         });
 
         return params;
     },
 
-    launchCluster: function (e) {
+    launchCluster: _.debounce(function (e) {
         girder.restRequest({
             path: '/clusters',
             type: 'POST',
@@ -57,5 +77,5 @@ minerva.views.AddClusterWidget = minerva.View.extend({
                 $('.modal-footer a[data-dismiss="modal"]').click();
             }, this));
         }, this));
-    }
+    }, 500, true)
 });

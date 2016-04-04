@@ -21,6 +21,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
     events: {
         'click .m-add-computeresource': 'addComputeResourceDialog',
         'click .m-cluster-details': 'viewClusterDetails',
+        'click .m-provision-cluster': 'provisionCluster',
         'click .m-terminate-cluster': 'terminateCluster',
         'click .m-remove-cluster': 'removeCluster'
     },
@@ -37,8 +38,11 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         // This will re-render the panel to update icons/text
         girder.eventStream.on('g:event.cluster.status', function (e) {
             var cluster = this.collection.get(e.data._id);
-            cluster.set('status', e.data.status);
-            this.render();
+
+            if (cluster) {
+                cluster.set('status', e.data.status);
+                this.render();
+            }
         }, this);
 
         this.collection.fetch();
@@ -72,11 +76,24 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         }).render(true);
     },
 
-    terminateCluster: function (e) {
+    provisionCluster: function (e) {
         var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
         e.stopPropagation();
 
-        if (!_.contains(['error', 'terminating', 'terminated'], resource.get('status'))) {
+        if (resource.isProvisionable()) {
+            new minerva.views.ProvisionClusterWidget({
+                el: $('#g-dialog-container'),
+                model: resource,
+                parentView: this
+            }).render();
+        }
+    },
+
+    terminateCluster: _.debounce(function (e) {
+        var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));
+        e.stopPropagation();
+
+        if (!_.contains(['terminating', 'terminated'], resource.get('status'))) {
             girder.restRequest({
                 path: '/clusters/' + resource.id + '/terminate',
                 type: 'PUT'
@@ -84,7 +101,7 @@ minerva.views.ComputeResourcePanel = minerva.views.Panel.extend({
         } else {
             resource.destroy();
         }
-    },
+    }, 500, true),
 
     removeCluster: function (e) {
         var resource = this.collection.get($(e.currentTarget).attr('m-resource-id'));

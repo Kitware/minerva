@@ -5,5 +5,4 @@ girder.events.once('m:pre-render-panel-groups', function (sessionView) {
         id: 'm-resource-panel',
         view: minerva.views.ComputeResourcePanel
     });
-
 });
