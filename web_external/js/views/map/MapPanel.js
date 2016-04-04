@@ -28,20 +28,16 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     },
 
     // MapContainer Interface >>
-    deleteGeoJsLayer: function (geoJsLayer) {
-        this.map.deleteLayer(geoJsLayer);
+    deleteLayer: function (geoLayer) {
+        this.map.deleteLayer(geoLayer);
     },
 
-    createGeoJsLayer: function (geoJsLayerType, properties) {
-        return this.map.createLayer(geoJsLayerType, properties || {});
+    createLayer: function (geoLayerType, properties) {
+        return this.map.createLayer(geoLayerType, properties || {});
     },
 
     getMapView: function () {
         return this;
-    },
-
-    drawMap: function () {
-        this.map.draw();
     },
 
     addFeatureInfoLayer: function (layer) {
@@ -51,6 +47,50 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             console.error('Attempting to addFeatureInfoLayer, but widget uninitialized');
         }
     },
+
+    renderMap: function () {
+        if (!this.map) {
+            var mapSettings = this.session.metadata().map;
+            this.map = geo.map({
+                node: '.m-map-panel-map',
+                center: mapSettings.center,
+                zoom: mapSettings.zoom,
+                interactor: geo.mapInteractor({
+                    map: this.map,
+                    click: {
+                        enabled: true,
+                        cancelOnMove: true
+                    }
+                })
+            });
+            this.map.createLayer(mapSettings.basemap,
+                                 _.has(mapSettings, 'basemap_args')
+                                 ? mapSettings.basemap_args : {});
+            this.uiLayer = this.map.createLayer('ui');
+            this.mapCreated = true;
+            _.each(this.collection.models, function (dataset) {
+                if (dataset.get('displayed')) {
+                    this.addDataset(dataset);
+                }
+            }, this);
+            this.map.featureInfoWidget =
+                new minerva.views.WmsFeatureInfoWidget({
+                    map: this.map,
+                    version: '1.1.1',
+                    layers: [],
+                    callback: 'getLayerFeatures',
+                    session: this.session,
+                    parentView: this
+                });
+                this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
+                this.map.geoOn(geo.event.mouseclick, function (evt) {
+                    this.featureInfoWidget.content = '';
+                    this.featureInfoWidget.callInfo(0, evt.geo);
+                });
+        }
+        this.map.draw();
+    },
+
     // << MapContainer Interface
 
     /**
@@ -79,7 +119,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     repr.deleteLayer(this);
                     dataset.set('geoError', true);
                 }
-            }, this).createRepresentation(this, dataset, layerType, mapping);
+            }, this)._createRepresentation(this, dataset, layerType, mapping);
         }
     },
 
@@ -143,49 +183,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         }, this);
 
         minerva.views.Panel.prototype.initialize.apply(this);
-    },
-
-    renderMap: function () {
-        if (!this.map) {
-            var mapSettings = this.session.metadata().map;
-            this.map = geo.map({
-                node: '.m-map-panel-map',
-                center: mapSettings.center,
-                zoom: mapSettings.zoom,
-                interactor: geo.mapInteractor({
-                    map: this.map,
-                    click: {
-                        enabled: true,
-                        cancelOnMove: true
-                    }
-                })
-            });
-            this.map.createLayer(mapSettings.basemap,
-                                 _.has(mapSettings, 'basemap_args')
-                                 ? mapSettings.basemap_args : {});
-            this.uiLayer = this.map.createLayer('ui');
-            this.mapCreated = true;
-            _.each(this.collection.models, function (dataset) {
-                if (dataset.get('displayed')) {
-                    this.addDataset(dataset);
-                }
-            }, this);
-            this.map.featureInfoWidget =
-                new minerva.views.WmsFeatureInfoWidget({
-                    map: this.map,
-                    version: '1.1.1',
-                    layers: [],
-                    callback: 'getLayerFeatures',
-                    session: this.session,
-                    parentView: this
-                });
-                this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
-                this.map.geoOn(geo.event.mouseclick, function (evt) {
-                    this.featureInfoWidget.content = '';
-                    this.featureInfoWidget.callInfo(0, evt.geo);
-                });
-        }
-        this.map.draw();
     },
 
     render: function () {

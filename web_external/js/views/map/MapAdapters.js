@@ -3,10 +3,10 @@ minerva.core = minerva.core || {};
 (function () {
     function AdapterRegistry() {
         this.registry = {};
-        this.register = function (layerType, mapLayerDefinition) {
-            this.registry[layerType] = mapLayerDefinition;
+        this.register = function (type, definition) {
+            this.registry[type] = definition;
         };
-        this.createRepresentation = function (mapContainer, dataset, layerType, mapping) {
+        this._createRepresentation = function (container, dataset, layerType, mapping) {
             if (layerType === null || !_.has(this.registry, layerType)) {
                 console.error('This dataset cannot be adapted to a map layer of type [' + layerType + '].');
                 this.trigger('m:map_adapter_error', dataset, layerType);
@@ -19,7 +19,7 @@ minerva.core = minerva.core || {};
                         this.trigger('m:map_adapter_layerCreated', layer);
                     }, this).once('m:map_layer_error', function (layer) {
                         this.trigger('m:map_adapter_layerError', layer);
-                    }, this).initLayer(mapContainer, dataset, dataset.get('geoData'), mapping);
+                    }, this).initLayer(container, dataset, dataset.get('geoData'), mapping);
                 }, this).loadGeoData();
                 //
                 // Instead of dataset.loadGeoData, ideally something like
@@ -36,8 +36,9 @@ minerva.core = minerva.core || {};
     minerva.core.AdapterRegistry = _.extend(new AdapterRegistry(), Backbone.Events);
 })();
 
-minerva.representations = minerva.representations || {};
-minerva.representations.defineMapLayer = function (layerType, layerDefinition, parentDefinition) {
+minerva.rendering = minerva.rendering || {};
+minerva.rendering.geo = minerva.rendering || {};
+minerva.rendering.geo.defineMapLayer = function (layerType, layerDefinition, parentDefinition) {
     if (parentDefinition) {
         layerDefinition.prototype = new parentDefinition();
     }
@@ -45,25 +46,25 @@ minerva.representations.defineMapLayer = function (layerType, layerDefinition, p
     return layerDefinition;
 }
 
-minerva.representations.MapLayer = minerva.representations.defineMapLayer('map', function () {
-    this.deleteLayer = function (mapContainer) {
-        mapContainer.deleteGeoJsLayer(this.geoJsLayer);
+minerva.rendering.geo.MapRepresentation = minerva.rendering.geo.defineMapLayer('map', function () {
+    this.deleteLayer = function (container) {
+        container.deleteLayer(this.geoJsLayer);
     },
 
     this.setOpacity = function (opacity) {
         this.geoJsLayer.opacity(opacity);
     },
 
-    this.render = function (mapContainer) {
-        mapContainer.drawMap();
+    this.render = function (container) {
+        container.renderMap();
     }
 });
 
-minerva.representations.JsonReaderMapLayer = minerva.representations.defineMapLayer('geojson', function () {
+minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLayer('geojson', function () {
     this.readerType = 'jsonReader',
 
-    this.initLayer = function (mapContainer, dataset, data, visProperties) {
-        this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
+    this.initLayer = function (container, dataset, data, visProperties) {
+        this.geoJsLayer = container.createLayer('feature');
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
             reader.read(data, _.bind(function () {
@@ -75,19 +76,19 @@ minerva.representations.JsonReaderMapLayer = minerva.representations.defineMapLa
             this.trigger('m:map_layer_error', this);
         }
     }
-}, minerva.representations.MapLayer);
+}, minerva.rendering.geo.MapRepresentation);
 
-minerva.representations.ContourJsonReaderMapLayer = minerva.representations.defineMapLayer('contour', function () {
+minerva.rendering.geo.ContourRepresentation = minerva.rendering.geo.defineMapLayer('contour', function () {
     this.readerType = 'contourJsonReader'
-}, minerva.representations.JsonReaderMapLayer);
+}, minerva.rendering.GeometryRepresentation);
 
-minerva.representations.ChoroplethMapLayer = minerva.representations.defineMapLayer('choropleth', function () {
-    this.initLayer = function (mapContainer, dataset, jsonData, visProperties) {
+minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMapLayer('choropleth', function () {
+    this.initLayer = function (container, dataset, jsonData, visProperties) {
         // Set the visProperties from the dataset, though they should come from visProperties.
         visProperties.colorByValue = dataset.getMinervaMetadata().colorByValue;
         visProperties.colorScheme = dataset.getMinervaMetadata().colorScheme;
 
-        this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
+        this.geoJsLayer = container.createLayer('feature');
         var data = [];
         var colorByValue = visProperties.colorByValue;
         var colorScheme = visProperties.colorScheme;
@@ -160,23 +161,23 @@ minerva.representations.ChoroplethMapLayer = minerva.representations.defineMapLa
             if (!this.clickInfoWidget) {
                 this.clickInfoWidget = new minerva.views.ClickInfoWidget({
                     model: clickInfo,
-                    parentView: mapContainer.getMapView()
+                    parentView: container.getMapView()
                 });
             }
         }, this));
         this.trigger('m:map_layer_renderable', this);
     }
-}, minerva.representations.MapLayer);
+}, minerva.rendering.geo.MapRepresentation);
 
 
-minerva.representations.WmsMapLayer = minerva.representations.defineMapLayer('wms', function () {
+minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('wms', function () {
 
-    this.initLayer = function (mapContainer, dataset, jsonData, visProperties) {
-        this.geoJsLayer = mapContainer.createGeoJsLayer('osm', {
+    this.initLayer = function (container, dataset, jsonData, visProperties) {
+        this.geoJsLayer = container.createLayer('osm', {
                               attribution: null,
                               keepLower: false
                           });
-        mapContainer.addFeatureInfoLayer(this.geoJsLayer);
+        container.addFeatureInfoLayer(this.geoJsLayer);
         var minervaMetadata = dataset.metadata();
         this.geoJsLayer.layerName = minervaMetadata.type_name;
         this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
@@ -208,4 +209,4 @@ minerva.representations.WmsMapLayer = minerva.representations.defineMapLayer('wm
         this.trigger('m:map_layer_renderable', this);
     }
 
-}, minerva.representations.MapLayer);
+}, minerva.rendering.geo.MapRepresentation);
