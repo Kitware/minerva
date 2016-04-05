@@ -57,6 +57,22 @@ minerva.rendering.geo.MapRepresentation = minerva.rendering.geo.defineMapLayer('
 
     this.render = function (container) {
         container.renderMap();
+    },
+
+    this.readerType = 'jsonReader',
+
+    this.initLayer = function (mapContainer, dataset, data, visProperties) {
+        this.geoJsLayer = mapContainer.createLayer('feature');
+        try {
+            var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
+            reader.read(data, _.bind(function () {
+                this.trigger('m:map_layer_renderable', this);
+            }, this));
+        } catch (err) {
+            console.error('This layer cannot be rendered to the map');
+            console.error(err);
+            this.trigger('m:map_layer_error', this);
+        }
     }
 });
 
@@ -124,11 +140,9 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
         };
     }
 
-    this.readerType = 'jsonReader';
-
     this.initLayer = function (mapContainer, dataset, data, visProperties) {
 
-        this.geoJsLayer = mapContainer.createGeoJsLayer('feature');
+        this.geoJsLayer = mapContainer.createLayer('feature');
         try {
             data = flattenFeatures(data);
 
@@ -166,7 +180,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
 
 minerva.rendering.geo.ContourRepresentation = minerva.rendering.geo.defineMapLayer('contour', function () {
     this.readerType = 'contourJsonReader'
-}, minerva.rendering.GeometryRepresentation);
+}, minerva.rendering.geo.MapRepresentation);
 
 minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMapLayer('choropleth', function () {
     this.initLayer = function (container, dataset, jsonData, visProperties) {
