@@ -76,7 +76,7 @@ class Source(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getSourceFolder(self, user, params):
-        folder = findSourceFolder(self.getCurrentUser(), user)
+        folder = findSourceFolder(self.getCurrentUser(), user, create=True)
         return {'folder': folder}
     getSourceFolder.description = (
         Description('Get the minerva source folder owned by a user.')
