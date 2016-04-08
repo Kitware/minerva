@@ -21,6 +21,7 @@ import cherrypy
 import urllib, urllib2, requests, zipfile, StringIO
 import glob
 from mimetypes import MimeTypes
+import os, shutil
 import json
 
 
@@ -62,9 +63,13 @@ class Item(Resource):
         if 'url' in params:
             url = params['url']
             file_name = url.split('/')[-1]
+            unpacked_path = './zip_file'
             u = urllib2.urlopen(url)
             mime = MimeTypes()
             mime_type = mime.guess_type(url)
+            r = requests.get(url, stream=True)
+            z = zipfile.ZipFile(StringIO.StringIO(r.content))
+            z.extractall(unpacked_path)
             f = open(file_name, 'wb')
             meta = u.info()
             file_size = int(meta.getheaders("Content-Length")[0])
@@ -86,15 +91,16 @@ class Item(Resource):
             for file in files:
                 name = file.split('/')[-1]
                 f = open(file, 'r').read()
-                # mime_type = mime.guess_type(f)
+                # Remove the unzipped files
+                shutil.rmtree(unpacked_path)
+                # Remove read files
+                os.remove(file_name)
                 return {
                     'name': name,
                     'size': file_size,
                     'file': unicode(f, errors='ignore'),
                     'mimeType': mime_type[0]
                 }
-
-            f.close()
 
 
         else:
