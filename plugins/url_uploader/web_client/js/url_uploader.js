@@ -2,6 +2,7 @@
  * The Item Preview widget shows a preview of items under a given folder.
  * For now, the only supported item previews are image previews.
  */
+
 girder.views.UrlUploaderWidget = girder.View.extend({
 
     events: {
