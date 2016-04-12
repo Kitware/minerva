@@ -24,6 +24,8 @@ import json
 import six
 import sys
 import traceback
+import urllib2
+
 
 from . import docs
 from girder import events, logger
@@ -33,7 +35,6 @@ from girder.models.model_base import AccessException, GirderException, \
 from girder.utility.model_importer import ModelImporter
 from girder.utility import config, JsonEncoder
 from six.moves import range, urllib
-
 
 def getUrlParts(url=None):
     """

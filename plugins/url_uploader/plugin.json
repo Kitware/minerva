@@ -1,0 +1,5 @@
+{
+    "name": "Url Uploader",
+    "description": "Upload item to Girder through URL.",
+    "version": "1.0.0"
+}

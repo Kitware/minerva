@@ -1,0 +1,12 @@
+{
+  "name": "girder-url-uploader",
+  "version": "1.0.0",
+  "description": "upload item to Girder through UR.",
+  "keywords": [
+    "girder",
+    "url",
+    "url uploader",
+    "uploader"
+  ],
+  "license": "Apache-2.0"
+}
