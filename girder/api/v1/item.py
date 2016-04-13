@@ -45,7 +45,7 @@ class Item(Resource):
         self.route('GET', (':id', 'download'), self.download)
         self.route('GET', (':id', 'rootpath'), self.rootpath)
         self.route('POST', (), self.createItem)
-        self.route('POST', ('url',), self.readUrl)
+        #self.route('POST', ('url',), self.readUrl)
         self.route('PUT', (':id',), self.updateItem)
         self.route('POST', (':id', 'copy'), self.copyItem)
         self.route('PUT', (':id', 'metadata'), self.setMetadata)

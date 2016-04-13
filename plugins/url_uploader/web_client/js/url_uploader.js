@@ -73,9 +73,7 @@ girder.views.UrlUploaderWidget = girder.View.extend({
             girder.restRequest({
                 path: '/item/upload',
                 type: 'POST',
-                data: {
-                    file: resp.file
-                }
+                data: {file_name: resp[0].file_name}
             });
         }, this));
     },
