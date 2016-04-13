@@ -57,7 +57,7 @@ def readUrl(self, params):
 def uploadUrl(self, params):
     user = self.getCurrentUser()
     gc = girder_client.GirderClient(port=8080)
-    gc.authenticate('essam', 'dreamcast2')
+    gc.authenticate('essam', '')
     folder_id = '570d18000640fd2cd7a6211d'
     path = './zip_file/*'
     files = glob.glob(path)
