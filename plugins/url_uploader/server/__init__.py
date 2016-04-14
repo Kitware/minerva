@@ -1,6 +1,6 @@
 from girder.api import access
 from girder.api.rest import boundHandler
-import urllib, urllib2, requests, zipfile, StringIO, bz2
+import urllib, urllib2, requests, zipfile, StringIO, bz2, gzip
 import glob
 from mimetypes import MimeTypes
 import os, shutil
@@ -9,12 +9,27 @@ import girder_client
 @access.public
 @boundHandler()
 def readUrl(self, params):
+    path = './zip_file/*'
+    files = glob.glob(path)
+    output = []
     if 'url' in params:
         unpacked_path = './zip_file'
         url = params['url']
         file_name = url.split('/')[-1]
         extension = file_name.split('.')[-1]
         retry = 0
+
+        def send_data_to_client(mime_type):
+            for file in files:
+                name = file.split('/')[-1]
+                f = open(file, 'r').read()
+                output.append({
+                    'name': name,
+                    'file_name': file_name,
+                    'file': unicode(f, errors='ignore'),
+                    'mimeType': mime_type[0]
+                })
+            return output
         while True: # retry request
             try:
                 u = urllib.urlopen(url)
@@ -35,25 +50,12 @@ def readUrl(self, params):
                         buffer = u.read(block_sz)
                         if not buffer:
                             break
-
                         file_size_dl += len(buffer)
                         f.write(buffer)
                         status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
                         status = status + chr(8)*(len(status)+1)
-                    path = './zip_file/*'
-                    files = glob.glob(path)
-                    output = []
-                    for file in files:
-                        name = file.split('/')[-1]
-                        f = open(file, 'r').read()
-                        output.append({
-                            'name': name,
-                            'file_name': file_name,
-                            'size': file_size,
-                            'file': unicode(f, errors='ignore'),
-                            'mimeType': mime_type[0]
-                        })
-                    return output
+                    return send_data_to_client(mime_type)
+
                 elif extension == 'bz2':
                     # create a directory
                     if not os.path.exists(unpacked_path):
@@ -65,22 +67,20 @@ def readUrl(self, params):
                     data = extractedFile.read()
                     newfilepath = unpacked_path + '/' + file_path[:-4]
                     open(newfilepath, 'wb').write(data)
-                    path = './zip_file/*'
-                    files = glob.glob(path)
-                    output = []
-                    for file in files:
-                        name = file.split('/')[-1]
-                        f = open(file, 'r').read()
-                        output.append({
-                            'name': name,
-                            'file_name': file_name,
-                            'file': unicode(f, errors='ignore'),
-                            'mimeType': mime_type[0]
-                        })
-                    return output
+                    return send_data_to_client(mime_type)
 
                 elif extension == 'gz':
-                    return []
+                    # create a directory
+                    if not os.path.exists(unpacked_path):
+                        os.makedirs(unpacked_path)
+                    file_path =  './' + file_name
+                    target = open(file_path, 'w')
+                    target.write(r.content)
+                    extractedFile = gzip.GzipFile(file_path)
+                    data = extractedFile.read()
+                    newfilepath = unpacked_path + '/' + file_path[:-4]
+                    open(newfilepath, 'wb').write(data)
+                    return send_data_to_client(mime_type)
                 else:
                     return []
             except Exception as e: # TODO need more detailed handling
