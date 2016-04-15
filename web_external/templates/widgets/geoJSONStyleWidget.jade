@@ -1,0 +1,33 @@
+
+// template variables:
+//   - properties: accumulated property object from a set of geojson features
+//   - styles: style objects configuring how the features are displayed
+//   - ramps: colorbrewer style color ramps
+
+.modal-dialog
+  .modal-content
+    form.form-horizontal.modal-form.m-geojson-style
+      .modal-body
+        each style in styles
+          .form-group(class='m-style-' + style.name)
+            label.col-sm-3.control-label #{style.name}
+            .col-sm-3
+              select.form-control.m-scale-by
+                option(value='constant' selected= style.scale === 'constant') constant
+                optgroup(label='properties')
+                  each prop, key in properties
+                    option(value=key selected= style.scale !== 'constant' && style.key === key) #{key}
+            if style.scale === 'constant'
+              .col-sm-3
+                input.form-control.m-constant-value(type=style.type value=style.value)
+            else if style.type === 'color'
+              .col-sm-3
+                select.form-control.m-select-ramp
+                  each ramp, name in ramps
+                    option(data-content!=ramp.display data-ramp-name=name) #{name}
+            else if style.type === 'number'
+              .col-sm-3
+                input.form-control.m-scale-min(type='number' value=properties[style.key].min)
+              .col-sm-3
+                input.form-control.m-scale-max(type='number' value=properties[style.key].max)
+
