@@ -17,13 +17,16 @@
 #  limitations under the License.
 ###############################################################################
 
+from os import environ
+
+from owslib.wfs import WebFeatureService
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import getUrlParts
 
-from owslib.wfs import WebFeatureService
-
 from girder.plugins.minerva.rest.source import Source
+from girder.plugins.minerva.utility.bsve import bsve_utility
 
 
 class WfsSource(Source):
@@ -38,7 +41,18 @@ class WfsSource(Source):
         baseURL = params['baseURL']
         parsedUrl = getUrlParts(baseURL)
         hostName = parsedUrl.netloc
-        wfs = WebFeatureService(baseURL, version='2.0.0')
+        # WFS in owslib can't deal with auth headers, so we call the request
+        # and pass the XML to owslib for processing.
+        user = environ.get('BSVE_USERNAME')
+        apikey = environ.get('BSVE_APIKEY')
+        secret = environ.get('BSVE_SECRETKEY')
+        bu = bsve_utility.BsveUtility(user=user, apikey=apikey, secret=secret,
+                                      base=baseURL)
+        url = '%s/api/data/v2/sources/wfs/meta/GetCapabilities' % baseURL
+        resp = bu._session.request(url=url, headers=bu._auth_header(),
+                                   method="GET")
+        # baseURL is passed but unused
+        wfs = WebFeatureService(baseURL, xml=resp.content, version='1.1.0')
         layersType = list(wfs.contents)
         layers = []
         for layerType in layersType:

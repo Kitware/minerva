@@ -16,19 +16,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
+from os import environ
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import loadmodel
 from girder.constants import AccessType
 
 from girder.plugins.minerva.rest.dataset import Dataset
-
+from girder.plugins.minerva.utility.bsve import bsve_utility
 
 class WfsDataset(Dataset):
 
     def __init__(self):
         self.resourceName = 'minerva_dataset_wfs'
         self.route('POST', (), self.createWfsDataset)
+        self.route('GET', ('bsve_auth',), self.getBsveAuthHeader)
 
     @access.user
     @loadmodel(map={'wfsSourceId': 'wfsSource'}, model='item',
@@ -55,3 +58,13 @@ class WfsDataset(Dataset):
         .param('typeName', 'The type name of the WFS layer', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
+
+    @access.user
+    def getBsveAuthHeader(self, params):
+        (user, apikey, secret) = (environ.get('BSVE_USERNAME'),
+                                  environ.get('BSVE_APIKEY'),
+                                  environ.get('BSVE_SECRETKEY'))
+        bu = bsve_utility.BsveUtility(user=user, apikey=apikey, secret=secret)
+        return bu._auth_header()
+    getBsveAuthHeader.description = (
+        Description('Create a valid current BSVE Auth Header.'))

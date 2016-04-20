@@ -30,22 +30,34 @@ minerva.models.WfsDatasetModel = minerva.models.DatasetModel.extend({
         if (this.get('geoData') !== null) {
             this.trigger('m:dataset_geo_dataLoaded', this);
         } else {
-            var mm = this.metadata();
-            var url = mm.base_url + '?service=wfs&version=1.0.0&request=GetFeature&typename='+mm.type_name+'&outputFormat=json';
-            $.ajax({
-                url: url,
-                contentType: 'application/json',
-                // Set this to text to prevent json parsing.
-                dataType: 'text',
-                success: _.bind(function (data) {
-                    this.set('geoData', data);
-                    this.trigger('m:dataset_geo_dataLoaded', this);
-                }, this),
-                error: function (a, b, c) {
-                    console.error(b);
-                    console.error(c);
-                }
-            });
+            // Get the Auth Header from the Minerva Server.
+            girder.restRequest({
+                path: '/minerva_dataset_wfs/bsve_auth',
+                type: 'GET',
+                error: null // ignore default error behavior (validation may fail)
+            }).done(_.bind(function (auth) {
+                var mm = this.metadata();
+                //var url = mm.base_url + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name + '&$format=json';
+                var url = mm.base_url + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name.split(':')[1] + '.1&$format=json';
+                $.ajax({
+                    url: url,
+                    contentType: 'application/json',
+                    // Set this to text to prevent json parsing.
+                    dataType: 'text',
+                    beforeSend: function (xhr) { xhr.setRequestHeader('harbinger-authentication', auth['harbinger-authentication']); },
+                    success: _.bind(function (data) {
+                        data = JSON.parse(data);
+                        this.set('geoData', data.result);
+                        this.trigger('m:dataset_geo_dataLoaded', this);
+                    }, this),
+                    error: function (a, b, c) {
+                        console.error(b);
+                        console.error(c);
+                    }
+                });
+            }, this)).error(_.bind(function (err) {
+                this.trigger('m:error', err);
+            }, this));
         }
     }
 });
