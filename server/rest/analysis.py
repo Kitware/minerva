@@ -18,6 +18,7 @@
 ###############################################################################
 
 import json
+import os
 
 from girder.constants import AccessType
 from girder.api import access
@@ -29,13 +30,17 @@ from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
                                                             addJobOutput)
 from girder.plugins.minerva.rest.dataset import Dataset
 
+from girder.plugins.minerva.utility.analysis import get_analysis_obj
+
 
 class Analysis(Resource):
     def __init__(self):
         self.resourceName = 'minerva_analysis'
 
         self.route('GET', (), self.listAnalyses)
-        self.route('GET', (':id',), self.getAnalysis)
+        self.route('GET', ('id',':id',), self.getAnalysisById)
+        self.route('GET', (':name',), self.getAnalysisByName)
+        self.route('GET', (':name', 'meta',), self.getAnalysisMeta)
         self.route('POST', (), self.createAnalysis)
         self.route('DELETE', (':id',), self.deleteAnalysis)
 
@@ -51,13 +56,15 @@ class Analysis(Resource):
     @describeRoute(
         Description('Get a list of analyses')
         .param('name', 'Filter by name of analysis', required=False, )
+        .errorResponse('name was invalid.')
         .errorResponse('Read access was denied for the analysis.', 403)
     )
     def listAnalyses(self, params):
         user = self.getCurrentUser()
 
-        # TODO: actually filter by name, other values
-        filters = None
+        filters = {}
+        if params.get('name'):
+            filters['name'] = params['name']
 
         return self.model('analysis', 'minerva').list(user=user,
                                                       filters=filters)
@@ -70,8 +77,32 @@ class Analysis(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied for the analysis.', 403)
     )
-    def getAnalysis(self, analysis, params):
+    def getAnalysisById(self, analysis, params):
         return analysis
+
+
+    @access.user
+    @describeRoute(
+        Description('Get an analysis by Name')
+        .param('name', 'The name of the analysis.', paramType='path',)
+        .errorResponse('name was invalid.')
+        .errorResponse('Read access was denied for the analysis.', 403)
+    )
+    def getAnalysisByName(self, name, params):
+        return self.model('analysis', 'minerva').get_by_name(name)
+
+    @access.user
+    @describeRoute(
+        Description('Get an analysis\'s metadata')
+        .param('name', 'The name of the analysis.', paramType='path',)
+        .errorResponse('name was invalid.')
+        .errorResponse('Read access was denied for the analysis.', 403)
+    )
+    def getAnalysisMeta(self, name, params):
+        analysis = get_analysis_obj(
+            self.model('analysis', 'minerva').get_by_name(name))
+
+        return analysis.inputs
 
     @access.user
     @describeRoute(
@@ -84,11 +115,14 @@ class Analysis(Resource):
 
         user = self.getCurrentUser()
         path = params['path'].strip()
+        name = params.get('name', None)
+
         analysis_type = params.get('type', 'python')
 
         return self.model('analysis', 'minerva').create(
             path,
             analysis_type,
+            name=name,
             user=user)
 
     @access.user

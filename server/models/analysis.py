@@ -2,7 +2,7 @@ import os
 import datetime
 
 from girder.constants import AccessType
-from girder.api.rest import getCurrentUser
+from girder.api.rest import getCurrentUser, RestException
 from girder.models.model_base import AccessControlledModel
 
 
@@ -16,6 +16,20 @@ class Analysis(AccessControlledModel):
         # TODO ensure run() function is available
         # TODO ensure name is unique
         return doc
+
+    def get_by_name(self, name, user=None):
+        if user is None:
+            user = getCurrentUser()
+
+        # TODO: Fix this
+        #   Shouldn't we be able to do this with out querying
+        #   the database twice?
+        doc = self.findOne({'name': name})
+        if doc is None:
+            raise RestException('No such analysis: %s' % name, code=400)
+
+
+        return self.load(doc['_id'], level=AccessType.READ, user=user)
 
     def list(self, user=None, filters=None, sort=None):
         if user is None:

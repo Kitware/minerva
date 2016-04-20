@@ -63,6 +63,15 @@ class AnalysisTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
+    # TODO: Analysis Model must have unique name
+    # TODO: Analysis Endpoint should accept name paramater
+    # TODO: Analysis Endpoint should create name from
+    #       basename stirpped of extension
+
+    # TODO: Test utility method for get_analysis
+
+    # TODO: test model get_by_name()
+
     def testAnalysisUtilityEndpoints(self):
         """Test the minerva analysis utility endpoints."""
 
