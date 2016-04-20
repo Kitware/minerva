@@ -38,7 +38,11 @@ minerva.models.WfsDatasetModel = minerva.models.DatasetModel.extend({
             }).done(_.bind(function (auth) {
                 var mm = this.metadata();
                 //var url = mm.base_url + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name + '&$format=json';
-                var url = mm.base_url + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name.split(':')[1] + '.1&$format=json';
+                var baseUrl = mm.base_url;
+                if (!baseUrl.endsWith('/')) {
+                    baseUrl += '/';
+                }
+                var url = baseUrl + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name.split(':')[1] + '.1&$format=json';
                 $.ajax({
                     url: url,
                     contentType: 'application/json',
