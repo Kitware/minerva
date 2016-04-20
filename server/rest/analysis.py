@@ -19,9 +19,10 @@
 
 import json
 
+from girder.constants import AccessType
 from girder.api import access
-from girder.api.describe import Description
-from girder.api.rest import Resource, RestException
+from girder.api.describe import Description, describeRoute
+from girder.api.rest import Resource, RestException, loadmodel
 
 from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
                                                             findAnalysisByName,
@@ -32,10 +33,76 @@ from girder.plugins.minerva.rest.dataset import Dataset
 class Analysis(Resource):
     def __init__(self):
         self.resourceName = 'minerva_analysis'
+
+        self.route('GET', (), self.listAnalyses)
+        self.route('GET', (':id',), self.getAnalysis)
+        self.route('POST', (), self.createAnalysis)
+        self.route('DELETE', (':id',), self.deleteAnalysis)
+
+
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
         self.route('POST', ('mmwr_import',), self.bsveMMWRAnalysis)
+
+
+
+    @access.user
+    @describeRoute(
+        Description('Get a list of analyses')
+        .param('name', 'Filter by name of analysis', required=False, )
+        .errorResponse('Read access was denied for the analysis.', 403)
+    )
+    def listAnalyses(self, params):
+        user = self.getCurrentUser()
+
+        # TODO: actually filter by name, other values
+        filters = None
+
+        return self.model('analysis', 'minerva').list(user=user,
+                                                      filters=filters)
+
+    @access.user
+    @loadmodel(model='analysis', plugin='minerva', level=AccessType.READ)
+    @describeRoute(
+        Description('Get an analysis by ID')
+        .param('id', 'The ID of the analysis.', paramType='path',)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied for the analysis.', 403)
+    )
+    def getAnalysis(self, analysis, params):
+        return analysis
+
+    @access.user
+    @describeRoute(
+        Description('Create an analysis')
+        .param('path', 'Path to the file containing the run function', )
+        .param('type', 'type of analysis (default=python)', required=False)
+    )
+    def createAnalysis(self, params):
+        self.requireParams('path', params)
+
+        user = self.getCurrentUser()
+        path = params['path'].strip()
+        analysis_type = params.get('type', 'python')
+
+        return self.model('analysis', 'minerva').create(
+            path,
+            analysis_type,
+            user=user)
+
+    @access.user
+    @loadmodel(model='analysis', plugin='minerva', level=AccessType.WRITE)
+    @describeRoute(
+        Description('Delete an analysis')
+        .param('id', 'The ID of the analysis.', paramType='path',)
+        .errorResponse('Write access was denied for the analysis.', 403)
+    )
+    def deleteAnalysis(self, analysis, params):
+        self.model('analysis', 'minerva').remove(analysis)
+
+
+
 
     @access.user
     def getAnalysisFolder(self, params):
