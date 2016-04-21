@@ -72,6 +72,18 @@ class AnalysisTestCase(base.TestCase):
 
     # TODO: test model get_by_name()
 
+    # TODO: test PythonInputParser
+    #   Test works with no arguments
+    #   Test works with just args
+    #   Test works with just defaults
+    #     Test works with default of None
+    #     Test works with default of String
+    #     Test works with default of Tuple
+    #     Test works with default of Number/Float
+    #   Test works with args and defaults
+    #   Test throws exception on bad syntax
+    #   Test throws exception if run couldn't be found
+
     def testAnalysisUtilityEndpoints(self):
         """Test the minerva analysis utility endpoints."""
 
