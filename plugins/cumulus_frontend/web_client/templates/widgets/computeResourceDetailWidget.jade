@@ -10,13 +10,13 @@
             tbody
               tr
                 td Instance Count
-                td #{resource.get('cluster_config').node_instance_count}
+                td #{resource.get('config').launch.params.node_instance_count}
               tr
                 td Instance Type
-                td #{resource.get('cluster_config').node_instance_type}
+                td #{resource.get('config').launch.params.node_instance_type}
               tr
                 td Creation Playbook
-                td #{resource.get('cluster_config').playbook}
+                td #{resource.get('type')}
 
 
           ul.nav.nav-tabs(role='tablist')
