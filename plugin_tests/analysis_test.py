@@ -1,50 +1,22 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-###############################################################################
-#  Copyright Kitware Inc.
-#
-#  Licensed under the Apache License, Version 2.0 ( the "License" );
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-###############################################################################
-
-import httmock
-from httmock import urlmatch, HTTMock
-import json
 import os
-import sys
-import time
 
 # Need to set the environment variable before importing girder
 girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
 os.environ['GIRDER_PORT'] = girder_port  # noqa
 
 from tests import base
-from girder_client import GirderClient
+import unittest
 
-sys.path.append(os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../utility')
-))
-import import_analyses
-
+PythonAnalysis = None
 
 def setUpModule():
     """Enable the minerva plugin and start the server."""
-    base.enabledPlugins.append('jobs')
-    base.enabledPlugins.append('romanesco')
-    base.enabledPlugins.append('gravatar')
     base.enabledPlugins.append('minerva')
+    base.enabledPlugins.append('cumulus')
     base.startServer(False)
 
+    global PythonAnalysis
+    from girder.plugins.minerva.utility.analysis import PythonAnalysis
 
 def tearDownModule():
     """Stop the server."""
@@ -54,15 +26,15 @@ def tearDownModule():
 class AnalysisTestCase(base.TestCase):
     """Tests of the minerva analysis functionality."""
 
-    def setUp(self):
-        """Set up the test case with  a user."""
-        super(AnalysisTestCase, self).setUp()
+    def get_analysis(self, file_name):
+        return PythonAnalysis(name=file_name,
+                              path=os.path.join(
+                                  os.path.dirname(__file__),
+                                  "analyses", file_name))
 
-        self._import_done = False
-        self._user = self.model('user').createUser(
-            'minervauser', 'password', 'minerva', 'user',
-            'minervauser@example.com')
 
+    def setUp(self, *args, **kwargs):
+        super(AnalysisTestCase, self).setUp(*args, **kwargs)
     # TODO: Analysis Model must have unique name
     # TODO: Analysis Endpoint should accept name paramater
     # TODO: Analysis Endpoint should create name from
@@ -72,292 +44,129 @@ class AnalysisTestCase(base.TestCase):
 
     # TODO: test model get_by_name()
 
-    # TODO: test PythonInputParser
+    # Test PythonInputParser
     #   Test works with no arguments
+    def assertComplexEquals(self, i, o):
+        def dict_ordered(obj):
+            if isinstance(obj, dict):
+                return sorted((k, dict_ordered(v)) for k, v in obj.items())
+            elif isinstance(obj, list):
+                return sorted(dict_ordered(x) for x in obj)
+            else:
+                return obj
+
+        self.assertEquals(dict_ordered(i), dict_ordered(o))
+
+    def test_no_arguments(self):
+        p = self.get_analysis('no_args.py')
+        self.assertTrue(p.inputs == [])
+
     #   Test works with just args
+    def test_just_args(self):
+        p = self.get_analysis('just_args.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'name': 'a',  'optional': False,
+                                   'vararg': False, 'kwarg': False},
+                                  {'name': 'b', 'optional': False,
+                                   'vararg': False, 'kwarg': False}])
+
     #   Test works with just defaults
     #     Test works with default of None
     #     Test works with default of String
     #     Test works with default of Tuple
     #     Test works with default of Number/Float
+    def test_just_defaults(self):
+        p = self.get_analysis('just_defaults.py')
+        self.assertComplexEquals(p.inputs[0], {'default': None,      'kwarg': False, 'optional': True, 'name': 'a', 'vararg': False})
+        self.assertComplexEquals(p.inputs[1], {'default': 'test',    'kwarg': False, 'optional': True, 'name': 'b', 'vararg': False})
+        self.assertComplexEquals(p.inputs[2], {'default': (1, 2, 3), 'kwarg': False, 'optional': True, 'name': 'c', 'vararg': False})
+        self.assertComplexEquals(p.inputs[3], {'default': 10,        'kwarg': False, 'optional': True, 'name': 'd', 'vararg': False})
+        self.assertComplexEquals(p.inputs[4], {'default': 10.5,      'kwarg': False, 'optional': True, 'name': 'e', 'vararg': False})
+
     #   Test works with args and defaults
+    def test_args_and_defaults(self):
+        p = self.get_analysis('args_and_defaults.py')
+        self.assertComplexEquals(p.inputs, ([{'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                             {'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                             {'default': 'test', 'kwarg': False, 'optional': True, 'name': 'c', 'vararg': False},
+                                             {'default': None, 'kwarg': False, 'optional': True, 'name': 'd', 'vararg': False}]))
+
     #   Test throws exception on bad syntax
+    def test_bad_syntax(self):
+        with self.assertRaises(SyntaxError):
+            p = self.get_analysis('bad_syntax.py')
+            p.inputs
+
     #   Test throws exception if run couldn't be found
+    def test_no_run(self):
+        with self.assertRaises(Exception):
+            p = self.get_analysis('no_run.py')
+            p.inputs
 
-    def testAnalysisUtilityEndpoints(self):
-        """Test the minerva analysis utility endpoints."""
 
-        # at first there is no analysis folder or minerva collection
+    def test_varargs(self):
+        p = self.get_analysis('varargs.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'default': [], 'kwarg': False,
+                                   'optional': True, 'name': 'args',
+                                   'vararg': True}])
 
-        path = '/minerva_analysis/folder'
-        response = self.request(path=path, method='GET')
-        self.assertStatus(response, 401)  # unauthorized
+    def test_kwargs(self):
+        p = self.get_analysis('kwargs.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'default': {}, 'kwarg': True,
+                                   'optional': True, 'name': 'kwargs',
+                                   'vararg': False}])
 
-        response = self.request(path=path, method='GET', user=self._user)
-        self.assertStatusOk(response)
-        self.assertEquals(
-            response.json['folder'], None,
-            'No analysis folder should exist'
-        )
+    def test_varargs_kwargs(self):
+        p = self.get_analysis('varargs_kwargs.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'default': [], 'kwarg': False,
+                                   'optional': True, 'name': 'args',
+                                   'vararg': True},
+                                  {'default': {}, 'kwarg': True,
+                                   'optional': True, 'name': 'kwargs',
+                                   'vararg': False}])
 
-        # create the analysis folder
+    def test_empty_docstring(self):
+        p = self.get_analysis('empty_docstring.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                  {'default': None, 'kwarg': False, 'optional': True, 'name': 'c', 'vararg': False}])
 
-        response = self.request(path=path, method='POST', user=self._user)
-        self.assertStatusOk(response)
-        self.assertNotEquals(
-            response.json['folder'], None,
-            'An analysis folder should exist'
-        )
+    def test_docstring_no_field_list(self):
+        p = self.get_analysis('no_field_list.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                  {'default': None, 'kwarg': False, 'optional': True, 'name': 'c', 'vararg': False}])
 
-        # ensure we can get it
+    def test_docstring_nonrelevant_params_and_types(self):
+        p = self.get_analysis('nonrelevant_params_and_types.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                  {'default': None, 'kwarg': False, 'optional': True, 'name': 'c', 'vararg': False}])
 
-        response = self.request(path=path, method='GET', user=self._user)
-        self.assertStatusOk(response)
-        self.assertNotEquals(
-            response.json['folder'], None,
-            'An analysis folder should exist'
-        )
+    def test_docstring_params(self):
+        p = self.get_analysis('params.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'description': 'description of a', 'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'description': 'description of b', 'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                  {'kwarg': False, 'name': 'c', 'vararg': False, 'default': None, 'optional': True, 'description': 'description of c'}])
 
-    def _importAnalysis(self):
-        """Setup and import analyses for bsve tests."""
-        if self._import_done:
-            return
+    def test_docstring_type(self):
+        p = self.get_analysis('type.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'int': 'int', 'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'int': 'int', 'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                  {'kwarg': False, 'name': 'c', 'vararg': False, 'default': None, 'optional': True, 'type': 'int'}])
 
-        path = '/minerva_analysis/folder'
-        response = self.request(path=path, method='POST', user=self._user)
-        self.assertStatusOk(response)
-        analyses_folder = response.json['folder']
 
-        # import the bsve analysis
-        client = GirderClient('localhost', girder_port)
-        client.authenticate('minervauser', 'password')
-
-        bsve_analysis_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                '../analyses/bsve'
-            )
-        )
-        import_analyses.import_analyses(client, bsve_analysis_path)
-
-        path = '/item'
-        params = {
-            'folderId': analyses_folder['_id']
-        }
-        response = self.request(
-            path=path, method='GET', params=params, user=self._user
-        )
-        self.assertStatusOk(response)
-        self.assertEquals(
-            len(response.json), 2,
-            'Expecting only one analysis'
-        )
-        for analysis in response.json:
-            if analysis['name'] == 'bsve search':
-                search_analysis = analysis
-            elif analysis['name'] == 'MMWR data import':
-                soda_analysis = analysis
-            else:
-                self.fail(
-                    'Unexpected analysis found "%s".' % analysis['name']
-                )
-        expected_meta = {
-            u'minerva': {
-                u'analysis_type': u'bsve_search',
-                u'analysis_name': u'bsve search',
-                u'analysis_id': search_analysis['_id']
-            }
-        }
-        self.assertEquals(
-            search_analysis['meta'], expected_meta,
-            'Unexpected value for search meta data'
-        )
-        expected_meta = {
-            u'minerva': {
-                u'analysis_type': u'mmwr_import_data',
-                u'analysis_name': u'MMWR data import',
-                u'analysis_id': soda_analysis['_id']
-            }
-        }
-        self.assertEquals(
-            soda_analysis['meta'], expected_meta,
-            'Unexpected value for soda meta data'
-        )
-
-        # create the dataset folder
-        path = '/minerva_dataset/folder'
-        params = {
-            'userId': self._user['_id'],
-        }
-        response = self.request(
-            path=path, method='POST', params=params, user=self._user
-        )
-        self.assertStatusOk(response)
-        self._importDone = True
-
-    def testBsveSearchAnalysis(self):
-        self._importAnalysis()
-
-        # mock the calls to bsve search
-        @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
-        def bsve_mock(url, request):
-            if url.path.split('/')[-1] == 'request':
-                return httmock.response(200, '12345')
-            else:
-                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
-                filepath = os.path.join(
-                    pluginTestDir, 'data', 'bsve_search.json'
-                )
-                with open(filepath) as bsve_search_file:
-                    content = {
-                        'status': 1,
-                        'results': json.load(bsve_search_file)
-                    }
-                    headers = {
-                        'content-length': len(content),
-                        'content-type': 'application/json'
-                    }
-                    return httmock.response(
-                        200, content, headers, request=request
-                    )
-
-        with HTTMock(bsve_mock):
-            response = self.request(
-                path='/minerva_analysis/bsve_search',
-                method='POST',
-                params={
-                    'datasetName': 'test dataset',
-                    'bsveSearchParams': '{}'
-                },
-                user=self._user
-            )
-            self.assertStatusOk(response)
-            job = response.json
-
-            # wait for the async job to complete
-            searchResultsFinished = False
-            count = 0
-            output = job['meta']['minerva']['outputs'][0]
-            self.assertEquals(
-                output['type'], 'dataset',
-                'Incorrect output type %s' % output['type']
-            )
-
-            while not searchResultsFinished and count < 5:
-                # get the dataset and check if it has been updated
-                path = '/minerva_dataset/%s/dataset' % str(output['dataset_id'])
-                response = self.request(
-                    path=path,
-                    method='GET',
-                    user=self._user
-                )
-                dataset = response.json
-
-                if 'json_row' in dataset:
-                    searchResultsFinished = True
-                else:
-                    time.sleep(2)
-                    count += 1
-
-            # ensure the first row of results was added to the dataset
-            self.assertTrue(
-                'json_row' in dataset,
-                'json_row expected in dataset'
-            )
-            self.assertTrue(
-                'data' in dataset['json_row'],
-                'data should be in json_row'
-            )
-            self.assertTrue(
-                'Longitude' in dataset['json_row']['data'],
-                'data.Longitude should be in json_row'
-            )
-            self.assertTrue(
-                'geojson_file' in dataset,
-                'geojson_file key missing'
-            )
-            self.assertTrue(
-                'dataset_type' in dataset,
-                'dataset_type key missing'
-            )
-            self.assertEquals(
-                dataset['dataset_type'], 'geojson',
-                'expected dataset_type of geojson'
-            )
-            self.assertTrue(
-                'original_type' in dataset,
-                'original_type key missing'
-            )
-            self.assertEquals(
-                dataset['original_type'], 'json',
-                'expected original_type of json'
-            )
-
-    def testBsveSodaAnalysis(self):
-        self._importAnalysis()
-
-        # mock the calls to bsve soda query
-        @urlmatch(netloc=r'(.*\.)?search.bsvecosystem.net(.*)$')
-        def bsve_mock(url, request):
-            r = url.path.split('/')[-1].lower()
-            if r == 'soda':
-                # the initial search request
-                return httmock.response(200, '{"requestId": "12345", "status": 0}')
-            elif r == '12345':
-                pluginTestDir = os.path.dirname(os.path.realpath(__file__))
-                filepath = os.path.join(
-                    pluginTestDir, 'data', 'soda_dump.json'
-                )
-                with open(filepath) as soda_dump_file:
-                    content = json.load(soda_dump_file)
-                    headers = {
-                        'content-length': len(content),
-                        'content-type': 'application/json'
-                    }
-                    return httmock.response(
-                        200, content, headers, request=request
-                    )
-            else:
-                self.fail('Unexpected BSVE request "%s"' % url.path)
-
-        with HTTMock(bsve_mock):
-            response = self.request(
-                path='/minerva_analysis/mmwr_import',
-                method='POST',
-                params={
-                    'datasetName': 'soda dataset'
-                },
-                user=self._user
-            )
-            self.assertStatusOk(response)
-            job = response.json
-
-            # wait for the async job to complete
-            searchResultsFinished = False
-            count = 0
-            output = job['meta']['minerva']['outputs'][0]
-            self.assertEquals(
-                output['type'], 'dataset',
-                'Incorrect output type %s' % output['type']
-            )
-
-            while not searchResultsFinished and count < 5:
-                # get the dataset and check if it has been updated
-                path = '/minerva_dataset/%s/dataset' % str(output['dataset_id'])
-                response = self.request(
-                    path=path,
-                    method='GET',
-                    user=self._user
-                )
-                dataset = response.json
-                if 'values' in dataset:
-                    searchResultsFinished = True
-                else:
-                    time.sleep(2)
-                    count += 1
-
-            # ensure that the values were accumulated correctly
-            self.assertTrue(
-                'babesiosis_cum_2014' in dataset.get('values', []),
-                '"babesiosis_cum_2014" expected in dataset values'
-            )
+    def test_docstring_params_and_type(self):
+        p = self.get_analysis('params_and_type.py')
+        self.assertComplexEquals(p.inputs,
+                                 [{'kwarg': False, 'name': 'a', 'vararg': False, 'type': 'int', 'optional': False, 'description': 'description of a'},
+                                  {'kwarg': False, 'name': 'b', 'vararg': False, 'type': 'int', 'optional': False, 'description': 'description of b'},
+                                  {'kwarg': False, 'name': 'c', 'vararg': False, 'default': None, 'type': 'int', 'optional': True, 'description': 'description of c'}])
