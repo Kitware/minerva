@@ -175,7 +175,39 @@ class GirderWorkerPythonAnalysis(PythonAnalysis):
                 "inputs": self.inputs,
                 "output": self.outputs}
 
+    def run_task(self, args, kwargs, opts=None):
+        # At this point we could use the args and kwargs that are passed in
+        # along with the spec to call girder_worker.run,  either synchornousely
+        # or through the girder_worker plugin
+        raise NotImplemented("This method is not yet implemented!")
+
+
 if __name__ == "__main__":
+    sum_code = """
+def run(a, b):
+    \"""Sum a list of numbers passed to run
+
+    :type a: number
+    :format a: number
+    :type b: number
+    :format b: number
+    :return type c: number
+    :return format c: number
+
+    \"""
+    return sum(a, b)
+"""
+    # Write the script to disk
+    with open("/tmp/sum.py", "wb") as fh:
+        fh.write(sum_code)
+
+    # Create an analysis from
     p = GirderWorkerPythonAnalysis(name='sum', path='/tmp/sum.py')
-    from pprint import pprint
-    pprint(p.spec)
+    print(p.spec)
+
+# This should produce the following spec
+#    {'inputs': [{'format': 'number', 'id': 'a', 'type': 'number'},
+#                {'format': 'number', 'id': 'b', 'type': 'number'}],
+#     'mode': 'python',
+#     'output': [{'format': 'number', 'id': 'c', 'type': 'number'}],
+#     'script': "\nimport imp\nfp, pathname, desc = imp.find_module('sum', ['/tmp'])\nmodule = imp.load_module('sum', fp, pathname, desc)\nc = module.run(a, b)\n"}
