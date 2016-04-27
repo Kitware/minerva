@@ -159,8 +159,8 @@ class AnalysisTestCase(base.TestCase):
     def test_docstring_type(self):
         p = self.get_analysis('type.py')
         self.assertComplexEquals(p.inputs,
-                                 [{'int': 'int', 'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
-                                  {'int': 'int', 'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
+                                 [{'type': 'int', 'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False},
+                                  {'type': 'int', 'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False},
                                   {'kwarg': False, 'name': 'c', 'vararg': False, 'default': None, 'optional': True, 'type': 'int'}])
 
 
