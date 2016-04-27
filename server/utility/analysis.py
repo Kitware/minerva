@@ -1,3 +1,5 @@
+import os
+import imp
 import ast
 from docutils import nodes, writers, core
 from collections import OrderedDict
@@ -166,6 +168,7 @@ class PythonAnalysis(BaseAnalysis):
     def __init__(self, *args, **kwargs):
         super(PythonAnalysis, self).__init__(*args, **kwargs)
         self._parser = None
+        self.opts = {}
 
     @property
     def inputs(self):
@@ -173,13 +176,38 @@ class PythonAnalysis(BaseAnalysis):
             self._parser = self.PythonInputParser(self.path)
         return self._parser.inputs.values()
 
-    def __call__(self, args, kwargs, opts=None):
-        pass
+    # Provide an interface to getting the directory name and script
+    # long term we may want to include more sophisticated logic
+    # for dealing with scripts at different URIs (e.g. hdfs://, http://)
+    # which may require generating temporary directories/files etc
+    def _get_path_and_module(self):
+        return (os.path.dirname(self.path),
+                os.path.splitext(os.path.basename(self.path))[0])
+
+    def run_analysis(self, args, kwargs, opts=None):
+        path, name = self._get_path_and_module()
+
+        fp, pathname, desc = imp.find_module(name, [path])
+
+        try:
+            module = imp.load_module(name, fp, pathname, desc)
+            return module.run(*args, **kwargs)
+        finally:
+            if fp:
+                fp.close()
+
+    # Convienence function for executing the analysis
+    def __call__(self, *args, **kwargs):
+        args = [] if args is None else args
+        kwargs = {} if kwargs is None else kwargs
+
+        return self.run_analysis(args, kwargs, self.opts)
 
 
 def get_analysis_obj(params):
     atype = params.pop("type", "python")
     return analysis_types[atype](**params)
+
 
 analysis_types = {
     "python": PythonAnalysis

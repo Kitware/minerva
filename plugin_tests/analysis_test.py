@@ -170,3 +170,9 @@ class AnalysisTestCase(base.TestCase):
                                  [{'kwarg': False, 'name': 'a', 'vararg': False, 'type': 'int', 'optional': False, 'description': 'description of a'},
                                   {'kwarg': False, 'name': 'b', 'vararg': False, 'type': 'int', 'optional': False, 'description': 'description of b'},
                                   {'kwarg': False, 'name': 'c', 'vararg': False, 'default': None, 'type': 'int', 'optional': True, 'description': 'description of c'}])
+
+
+
+    def test_running_analysis(self):
+        p = self.get_analysis('sum.py')
+        self.assertEquals(p(1, 2, 3), 6)
