@@ -18,8 +18,6 @@
 ###############################################################################
 
 import json
-import os
-
 from girder.constants import AccessType
 from girder.api import access
 from girder.api.describe import Description, describeRoute
@@ -38,19 +36,15 @@ class Analysis(Resource):
         self.resourceName = 'minerva_analysis'
 
         self.route('GET', (), self.listAnalyses)
-        self.route('GET', ('id',':id',), self.getAnalysisById)
+        self.route('GET', ('id', ':id',), self.getAnalysisById)
         self.route('GET', (':name',), self.getAnalysisByName)
         self.route('GET', (':name', 'meta',), self.getAnalysisMeta)
         self.route('POST', (), self.createAnalysis)
         self.route('DELETE', (':id',), self.deleteAnalysis)
-
-
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
         self.route('POST', ('bsve_search',), self.bsveSearchAnalysis)
         self.route('POST', ('mmwr_import',), self.bsveMMWRAnalysis)
-
-
 
     @access.user
     @describeRoute(
@@ -79,7 +73,6 @@ class Analysis(Resource):
     )
     def getAnalysisById(self, analysis, params):
         return analysis
-
 
     @access.user
     @describeRoute(
@@ -134,9 +127,6 @@ class Analysis(Resource):
     )
     def deleteAnalysis(self, analysis, params):
         self.model('analysis', 'minerva').remove(analysis)
-
-
-
 
     @access.user
     def getAnalysisFolder(self, params):

@@ -2,14 +2,14 @@ import ast
 from docutils import nodes, writers, core
 from collections import OrderedDict
 
+
 class BaseAnalysis(object):
-    valid_attributes = ['name', 'path' ]
+    valid_attributes = ['name', 'path']
 
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             if k in self.valid_attributes:
                 setattr(self, k, v)
-
 
 
 class PythonDocParser(writers.Writer):
@@ -32,7 +32,8 @@ class PythonDocParser(writers.Writer):
                 except (ValueError, IndexError, AssertionError):
                     continue
 
-                if len(name.split()) == 2 and name.split()[0] in ['param', 'type']:
+                if len(name.split()) == 2 and \
+                   name.split()[0] in ['param', 'type']:
                     kind, var_name = name.split()[0], name.split()[1]
                     if var_name not in self.output:
                         self.output[var_name] = {}
@@ -69,7 +70,7 @@ class PythonAnalysis(BaseAnalysis):
             self.visit(self.__st)
 
         def __v(self, node):
-            """ Get the values of various ast types."""
+            """Get the values of various ast types."""
             if isinstance(node, ast.Name):
                 return node.id if node.id != 'None' else None
 
@@ -171,7 +172,6 @@ class PythonAnalysis(BaseAnalysis):
         if self._parser is None:
             self._parser = self.PythonInputParser(self.path)
         return self._parser.inputs.values()
-
 
     def __call__(self, args, kwargs, opts=None):
         pass
