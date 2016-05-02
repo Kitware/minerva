@@ -195,7 +195,7 @@ def run(a, b):
     :return format c: number
 
     \"""
-    return sum(a, b)
+    return sum([a, b])
 """
     # Write the script to disk
     with open("/tmp/sum.py", "wb") as fh:
