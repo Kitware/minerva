@@ -21,7 +21,7 @@ import json
 from girder.constants import AccessType
 from girder.api import access
 from girder.api.describe import Description, describeRoute
-from girder.api.rest import Resource, RestException, loadmodel
+from girder.api.rest import Resource, RestException, loadmodel, getBodyJson
 
 from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
                                                             findAnalysisByName,
@@ -38,6 +38,7 @@ class Analysis(Resource):
         self.route('GET', (), self.listAnalyses)
         self.route('GET', ('id', ':id',), self.getAnalysisById)
         self.route('GET', (':name',), self.getAnalysisByName)
+        self.route('POST', (':name',), self.runAnalysis)
         self.route('GET', (':name', 'meta',), self.getAnalysisMeta)
         self.route('POST', (), self.createAnalysis)
         self.route('DELETE', (':id',), self.deleteAnalysis)
@@ -96,6 +97,62 @@ class Analysis(Resource):
             self.model('analysis', 'minerva').get_by_name(name))
 
         return analysis.inputs
+
+    @access.user
+    @describeRoute(
+        Description('Run an analysis')
+        .param('name', 'The name of the analysis.', paramType='path',)
+        .param('args', 'The name of the analysis.', paramType='body',)
+        .errorResponse('name was invalid.')
+        .errorResponse('Read access was denied for the analysis.', 403)
+    )
+    def runAnalysis(self, name, params):
+        analysis = get_analysis_obj(
+            self.model('analysis', 'minerva').get_by_name(name))
+
+        body = getBodyJson()
+
+        self.requireParams([a['name'] for a in analysis.inputs
+                            if not a['optional']], body)
+
+
+        # TODO:  add opts introspection to analysis class
+        # pop off opts before parsing out args/kwargs
+        opts = None
+
+        # List of arguments
+        args = []
+        # List of kwarguments
+        kwargs = {}
+
+        # paramater that contains vararg
+        vararg = []
+        # paramater that contains kwarg
+        kwarg = {}
+
+        for arg in analysis.inputs:
+            name = arg['name']
+            if arg['vararg']:
+                vararg = arg
+                continue
+
+            if arg['kwarg']:
+                kwarg = arg
+                continue
+
+            if not arg['optional']:
+                args.append(body[name])
+            else:
+                try:
+                    kwargs[name] = body[name]
+                except KeyError:
+                    pass
+
+        args.extend(vararg)
+        kwarg.update(kwargs)
+
+        return analysis.run_analysis(args, kwargs, opts=opts)
+
 
     @access.user
     @describeRoute(
