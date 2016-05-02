@@ -6,6 +6,8 @@ from collections import OrderedDict
 
 
 class BaseAnalysis(object):
+    """Base class for all Analysis objects
+    """
     valid_attributes = ['name', 'path']
 
     def __init__(self, *args, **kwargs):
@@ -19,6 +21,16 @@ class BaseAnalysis(object):
 ######
 
 class PythonDocTranslator(nodes.SparseNodeVisitor):
+    """Basic documentation translator that collets field_list items
+
+    This class provides access to :param:  and :type: fields in a sphinx
+    style documentation string.  It is not intended to be used on its own
+    but as a 'visitor' defined in a PythonDocParser class. PythonDocParser
+    traverses an abstract documentation tree and applies functions defined
+    in this class to each node in that tree. In general this means
+    PythonDocParser drives the documentation parsing,  but PythonDoctranslator
+    does the heavy lifing.
+    """
     def __init__(self, *args, **kwargs):
         nodes.SparseNodeVisitor.__init__(self, *args, **kwargs)
         self.output = {}
@@ -51,7 +63,13 @@ class PythonDocTranslator(nodes.SparseNodeVisitor):
 
 
 class PythonDocParser(writers.Writer):
+    """PythonDocParser drives the parsing of the function documentation.
 
+    This class implements a relatively generic passthrough,  such that
+    it sets it's output to the output of its translator class. In general
+    this means you will not need to subclass PythonDocParser,  but instead
+    its translator_class (e.g. PythonDocTranslator).
+    """
     def __init__(self, translator_class=None):
         writers.Writer.__init__(self)
         self.translator_class = PythonDocTranslator \
@@ -64,6 +82,15 @@ class PythonDocParser(writers.Writer):
 
 
 class PythonParser(ast.NodeVisitor):
+    """Parse a python file and provide metadata about a specific function.
+
+    This class is used to parse a python file using python's built in abstract
+    syntax trees (ASTs). This means if the file is valid python it will always
+    parse. The class looks through the AST for a specific function and provides
+    access to information about that function in a structured way. Information
+    comes from the function definition (e.g.  def run(...)) as well as from the
+    function documentation.
+    """
     RUN_FUNCTION_NAME = "run"
 
     DOC_PARSER_CLASS = PythonDocParser
@@ -184,6 +211,9 @@ class PythonParser(ast.NodeVisitor):
 
 
 class PythonAnalysis(BaseAnalysis):
+    """This class models a python analysis file, providing data about
+    it's inputs and allowing you to run the analysis.
+    """
     INPUT_PARSER_CLASS = PythonParser
 
     def __init__(self, *args, **kwargs):
@@ -193,6 +223,13 @@ class PythonAnalysis(BaseAnalysis):
 
     @property
     def inputs(self):
+        """Proxy through to the INPUT_PARSER_CLASS's data values
+
+        :returns: inputs to the analysis script
+        :rtype: list
+
+        """
+
         if self._parser is None:
             self._parser = self.INPUT_PARSER_CLASS(self.path)
         return self._parser.data.values()
@@ -206,6 +243,18 @@ class PythonAnalysis(BaseAnalysis):
                 os.path.splitext(os.path.basename(self.path))[0])
 
     def run_analysis(self, args, kwargs, opts=None):
+        """Run an analysis.
+
+        Note that this function intentionally bears resemblance to the
+        Celery signature interface. Options are not currently implemented.
+
+        :param args: list of argument values
+        :param kwargs: dict of optional key word arguments
+        :param opts: options for how to run the analysis
+        :returns: Result of the analysis
+        :rtype: Any
+
+        """
         path, name = self._get_path_and_module()
 
         fp, pathname, desc = imp.find_module(name, [path])
@@ -217,8 +266,15 @@ class PythonAnalysis(BaseAnalysis):
             if fp:
                 fp.close()
 
-    # Convienence function for executing the analysis
+    #
     def __call__(self, *args, **kwargs):
+        """Convienence function for executing the analysis
+
+        :returns: Results of the analysis
+        :rtype: Any
+
+        """
+
         args = [] if args is None else args
         kwargs = {} if kwargs is None else kwargs
 
@@ -226,10 +282,21 @@ class PythonAnalysis(BaseAnalysis):
 
 
 def get_analysis_obj(params):
+    """FIXME! briefly describe function
+
+    :param params: dictionary of paramaters including name, path and type
+    :returns: an analysis object derived from BaseAnalysis
+    :rtype: object
+
+    """
+
     atype = params.pop("type", "python")
     return analysis_types[atype](**params)
 
 
+# Mapping between minerva_analysis 'type' and class
+# used by get_analysis_obj to to return the correct object
+# given the type stored in the database
 analysis_types = {
     "python": PythonAnalysis
 }
