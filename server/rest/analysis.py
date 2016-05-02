@@ -107,6 +107,8 @@ class Analysis(Resource):
         .errorResponse('Read access was denied for the analysis.', 403)
     )
     def runAnalysis(self, name, params):
+#        from pudb.remote import set_trace; set_trace(term_size=(209, 64))
+
         analysis = get_analysis_obj(
             self.model('analysis', 'minerva').get_by_name(name))
 
@@ -120,44 +122,60 @@ class Analysis(Resource):
         # pop off opts before parsing out args/kwargs
         opts = None
 
-        # List of arguments
-        args = []
-        # List of kwarguments
-        kwargs = {}
-
-        # paramater that contains vararg
-        vararg = []
-        # paramater that contains kwarg
-        kwarg = {}
+        arguments = {
+            'args': [],
+            'kwargs': [],
+            'vararg': None,
+            'kwarg': None}
 
         for arg in analysis.inputs:
-            name = arg['name']
-            if arg['vararg']:
-                vararg = arg
-                continue
+            self._validate_arg(arg, body)
 
+            if arg['vararg']:
+                arguments['vararg'] = arg
+                continue
             if arg['kwarg']:
-                kwarg = arg
+                arguments['kwarg'] = arg
                 continue
 
             if not arg['optional']:
-                args.append(body[name])
+                arguments['args'].append(arg)
             else:
-                try:
-                    kwargs[name] = body[name]
-                except KeyError:
-                    pass
+                arguments['kwargs'].append(arg)
 
-        args.extend(vararg)
-        kwarg.update(kwargs)
+        args = [body[a['name']] for a in arguments['args']]
+
+        kwargs = {a['name']: body[a['name']]
+                  for a in arguments['kwargs'] if a['name'] in body}
+
+        if arguments['vararg'] is not None:
+            try:
+                args.extend(body.get(arguments['vararg']['name'], []))
+            except TypeError:
+                Exception("'%s' argument must be of type list"
+                          % arguments['vararg']['name'])
+
+        if arguments['kwarg'] is not None:
+            try:
+                kwargs.update(body.get(arguments['kwarg']['name'], {}))
+            except TypeError:
+                Exception("'%s' argument must be of type dict"
+                          % arguments['vararg']['name'])
+
 
         return analysis.run_analysis(args, kwargs, opts=opts)
+
+    def _validate_arg(self, arg, body):
+        assert 'name' in arg, "Argument must have a name key!"
+        return True
 
 
     @access.user
     @describeRoute(
         Description('Create an analysis')
         .param('path', 'Path to the file containing the run function', )
+        .param('name', 'name of analysis (default: name of file)',
+               required=False)
         .param('type', 'type of analysis (default=python)', required=False)
     )
     def createAnalysis(self, params):

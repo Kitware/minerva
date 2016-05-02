@@ -163,10 +163,12 @@ class PythonParser(ast.NodeVisitor):
                                            writer=self.doc_parser)
 
                 for var_name, values in docs.items():
+                    # Check to make sure var_name is in self._data before
+                    # we add it.  this makes the AST parse the authority on
+                    # what variable exist/don't exist, allowing documentation
+                    # to just augment this iff it is well formatted
                     if var_name in self._data:
                         self._data[var_name].update(values)
-                    else:
-                        self._data[var_name] = values
 
         self.generic_visit(node)
 

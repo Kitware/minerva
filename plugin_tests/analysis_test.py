@@ -12,7 +12,6 @@ PythonAnalysis = None
 def setUpModule():
     """Enable the minerva plugin and start the server."""
     base.enabledPlugins.append('minerva')
-    base.enabledPlugins.append('cumulus')
     base.startServer(False)
 
     global PythonAnalysis
@@ -174,5 +173,15 @@ class AnalysisTestCase(base.TestCase):
 
 
     def test_running_analysis(self):
-        p = self.get_analysis('sum.py')
+        p = self.get_analysis('sum_vararg.py')
         self.assertEquals(p(1, 2, 3), 6)
+
+
+
+    def test_broken_sum(self):
+        p = self.get_analysis('broken_sum.py')
+
+        self.assertEquals(len(p.inputs), 2)
+        self.assertComplexEquals(p.inputs,
+                                 [{'kwarg': False, 'optional': False, 'name': 'a', 'vararg': False, 'description': 'first summand'},
+                                  {'kwarg': False, 'optional': False, 'name': 'b', 'vararg': False, 'description': 'second summand'}])
