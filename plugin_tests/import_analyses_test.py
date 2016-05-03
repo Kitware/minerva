@@ -73,7 +73,7 @@ class ImportAnalysesTestCase(base.TestCase):
         client.authenticate(self._username, self._password)
 
         path = os.path.dirname(os.path.realpath(__file__))
-        analyses_path = os.path.join(path, 'analyses')
+        analyses_path = os.path.join(path, 'analyses', 'import_analyses')
 
         import_analyses.import_analyses(client, analyses_path)
 
