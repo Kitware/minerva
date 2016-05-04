@@ -210,4 +210,6 @@ def run(a, b):
 #                {'format': 'number', 'id': 'b', 'type': 'number'}],
 #     'mode': 'python',
 #     'output': [{'format': 'number', 'id': 'c', 'type': 'number'}],
-#     'script': "\nimport imp\nfp, pathname, desc = imp.find_module('sum', ['/tmp'])\nmodule = imp.load_module('sum', fp, pathname, desc)\nc = module.run(a, b)\n"}
+#     'script': "\nimport imp\nfp, pathname, desc = imp.find_module('sum',\
+#           ['/tmp'])\nmodule = imp.load_module('sum', fp, pathname, desc)\
+#           \nc = module.run(a, b)\n"}

@@ -1,2 +1,4 @@
 [report]
 include = */minerva/*
+omit =
+       *girder_worker_analysis.py

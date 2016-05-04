@@ -107,8 +107,6 @@ class Analysis(Resource):
         .errorResponse('Read access was denied for the analysis.', 403)
     )
     def runAnalysis(self, name, params):
-#        from pudb.remote import set_trace; set_trace(term_size=(209, 64))
-
         analysis = get_analysis_obj(
             self.model('analysis', 'minerva').get_by_name(name))
 
@@ -116,7 +114,6 @@ class Analysis(Resource):
 
         self.requireParams([a['name'] for a in analysis.inputs
                             if not a['optional']], body)
-
 
         # TODO:  add opts introspection to analysis class
         # pop off opts before parsing out args/kwargs
@@ -162,13 +159,11 @@ class Analysis(Resource):
                 Exception("'%s' argument must be of type dict"
                           % arguments['vararg']['name'])
 
-
         return analysis.run_analysis(args, kwargs, opts=opts)
 
     def _validate_arg(self, arg, body):
         assert 'name' in arg, "Argument must have a name key!"
         return True
-
 
     @access.user
     @describeRoute(
