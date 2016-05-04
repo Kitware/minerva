@@ -66,7 +66,7 @@ class Session(Resource):
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     def getSessionFolder(self, user, params):
-        folder = findSessionFolder(self.getCurrentUser(), user)
+        folder = findSessionFolder(self.getCurrentUser(), user, create=True)
         return {'folder': folder}
     getSessionFolder.description = (
         Description('Get the minerva session folder owned by a user.')
