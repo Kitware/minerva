@@ -1,0 +1,52 @@
+
+// template variables:
+//   - style: style attribute object
+//   - ramps: colorbrewer style color ramps
+//   - scales: an array of valid scale types
+
+.m-geojson-style-element(data-style-name=style.name).form-horizontal
+  .row
+    label.col-sm-3.control-label #{style.name}
+  .form-group
+    .col-sm-3.col-sm-offset-3
+      label.control-label Scale type
+    .col-sm-6
+      select.form-control.m-scale-type
+        each type in scales
+          option(value=type selected= type === style.scale) #{type}
+  if style.scale === 'constant'
+    .form-group
+      .col-sm-3.col-sm-offset-3
+        label.control-label Value
+      .col-sm-6
+        input.form-control.m-constant-value(type=style.type value=style.value)
+  else
+    .form-group
+      .col-sm-3.col-sm-offset-3
+        label.control-label Scale by
+      .col-sm-6
+        select.form-control.m-scale-by
+          each prop, key in style.summary
+            option(value=key selected= style.scale !== 'constant' && style.key === key) #{key}
+    if style.type === 'color'
+      .form-group
+        .col-sm-3.col-sm-offset-3
+          label.control-label Color map
+        .col-sm-6
+          select.form-control.m-select-ramp
+            each ramp, name in ramps
+              - var s = style.ramp === name
+              option(data-content!=ramp.display data-ramp-name=name selected=s) #{name}
+    else if style.type === 'number'
+      - var range = style.range || [];
+      .form-group
+        .col-sm-3.col-sm-offset-3
+          label.control-label Minimum
+        .col-sm-6
+          input.form-control.m-scale-min(type='number' value=range[0])
+      .form-group
+        .col-sm-3.col-sm-offset-3
+          label.control-label Maximum
+        .col-sm-6
+          input.form-control.m-scale-max(type='number' value=range[1])
+
