@@ -28,7 +28,7 @@ from girder.plugins.minerva.utility.minerva_utility import (findAnalysisFolder,
                                                             addJobOutput)
 from girder.plugins.minerva.rest.dataset import Dataset
 
-from girder.plugins.minerva.utility.analysis import get_analysis_obj
+from minerva.analyses import get_analysis_obj
 
 
 class Analysis(Resource):

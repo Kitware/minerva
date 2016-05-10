@@ -1,28 +1,9 @@
 import os
-
-# Need to set the environment variable before importing girder
-girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
-os.environ['GIRDER_PORT'] = girder_port  # noqa
-
-from tests import base
 import unittest
-
-PythonAnalysis = None
-
-def setUpModule():
-    """Enable the minerva plugin and start the server."""
-    base.enabledPlugins.append('minerva')
-    base.startServer(False)
-
-    global PythonAnalysis
-    from girder.plugins.minerva.utility.analysis import PythonAnalysis
-
-def tearDownModule():
-    """Stop the server."""
-    base.stopServer()
+from minerva.analyses import PythonAnalysis
 
 
-class AnalysisTestCase(base.TestCase):
+class AnalysisTestCase(unittest.TestCase):
     """Tests of the minerva analysis functionality."""
 
     def get_analysis(self, file_name):
@@ -30,7 +11,6 @@ class AnalysisTestCase(base.TestCase):
                               path=os.path.join(
                                   os.path.dirname(__file__),
                                   "analyses", file_name))
-
 
     def setUp(self, *args, **kwargs):
         super(AnalysisTestCase, self).setUp(*args, **kwargs)

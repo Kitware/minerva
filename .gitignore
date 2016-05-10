@@ -10,3 +10,4 @@ src
 /*.egg-info/
 /build/
 /dist/
+.coverage

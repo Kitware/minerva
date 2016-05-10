@@ -1,0 +1,7 @@
+# Configuration for python coverage
+[run]
+branch = @_py_branch_cov@
+omit =
+       *site-packages*
+       tests*
+       *girder_worker_analysis.py
