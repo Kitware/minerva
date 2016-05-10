@@ -103,6 +103,9 @@ script:
     - if [ -f _build/test_failed ] ; then false ; fi
     # Test module code
     - cd $HOME/build/
+    - pushd girder/plugins/minerva
+    - pip install -e .
+    - popd
     - mkdir _minerva_build
     - pushd _minerva_build
     - cmake ../girder/plugins/minerva/
