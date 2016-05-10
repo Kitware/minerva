@@ -105,6 +105,6 @@ script:
     - cd $HOME/build/
     - mkdir _minerva_build
     - pushd _minerva_build
-    - cmake girder/plugins/minerva/
+    - cmake ../girder/plugins/minerva/
     - ctest -VV
     - popd
