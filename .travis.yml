@@ -101,3 +101,10 @@ install:
 script:
     - JASMINE_TIMEOUT=15000 PYTHONPATH="$PYTHONPATH:$GIRDER_SOURCE_DIR/plugins/minerva" ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
     - if [ -f _build/test_failed ] ; then false ; fi
+    # Test module code
+    - cd $HOME/build/
+    - mkdir _minerva_build
+    - pushd _minerva_build
+    - cmake girder/plugins/minerva/
+    - ctest -VV
+    - popd
