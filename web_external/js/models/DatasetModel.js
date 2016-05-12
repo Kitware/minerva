@@ -142,7 +142,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
             if (mm.geojson && mm.geojson.data) {
                 // Some datasets have geojson in the metadata.
-                this.set('geoData', mm.geojson.data);
+                this.set('geoData', minerva.geojson.normalize(mm.geojson.data));
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
         } else {
@@ -153,7 +153,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 // Prevent json from getting parsed.
                 dataType: null
             }).done(_.bind(function (data) {
-                this.set('geoData', data);
+                this.set('geoData', minerva.geojson.normalize(data));
                 this.trigger('m:dataset_geo_dataLoaded', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);

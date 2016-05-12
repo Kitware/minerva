@@ -41,6 +41,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             scale: 'constant',
             summary: props
         }]);
+        window.collection = this.collection;
 
         this.listenTo(this.collection, 'add', this.addOne);
         this.listenTo(this.collection, 'reset', this.render);
@@ -51,11 +52,6 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             return;
         }
 
-        var modal = this.$el.html(minerva.templates.geoJSONStyleWidget())
-            .girderModal(this)
-            .trigger(
-                $.Event('ready.girder.modal', {relatedTarget: modal})
-            );
         this.addAll();
         return this;
     },
@@ -68,14 +64,14 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             model: model,
             parentView: this
         });
-        this.$('.m-geojson-style').append(view.render().el);
+        this.$el.append(view.render().el);
     },
 
     /**
      * Reset the view and add all style elements from the collection to the widget.
      */
     addAll: function () {
-        this.$('.m-geojson-style').children().remove();
+        this.$el.empty();
         this.collection.each(this.addOne, this);
     },
 

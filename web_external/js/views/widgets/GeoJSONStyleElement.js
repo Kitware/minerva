@@ -59,7 +59,7 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
      * Custom set method that ignore undefined values.
      */
     set: function (hash, options) {
-        var key, value;
+        var key, value, filtered = {};
 
         // handle set(key, value) calling
         if (_.isString(hash)) {
@@ -71,12 +71,14 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
         }
 
         // remove keys with undefined values
-        hash = _.pick(hash, function (value, key) {
-            return value !== undefined;
+        _.each(hash, function (value, key) {
+            if (value !== undefined) {
+                filtered[key] = value;
+            }
         });
 
         // call super method
-        return Backbone.Model.prototype.set.call(this, hash, options);
+        return Backbone.Model.prototype.set.call(this, filtered, options);
     },
 
     /**
