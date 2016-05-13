@@ -116,7 +116,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 dataset.set('geoError', true);
             }, this).once('m:map_adapter_layerError', function (repr) {
                 if (repr) {
-                    repr.deleteLayer(this);
+                    repr.delete(this);
                     dataset.set('geoError', true);
                 }
             }, this)._createRepresentation(this, dataset, layerType, mapping);
@@ -135,7 +135,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     this.map.featureInfoWidget.layers.splice(layerIndex, 1);
                 }
             }
-            layerRepr.deleteLayer(this);
+            layerRepr.delete(this);
             this.map.draw();
         }
         delete this.datasetLayerReprs[datasetId];

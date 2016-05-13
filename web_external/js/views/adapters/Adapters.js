@@ -19,7 +19,7 @@ minerva.core = minerva.core || {};
                         this.trigger('m:map_adapter_layerCreated', layer);
                     }, this).once('m:map_layer_error', function (layer) {
                         this.trigger('m:map_adapter_layerError', layer);
-                    }, this).initLayer(container, dataset, dataset.get('geoData'), mapping);
+                    }, this).init(container, dataset, dataset.get('geoData'), mapping);
                 }, this).loadGeoData();
                 //
                 // Instead of dataset.loadGeoData, ideally something like
@@ -47,7 +47,7 @@ minerva.rendering.geo.defineMapLayer = function (layerType, layerDefinition, par
 }
 
 minerva.rendering.geo.MapRepresentation = minerva.rendering.geo.defineMapLayer('map', function () {
-    this.deleteLayer = function (container) {
+    this.delete = function (container) {
         container.deleteLayer(this.geoJsLayer);
     },
 
@@ -63,7 +63,7 @@ minerva.rendering.geo.MapRepresentation = minerva.rendering.geo.defineMapLayer('
 minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLayer('geojson', function () {
     this.readerType = 'jsonReader',
 
-    this.initLayer = function (container, dataset, data, visProperties) {
+    this.init = function (container, dataset, data, visProperties) {
         this.geoJsLayer = container.createLayer('feature');
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
@@ -83,7 +83,7 @@ minerva.rendering.geo.ContourRepresentation = minerva.rendering.geo.defineMapLay
 }, minerva.rendering.GeometryRepresentation);
 
 minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMapLayer('choropleth', function () {
-    this.initLayer = function (container, dataset, jsonData, visProperties) {
+    this.init = function (container, dataset, jsonData, visProperties) {
         // Set the visProperties from the dataset, though they should come from visProperties.
         visProperties.colorByValue = dataset.getMinervaMetadata().colorByValue;
         visProperties.colorScheme = dataset.getMinervaMetadata().colorScheme;
@@ -169,10 +169,9 @@ minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMap
     }
 }, minerva.rendering.geo.MapRepresentation);
 
-
 minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('wms', function () {
 
-    this.initLayer = function (container, dataset, jsonData, visProperties) {
+    this.init = function (container, dataset, jsonData, visProperties) {
         this.geoJsLayer = container.createLayer('osm', {
                               attribution: null,
                               keepLower: false
