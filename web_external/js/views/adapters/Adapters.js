@@ -12,8 +12,8 @@ minerva.core = minerva.core || {};
                 this.trigger('m:map_adapter_error', dataset, layerType);
                 return;
             } else {
-                var adapter = this.registry[layerType];
-                var layerRepr = _.extend(new adapter(), Backbone.Events);
+                var Adapter = this.registry[layerType];
+                var layerRepr = _.extend(new Adapter(), Backbone.Events);
                 dataset.once('m:dataset_geo_dataLoaded', function () {
                     layerRepr.once('m:map_layer_renderable', function (layer) {
                         this.trigger('m:map_adapter_layerCreated', layer);
@@ -38,31 +38,30 @@ minerva.core = minerva.core || {};
 
 minerva.rendering = minerva.rendering || {};
 minerva.rendering.geo = minerva.rendering || {};
-minerva.rendering.geo.defineMapLayer = function (layerType, layerDefinition, parentDefinition) {
-    if (parentDefinition) {
-        layerDefinition.prototype = new parentDefinition();
+minerva.rendering.geo.defineMapLayer = function (layerType, layerDefinition, ParentDefinition) {
+    if (ParentDefinition) {
+        layerDefinition.prototype = new ParentDefinition();
     }
     minerva.core.AdapterRegistry.register(layerType, layerDefinition);
     return layerDefinition;
-}
+};
 
 minerva.rendering.geo.MapRepresentation = minerva.rendering.geo.defineMapLayer('map', function () {
     this.delete = function (container) {
         container.deleteLayer(this.geoJsLayer);
-    },
+    };
 
     this.setOpacity = function (opacity) {
         this.geoJsLayer.opacity(opacity);
-    },
+    };
 
     this.render = function (container) {
         container.renderMap();
-    }
+    };
 });
 
 minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLayer('geojson', function () {
-    this.readerType = 'jsonReader',
-
+    this.readerType = 'jsonReader';
     this.init = function (container, dataset, data, visProperties) {
         this.geoJsLayer = container.createLayer('feature');
         try {
@@ -75,11 +74,11 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             console.error(err);
             this.trigger('m:map_layer_error', this);
         }
-    }
+    };
 }, minerva.rendering.geo.MapRepresentation);
 
 minerva.rendering.geo.ContourRepresentation = minerva.rendering.geo.defineMapLayer('contour', function () {
-    this.readerType = 'contourJsonReader'
+    this.readerType = 'contourJsonReader';
 }, minerva.rendering.GeometryRepresentation);
 
 minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMapLayer('choropleth', function () {
@@ -90,8 +89,6 @@ minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMap
 
         this.geoJsLayer = container.createLayer('feature');
         var data = [];
-        var colorByValue = visProperties.colorByValue;
-        var colorScheme = visProperties.colorScheme;
 
         var polygon = this.geoJsLayer.createFeature('polygon', {selectionAPI: true});
         // Loop through the data and transform multipolygons into
@@ -145,7 +142,7 @@ minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMap
                 var c = scale(v);
                 c = geo.util.convertColor(c);
                 return c;
-            },
+            }
         }).data(data);
 
         var clickInfo = new minerva.models.ClickInfoModel();
@@ -166,16 +163,15 @@ minerva.rendering.geo.ChoroplethRepresentation = minerva.rendering.geo.defineMap
             }
         }, this));
         this.trigger('m:map_layer_renderable', this);
-    }
+    };
 }, minerva.rendering.geo.MapRepresentation);
 
 minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('wms', function () {
-
     this.init = function (container, dataset, jsonData, visProperties) {
         this.geoJsLayer = container.createLayer('osm', {
-                              attribution: null,
-                              keepLower: false
-                          });
+            attribution: null,
+            keepLower: false
+        });
         container.addFeatureInfoLayer(this.geoJsLayer);
         var minervaMetadata = dataset.metadata();
         this.geoJsLayer.layerName = minervaMetadata.type_name;
@@ -206,6 +202,5 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
             }, this)
         );
         this.trigger('m:map_layer_renderable', this);
-    }
-
+    };
 }, minerva.rendering.geo.MapRepresentation);
