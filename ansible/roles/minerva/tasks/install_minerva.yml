@@ -22,12 +22,19 @@
     become: yes
     become_user: root
 
+  - name: probe minerva folder
+    stat:
+      path: "{{ minerva_install_root }}"
+    register: path
+
   - name: Clone a copy of the repository
     git:
       repo: "{{ minerva_repo }}"
       dest: "{{ minerva_install_root }}"
       version: "{{ minerva_version }}"
       update: yes
+      force: yes
+    when: path.stat.exists == False
 
   - name: Update pip
     pip:

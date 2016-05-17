@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   end
 
   host_port = ENV["GIRDER_HOST_PORT"] || 8080
-  guest_port = ENV["GIRDER_GUEST_PORT"] || host_port
+  guest_port = ENV["GIRDER_GUEST_PORT"] || 8080
   dev_install = ENV["DEVELOPMENT"] || false
 
   config.vm.network "private_network", type: "dhcp"
@@ -55,17 +55,9 @@ Vagrant.configure(2) do |config|
 
   # If DEVELOPMENT is true,  mount NFS directories from host
   if dev_install and Vagrant.has_plugin?("vagrant-bindfs")
-    if File.exists? File.expand_path("../../../minerva")
-      config.vm.synced_folder "../../../minerva", "/tmp/minerva-nfs", type: "nfs"
+    if File.exists? File.expand_path(".")
+      config.vm.synced_folder ".", "/tmp/minerva-nfs", type: "nfs"
       config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/master",
-                                after: :provision,
-                                o: "nonempty",
-                                u: "girder",
-                                g: "girder"
-    end
-    if File.exists? File.expand_path("../../../cumulus")
-      config.vm.synced_folder "../../../cumulus", "/tmp/cumulus-nfs", type: "nfs"
-      config.bindfs.bind_folder "/tmp/cumulus-nfs", "/opt/cumulus/master",
                                 after: :provision,
                                 o: "nonempty",
                                 u: "girder",
@@ -84,14 +76,13 @@ Vagrant.configure(2) do |config|
 
     ansible.extra_vars = {
       default_user: "vagrant",
-      girder_port: host_port
+      girder_port: guest_port
     }
     ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
-    ENV["CUMULUS_VERSION"] && ansible.extra_vars['cumulus_version'] = ENV["CUMULUS_VERSION"]
     ENV["MINERVA_VERSION"] && ansible.extra_vars['minerva_version'] = ENV["MINERVA_VERSION"]
 
     ansible.verbose = "-vv"
-    ansible.playbook = "site.yml"
-    ansible.galaxy_role_file = "requirements.yml"
+    ansible.playbook = "ansible/site.yml"
+    ansible.galaxy_role_file = "ansible/requirements.yml"
   end
 end
