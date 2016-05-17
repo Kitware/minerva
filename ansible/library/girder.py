@@ -30,6 +30,9 @@ try:
 except ImportError:
     HAS_GIRDER_CLIENT = False
 
+
+__version__ = "0.2.0"
+
 DOCUMENTATION = '''
 ---
 module: girder
@@ -461,11 +464,170 @@ def class_spec(cls, include=None):
                         "optional": params[r:]})
 
 
+class Resource(object):
+    known_resources = ['collection', 'folder', 'item', 'group']
+
+    def __init__(self, client, resource_type):
+        self._resources = None
+        self._resources_by_name = None
+        self.client = client
+
+        if resource_type in self.known_resources:
+            self.resource_type = resource_type
+        else:
+            raise Exception("{} is an unknown resource!".format(resource_type))
+
+    @property
+    def resources(self):
+        if self._resources is None:
+            self._resources = {r['_id']: r for r
+                               in self.client.get(self.resource_type)}
+        return self._resources
+
+    @property
+    def resources_by_name(self):
+        if self._resources_by_name is None:
+            self._resources_by_name = {r['name']: r
+                                       for r in self.resources.values()}
+
+        return self._resources_by_name
+
+    def __apply(self, _id, func, *args, **kwargs):
+        if _id in self.resources.keys():
+            ret = func("{}/{}".format(self.resource_type, _id),
+                       *args, **kwargs)
+            self.client.changed = True
+        return ret
+
+    def id_exists(self, _id):
+        return _id in self.resources.keys()
+
+    def name_exists(self, _name):
+        return _name in self.resources_by_name.keys()
+
+    def create(self, body, **kwargs):
+        try:
+            ret = self.client.post(self.resource_type, body, **kwargs)
+            self.client.changed = True
+        except HttpError as htErr:
+            try:
+                # If we can't create the item,  try and return
+                # The item with the same name
+                ret = self.resource_by_name[args['name']]
+            except KeyError:
+                raise htErr
+        return ret
+
+    def read(self, _id):
+        return self.resources[_id]
+
+    def read_by_name(self, name):
+        return self.resources_by_name[name]['_id']
+
+    def update(self, _id, body, **kwargs):
+        if _id in self.resources:
+            current = self.resources[_id]
+            # if body is a subset of current we don't actually need to update
+            if set(body.items()) <= set(current.items()):
+                return current
+            else:
+                return self.__apply(_id, self.client.put, body, **kwargs)
+        else:
+            raise Exception("{} does not exist!".format(_id))
+
+    def update_by_name(self, name, body, **kwargs):
+        return self.update(self.resources_by_name[name]['_id'],
+                           body, **kwargs)
+
+    def delete(self, _id):
+        return self.__apply(_id, self.client.delete)
+
+    def delete_by_name(self, name):
+        try:
+            return self.delete(self.resources_by_name[name]['_id'])
+        except KeyError:
+            return {}
+
+
+class AccessMixin(object):
+
+    def get_access(self, _id):
+        return self.client.get("{}/{}/access"
+                               .format(self.resource_type, _id))
+
+    def put_access(self, _id, access, public=True):
+        current_access = self.get_access(_id)
+
+        if set([tuple(u.values()) for u in access['users']]) ^ \
+           set([(u["id"], u['level']) for u in current_access['users']]):
+            self.client.changed = True
+
+        if set([tuple(g.values()) for g in access['groups']]) ^ \
+           set([(u["id"], u['level']) for u in current_access['groups']]):
+            self.client.changed = True
+
+        return self.client.put("{}/{}/access"
+                               .format(self.resource_type, _id),
+                               dict(access=json.dumps(access),
+                                    public="true" if public else "false"))
+
+
+class CollectionResource(AccessMixin, Resource):
+    def __init__(self, client):
+        super(CollectionResource, self).__init__(client, "collection")
+
+
+class GroupResource(Resource):
+    def __init__(self, client):
+        super(GroupResource, self).__init__(client, "group")
+
+
+class FolderResource(AccessMixin, Resource):
+    def __init__(self, client, parentType, parentId):
+        super(FolderResource, self).__init__(client, "folder")
+        self.parentType = parentType
+        self.parentId = parentId
+
+    @property
+    def resources(self):
+        if self._resources is None:
+            self._resources = {r['_id']: r for r
+                               in self.client.get(self.resource_type, {
+                                   "parentType": self.parentType,
+                                   "parentId": self.parentId
+                               })}
+            # parentType is stored as parrentCollection in database
+            # We need parentType to be available so we can do set
+            # comparison to check if we are updating parentType (e.g.
+            # Moving a subfolder from a folder to a collection)
+            for _id in self._resources.keys():
+                self._resources[_id]['parentType'] = \
+                    self._resources[_id]['parentCollection']
+        return self._resources
+
+
+class ItemResource(Resource):
+    def __init__(self, client, folderId):
+        super(ItemResource, self).__init__(client, "item")
+        self.folderId = folderId
+
+    @property
+    def resources(self):
+        if self._resources is None:
+            self._resources = {r['_id']: r for r
+                               in self.client.get(self.resource_type, {
+                                   "folderId": self.folderId
+                               })}
+        return self._resources
+
+
 class GirderClientModule(GirderClient):
 
     # Exclude these methods from both 'raw' mode
     _include_methods = ['get', 'put', 'post', 'delete',
-                        'plugins', 'user', 'assetstore']
+                        'plugins', 'user', 'assetstore',
+                        'collection', 'folder', 'item', 'files',
+                        'group']
 
     _debug = True
 
@@ -485,6 +647,10 @@ class GirderClientModule(GirderClient):
         self.spec = dict(class_spec(self.__class__,
                                     GirderClientModule._include_methods))
         self.required_one_of = self.spec.keys()
+
+        # Note: if additional types are added o girder this will
+        # have to be updated!
+        self.access_types = {"member": 0, "moderator": 1, "admin": 2}
 
     def __call__(self, module):
         self.module = module
@@ -554,6 +720,360 @@ class GirderClientModule(GirderClient):
 
         self.message['gc_return'] = ret
 
+    def files(self, itemId, sources=None):
+        ret = {"added": [],
+               "removed": []}
+
+        files = self.get("item/{}/files".format(itemId))
+
+        if self.module.params['state'] == 'present':
+
+            file_dict = {f['name']: f for f in files}
+
+            source_dict = {os.path.basename(s): {
+                "path": s,
+                "name": os.path.basename(s),
+                "size": os.path.getsize(s)} for s in sources}
+
+            source_names = set([(s['name'], s['size'])
+                                for s in source_dict.values()])
+
+            file_names = set([(f['name'], f['size'])
+                              for f in file_dict.values()])
+
+            for n, _ in (file_names - source_names):
+                self.delete("file/{}".format(file_dict[n]['_id']))
+                ret['removed'].append(file_dict[n])
+
+            for n, _ in (source_names - file_names):
+                self.uploadFileToItem(itemId, source_dict[n]['path'])
+                ret['added'].append(source_dict[n])
+
+        elif self.module.params['state'] == 'absent':
+            for f in files:
+                self.delete("file/{}".format(f['_id']))
+                ret['removed'].append(f)
+
+        if len(ret['added']) != 0 or len(ret['removed']) != 0:
+            self.changed = True
+
+        return ret
+
+    def _get_user_by_login(self, login):
+        try:
+            user = self.get("/resource/lookup",
+                            {"path": "/user/{}".format(login)})
+        except HttpError:
+            user = None
+        return user
+
+    def _get_group_by_name(self, name):
+        try:
+            # Could potentially fail if we have more 50 groups
+            group = {g['name']: g for g in self.get("group")}['name']
+        except (KeyError, HttpError):
+            group = None
+        return group
+
+    def group(self, name, description, users=None, debug=False):
+
+        r = GroupResource(self)
+        valid_fields = [("name", name),
+                        ("description", description)]
+
+        if self.module.params['state'] == 'present':
+            if r.name_exists(name):
+                ret = r.update_by_name(name, {k: v for k, v in valid_fields
+                                              if v is not None})
+            else:
+                ret = r.create({k: v for k, v in valid_fields
+                                if v is not None})
+
+            if users is not None:
+                ret["added"] = []
+                ret["removed"] = []
+                ret["updated"] = []
+
+                group_id = ret['_id']
+
+                # Validate and normalize the user list
+                for user in users:
+                    assert "login" in user.keys(), \
+                        "User list must have a login attribute"
+
+                    user['type'] = self.access_types.get(
+                        user.get('type', 'member'), "member")
+
+                # dict of passed in login -> type
+                user_levels = {u['login']: u['type'] for u in users}
+
+                # dict of current login -> user information for this group
+                members = {m['login']: m for m in
+                           self.get('group/{}/member'.format(group_id))}
+
+                # Add these users
+                for login in (set(user_levels.keys()) - set(members.keys())):
+                    user = self._get_user_by_login(login)
+                    if user is not None:
+                        # add user at level
+                        self.post("group/{}/invitation".format(group_id),
+                                  {"userId": user["_id"],
+                                   "level": user_levels[login],
+                                   "quiet": True,
+                                   "force": True})
+                        ret['added'].append(user)
+                    else:
+                        raise Exception('{} is not a valid login!'
+                                        .format(login))
+
+                # Remove these users
+                for login in (set(members.keys()) - set(user_levels.keys())):
+                    self.delete("/group/{}/member".format(group_id),
+                                {"userId": members[login]['_id']})
+                    ret['removed'].append(members[login])
+
+                # Set of users that potentially need to be updated
+                if len(set(members.keys()) & set(user_levels.keys())):
+                    group_access = self.get('group/{}/access'.format(group_id))
+                    # dict of current login -> access information for this group
+                    user_access = {m['login']: m
+                                   for m in group_access['access']['users']}
+
+                    # dict of login -> level for the current group
+                    # Note:
+                    #  Here we join members with user_access - if the member
+                    #  is not in user_access then the member has a level of 0 by
+                    #  default. This gives us  a complete list of every login,
+                    #  and its access level, including those that are IN the
+                    #  group, but have no permissions ON the group.
+                    member_levels = {m['login']:
+                                     user_access.get(m['login'],
+                                                     {"level": 0})['level']
+                                     for m in members.values()}
+
+                    ret = self._promote_or_demote_in_group(ret,
+                                                           member_levels,
+                                                           user_levels,
+                                                           group_id)
+
+                # Make sure 'changed' is handled correctly if we've
+                # manipulated the group's users in any way
+                if (len(ret['added']) != 0 or len(ret['removed']) != 0 or
+                        len(ret['updated']) != 0):
+                    self.changed = True
+
+        elif self.module.params['state'] == 'absent':
+            ret = r.delete_by_name(name)
+
+        return ret
+
+    def _promote_or_demote_in_group(self, ret, member_levels, user_levels,
+                                    group_id):
+        """Promote or demote a set of users.
+
+        :param ret: the current dict of return values
+        :param members_levels: the current access levels of each member
+        :param user_levels: the desired levels of each member
+        :param types: a mapping between resource names and access levels
+        :returns: info about what has (or has not) been updated
+        :rtype: dict
+
+        """
+
+        reverse_type = {v: k for k, v in self.access_types.items()}
+
+        for login in (set(member_levels.keys()) &
+                      set(user_levels.keys())):
+            user = self._get_user_by_login(login)
+            _id = user["_id"]
+
+            # We're promoting
+            if member_levels[login] < user_levels[login]:
+                resource = reverse_type[user_levels[login]]
+                self.post("group/{}/{}"
+                          .format(group_id, resource),
+                          {"userId": _id})
+
+                user['from_level'] = member_levels[login]
+                user['to_level'] = user_levels[login]
+                ret['updated'].append(user)
+
+            # We're demoting
+            elif member_levels[login] > user_levels[login]:
+                resource = reverse_type[member_levels[login]]
+                self.delete("group/{}/{}"
+                            .format(group_id, resource),
+                            {"userId": _id})
+
+                # In case we're not demoting to member make sure
+                # to update to promote to whatever level we ARE
+                # demoting too now that our user is a only a member
+                if user_levels[login] != 0:
+                    resource = reverse_type[user_levels[login]]
+                    self.post("group/{}/{}"
+                              .format(group_id, resource),
+                              {"userId": _id})
+
+                    user['from_level'] = member_levels[login]
+                    user['to_level'] = user_levels[login]
+                    ret['updated'].append(user)
+
+        return ret
+
+    def item(self, name, folderId, description=None, files=None,
+             access=None, debug=False):
+        ret = {}
+        r = ItemResource(self, folderId)
+        valid_fields = [("name", name),
+                        ("description", description),
+                        ('folderId', folderId)]
+
+        if self.module.params['state'] == 'present':
+            if r.name_exists(name):
+                ret = r.update_by_name(name, {k: v for k, v in valid_fields
+                                              if v is not None})
+            else:
+                ret = r.create({k: v for k, v in valid_fields
+                                if v is not None})
+        # handle files here
+
+        elif self.module.params['state'] == 'absent':
+            ret = r.delete_by_name(name)
+
+        return ret
+
+    def folder(self, name, parentId, parentType, description=None,
+               public=True, folders=None, access=None, debug=False):
+
+        ret = {}
+
+        assert parentType in ['collection', 'folder', 'user'], \
+            "parentType must be collection or folder"
+
+        r = FolderResource(self, parentType, parentId)
+        valid_fields = [("name", name),
+                        ("description", description),
+                        ("parentType", parentType),
+                        ("parentId", parentId)]
+
+        if self.module.params['state'] == 'present':
+            if r.name_exists(name):
+                ret = r.update_by_name(name, {k: v for k, v in valid_fields
+                                              if v is not None})
+            else:
+                valid_fields = valid_fields + [("public", public)]
+                ret = r.create({k: v for k, v in valid_fields
+                                if v is not None})
+
+            if folders is not None:
+                self._process_folders(folders, ret["_id"], "folder")
+
+            # handle access here
+            if access is not None:
+                _id = ret['_id']
+                ret['access'] = self._access(r, access, _id, public=public)
+
+        elif self.module.params['state'] == 'absent':
+            ret = r.delete_by_name(name)
+
+        return ret
+
+    def _access(self, r, access, _id, public=True):
+        access_list = {"users": [], "groups": []}
+        users = access.get("users", None)
+        groups = access.get("groups", None)
+
+        if groups is not None:
+            assert set(g['type'] for g in groups) <= \
+                set(self.access_types.keys()), "Invalid access type!"
+
+            # Hash of name -> group information
+            # used to get user id's for access control lists
+            all_groups = {g['name']: g for g in self.get("group")}
+
+            access_list['groups'] = [{'id': all_groups[g['name']]["_id"],
+                                      'level': self.access_types[g['type']]}
+                                     for g in groups]
+
+        if users is not None:
+
+            assert set(u['type'] for u in users) <= \
+                set(self.access_types.keys()), "Invalid access type!"
+
+            # Hash of login -> user information
+            # used to get user id's for access control lists
+            current_users = {u['login']: self._get_user_by_login(u['login'])
+                             for u in users}
+
+            access_list['users'] = [{'id': current_users[u['login']]["_id"],
+                                     "level": self.access_types[u['type']]}
+                                    for u in users]
+
+        return r.put_access(_id, access_list, public=public)
+
+    def _process_folders(self, folders, parentId, parentType):
+        """Process a list of folders from a user or collection.
+
+        :param folders: List of folders passed as attribute
+                        to user or collection
+        :param parentId: ID of the user or the collection
+        :param parentType: one of 'user' or 'collection'
+        :returns: Nothing
+        :rtype: None
+
+        """
+
+        current_folders = {f['name']: f for f in
+                           self.get("folder", {"parentType": parentType,
+                                               "parentId": parentId})}
+        # Add, update or noop listed folders
+        for folder in folders:
+            # some validation of folder here would be a good idea
+            kwargs = folder.copy()
+            del kwargs['name']
+            self.folder(folder['name'],
+                        parentId=parentId,
+                        parentType=parentType,
+                        **kwargs)
+
+        # Make sure we remove folders not listed
+        for name in (set(current_folders.keys()) -
+                     set([f['name'] for f in folders])):
+
+            original_state = self.module.params['state']
+            self.module.params['state'] = "absent"
+            self.folder(name,
+                        parentId=parentId,
+                        parentType=parentType)
+            self.module.params['state'] = original_state
+
+    def collection(self, name, description=None,
+                   public=True, access=None, folders=None, debug=False):
+
+        ret = {}
+        r = CollectionResource(self)
+        valid_fields = [("name", name),
+                        ("description", description)]
+
+        if self.module.params['state'] == 'present':
+            if r.name_exists(name):
+                ret = r.update_by_name(name, {k: v for k, v in valid_fields
+                                              if v is not None})
+            else:
+                ret = r.create({k: v for k, v in valid_fields
+                                if v is not None})
+        if folders is not None:
+            self._process_folders(folders, ret["_id"], "collection")
+
+        if access is not None:
+            _id = ret['_id']
+            ret['access'] = self._access(r, access, _id, public=public)
+
+        elif self.module.params['state'] == 'absent':
+            ret = r.delete_by_name(name)
+
+        return ret
+
     def plugins(self, *plugins):
         import json
         ret = []
@@ -571,7 +1091,7 @@ class GirderClientModule(GirderClient):
         # Fail if plugins are passed in that are not available
         if not plugins <= set(available_plugins["all"].keys()):
             self.fail("{}, not available!".format(
-                ",".join(list(plugins - set(available_plugins['all'].keys())))
+                ",".join(list(plugins - set(available_plugins["all"].keys())))
             ))
 
         # If we're trying to ensure plugins are present
@@ -598,7 +1118,7 @@ class GirderClientModule(GirderClient):
         return ret
 
     def user(self, login, password, firstName=None,
-             lastName=None, email=None, admin=False):
+             lastName=None, email=None, admin=False, folders=None):
 
         if self.module.params['state'] == 'present':
 
@@ -643,6 +1163,11 @@ class GirderClientModule(GirderClient):
                     "admin": "true" if admin else "false"
                 })
                 self.changed = True
+
+            if folders is not None:
+                _id = self.get("resource/lookup",
+                               {"path": "/user/{}".format(login)})["_id"]
+                self._process_folders(folders, _id, "user")
 
         elif self.module.params['state'] == 'absent':
             ret = []

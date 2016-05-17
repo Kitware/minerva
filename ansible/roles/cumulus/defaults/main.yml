@@ -1,0 +1,15 @@
+---
+girder_user: "{{ ansible_user }}"
+
+cumulus_version: "master"
+
+cumulus_base_path: "/opt/cumulus"
+cumulus_install_root: "{{cumulus_base_path}}/{{ cumulus_version }}"
+cumulus_keys_directory: "/data/cumulus/{{ cumulus_version }}/keys"
+
+cumulus_plugin_root: "{{ cumulus_install_root }}/girder"
+
+cumulus_repo: "https://github.com/Kitware/cumulus.git"
+
+cumulus_celery_user: "{{ ansible_user }}"
+cumulus_celery_group: "{{ cumulus_celery_user }}"

@@ -1,0 +1,74 @@
+---
+- fail: msg="celery_app must be defined"
+  when: celery_app is not defined
+
+- fail: msg="celery_dir must be defined"
+  when: celery_app_dir is not defined
+
+- name: Install celery dependencies
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  become: yes
+  become_user: root
+  with_items:
+    - rabbitmq-server
+    - python-dev
+    - python-pip
+
+- name: Restart rabbitmq-server
+  service:
+    name: rabbitmq-server
+    state: restarted
+  become: yes
+  become_user: root
+
+- name: Install celery
+  pip:
+    name: celery
+    version: 3.1.20
+  become: yes
+  become_user: root
+
+- name: Install project requirements
+  pip:
+    requirements: "{{ celery_app_dir }}/requirements.txt"
+  become: yes
+  become_user: root
+
+
+- name: Install celeryd init script
+  template:
+    src: celeryd.script
+    dest: /etc/init.d/celeryd
+    mode: 0755
+  become: yes
+  become_user: root
+
+- name: Install celeryd config script
+  template:
+    src: celeryd.conf.j2
+    dest: /etc/default/celeryd
+    mode: 0640
+  become: yes
+  become_user: root
+
+- name: Create log and run directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ celery_user }}"
+    group: "{{ celery_group }}"
+  with_items:
+    - "{{ celery_log_dir }}"
+    - "{{ celery_run_dir }}"
+  become: yes
+  become_user: root
+
+
+- name: Start celeryd service
+  service:
+    name: celeryd
+    state: restarted
+  become: yes
+  become_user: root

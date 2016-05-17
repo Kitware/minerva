@@ -1,0 +1,53 @@
+- name: Install cumulus key directory
+  file:
+    path: "{{ cumulus_keys_directory }}"
+    state: directory
+    group: "{{ cumulus_celery_group }}"
+    owner: "{{ cumulus_celery_user }}"
+    mode: 0700
+  become: yes
+  become_user: root
+
+- name: Clone a copy of the repository
+  git:
+    repo: "{{ cumulus_repo }}"
+    dest: "{{ cumulus_install_root }}"
+    version: "{{ cumulus_version }}"
+    force: yes
+    update: yes
+
+- name: Get local host name, used in Vagrant deployment
+  command: hostname --fqdn
+  register: local_hostname
+
+- name: cumulus | create config.json
+  template:
+    src: config.json.j2
+    dest: "{{cumulus_install_root}}/cumulus/conf/config.json"
+    mode: 0665
+    owner: "{{ role_user_output.stdout }}"
+    group: "{{ cumulus_celery_user }}"
+  become: yes
+  become_user: root
+
+- name: Install cumulus python dependencies
+  pip:
+    requirements: "{{cumulus_install_root}}/requirements.txt"
+    virtualenv: "{{ girder_venv | default(omit) }}"
+
+
+- name: Install Cumulus
+  pip:
+    name: "."
+    editable: yes
+    chdir: "{{ cumulus_install_root }}"
+    virtualenv: "{{ girder_venv | default(omit) }}"
+
+
+- name: Install cumulus girder plugins
+  file:
+    dest: "{{ girder_path }}/plugins/{{ item }}"
+    src: "{{cumulus_plugin_root}}/{{ item }}"
+    state: link
+  with_items: "{{ cumulus_girder_plugins }}"
+  when: girder_path is defined

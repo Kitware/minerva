@@ -1,15 +1,28 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.enable :apt
+    config.cache.enable :pip
+    config.cache.enable :npm
+  end
+
   host_port = ENV["GIRDER_HOST_PORT"] || 8080
+  guest_port = ENV["GIRDER_GUEST_PORT"] || host_port
+  dev_install = ENV["DEVELOPMENT"] || false
 
-  sync_folders = ENV["DEVELOPMENT_SYNC_FOLDERS"] || false
+  config.vm.network "private_network", type: "dhcp"
 
-  config.vm.network "forwarded_port", guest: 8080, host: host_port
+  config.vm.network "forwarded_port", guest: guest_port, host: host_port
 
-  config.vm.define "minervagrant" do |node| end
+  config.vm.define "minerva" do |node| end
 
   config.vm.provider "virtualbox" do |vb|
     host = RbConfig::CONFIG['host_os']
@@ -38,47 +51,47 @@ Vagrant.configure(2) do |config|
 
   end
 
-
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  if sync_folders
-    # This is experimental and intended for developers who are
-    # working directly on code in the virtualized instance,
-    # no support, warranty or ganuntee of correctness!
-    GIRDER_UID = GIRDER_GID = 1003
-    ROMANESCO_UID = ROMANESCO_GID = 1002
-    if File.directory?("../girder")
-      config.vm.synced_folder "../girder", "/opt/girder", owner: GIRDER_UID, group: GIRDER_GID
+  # If DEVELOPMENT is true,  mount NFS directories from host
+  if dev_install and Vagrant.has_plugin?("vagrant-bindfs")
+    if File.exists? File.expand_path("../../../minerva")
+      config.vm.synced_folder "../../../minerva", "/tmp/minerva-nfs", type: "nfs"
+      config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/master",
+                                after: :provision,
+                                o: "nonempty",
+                                u: "girder",
+                                g: "girder"
     end
-
-    if File.directory?("../romanesco")
-      config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: ROMANESCO_UID, group: ROMANESCO_GID
+    if File.exists? File.expand_path("../../../cumulus")
+      config.vm.synced_folder "../../../cumulus", "/tmp/cumulus-nfs", type: "nfs"
+      config.bindfs.bind_folder "/tmp/cumulus-nfs", "/opt/cumulus/master",
+                                after: :provision,
+                                o: "nonempty",
+                                u: "girder",
+                                g: "girder"
     end
-
-    config.vm.synced_folder ".", "/opt/minerva", owner: GIRDER_UID, group: GIRDER_GID
   end
 
-
-  ansible_tags = ENV["MINERVA_VAGRANT_ANSIBLE_TAGS"] || false
-
   config.vm.provision "ansible" do |ansible|
-    ansible.verbose = "vvvv"
-
-    if ansible_tags
-        ansible.tags = ansible_tags
-    end
-
     ansible.groups = {
-      "all" => ['minervagrant'],
-      "girder" => ['minervagrant'],
-      "mongo" => ['minervagrant'],
-      "rabbitmq" => ['minervagrant']
+      "all" => ['minerva'],
+      "girder" => ['minerva'],
+      "mongo" => ['minerva'],
+      "rabbitmq" => ['minerva'],
+      "minerva" => ['minerva']
     }
 
     ansible.extra_vars = {
-      default_user: "vagrant"
+      default_user: "vagrant",
+      girder_port: host_port
     }
+    ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
+    ENV["CUMULUS_VERSION"] && ansible.extra_vars['cumulus_version'] = ENV["CUMULUS_VERSION"]
+    ENV["MINERVA_VERSION"] && ansible.extra_vars['minerva_version'] = ENV["MINERVA_VERSION"]
 
-    ansible.playbook = "ansible/site.yml"
+    ansible.verbose = "-vv"
+    ansible.playbook = "site.yml"
+    ansible.galaxy_role_file = "requirements.yml"
   end
 end
