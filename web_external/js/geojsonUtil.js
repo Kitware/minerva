@@ -125,3 +125,35 @@ minerva.geojson.normalize = function normalize(geojson) {
 
     return normalized;
 };
+
+/**
+ * Set style properties in the geojson according to the
+ * `visProperties` mapping.  This will loop through all
+ * of the contained features and append "property"
+ * key -> value pairs for each vis property.
+ *
+ * This method mutates the geojson object.
+ *
+ * @note assumes the geojson object is normalized
+ */
+minerva.geojson.style = function style(geojson, visProperties) {
+    // cache all of the scale functions before looping
+    // through the features
+    var scales = {};
+    _.each(visProperties, function (style, key) {
+        scales[key] = style.scale();
+    });
+
+    _.each(geojson, function (feature) {
+        var properties = feature.properties || {};
+        var geometry = feature.geometry || {};
+
+        _.each(scales, function (scale, key) {
+            properties[key] = scale(properties, geo);
+        });
+
+        feature.properties = properties;
+    });
+
+    return geojson;
+};

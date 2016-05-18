@@ -17,6 +17,28 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     },
 
     /**
+     * Default initialization, attach event handlers to preprocess data
+     * on load.
+     */
+    initialize: function () {
+        minerva.models.MinervaModel.prototype.initialize.apply(this, arguments);
+        this.on('change:geoData', this._preprocess, this);
+        return this;
+    },
+
+    /**
+     * Preprocess data to generate summary information about the properties
+     * and value types.  This should be called whenever the dataset changes.
+     *
+     * For now, this is only done for GeoJSON datasets.
+     */
+    _preprocess: function () {
+        if (this.getDatasetType() === 'geojson') {
+            this.set('geoData', minerva.geojson.normalize(this.get('geoData')));
+        }
+    },
+
+    /**
      * Async function that should be called after uploading a file as an
      * Item to the user's Minerva/Dataset folder, this function will then
      * promote the Item to a Minerva Dataset, which means
@@ -142,7 +164,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
             if (mm.geojson && mm.geojson.data) {
                 // Some datasets have geojson in the metadata.
-                this.set('geoData', minerva.geojson.normalize(mm.geojson.data));
+                this.set('geoData', mm.geojson.data);
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
         } else {
@@ -153,7 +175,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 // Prevent json from getting parsed.
                 dataType: null
             }).done(_.bind(function (data) {
-                this.set('geoData', minerva.geojson.normalize(data));
+                this.set('geoData', data);
                 this.trigger('m:dataset_geo_dataLoaded', this);
             }, this)).error(_.bind(function (err) {
                 console.error(err);
