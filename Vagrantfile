@@ -69,15 +69,16 @@ Vagrant.configure(2) do |config|
     ansible.groups = {
       "all" => ['minerva'],
       "girder" => ['minerva'],
-      "mongo" => ['minerva'],
-      "rabbitmq" => ['minerva'],
       "minerva" => ['minerva']
     }
 
     ansible.extra_vars = {
       default_user: "vagrant",
-      girder_port: guest_port
+      girder_port: guest_port,
+      girder_version: File.read(".girder-version").delete!("\n"),
+      minerva_version: `git rev-parse --short HEAD`.delete!("\n")
     }
+
     ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
     ENV["MINERVA_VERSION"] && ansible.extra_vars['minerva_version'] = ENV["MINERVA_VERSION"]
 

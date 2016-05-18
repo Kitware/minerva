@@ -3,6 +3,14 @@
   vars:
     girder_venv: "{{ girder_base_path }}/.venv"
   pre_tasks:
+    - name: Check that girder_version is available
+      fail: msg="You must set girder_version!"
+      when: girder_version is not defined or girder_version == ""
+
+    - name: Check that minerva_version is available
+      fail: msg="You must set minerva_version!"
+      when: minerva_version is not defined or minerva_version == ""
+
     - name: Create users
       user:
         name: "{{ item }}"
