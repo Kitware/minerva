@@ -31,7 +31,7 @@ except ImportError:
     HAS_GIRDER_CLIENT = False
 
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 DOCUMENTATION = '''
 ---
@@ -264,6 +264,156 @@ options:
                        description:
                            - None
 
+    group:
+        required: false
+        description:
+            - Create a group with pre-existing users
+        options:
+            name:
+                required: true
+                description:
+                    - Name of the group
+
+            description:
+                required: false
+                description:
+                    - Description of the group
+            users:
+                required: false
+                type: list
+                description:
+                    - List of dicts with users login and their level
+                options:
+                    login:
+                        required: true
+                        description:
+                            - the login name
+                    type:
+                        required: true
+                        choices: ["member", "moderator", "admin"]
+                        description:
+                            - Access level for that user in the group
+
+    collection:
+        required: false
+        description:
+            - Create a collection
+        options:
+            name:
+                required: true
+                description:
+                    - Name of the collection
+
+            description:
+                required: false
+                description:
+                    - Description of the collection
+
+            folders:
+                required: false
+                description:
+                    - A list of folder options
+                    - Specified by the 'folder' option to the girder module
+                    - (see 'folder:')
+            access:
+                required: false
+                description:
+                    - Set the access for the collection/folder
+                options:
+                    users:
+                        required: false
+                        description:
+                            - list of login/type arguments
+                            - login is a user login
+                            - type is one of 'admin', 'moderator', 'member'
+                    groups:
+                        required: false
+                        description:
+                            - list of name/type arguments
+                            - name is a group name
+                            - type is one of 'admin', 'moderator', 'member'
+
+    folder:
+        required: false
+        description:
+            - Create a folder
+        options:
+            name:
+                required: true
+                description:
+                    - Name of the folder
+
+            description:
+                required: false
+                description:
+                    - Description of the folder
+            parentType:
+                required: true
+                choices: ["user", "folder", "collection"]
+                description:
+                    - The type of the parent
+            parentId:
+                required: true
+                description:
+                    - The ID of the parent collection
+            folders:
+                required: false
+                description:
+                    - A list of folder options
+                    - Specified by the 'folder' option to the girder module
+                    - (see 'folder:')
+            access:
+                required: false
+                description:
+                    - Set the access for the collection/folder
+                options:
+                    users:
+                        required: false
+                        description:
+                            - list of login/type arguments
+                            - login is a user login
+                            - type is one of 'admin', 'moderator', 'member'
+                    groups:
+                        required: false
+                        description:
+                            - list of name/type arguments
+                            - name is a group name
+                            - type is one of 'admin', 'moderator', 'member'
+
+    item:
+        required: false
+        description:
+            - Create a item
+        options:
+            name:
+                required: true
+                description:
+                    - Name of the item
+
+            description:
+                required: false
+                description:
+                    - Description of the item
+            folderId:
+                required: true
+                description:
+                    - The ID of the parent collection
+
+     files:
+        required: false
+        description:
+            - Uploads a list of files to an item
+        options:
+            itemId:
+                required: true
+                description:
+                    - the parent item for the file
+            sources:
+                required: true
+                description:
+                    - list of local file paths
+                    - files will be uploaded to the item
+
 '''
 
 EXAMPLES = '''
@@ -310,6 +460,86 @@ EXAMPLES = '''
       password: "foobarbaz"
     state: absent
 
+############
+# Examples using Group
+#
+
+# Create an 'alice' user
+- name: Create 'alice' User
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    user:
+      firstName: "Alice"
+      lastName: "Test"
+      login: "alice"
+      password: "letmein"
+      email: "alice.test@kitware.com"
+    state: present
+
+# Create a 'bill' user
+- name: Create 'bill' User
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    user:
+      firstName: "Bill"
+      lastName: "Test"
+      login: "bill"
+      password: "letmein"
+      email: "bill.test@kitware.com"
+    state: present
+
+# Create a 'chris' user
+- name: Create 'chris' User
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    user:
+      firstName: "Chris"
+      lastName: "Test"
+      login: "chris"
+      password: "letmein"
+      email: "chris.test@kitware.com"
+    state: present
+
+- name: Create a test group with users
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    group:
+      name: "Test Group"
+      description: "Basic test group"
+      users:
+        - login: alice
+          type: member
+        - login: bill
+          type: moderator
+        - login: chris
+          type: admin
+    state: present
+
+# Remove Bill from the group,
+# Note that 'group' list is idempotent - it describes the desired state
+
+- name: Remove bill from group
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    group:
+      name: "Test Group"
+      description: "Basic test group"
+      users:
+        - login: alice
+          type: member
+        - login: chris
+          type: admin
+    state: present
 
 #############
 # Example using 'plugins'
@@ -371,6 +601,154 @@ EXAMPLES = '''
       type: "filesystem"
       root: "/tmp/"
     state: absent
+
+
+############
+# Examples using collections, folders, items and files
+#
+
+# Creates a test collection called "Test Collection"
+- name: Create collection
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    collection:
+      name: "Test Collection"
+      description: "A test collection"
+  register: test_collection
+
+# Creates a folder called "test folder" under "Test Collection"
+- name: Create folder
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    folder:
+      parentType: "collection"
+      parentId: "{{test_collection['gc_return']['_id'] }}"
+      name: "test folder"
+      description: "A test folder"
+  register: test_folder
+
+# Creates an item called "test item" under "test folder"
+- name: Create an item
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    item:
+      folderId: "{{test_folder['gc_return']['_id'] }}"
+      name: "test item"
+      description: "A test item"
+  register: test_item
+
+# Upload files on the localhost at /tmp/data/test1.txt and
+# /tmp/data/test2.txt to the girder instance under the item
+# "test item"
+# Note:  the list is idempotent and will remove files that are
+# not listed under the item. Files are checked for both name
+# and size to determine if they should be updated.
+- name: Upload files
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    files:
+      itemId: "{{ test_item['gc_return']['_id'] }}"
+      sources:
+        - /tmp/data/test1.txt
+        - /tmp/data/test2.txt
+  register: retval
+
+
+############
+# Examples Using collection/folder hierarchy
+#
+
+- name: Create collection with a folder and a subfolder
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    collection:
+      name: "Test Collection"
+      description: "A test collection"
+      folders:
+        - name: "test folder"
+          description: "A test folder"
+          folders:
+            - name: "test subfolder"
+            - name: "test subfolder 2"
+  register: test_collection
+
+
+
+############
+# Examples Setting access to files/folders
+#
+
+
+- name: Create collection with access
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    collection:
+      name: "Test Collection"
+      description: "A test collection"
+      public: no
+      access:
+        users:
+          - login: alice
+            type: admin
+          - login: chris
+            type: member
+  register: test_collection
+
+
+- name: Add group to Test Collection
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    collection:
+      name: "Test Collection"
+      description: "A test collection"
+      public: no
+      access:
+        users:
+          - login: alice
+            type: admin
+          - login: bill
+            type: moderator
+          - login: chris
+            type: member
+        groups:
+          - name: Test Group
+            type: member
+  register: test_collection
+
+- name: Add Test Folder with access
+  girder:
+    port: 8080
+    username: "admin"
+    password: "letmein"
+    folder:
+      parentType: "collection"
+      parentId: "{{test_collection['gc_return']['_id'] }}"
+      name: "test folder"
+      description: "A test folder"
+      access:
+        users:
+          - login: bill
+            type: admin
+        groups:
+          - name: Test Group
+            type: member
+  register: test_folder
+
+
 
 ############
 # Examples using get
@@ -455,13 +833,21 @@ def class_spec(cls, include=None):
     for fn, method in getmembers(cls, predicate=ismethod):
         if fn in include:
             spec = getargspec(method)
+            # Note: must specify the kind of data we accept
+            #       In all most all cases this will be a dict
+            #       where variable names become keys used in yaml
+            #       but if we have a vararg then we need to set
+            #       this to a list.
+            kind = 'dict' if spec.varargs is None else 'list'
+
             # spec.args[1:] so we don't include 'self'
             params = spec.args[1:]
             d = len(spec.defaults) if spec.defaults is not None else 0
             r = len(params) - d
 
             yield (fn, {"required": params[:r],
-                        "optional": params[r:]})
+                        "optional": params[r:],
+                        "type": kind})
 
 
 class Resource(object):
@@ -696,17 +1082,17 @@ class GirderClientModule(GirderClient):
         # Final list of keyword arguments to the function
         kwargs = {}
 
-        if type(params) is dict:
+        if isinstance(params, dict):
             for arg_name in self.spec[method]['required']:
                 if arg_name not in params.keys():
-                    self.fail("{} is required for {}".format(arg_name, method))
+                    self.fail("%s is required for %s" % (arg_name, method))
                 args.append(params[arg_name])
 
             for kwarg_name in self.spec[method]['optional']:
                 if kwarg_name in params.keys():
                     kwargs[kwarg_name] = params[kwarg_name]
 
-        elif type(params) is list:
+        elif isinstance(params, list):
             args = params
         else:
             args = [params]
@@ -1090,9 +1476,9 @@ class GirderClientModule(GirderClient):
 
         # Fail if plugins are passed in that are not available
         if not plugins <= set(available_plugins["all"].keys()):
-            self.fail("{}, not available!".format(
-                ",".join(list(plugins - set(available_plugins["all"].keys())))
-            ))
+            self.fail("%s, not available!" %
+                      ",".join(list(plugins -
+                                    set(available_plugins["all"].keys()))))
 
         # If we're trying to ensure plugins are present
         if self.module.params['state'] == 'present':
@@ -1126,8 +1512,8 @@ class GirderClientModule(GirderClient):
             for var_name, var in [('firstName', firstName),
                                   ('lastName', lastName), ('email', email)]:
                 if var is None:
-                    self.fail("{} must be set if state "
-                              "is 'present'".format(var_name))
+                    self.fail("%s must be set if state "
+                              "is 'present'" % var_name)
 
             try:
                 ret = self.authenticate(username=login,
@@ -1143,7 +1529,7 @@ class GirderClientModule(GirderClient):
                 if set([(k, v) for k, v in me.items() if k in updateable]) ^ \
                    set(zip(updateable, passed_in)):
 
-                    self.put("user/{}".format(me['_id']),
+                    self.put("user/%s" % me['_id'],
                              parameters={
                                  "login": login,
                                  "firstName": firstName,
@@ -1177,7 +1563,7 @@ class GirderClientModule(GirderClient):
 
                 me = self.get("user/me")
 
-                self.delete('user/{}'.format(me['_id']))
+                self.delete('user/%s' % me['_id'])
                 self.changed = True
             # User does not exist (with this login info)
             except AuthenticationError:
@@ -1204,7 +1590,7 @@ class GirderClientModule(GirderClient):
 
             # Fail if somehow we have an asset type not in assetstore_types
         if type not in self.assetstore_types.keys():
-            self.fail("assetstore type {} is not implemented!".format(type))
+            self.fail("assetstore type %s is not implemented!" % type)
 
         argument_hash = {
             "filesystem": {'name': name,
@@ -1236,7 +1622,7 @@ class GirderClientModule(GirderClient):
         for k, v in argument_hash[type].items():
             if v is None:
                 self.fail("assetstores of type "
-                          "{} require attribute {}".format(type, k))
+                          "%s require attribute %s" % (type, k))
 
         # Set optional arguments in the hash
         argument_hash[type]['readOnly'] = readOnly
@@ -1285,7 +1671,7 @@ class GirderClientModule(GirderClient):
                 # if arg_hash_items not a proper subset of assetstore_items
                 if not arg_hash_items <= assetstore_items:
                     # Update
-                    ret = self.put("assetstore/{}".format(id),
+                    ret = self.put("assetstore/%s" % id,
                                    parameters=argument_hash[type])
 
                     self.changed = True
@@ -1296,8 +1682,8 @@ class GirderClientModule(GirderClient):
                     # If __validate_[type]_assetstore exists then call the
                     # function with argument_hash. E.g.,  to check if the
                     # HDFS plugin is enabled
-                    getattr(self, "__validate_{}_assetstore"
-                            .format(type))(**argument_hash)
+                    getattr(self, "__validate_%s_assetstore" % type
+                            )(**argument_hash)
                 except AttributeError:
                     pass
 
@@ -1309,7 +1695,7 @@ class GirderClientModule(GirderClient):
             # And the assetstore exists
             if name in assetstores.keys():
                 id = assetstores[name]['_id']
-                ret = self.delete("assetstore/{}".format(id),
+                ret = self.delete("assetstore/%s" % id,
                                   parameters=argument_hash[type])
 
         return ret
@@ -1345,7 +1731,7 @@ def main():
     gcm = GirderClientModule()
 
     for method in gcm.required_one_of:
-        argument_spec[method] = dict()
+        argument_spec[method] = dict(type=gcm.spec[method]['type'])
 
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -1363,15 +1749,14 @@ def main():
 
     except HttpError as e:
         import traceback
-        module.fail_json(msg="{}:{}\n{}\n{}".format(e.__class__, str(e),
-                                                    e.responseText,
-                                                    traceback.format_exc()))
+        module.fail_json(msg="%s:%s\n%s\n%s" % (e.__class__, str(e),
+                                                e.responseText,
+                                                traceback.format_exc()))
     except Exception as e:
         import traceback
         # exc_type, exc_obj, exec_tb = sys.exc_info()
-        module.fail_json(msg="{}: {}\n\n{}".format(e.__class__,
-                                                   str(e),
-                                                   traceback.format_exc()))
+        module.fail_json(msg="%s: %s\n\n%s" % (e.__class__, str(e),
+                                               traceback.format_exc()))
 
 
 if __name__ == '__main__':
