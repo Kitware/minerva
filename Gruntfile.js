@@ -303,9 +303,7 @@ module.exports = function (grunt) {
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
-            // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
-            '/' + staticDir + '/jquery-ui.min.js',
-            '/' + staticDir + '/geo.min.js',
+            '/' + staticDir + '/minerva.ext.min.js',
             '/' + rootStaticDir + '/app.min.js'
         ];
         // if any plugin dependencies have js, add them
@@ -316,11 +314,6 @@ module.exports = function (grunt) {
                 dependencies.push('/' + pluginJs);
             }
         }
-        dependencies.concat([
-            '/' + staticDir + '/papaparse.min.js',
-            '/' + staticDir + '/jsonpath.min.js'
-        ]);
-
         var globs = grunt.config.get('uglify.minerva.files')[0].src;
         var jsFiles = [];
         globs.forEach(function (glob) {
