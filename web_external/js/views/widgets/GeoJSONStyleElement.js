@@ -83,15 +83,31 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
 
     /**
      * Return a d3 scale object that performs the style mapping indicated
-     * by this model's attributes.
+     * by this model's attributes.  The returned scale takes a properties
+     * object and returns the scaled style value.
      */
     scale: function () {
-        var scale, value, pairs;
+        var scale, pairs;
+
+        /**
+         * Returns the property value associated with `this.key`.
+         * @private
+         */
+        var getProperty = _.bind(function (properties) {
+            return properties[this.get('key')];
+        }, this);
+
+        /**
+         * Replaces a value with the default if it is undefined.
+         * @private
+         */
+        var getDefault = _.bind(function (val) {
+            return val !== undefined ? val : this.get('value');
+        }, this);
 
         switch (this.get('type')) {
             case 'constant':
-                value = this.get('value');
-                scale = function () { return value; };
+                scale = _.bind(function () { return this.get('value'); }, this);
                 break;
 
             case 'continuous':
@@ -110,7 +126,7 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
             default:
                 throw new Error('Invalid style type');
         }
-        return scale;
+        return _.compose(getDefault, scale, getProperty);
     },
 
     scales: ['constant', 'continuous', 'categorical'],

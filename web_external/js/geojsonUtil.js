@@ -137,19 +137,13 @@ minerva.geojson.normalize = function normalize(geojson) {
  * @note assumes the geojson object is normalized
  */
 minerva.geojson.style = function style(geojson, visProperties) {
-    // cache all of the scale functions before looping
-    // through the features
-    var scales = {};
-    _.each(visProperties, function (style, key) {
-        scales[key] = style.scale();
-    });
 
-    _.each(geojson, function (feature) {
+    _.each(geojson.features || [], function (feature) {
         var properties = feature.properties || {};
         var geometry = feature.geometry || {};
 
-        _.each(scales, function (scale, key) {
-            properties[key] = scale(properties, geo);
+        _.each(visProperties, function (scale, key) {
+            properties[key] = scale(properties, key, geometry);
         });
 
         feature.properties = properties;

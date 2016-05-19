@@ -1,14 +1,11 @@
-window.minerva = {};
-girderTest.addCoveredScripts([
-    '/plugins/minerva/web_external/js/geojsonUtil.js'
-]);
 
 describe('geojson', function () {
-    var merge, accumulate, normalize;
+    var merge, accumulate, normalize, style;
     beforeEach(function () {
         merge = minerva.geojson.merge;
         accumulate = minerva.geojson.accumulate;
         normalize = minerva.geojson.normalize;
+        style = minerva.geojson.style;
     });
     describe('merge', function () {
         it('string type', function () {
@@ -209,6 +206,99 @@ describe('geojson', function () {
                 normalize({});
             }).toThrow();
         });
+    });
+
+    it('style', function () {
+        var geojson = normalize({
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [0, 0]
+                    },
+                    properties: {
+                        a: 1,
+                        b: 'red'
+                    }
+                }, {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [1, 1],
+                    },
+                    properties: {
+                        a: -1,
+                        b: 'blue'
+                    }
+                }, {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [3, 3]
+                    },
+                    properties: {
+                        c: 0
+                    }
+                }
+            ]
+        });
+
+        var vis = {
+            fillColor: sinon.stub().returns('green'),
+            strokeWidth: sinon.stub().returns(4)
+        };
+
+        expect(_.pluck(style(geojson, vis).features, 'properties'))
+            .toEqual([
+                {
+                    "a": 1,
+                    "b": "red",
+                    "fillColor": "green",
+                    "strokeWidth": 4
+                },
+                {
+                    "a": -1,
+                    "b": "blue",
+                    "fillColor": "green",
+                    "strokeWidth": 4
+                },
+                {
+                    "c": 0,
+                    "fillColor": "green",
+                    "strokeWidth": 4
+                }
+            ]);
+
+        sinon.assert.callCount(vis.fillColor, 3);
+        sinon.assert.callCount(vis.strokeWidth, 3);
+
+        sinon.assert.calledWithMatch(
+            vis.fillColor.getCall(0),
+            {a: 1, b: 'red'}
+        );
+        sinon.assert.calledWithMatch(
+            vis.fillColor.getCall(1),
+            {a: -1, b: 'blue'}
+        );
+        sinon.assert.calledWithMatch(
+            vis.fillColor.getCall(2),
+            {c: 0}
+        );
+
+        sinon.assert.calledWithMatch(
+            vis.strokeWidth.getCall(0),
+            {a: 1, b: 'red'}
+        );
+        sinon.assert.calledWithMatch(
+            vis.strokeWidth.getCall(1),
+            {a: -1, b: 'blue'}
+        );
+        sinon.assert.calledWithMatch(
+            vis.strokeWidth.getCall(2),
+            {c: 0}
+        );
     });
 });
 
