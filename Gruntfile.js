@@ -203,6 +203,16 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
+            },
+            'sinon': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.root %>/node_modules/sinon/pkg',
+                        src: ['sinon-1.17.4.js'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
             }
         },
         concat: {
@@ -245,6 +255,9 @@ module.exports = function (grunt) {
             },
             'concat:minerva-ext': {
                 dependencies: ['copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
+            },
+            'copy:sinon': {
+                dependencies: ['shell:plugin-minerva']
             }
         },
         default: {
@@ -300,6 +313,7 @@ module.exports = function (grunt) {
         var i, plugin, pluginJs, pluginCss;
         var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
         var dependencies = [
+            '/' + staticDir + '/sinon-1.17.4.js',
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
