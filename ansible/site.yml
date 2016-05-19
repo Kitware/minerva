@@ -115,3 +115,126 @@
       become_user: "{{ girder_user }}"
       tags:
         - config
+
+
+
+- name: Set up tests
+  hosts: girder
+  become: yes
+  become_user: "{{ girder_user }}"
+  tags:
+    - testing
+  vars:
+    girder_venv: "{{ girder_base_path }}/.venv"
+
+  # Install romanesco
+  # Note: all 'pre_tasks' should be removed once romaneco
+  #       is expunged from the code base.
+  pre_tasks:
+    - file:
+        state: directory
+        path: /opt/romanesco
+        owner: "{{ girder_user }}"
+        group: "{{ girder_user }}"
+        mode: 0755
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - git:
+        repo: https://github.com/Kitware/romanesco.git
+        accept_hostkey: true
+        dest: /opt/romanesco/romanesco
+        version: da82cd17
+        force: yes
+      when: setup_tests
+
+    - apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - libxml2-dev
+        - libxslt1-dev
+        - python-dev
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - pip:
+        requirements: /opt/romanesco/romanesco/requirements.txt
+        virtualenv: "{{ girder_venv }}"
+      when: setup_tests
+
+    - file:
+        state: link
+        src: /opt/romanesco/romanesco
+        dest: "/opt/girder/{{ girder_version }}/plugins/romanesco"
+      when: setup_tests
+
+  tasks:
+    - name: Install girder development requirements
+      pip:
+        requirements: "/opt/girder/{{ girder_version }}/requirements-dev.txt"
+        virtualenv: "{{ girder_venv }}"
+      when: setup_tests
+
+    - name: Install minerva development requirements
+      pip:
+        requirements: "/opt/minerva/{{ minerva_version }}/requirements-dev.txt"
+        virtualenv: "{{ girder_venv }}"
+      when: setup_tests
+
+    - block:
+        - name: Do a full npm install in girder
+          shell: >-
+            npm install
+          args:
+            chdir: "/opt/girder/{{ girder_version }}/"
+          when: setup_tests
+      rescue:
+        - name: Try installing with npm from bitbucket
+          shell: >-
+            npm install
+          args:
+            chdir: "/opt/girder/{{ girder_version }}/"
+          environment:
+            PHANTOMJS_CDNURL: https://bitbucket.org/ariya/phantomjs/downloads
+          when: setup_tests
+      finally:
+        - name: If we at least have eslint - go ahead and continue
+          shell: >-
+            npm install
+          args:
+            chdir: "/opt/girder/{{ girder_version }}/"
+            creates: "/opt/girder/{{ girder_version }}/node_modules/.bin/eslint"
+          environment:
+            PHANTOMJS_CDNURL: https://bitbucket.org/ariya/phantomjs/downloads
+          when: setup_tests
+
+    - name: Create the build directory
+      file:
+        state: directory
+        path: /opt/build
+        owner: "{{ girder_user }}"
+        group: "{{ girder_user }}"
+        mode: 0755
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - name: Install CMake
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - cmake
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - name: Build the test directory
+      shell: >-
+        . /opt/girder/.venv/bin/activate && cmake /opt/girder/{{ girder_version }}/
+      args:
+        chdir: /opt/build
+      when: setup_tests

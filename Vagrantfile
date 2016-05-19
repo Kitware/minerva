@@ -17,6 +17,7 @@ Vagrant.configure(2) do |config|
   host_port = ENV["GIRDER_HOST_PORT"] || 8080
   guest_port = ENV["GIRDER_GUEST_PORT"] || 8080
   dev_install = ENV["DEVELOPMENT"] || false
+  setup_tests = ENV["TESTING"] || false
 
   config.vm.network "private_network", type: "dhcp"
 
@@ -55,6 +56,7 @@ Vagrant.configure(2) do |config|
 
   # If DEVELOPMENT is true,  mount NFS directories from host
   if dev_install and Vagrant.has_plugin?("vagrant-bindfs")
+    setup_tests = true
     if File.exists? File.expand_path(".")
       config.vm.synced_folder ".", "/tmp/minerva-nfs", type: "nfs"
       config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/master",
@@ -76,8 +78,10 @@ Vagrant.configure(2) do |config|
       default_user: "vagrant",
       girder_port: guest_port,
       girder_version: File.read(".girder-version").delete!("\n"),
-      minerva_version: `git rev-parse --short HEAD`.delete!("\n")
+      minerva_version: `git rev-parse --short HEAD`.delete!("\n"),
+      setup_tests: setup_tests
     }
+
 
     ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
     ENV["MINERVA_VERSION"] && ansible.extra_vars['minerva_version'] = ENV["MINERVA_VERSION"]

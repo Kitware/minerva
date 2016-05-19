@@ -1,4 +1,6 @@
 ---
+setup_tests: false
+
 install_base_path: "/opt"
 
 minerva_version: master
