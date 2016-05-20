@@ -140,9 +140,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      *
      * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
      * @param {string} layerType - The type of map visualization used to render the dataset
-     * @param {Object} visProperties - Properties used to render the dataset as a layerType
      */
-    addDataset: function (dataset, layerType, visProperties) {
+    addDataset: function (dataset, layerType) {
         var datasetId = dataset.get('_id');
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
             // For now, get the layerType directly from the dataset,
@@ -151,7 +150,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             layerType = dataset.getGeoRenderType();
             // For now, set the visProperties here, but this should come from the user at
             // the same time they designate the layerType.
-            visProperties = {};
+            visProperties = dataset.get('visProperties');
             minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
                 this.datasetLayerReprs[datasetId] = repr;
                 repr.render(this);
@@ -212,6 +211,17 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 }
             }
         }, this);
+
+        /* TODO: add an event handler like this:
+
+            this.listenTo(this.collection, 'change:visProperties', function (dataset) {
+                // rerender the layer
+            });
+
+          For now, it is unnecessary because the only way to change the visProperties
+          for a dataset in the UI is through the configuration menu present when the
+          dataset is *not* rendered.
+        */
 
         this.listenTo(this.collection, 'change:opacity', function (dataset) {
             if (this.mapCreated) {

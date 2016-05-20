@@ -131,6 +131,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      */
     this.init = function (container, dataset, visProperties, data) {
         this.geoJsLayer = container.createLayer('feature');
+        minerva.geojson.style(data, visProperties);
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
             reader.read(data, _.bind(function () {
@@ -142,6 +143,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             this.trigger('m:map_layer_error', this);
         }
     };
+
 }, minerva.rendering.geo.MapRepresentation);
 
 /**

@@ -13,7 +13,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         // Tabular data related attributes.
         tableData: null,
         readOnly: true,
-        visible: true
+        visible: true,
+        // Dataset styling information as passed to Adapters
+        visProperties: {}
     },
 
     /**
