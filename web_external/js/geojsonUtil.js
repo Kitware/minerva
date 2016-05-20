@@ -120,7 +120,7 @@ minerva.geojson.normalize = function normalize(geojson) {
 
     // generate property summary
     normalized.summary = minerva.geojson.accumulate(
-        normalized.features.map(function (f) {return f.properties;})
+        normalized.features.map(function (f) { return f.properties; })
     );
 
     return normalized;
@@ -137,7 +137,6 @@ minerva.geojson.normalize = function normalize(geojson) {
  * @note assumes the geojson object is normalized
  */
 minerva.geojson.style = function style(geojson, visProperties) {
-
     _.each(geojson.features || [], function (feature) {
         var properties = feature.properties || {};
         var geometry = feature.geometry || {};

@@ -143,7 +143,6 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             this.trigger('m:map_layer_error', this);
         }
     };
-
 }, minerva.rendering.geo.MapRepresentation);
 
 /**

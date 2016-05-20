@@ -57,9 +57,9 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
             this.$el.modal('hide');
         },
         'change #m-geo-render-type': function () {
-            if (this.$('#m-geo-render-type').val() === 'geojson')
+            if (this.$('#m-geo-render-type').val() === 'geojson') {
                 this.$('.m-geojson-style').removeClass('hidden');
-            else {
+            } else {
                 this.$('.m-geojson-style').addClass('hidden');
             }
         }

@@ -143,6 +143,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      */
     addDataset: function (dataset, layerType) {
         var datasetId = dataset.get('_id');
+        var visProperties;
+
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired

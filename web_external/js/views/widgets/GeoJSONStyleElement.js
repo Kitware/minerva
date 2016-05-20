@@ -131,16 +131,16 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
 
     scales: ['constant', 'continuous', 'categorical'],
     ramps: _.map(colorbrewer, _.bind(function (ramp, name) {
-            var n = "<ul class='m-color-ramp'>";
-            _.each(ramp[6], function (color, i) {
-                n += "<li style='background-color: " + color + "'/>";
-            });
-            n += '</ul>';
-            this[name] = {
-                value: ramp[6],
-                display: n
-            };
-            return this;
+        var n = "<ul class='m-color-ramp'>";
+        _.each(ramp[6], function (color, i) {
+            n += "<li style='background-color: " + color + "'/>";
+        });
+        n += '</ul>';
+        this[name] = {
+            value: ramp[6],
+            display: n
+        };
+        return this;
     }, {}))[0]
 
 });
@@ -158,7 +158,6 @@ minerva.views.GeoJSONStyleElement = minerva.View.extend({
         this.listenTo(this.model, 'destroy', this.remove);
     },
     render: function (evt) {
-
         // when responding to an input element change event, don't re-render
         if (evt && evt.norender) {
             return;
