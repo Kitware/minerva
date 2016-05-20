@@ -70,7 +70,7 @@ add_web_client_test(
     geojson "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/geojsonUtil.js"
     BASEURL "/static/built/testEnvMinerva.html"
 )
-set_property(TEST web_client_minerva PROPERTY LABELS minerva_client)
+set_property(TEST web_client_geojson PROPERTY LABELS minerva_client)
 
 set_property(TEST js_coverage_reset APPEND PROPERTY LABELS minerva_client)
 set_property(TEST js_coverage_combine_report APPEND PROPERTY LABELS minerva_client)
