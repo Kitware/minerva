@@ -22,13 +22,6 @@ minerva.views.LayoutHeaderUserView = minerva.View.extend({
         'click a.g-my-settings': function () {
             minerva.router.navigate('useraccount/' + girder.currentUser.get('_id') +
                                     '/info', {trigger: true});
-        },
-
-        'click a.g-test-modal': function () {
-            new minerva.views.GeoJSONStyleWidget({
-                parentView: this,
-                el: $('#g-dialog-container')
-            }).render();
         }
     },
 
