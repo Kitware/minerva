@@ -200,16 +200,6 @@
           environment:
             PHANTOMJS_CDNURL: https://bitbucket.org/ariya/phantomjs/downloads
           when: setup_tests
-      finally:
-        - name: If we at least have eslint - go ahead and continue
-          shell: >-
-            npm install
-          args:
-            chdir: "/opt/girder/{{ girder_version }}/"
-            creates: "/opt/girder/{{ girder_version }}/node_modules/.bin/eslint"
-          environment:
-            PHANTOMJS_CDNURL: https://bitbucket.org/ariya/phantomjs/downloads
-          when: setup_tests
 
     - name: Create the build directory
       file:
