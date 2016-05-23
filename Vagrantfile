@@ -19,6 +19,8 @@ Vagrant.configure(2) do |config|
   dev_install = ENV["DEVELOPMENT"] || false
   setup_tests = ENV["TESTING"] || false
 
+  minerva_version = ENV["MINERVA_VERSION"] || `git rev-parse --short HEAD`.delete!("\n")
+
   config.vm.network "private_network", type: "dhcp"
 
   config.vm.network "forwarded_port", guest: guest_port, host: host_port
@@ -59,7 +61,7 @@ Vagrant.configure(2) do |config|
     setup_tests = true
     if File.exists? File.expand_path(".")
       config.vm.synced_folder ".", "/tmp/minerva-nfs", type: "nfs"
-      config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/master",
+      config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/" + minerva_version,
                                 after: :provision,
                                 o: "nonempty",
                                 u: "girder",
@@ -78,13 +80,11 @@ Vagrant.configure(2) do |config|
       default_user: "vagrant",
       girder_port: guest_port,
       girder_version: File.read(".girder-version").delete!("\n"),
-      minerva_version: `git rev-parse --short HEAD`.delete!("\n"),
+      minerva_version: minerva_version,
       setup_tests: setup_tests
     }
 
-
     ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
-    ENV["MINERVA_VERSION"] && ansible.extra_vars['minerva_version'] = ENV["MINERVA_VERSION"]
 
     ansible.verbose = "-vv"
     ansible.playbook = "ansible/site.yml"
