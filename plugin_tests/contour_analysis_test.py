@@ -32,7 +32,6 @@ from girder_client import GirderClient
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
 import import_analyses
-import romanesco
 
 def setUpModule():
     """
@@ -40,7 +39,6 @@ def setUpModule():
     """
     base.enabledPlugins.append('minerva')
     base.enabledPlugins.append('jobs')
-    base.enabledPlugins.append('romanesco')
     base.startServer(False)
 
 
@@ -158,59 +156,3 @@ class ContourAnalysesTestCase(base.TestCase):
         self.assertEqual(len(response.json), 1, 'Excepting only a single file')
 
         self._dataset_file_id = response.json[0]['_id']
-
-
-    def testContourAnalysis(self):
-        """
-        Test contour analysis
-        """
-        inputs =  {
-            'host': {
-                'format': 'json',
-                'data': 'localhost'
-            },
-            'port': {
-                'format': 'json',
-                'data': girder_port
-            },
-            'token': {
-                'format': 'json',
-                'data': self._client.token
-            },
-            'fileId': {
-                'format': 'json',
-                'data': self._dataset_file_id
-            },
-            'variable': {
-                'format': 'json',
-                'data': 'pr'
-            },
-            'timestep': {
-                'format': 'number',
-                'data': 0
-            }
-        }
-
-        outputs =  {
-            'result': {
-                'format': 'json'
-            }
-        }
-
-        analysis = self._analysis['meta']['analysis']
-        result = romanesco.run(analysis, inputs=inputs, outputs=outputs)
-        output_item_id = str(result['output_item_id']['data'])
-
-        # Download the item and check it what we expect
-        path = '/item/%s/download' % output_item_id
-        response = self.request(path=path, method='GET', user=self._user)
-        self.assertStatusOk(response)
-
-        data_path = os.path.join(os.path.dirname(__file__), 'data', 'expected_contour.json' )
-
-
-        with open(data_path, 'r') as fp:
-            expected_result = json.load(fp)
-
-        self.assertEquals(response.json, expected_result, 'Unexpected result')
-

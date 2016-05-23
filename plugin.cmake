@@ -69,7 +69,7 @@ add_minerva_eslint_test(minerva-gruntfile "Gruntfile.js")
 
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
-    ENABLEDPLUGINS "gravatar" "jobs" "romanesco" "minerva"
+    ENABLEDPLUGINS "gravatar" "jobs" "minerva"
     BASEURL "/static/built/testEnvMinerva.html"
     TEST_MODULE "plugin_tests.web_client_test"
 )

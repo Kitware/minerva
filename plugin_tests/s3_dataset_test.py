@@ -30,7 +30,6 @@ def setUpModule():
     Enable the minerva plugin and start the server.
     """
     base.enabledPlugins.append('jobs')
-    base.enabledPlugins.append('romanesco')
     base.enabledPlugins.append('gravatar')
     base.enabledPlugins.append('minerva')
     base.startServer(False)
@@ -114,4 +113,3 @@ class S3DatasetTestCase(base.TestCase):
         response = self.request(path=path, method='GET', user=self._user)
         self.assertStatusOk(response)
         self.assertEquals(response.json['name'], prefix, 'Expected %s as folder name' % prefix)
-
