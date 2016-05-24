@@ -23,7 +23,7 @@ from owslib.wfs import WebFeatureService
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import getUrlParts
+from girder.api.rest import getUrlParts, RestException
 
 from girder.plugins.minerva.rest.source import Source
 from girder.plugins.minerva.utility.bsve import bsve_utility
@@ -52,6 +52,8 @@ class WfsSource(Source):
         resp = bu._session.request(url=url, headers=bu._auth_header(),
                                    method="GET")
         # baseURL is passed but unused
+        if resp.status_code != 200:
+            raise RestException('WFS Source GetCapabilities returned %s' % (resp.status_code))
         wfs = WebFeatureService(baseURL, xml=resp.content, version='1.1.0')
         layersType = list(wfs.contents)
         layers = []
