@@ -24,27 +24,29 @@ minerva.views.AddClusterWidget = minerva.View.extend({
 
     params: function () {
         // Defaults
+
         var params = {
-            type: 'ansible',
-            cluster_config: {},
-            profile: this.profileId
+            type: "ec2",
+            name: this.$('#m-cluster-name').val(),
+            profileId: this.profileId,
+            config: {
+                launch: {
+                    spec: this.$('#m-cluster-creation-playbook').val(),
+                    params: {
+                        master_instance_type: this.$('#m-cluster-instance-type').val(),
+                        node_instance_type: this.$('#m-cluster-instance-type').val(),
+                        node_instance_count: this.$('#m-cluster-instance-count').val(),
+                        master_instance_ami: this.$('#m-cluster-ami').val(),
+                        node_instance_ami: this.$('#m-cluster-ami').val(),
+                    }
+                },
+                "ssh": {
+                    user: this.$('#m-cluster-user').val()
+                }
+            }
         };
 
-        // Deep copy
-        $.extend(true, params, {
-            name: this.$('#m-cluster-name').val(),
-            playbook: this.$('#m-cluster-creation-playbook').val(),
-            cluster_config: {
-                master_instance_type: this.$('#m-cluster-instance-type').val(),
-                node_instance_type: this.$('#m-cluster-instance-type').val(),
-                node_instance_count: this.$('#m-cluster-instance-count').val(),
-                master_instance_ami: this.$('#m-cluster-ami').val(),
-                node_instance_ami: this.$('#m-cluster-ami').val(),
-                ansible_ssh_user: this.$('#m-cluster-user').val()
-            }
-        });
-
-        // Extend cluster_config with advanced variables
+        // Extend config.launch.params with advanced variables
         var advancedKeyValuePairs = _.zip($('form.create-cluster-form input.cluster-advanced-key'),
                                           $('form.create-cluster-form input.cluster-advanced-value'));
 
@@ -53,7 +55,7 @@ minerva.views.AddClusterWidget = minerva.View.extend({
                 val = $(keyValuePair[1]).val();
 
             if (key != '' && val != '') {
-                params.cluster_config[key] = val;
+                params.config.launch.params[key] = val;
             }
         });
 

@@ -38,16 +38,6 @@ minerva.views.WmsLayersListWidget = minerva.View.extend({
                 }
             }, this));
         },
-
-        'click .m-add-layers-checkbox label': function (e) {
-            var checkbox = $(e.currentTarget).parent().find('input:checkbox').first();
-            var checked = checkbox.prop('checked');
-            var disabled = checkbox.prop('disabled');
-            if (!disabled) {
-                checkbox.prop('checked', !checked);
-            }
-        },
-
         'keyup #m-filter-layers': function (e) {
             var text = $(e.target).val();
             this.filterLayers(text);

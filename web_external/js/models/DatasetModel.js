@@ -21,7 +21,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * promote the Item to a Minerva Dataset, which means
      * initializing the Item's 'minerva' namespaced metadata.
      *
-     * @param {object} params set of params to the created dataset, possibly including
+     * @param {Object} params set of params to the created dataset, possibly including
      * {csvPreview}.
      * @fires 'm:dataset_promoted' event upon successful Dataset promotion.
      */
@@ -103,7 +103,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                     type: 'geojson'
                 };
             } else {
-                // console.log('Unknown dataset_type for geo_render purposes: ' + mm.dataset_type);
+                // An unknown type.
             }
             this.saveMinervaMetadata(mm);
         }
@@ -127,7 +127,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     /**
      * Gets whether GeoJs can render this dataset.
      *
-     * @returns {Boolean} Whether GeoJs can render this dataset.
+     * @returns {boolean} Whether GeoJs can render this dataset.
      */
     isGeoRenderable: function () {
         var mm = this.metadata();

@@ -153,20 +153,22 @@ class WmsTestCase(base.TestCase):
         """
         # Create the source.
         path = '/minerva_source_wms'
-        name = 'testWMSAuth'
-        username = 'admin'
-        password = 'admin'
-        baseURL = 'http://demo.geonode.org/geoserver/wms'
+        name = 'testWMS'
+        username = 'user'
+        password = 'password'
+        baseURL = 'http://fake.geoserver.fak/geoserver/ows'
         params = {
             'name': name,
             'username': username,
             'password': password,
             'baseURL': baseURL
         }
-        response = self.request(path=path, method='POST',
-                                params=params, user=self._user)
+
+        with HTTMock(wms_mock):
+            response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
+
         credentials = wmsSource['meta']['minerva']['wms_params']['credentials']
         # Make sure credentials were encrypted.
         self.assertNotEqual(credentials, '{}:{}'.format(username, password),

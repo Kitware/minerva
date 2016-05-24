@@ -9,8 +9,8 @@
         each collection in mongo_collections
           .form-group
             .checkbox
-              input.m-add-collections(type="checkbox", name="#{collection}" mongo-collection="#{collection}")
               label
+                input.m-add-collections(type="checkbox", name="#{collection}" mongo-collection="#{collection}")
                 i.icon-layers.m-add-layers-type-icon
                 | #{collection}
       .modal-footer

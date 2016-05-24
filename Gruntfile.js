@@ -55,6 +55,7 @@ module.exports = function (grunt) {
                 source: '<%= plugin.minerva.external %>/js',
                 geojs: '<%= plugin.minerva.root %>/node_modules/geojs',
                 extra: '<%= plugin.minerva.external %>/extra',
+                jqueryui: '<%= plugin.minerva.root %>/node_modules/jquery-ui-bundle',
                 fontello: '<%= plugin.minerva.external %>/fontello'
             }
         },
@@ -112,14 +113,6 @@ module.exports = function (grunt) {
             'minerva-ext': {
                 files: [
                     {
-                        src: [
-                            '<%= plugin.minerva.geojs %>/bower_components/gl-matrix/dist/gl-matrix.js',
-                            '<%= plugin.minerva.geojs %>/bower_components/proj4/dist/proj4-src.js',
-                            '<%= plugin.minerva.root %>/node_modules/pnltri/pnltri.js'
-                        ],
-                        dest: '<%= plugin.minerva.static %>/minerva.geo.ext.min.js'
-                    },
-                    {
                         src: ['<%= plugin.minerva.root %>/node_modules/JSONPath/lib/jsonpath.js'],
                         dest: '<%= plugin.minerva.static %>/jsonpath.min.js'
                     },
@@ -176,20 +169,8 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui',
-                        src: ['jquery-ui.min.js'],
-                        dest: '<%= plugin.minerva.static %>'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
-                        src: ['jquery-ui.min.css'],
-                        dest: '<%= plugin.minerva.static %>'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= plugin.minerva.geojs %>/bower_components/jquery-ui/themes/smoothness',
-                        src: ['images/*'],
+                        cwd: '<%= plugin.minerva.jqueryui %>',
+                        src: ['jquery-ui.min.js', 'jquery-ui.min.css', 'images/*'],
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
@@ -222,7 +203,6 @@ module.exports = function (grunt) {
                 files: {
                     '<%= plugin.minerva.static %>/minerva.ext.min.js':
                     [
-                        '<%= plugin.minerva.static %>/minerva.geo.ext.min.js',
                         '<%= plugin.minerva.static %>/geo.min.js',
                         '<%= plugin.minerva.static %>/jsonpath.min.js',
                         '<%= plugin.minerva.static %>/papaparse.min.js',
@@ -315,7 +295,6 @@ module.exports = function (grunt) {
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
-            '/' + staticDir + '/minerva.geo.ext.min.js',
             // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
             '/' + staticDir + '/jquery-ui.min.js',
             '/' + staticDir + '/geo.min.js',

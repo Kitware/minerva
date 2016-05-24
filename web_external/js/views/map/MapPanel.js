@@ -28,18 +28,49 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     },
 
     // MapContainer Interface >>
+    // These functions are an interface for a MapContainer that may be
+    // separable in the future from this MapPanel, and can be called
+    // by an Adapter.
+
+    /**
+     * Deletes the passed in layer from the map.
+     *
+     * @param {geo.layer} geoLayer - GeoJs layer assumed to be included
+     * in the current GeoJs map owned by this MapContainer.
+     */
     deleteLayer: function (geoLayer) {
         this.map.deleteLayer(geoLayer);
     },
 
+    /**
+     * Creates a new GeoJs layer from the current GeoJs map owned by this
+     * MapContainer, of the requested type, passing in the properties object.
+     *
+     * @param {string} geoLayerType - type of GeoJs layer to be created
+     * @param {Object} [properties] - GeoJs layer properties to be passed upon
+     * construction of the GeoJs layer
+     * @returns {geo.layer}
+     */
     createLayer: function (geoLayerType, properties) {
         return this.map.createLayer(geoLayerType, properties || {});
     },
 
+    /**
+     * Accessor for the MapContainer's Backbone view.
+     *
+     * @returns {Backbone.View}
+     */
     getMapView: function () {
         return this;
     },
 
+    /**
+     * Adds the passed in GeoJs layer as a layer of interest for the
+     * FeatureInfoWidget owned by this MapContainer.
+     *
+     * @param {geo.layer} layer - The GeoJs layer to have info displayed about
+     * it in by the FeatureInfoWidget.
+     */
     addFeatureInfoLayer: function (layer) {
         if (this.map && this.map.featureInfoWidget) {
             this.map.featureInfoWidget.layers.push(layer);
@@ -48,6 +79,10 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         }
     },
 
+    /**
+     * Render the GeoJs map owned by this MapContainer, which will render all of the
+     * map's layers.
+     */
     renderMap: function () {
         if (!this.map) {
             var mapSettings = this.session.metadata().map;
@@ -82,11 +117,11 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     session: this.session,
                     parentView: this
                 });
-                this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
-                this.map.geoOn(geo.event.mouseclick, function (evt) {
-                    this.featureInfoWidget.content = '';
-                    this.featureInfoWidget.callInfo(0, evt.geo);
-                });
+            this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
+            this.map.geoOn(geo.event.mouseclick, function (evt) {
+                this.featureInfoWidget.content = '';
+                this.featureInfoWidget.callInfo(0, evt.geo);
+            });
         }
         this.map.draw();
     },
@@ -94,21 +129,23 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     // << MapContainer Interface
 
     /**
-     * TODO REDO
-     * Add the passed in dataset to the current map as a rendered layer.
+     * Async function to add the passed in dataset to the current map as a rendered layer,
+     * will set the 'geoError' property to be true if there is a rendering error.
      *
-     * @param {Object} DatasetModel or descendent.
+     * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
+     * @param {string} layerType - The type of map visualization used to render the dataset
+     * @param {Object} visProperties - Properties used to render the dataset as a layerType
      */
-    addDataset: function (dataset, layerType, mapping) {
+    addDataset: function (dataset, layerType, visProperties) {
         var datasetId = dataset.get('_id');
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
             layerType = dataset.getGeoRenderType();
-            // For now, set the mapping here, but this should come from the user at
+            // For now, set the visProperties here, but this should come from the user at
             // the same time they designate the layerType.
-            mapping = {};
+            visProperties = {};
             minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
                 this.datasetLayerReprs[datasetId] = repr;
                 repr.render(this);
@@ -116,14 +153,16 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 dataset.set('geoError', true);
             }, this).once('m:map_adapter_layerError', function (repr) {
                 if (repr) {
-                    repr.deleteLayer(this);
+                    repr.delete(this);
                     dataset.set('geoError', true);
                 }
-            }, this)._createRepresentation(this, dataset, layerType, mapping);
+            }, this)._createRepresentation(this, dataset, layerType, visProperties);
         }
     },
 
-    /** */
+    /**
+     * Remove a rendered dataset from the current map.
+     */
     removeDataset: function (dataset) {
         var datasetId = dataset.get('_id');
         var layerRepr = this.datasetLayerReprs[datasetId];
@@ -135,13 +174,11 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     this.map.featureInfoWidget.layers.splice(layerIndex, 1);
                 }
             }
-            layerRepr.deleteLayer(this);
+            layerRepr.delete(this);
             this.map.draw();
         }
         delete this.datasetLayerReprs[datasetId];
     },
-
-
 
     initialize: function (settings) {
         this.session = settings.session.model;
