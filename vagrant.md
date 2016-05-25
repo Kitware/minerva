@@ -23,7 +23,7 @@ The Vagrant name of the VM will be 'minervagrant', and the name of the vm on vir
 when run for the first time will create a new VM, and will provision
 the Minerva client/server stack on that VM using Ansible.
 
-The VM will be running Ubuntu 14.04, and will be running CherryPy serving Girder and Minerva, Mongo, RabbitMQ and the Romanesco celery worker.
+The VM will be running Ubuntu 14.04, and will be running CherryPy serving Girder and Minerva, Mongo, and RabbitMQ.
 Spark will not be running.
 
 If the VM has been created previously, this command will start the Minerva VM
@@ -73,18 +73,6 @@ will shut down your Minerva VM.
 
 ## Minerva web application
 
-The Vagrantfile forwards VM port 8080 to host port 8080.  This specific
-forwarding is required, since when a Romanesco job is created, the url it is
-submitted from is seen as the host, and this is where the job will have its
-results uploaded to.  If e.g. the VM port 8080 was forwarded to host port
-9080, then when a job is created, the url would be saved as
-http://localhost:9080/...--assuming the job was submitted from a browser on
-the host--and when the Romanesco celery worker tries to upload any output,
-it would send them to http://localhost:9080/..., but inside the VM,
-Girder is running on port 8080, so the Romanesco celery worker
-wouldn't be able to connect, since it would try to reach 9080.
-
-
 In a browser on your host machine, navigate to
 
     http://localhost:8080
@@ -101,9 +89,9 @@ to get to the Girder web application backing Minerva.
 The username/password for the Minerva and Girder admin user are
 `girder`/`letmein`.  These can be changed in the `ansible/site.yml` file.
 
-## Setting a specific version of Girder, Romanesco, or Minerva
+## Setting a specific version of Girder or Minerva
 
-Girder and Romanesco versions can be set using the files `.girder-version` and `.romanesco-version` respectively.
+Girder version can be set using the file `.girder-version`.
 
 The Minerva version is taken from the current git revision on your host, e.g., if you have your host Minerva repo on
 git branch `foo_la_la`, then the VM will be provisioned with Minerva branch `foo_la_la`, as that branch currently
