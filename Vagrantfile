@@ -46,14 +46,10 @@ Vagrant.configure(2) do |config|
     # working directly on code in the virtualized instance,
     # no support, warranty or ganuntee of correctness!
     GIRDER_UID = GIRDER_GID = 1003
-    ROMANESCO_UID = ROMANESCO_GID = 1002
     if File.directory?("../girder")
       config.vm.synced_folder "../girder", "/opt/girder", owner: GIRDER_UID, group: GIRDER_GID
     end
 
-    if File.directory?("../romanesco")
-      config.vm.synced_folder "../romanesco", "/opt/romanesco", owner: ROMANESCO_UID, group: ROMANESCO_GID
-    end
 
     config.vm.synced_folder ".", "/opt/minerva", owner: GIRDER_UID, group: GIRDER_GID
   end
