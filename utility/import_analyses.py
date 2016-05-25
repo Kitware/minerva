@@ -24,7 +24,6 @@ def import_analyses(client, analyses_path):
     for analysis_subfolder in os.listdir(analyses_path):
         analysis_path = os.path.join(analyses_path, analysis_subfolder)
 
-        # If there is an analysis.json, it is a Romanesco analysis
         metadata = {}
         minerva_metadata = {}
 
