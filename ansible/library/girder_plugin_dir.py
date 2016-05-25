@@ -57,20 +57,20 @@ options:
 '''
 
 EXAMPLES = '''
-# Add a the romanesco path to the plugin_directory config in
+# Add the minerva path to the plugin_directory config in
 # girder_install_root
-- name: Add romanesco to plugin_dir
+- name: Add minerva to plugin_dir
   become: yes
   girder_plugin_dir:
     girder_dir: "{{ girder_install_root }}"
-    plugin_dir: "{{ romanesco_install_root }}"
+    plugin_dir: "{{ minerva_install_root }}"
     state: present
 
 - name: Remove plugin dir that does not exist
   become: yes
   girder_plugin_dir:
     girder_dir: "{{ girder_install_root }}"
-    plugin_dir: "{{ romanesco_install_root }}"
+    plugin_dir: "{{ minerva_install_root }}"
     state: absent
 
 # girder_plugin_dir also accepts a list of directories
@@ -79,7 +79,7 @@ EXAMPLES = '''
   girder_plugin_dir:
     girder_dir: "{{ girder_install_root }}"
     plugin_dir:
-      - "{{ romanesco_install_root }}"
+      - "{{ minerva_install_root }}"
       - "/some/other/directory"
     state: present
 

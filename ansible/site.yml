@@ -24,12 +24,6 @@
       sudo: yes
 
   roles:
-    - role: romanesco
-      rabbitmq_ansible_group: rabbitmq
-      romanesco_version: "{{ lookup('file', '../.romanesco-version') }}"
-      state: started
-      sudo: yes
-
     - role: girder
       mongodb_ansible_group: girder
       girder_admin_user: girder
@@ -53,8 +47,8 @@
         group: "{{ girder_group }}"
       sudo: yes
 
-    - name: Install minerva and romanesco as girder plugins
-      shell: ". {{venv_root}}/bin/activate && girder-install plugin -s -f {{base_dir}}/minerva {{base_dir}}/romanesco"
+    - name: Install minerva as a girder plugin
+      shell: ". {{venv_root}}/bin/activate && girder-install plugin -s -f {{base_dir}}/minerva"
       become: yes
       become_user: "{{girder_user}}"
       tags:
@@ -89,7 +83,6 @@
         username: "admin"
         password: "letmein"
         plugins:
-          - romanesco
           - minerva
         state: present
 

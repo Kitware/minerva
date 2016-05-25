@@ -20,7 +20,6 @@
         username: "admin"
         password: "letmein"
         plugins:
-          - romanesco
           - minerva
         state: present
 

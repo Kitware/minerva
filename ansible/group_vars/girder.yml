@@ -1,9 +1,6 @@
 ---
 base_dir: /opt
 
-romanesco_install_root: "{{base_dir}}/romanesco"
-romanesco_version: "master"
-
 girder_install_root: "{{base_dir}}/girder"
 girder_version: "master"
 
