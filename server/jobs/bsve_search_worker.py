@@ -64,7 +64,7 @@ def run(job):
         shutil.move(outFilepath, humanFilepath)
 
         # connect to girder and upload the file
-        # TODO will probably have to change this from local to romanesco
+        # TODO will probably have to change this from local to girder worker
         # so that can work on worker machine
         # at least need host connection info
         girderPort = config.getConfig()['server.socket_port']
@@ -74,7 +74,7 @@ def run(job):
         client.uploadFileToItem(datasetId, humanFilepath)
 
         # TODO some stuff here using models will only work on a local job
-        # will have to be rewritten using girder client to work in romanesco
+        # will have to be rewritten using girder client to work in girder worker
         # non-locally
 
         user_model = ModelImporter.model('user')
