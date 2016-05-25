@@ -353,4 +353,7 @@ module.exports = function (grunt) {
             apiRoot: '/api/v1'
         }));
     });
+
+    // Append bsve related tasks
+    require('./bsve/configure')(grunt);
 };
