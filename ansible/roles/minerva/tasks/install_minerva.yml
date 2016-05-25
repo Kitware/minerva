@@ -1,0 +1,69 @@
+---
+
+  - name: Update Apt
+    apt: update_cache=yes
+    become: yes
+    become_user: root
+
+  - name: minerva | deps | install
+    apt: name={{ item }} state=present update_cache=yes
+    with_items:
+      - curl
+      - g++
+      - git
+      - libffi-dev
+      - make
+      - python-dev
+      - python-pip
+      - libgdal-dev
+      - libnetcdf-dev
+      - libpng12-dev
+      - pkg-config
+    become: yes
+    become_user: root
+
+  - name: probe minerva folder
+    stat:
+      path: "{{ minerva_install_root }}"
+    register: path
+
+  - name: Clone a copy of the repository
+    git:
+      repo: "{{ minerva_repo }}"
+      dest: "{{ minerva_install_root }}"
+      version: "{{ minerva_version }}"
+      update: yes
+      force: yes
+    when: path.stat.exists == False
+
+  - name: Update pip
+    pip:
+      name: pip
+      virtualenv: "{{ girder_venv | default(omit) }}"
+      state: latest
+
+  - name: Install python dependencies
+    pip:
+      requirements: "{{minerva_install_root}}/requirements.txt"
+      virtualenv: "{{ girder_venv | default(omit) }}"
+
+  - name: Install minerva as a package
+    pip:
+      name: .
+      editable: yes
+      chdir: "{{ minerva_install_root }}"
+      virtualenv: "{{ girder_venv | default(omit) }}"
+
+
+  - name: Install minerva plugin
+    file:
+      dest: "{{ girder_path }}/plugins/minerva"
+      src: "{{ minerva_install_root }}"
+      state: link
+
+  - name: Install minerva girder plugins
+    file:
+      dest: "{{ girder_path }}/plugins/{{ item }}"
+      src: "{{minerva_install_root}}/plugins/{{ item }}"
+      state: link
+    with_items: "{{ minerva_girder_plugins }}"

@@ -6,7 +6,7 @@ You'll need to have the following installed
 
   * Virtualbox
   * Vagrant
-  * Ansible [version >= 1.9.3 and < 2.0]
+  * Ansible [version >= 2.0]
 
 ## Vagrant commands
 
@@ -14,7 +14,7 @@ Run all of these from this (the minerva repo top level) directory with the Vagra
 
 The root user/password on your VM is vagrant/vagrant.
 
-The Vagrant name of the VM will be 'minervagrant', and the name of the vm on virtualbox will be close to 'minerva_minervagrant'.
+The Vagrant name of the VM will be 'minerva', and the name of the vm on virtualbox will be close to 'minerva_minerva'.
 
 ### vagrant up
 
@@ -23,7 +23,7 @@ The Vagrant name of the VM will be 'minervagrant', and the name of the vm on vir
 when run for the first time will create a new VM, and will provision
 the Minerva client/server stack on that VM using Ansible.
 
-The VM will be running Ubuntu 14.04, and will be running CherryPy serving Girder and Minerva, Mongo, and RabbitMQ.
+The VM will be running Ubuntu 14.04, and will be running CherryPy serving Girder and Minerva, Mongo, RabbitMQ and the Romanesco celery worker.
 Spark will not be running.
 
 If the VM has been created previously, this command will start the Minerva VM
@@ -41,29 +41,6 @@ will ssh into your Minerva VM.
 
 will re-provision your Minerva VM with ansible.
 
-#### vagrant provision, now with even more tags
-
-If you already have a provisioned VM, you can set tags through environment variables
-to reprovision a limited number of steps.  You can set the tags as a comma separated
-list like
-
-    export MINERVA_VAGRANT_ANSIBLE_TAGS='minerva-update,test'
-
-##### minerva
-
-Think of this tag as minerva with dependencies.
-
-This tag will pull the git version of minerva on your VM that is your current git revision on your host,
-install system dependencies and pip dependencies defined in the minerva role,
-then install the minerva plugin to girder and build the client side code.
-
-##### minerva-update
-
-Think of this tag as minerva without dependencies.
-
-This tag will pull the git version of minerva on your VM that is your current git revision on your host,
-then install the minerva plugin to girder and build the client side code.
-
 
 ### vagrant halt
 
@@ -72,6 +49,9 @@ then install the minerva plugin to girder and build the client side code.
 will shut down your Minerva VM.
 
 ## Minerva web application
+
+By default the Vagrantfile forwards VM port 8080 to host port 8080.
+
 
 In a browser on your host machine, navigate to
 
@@ -85,17 +65,45 @@ Navigate to
 
 to get to the Girder web application backing Minerva.
 
+You may change the VM port that girder is running on by setting the ```GIRDER_GUEST_PORT```
+Similarly you may change the host port by settting ```GIRDER_HOST_PORT```
 
 The username/password for the Minerva and Girder admin user are
-`girder`/`letmein`.  These can be changed in the `ansible/site.yml` file.
+`admin`/`letmein`.  These can be changed in the `ansible/site.yml` file.
 
 ## Setting a specific version of Girder or Minerva
 
-Girder version can be set using the file `.girder-version`.
+By default Minerva will be installed with the hash of the current directory. This means 
+if you wish to change minerva's directory you can checkout a different version and
+re-provision the VM.  By default the version of girder will be read from the 
+```.girder-version``` file at the root of this repository.
 
-The Minerva version is taken from the current git revision on your host, e.g., if you have your host Minerva repo on
-git branch `foo_la_la`, then the VM will be provisioned with Minerva branch `foo_la_la`, as that branch currently
-exists on GitHub.  If you want to change the provisioned Minerva to a different version, you can change the value
-configured within `ansible/site.yml` under the key `minerva_version`. Versions can be a branch, tag, or SHA.  Note
-that if you have changes local to your host Minerva repo, these will not be accessible to the provisioned VM, unless
-you have filesyncing between your host and VM, which is experimental and not officially supported.
+Both the girder version and the minerva version can be overridden by setting the 
+```GIRDER_VERSION``` and the ```MINERVA_VERSION``` environment variables. 
+
+
+## Development install
+It is possible to develop on minerva locally and mount its folder within 
+the VM for testing purposes.  This requires NFS and the vagrant plugin 
+```vagrant-bindfs``` to ensure permissions and ownership are correct.
+
+```
+git clone git@github.com:Kitware/minerva.git
+
+cd minerva
+
+# Install NFS on local system
+# This is system dependant for ubuntu:
+# 
+#  sudo apt-get install nfs-kernel-server
+#  sudo service nfs-kernel-server restart
+
+
+vagrant plugin install vagrant-bindfs
+
+export DEVELOPMENT=1
+
+vagrant up
+```
+
+

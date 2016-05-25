@@ -1,15 +1,31 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.enable :apt
+    config.cache.enable :pip
+    config.cache.enable :npm
+  end
+
   host_port = ENV["GIRDER_HOST_PORT"] || 8080
+  guest_port = ENV["GIRDER_GUEST_PORT"] || 8080
+  dev_install = ENV["DEVELOPMENT"] || false
+  setup_tests = ENV["TESTING"] || false
 
-  sync_folders = ENV["DEVELOPMENT_SYNC_FOLDERS"] || false
+  minerva_version = ENV["MINERVA_VERSION"] || `git rev-parse --short HEAD`.delete!("\n")
 
-  config.vm.network "forwarded_port", guest: 8080, host: host_port
+  config.vm.network "private_network", type: "dhcp"
 
-  config.vm.define "minervagrant" do |node| end
+  config.vm.network "forwarded_port", guest: guest_port, host: host_port
+
+  config.vm.define "minerva" do |node| end
 
   config.vm.provider "virtualbox" do |vb|
     host = RbConfig::CONFIG['host_os']
@@ -38,43 +54,42 @@ Vagrant.configure(2) do |config|
 
   end
 
-
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  if sync_folders
-    # This is experimental and intended for developers who are
-    # working directly on code in the virtualized instance,
-    # no support, warranty or ganuntee of correctness!
-    GIRDER_UID = GIRDER_GID = 1003
-    if File.directory?("../girder")
-      config.vm.synced_folder "../girder", "/opt/girder", owner: GIRDER_UID, group: GIRDER_GID
+
+  # If DEVELOPMENT is true,  mount NFS directories from host
+  if dev_install and Vagrant.has_plugin?("vagrant-bindfs")
+    setup_tests = true
+    if File.exists? File.expand_path(".")
+      config.vm.synced_folder ".", "/tmp/minerva-nfs", type: "nfs"
+      config.bindfs.bind_folder "/tmp/minerva-nfs", "/opt/minerva/" + minerva_version,
+                                after: :provision,
+                                o: "nonempty",
+                                u: "girder",
+                                g: "girder"
     end
 
-
-    config.vm.synced_folder ".", "/opt/minerva", owner: GIRDER_UID, group: GIRDER_GID
   end
 
-
-  ansible_tags = ENV["MINERVA_VAGRANT_ANSIBLE_TAGS"] || false
-
   config.vm.provision "ansible" do |ansible|
-    ansible.verbose = "vvvv"
-
-    if ansible_tags
-        ansible.tags = ansible_tags
-    end
-
     ansible.groups = {
-      "all" => ['minervagrant'],
-      "girder" => ['minervagrant'],
-      "mongo" => ['minervagrant'],
-      "rabbitmq" => ['minervagrant']
+      "all" => ['minerva'],
+      "girder" => ['minerva'],
+      "minerva" => ['minerva']
     }
 
     ansible.extra_vars = {
-      default_user: "vagrant"
+      default_user: "vagrant",
+      girder_port: guest_port,
+      girder_version: File.read(".girder-version").delete!("\n"),
+      minerva_version: minerva_version,
+      setup_tests: setup_tests
     }
 
+    ENV["GIRDER_VERSION"] && ansible.extra_vars['girder_version'] = ENV["GIRDER_VERSION"]
+
+    ansible.verbose = "-vv"
     ansible.playbook = "ansible/site.yml"
+    ansible.galaxy_role_file = "ansible/requirements.yml"
   end
 end
