@@ -1,14 +1,13 @@
 ---
-- fail: msg="girder_path must be defined"
-  when: girder_path is not defined
+# tasks file for girder
 
 - command: whoami
   register: role_user_output
   changed_when: false
 
-- name: Install minerva base directory
+- name: Ensure girder base directory exists
   file:
-    path: "{{ minerva_base_path }}"
+    path: "{{ girder_base_path }}"
     state: directory
     group: "{{ role_user_output.stdout }}"
     owner: "{{ role_user_output.stdout }}"
@@ -16,10 +15,14 @@
   become: yes
   become_user: root
 
-- include: install_minerva.yml
+
+- include: create_virtualenv.yml
   when: girder_venv is defined
 
-- include: install_minerva.yml
+- include: install_girder.yml
+  when: girder_venv is defined
+
+- include: install_girder.yml
   when: girder_venv is not defined
   become: yes
   become_user: root

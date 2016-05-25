@@ -1,0 +1,20 @@
+---
+- name: Install virtualenv
+  apt:
+    name: python-virtualenv
+    state: latest
+  become: yes
+  become_user: root
+
+
+# Note - this has to be fixed, technically we don't have
+# access to girder_user except through the playbook
+- name: Create virtualenv directory
+  file:
+    state: directory
+    path: "{{ girder_venv }}"
+    mode: 0775
+    group: "{{ role_user_output.stdout }}"
+    owner: "{{ role_user_output.stdout }}"
+  become: yes
+  become_user: root
