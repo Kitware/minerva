@@ -20,10 +20,10 @@ if datasets
               i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
               - var geoRenderType = dataset.getGeoRenderType()
 
-              //- Eye icon to move dataset into current session
+              //- list-add icon to move dataset into current session
               if dataset.isGeoRenderable()
-                - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
-                i(class=classes)&attributes(attributes)
+                - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
+                i(title='add to layers', class=classes)&attributes(attributes)
 
               //- Cog icon for geo rendering configuration
               if geoRenderType !== null && geoRenderType !== 'wms'
