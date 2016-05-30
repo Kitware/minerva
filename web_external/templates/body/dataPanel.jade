@@ -20,7 +20,7 @@ if datasets
               i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
               - var geoRenderType = dataset.getGeoRenderType()
 
-              //- list-add icon to move dataset into current session
+              //- Globe icon to move dataset into current session
               if dataset.isGeoRenderable()
                 - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
                 i(title='add to layers', class=classes)&attributes(attributes)
