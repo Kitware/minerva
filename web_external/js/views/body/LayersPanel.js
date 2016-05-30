@@ -28,7 +28,6 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         } else {
             dataset.set('opacity', opacity);
         }
-
     },
 
     changeLayerOpacity: function (event) {
