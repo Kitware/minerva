@@ -2,6 +2,7 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
 
     events: {
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
+        'click .m-toggle-dataset': 'toggleDatasetEvent',
         'change .m-opacity-range': 'changeLayerOpacity',
         'click .m-order-layer': 'reorderLayer'
     },
@@ -10,6 +11,24 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         dataset.set('displayed', false);
+    },
+
+    toggleDatasetEvent: function (event) {
+        // Toggle behavior with JQuery
+        $(event.currentTarget).toggleClass('icon-eye icon-eye-off');
+
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+
+        // Opacity from the slider
+        var opacity = $("input[type=range]").val();
+
+        if (dataset.get('opacity') > 0.0) {
+            dataset.set('opacity', 0.0);
+        } else {
+            dataset.set('opacity', opacity);
+        }
+
     },
 
     changeLayerOpacity: function (event) {
