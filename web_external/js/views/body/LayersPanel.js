@@ -21,7 +21,7 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         var dataset = this.collection.get(datasetId);
 
         // Opacity from the slider
-        var opacity = $("input[type=range]").val();
+        var opacity = $("input[type=range][m-dataset-id='" + datasetId + "']").val();
 
         if (dataset.get('opacity') > 0.0) {
             dataset.set('opacity', 0.0);
