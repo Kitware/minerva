@@ -10,8 +10,15 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
 
     changeLayerOpacity: function (dataset) {
         // TODO ideally move opacity from the Dataset to the Layer.
+
         var layerRepr = this.datasetLayerReprs[dataset.get('_id')];
-        layerRepr.setOpacity(dataset.get('opacity'));
+
+        if (dataset.get('visible')) {
+            layerRepr.setOpacity(dataset.get('opacity'));
+        } else {
+
+            layerRepr.setOpacity(0.0);
+        }
     },
 
     changeLayerZIndex: function (dataset) {
@@ -208,6 +215,12 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         }, this);
 
         this.listenTo(this.collection, 'change:opacity', function (dataset) {
+            if (this.mapCreated) {
+                this.changeLayerOpacity(dataset);
+            }
+        }, this);
+
+        this.listenTo(this.collection, 'change:visible', function (dataset) {
             if (this.mapCreated) {
                 this.changeLayerOpacity(dataset);
             }

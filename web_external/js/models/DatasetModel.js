@@ -12,7 +12,8 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         geoData: null,
         // Tabular data related attributes.
         tableData: null,
-        readOnly: true
+        readOnly: true,
+        visible: true
     },
 
     /**
