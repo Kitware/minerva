@@ -16,7 +16,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
         if (dataset.get('visible')) {
             layerRepr.setOpacity(dataset.get('opacity'));
         } else {
-
             layerRepr.setOpacity(0.0);
         }
     },

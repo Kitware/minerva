@@ -20,15 +20,6 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
 
-        // // Opacity from the slider
-        // var opacity = $("input[type=range][m-dataset-id='" + datasetId + "']").val();
-
-        // if (dataset.get('opacity') > 0.0) {
-        //     dataset.set('opacity', 0.0);
-        // } else {
-        //     dataset.set('opacity', opacity);
-        // }
-
         dataset.set('visible', !dataset.get('visible'));
     },
 
