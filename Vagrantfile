@@ -79,7 +79,7 @@ Vagrant.configure(2) do |config|
     ansible.extra_vars = {
       default_user: "vagrant",
       girder_port: guest_port,
-      girder_version: File.read(".girder-version").delete!("\n"),
+      girder_version: File.read(File.dirname(__FILE__) + "/.girder-version").delete!("\n"),
       minerva_version: minerva_version,
       setup_tests: setup_tests
     }
