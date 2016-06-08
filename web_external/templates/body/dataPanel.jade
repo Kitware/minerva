@@ -12,11 +12,6 @@ if datasets
             span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
               - var attributes = {'m-dataset-id': dataset.get('_id')}
 
-              //- Eye icon to move dataset into current session
-              if dataset.isGeoRenderable()
-                - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
-                i(class=classes)&attributes(attributes)
-
               //- Trash icon to delete dataset
               - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
               i(class=classes)&attributes(attributes)
@@ -24,6 +19,11 @@ if datasets
               //- Info icon for minerva metadata display
               i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
               - var geoRenderType = dataset.getGeoRenderType()
+
+              //- Globe icon to move dataset into current session
+              if dataset.isGeoRenderable()
+                - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
+                i(title='add to layers', class=classes)&attributes(attributes)
 
               //- Cog icon for geo rendering configuration
               if geoRenderType !== null && geoRenderType !== 'wms'
