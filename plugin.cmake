@@ -41,20 +41,11 @@ add_minerva_server_test(geonames)
 add_minerva_server_test(s3_dataset)
 add_minerva_server_test(s3_source)
 add_minerva_server_test(import_analyses)
-add_minerva_server_test(contour_analysis)
 add_minerva_server_test(wms)
 add_minerva_server_test(elasticsearch)
 add_minerva_server_test(geojson)
 add_minerva_server_test(postgres)
 add_minerva_server_test(mongo_dataset)
-
-
-set(SPARK_TEST_MASTER_URL  "" CACHE STRING "Spark master URL")
-if (SPARK_TEST_MASTER_URL)
-    add_minerva_server_test(mean_contour_analysis)
-    set_property(TEST server_minerva.mean_contour_analysis APPEND PROPERTY ENVIRONMENT "SPARK_TEST_MASTER_URL=${SPARK_TEST_MASTER_URL}")
-endif()
-
 
 
 add_minerva_python_style_test(constants "server/constants.py")
@@ -69,7 +60,7 @@ add_minerva_eslint_test(minerva-gruntfile "Gruntfile.js")
 
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
-    ENABLEDPLUGINS "gravatar" "jobs" "romanesco" "minerva"
+    ENABLEDPLUGINS "gravatar" "jobs" "minerva"
     BASEURL "/static/built/testEnvMinerva.html"
     TEST_MODULE "plugin_tests.web_client_test"
 )

@@ -54,19 +54,6 @@
       chdir: "{{ minerva_install_root }}"
       virtualenv: "{{ girder_venv | default(omit) }}"
 
-  # We should be able to remove this task once romanesco
-  # is dropped from minerva's plugin.json file
-  - name: Hack out dependency on romanesco
-    lineinfile:
-      dest: "{{ minerva_install_root }}/plugin.json"
-      regexp: "romanesco"
-      state: absent
-
-  - name: Hack out trailing comma on plugin list
-    replace:
-      dest: "{{ minerva_install_root }}/plugin.json"
-      regexp: '^\s+"jobs",'
-      replace: '        "jobs"'
 
   - name: Install minerva plugin
     file:

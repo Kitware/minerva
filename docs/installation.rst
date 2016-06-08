@@ -1,7 +1,7 @@
 Installation
 ============
 
-These installation instructions are aimed at developers and will install Girder, Minerva, and Romanesco from source.
+These installation instructions are aimed at developers and will install Girder, and Minerva from source.
 
 The top level directory of Girder cloned by git will be GIRDER_DIR.
 
@@ -30,11 +30,6 @@ Update apt package indices before you start.
 
     sudo apt-get install libgdal-dev libnetcdf-dev libpng12-dev pkg-config
 
-- Install Romanesco dev system dependencies
-
-::
-
-    sudo apt-get install libxml2-dev libxslt1-dev
 
 Fedora 22
 ^^^^^^^^^
@@ -63,13 +58,6 @@ Setup Girder admin user and assetstore
 Install of Minerva as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  Install Romanesco, a dependency of Minerva, into the Girder plugins dir from source.
-
-::
-
-    cd GIRDER_DIR/plugins
-    git clone https://github.com/Kitware/romanesco.git
-
 -  Install Minerva into the Girder plugins dir from source.
 
 ::
@@ -87,7 +75,6 @@ Install of Minerva as a Girder plugin
 
 Notes:
 
-- The dev Python dependency lxml in Romanesco may require a large amount of memory to install
 - If the cryptography pip package in Girder fails to install, or fails when running Girder, try this
 
 ::
@@ -97,7 +84,7 @@ Notes:
     sudo pip install -U cryptography
 
 
-- Build the client side of Minerva and Romanesco
+- Build the client side of Minerva
 
 ::
 
@@ -130,15 +117,9 @@ Notes:
 
 
 
-Because Romanesco is a Girder plugin that is a dependency of Minerva, when you enable the Minerva Girder plugin, you will also enable the Romanesco Girder plugin.
-
-To see more details about this on Romanesco, though you will not need to follow it, see `Install Romanesco as a Girder plugin`_
-
-..  _Install Romanesco as a Girder plugin: http://romanesco.readthedocs.org/en/latest/installation.html#installing-the-girder-plugin
-
 - Navigate to the Admin console in Girder, when you are logged in as an admin user, then click on the Plugins section.
 
-- Enable the Minerva plugin, which will enable Gravatar, Jobs, and Romanesco plugins.  Click the button to restart the server.
+- Enable the Minerva plugin, which will enable Gravatar, and Jobs plugins.  Click the button to restart the server.
 
 This will serve Minerva as your top level application. Girder will now
 be served at your top level path with ``/girder``.
@@ -157,64 +138,6 @@ Post-Minerva:
     http://localhost:8080 => serves Minerva
 
     http://localhost:8080/girder => serves Girder
-
-Run the Romanesco Celery Worker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Configure Romanesco inside the GIRDER_DIR/plugins/romanesco/romanesco directory, creating worker.local.cfg and setting spark as an enabled plugin.
-
--  See `Configuration of Romanesco`_
-
-.. _Configuration of Romanesco: http://romanesco.readthedocs.org/en/latest/installation.html#configuration
-
-- Run Spark
-
-Here we install spark to the user's home directory, though you can install it anywhere you like.  The important thing is to have the SPARK_HOME environment variable point to the install location.
-
-::
-
-    cd ~/
-    sudo apt-get install openjdk-7-jre-headless
-    wget http://www.scala-lang.org/files/archive/scala-2.10.5.tgz
-    tar xzvf scala-2.10.5.tgz -C ~
-    export SCALA_HOME=$HOME/scala-2.10.5
-    export PATH=$PATH:$SCALA_HOME/bin
-    # this may not work
-    wget http://psg.mtu.edu/pub/apache/spark/spark-1.3.1/spark-1.3.1-bin-hadoop2.4.tgz
-    # this may not be stable, and you only need to run this if the above didn't work
-    wget http://d3kbcqa49mib13.cloudfront.net/spark-1.3.1-bin-hadoop2.4.tgz
-    tar xzvf spark-1.3.1-bin-hadoop2.4.tgz -C ~
-    export SPARK_MASTER_IP=localhost
-    export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
-    # Prevent a collision with the Girder server on 8080
-    export SPARK_MASTER_WEBUI_PORT=8081
-    $SPARK_HOME/sbin/start-master.sh
-    $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
-    # this next command should show you two java spark processes, a worker and a master
-    ps aux | grep java
-
-- Run the Romanesco (Celery) worker
-
-::
-
-    cd GIRDER_DIR/plugins/romanesco
-    pip install -e .[spark]
-    python -m romanesco
-
-You should see in the Celery output
-
-    Loaded plugin "spark"
-
-- Restart Girder with the environment setup for Romanesco
-
-::
-
-    cd GIRDER_DIR
-    export SPARK_HOME=$HOME/spark-1.3.1-bin-hadoop2.4
-    export PATH=$PATH:$SPARK_HOME/bin
-    python -m girder
-
-- In the Girder Admin Console, in the Romanesco plugin config, add a user or group who can use Romanesco
 
 Data services
 ~~~~~~~~~~~~~

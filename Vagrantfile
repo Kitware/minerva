@@ -56,6 +56,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
+
   # If DEVELOPMENT is true,  mount NFS directories from host
   if dev_install and Vagrant.has_plugin?("vagrant-bindfs")
     setup_tests = true
@@ -67,6 +68,7 @@ Vagrant.configure(2) do |config|
                                 u: "girder",
                                 g: "girder"
     end
+
   end
 
   config.vm.provision "ansible" do |ansible|

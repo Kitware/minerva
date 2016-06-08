@@ -127,49 +127,7 @@
   vars:
     girder_venv: "{{ girder_base_path }}/.venv"
 
-  # Install romanesco
-  # Note: all 'pre_tasks' should be removed once romaneco
-  #       is expunged from the code base.
-  pre_tasks:
-    - file:
-        state: directory
-        path: /opt/romanesco
-        owner: "{{ girder_user }}"
-        group: "{{ girder_user }}"
-        mode: 0755
-      become: yes
-      become_user: root
-      when: setup_tests
 
-    - git:
-        repo: https://github.com/Kitware/romanesco.git
-        accept_hostkey: true
-        dest: /opt/romanesco/romanesco
-        version: da82cd17
-        force: yes
-      when: setup_tests
-
-    - apt:
-        name: "{{ item }}"
-        state: latest
-      with_items:
-        - libxml2-dev
-        - libxslt1-dev
-        - python-dev
-      become: yes
-      become_user: root
-      when: setup_tests
-
-    - pip:
-        requirements: /opt/romanesco/romanesco/requirements.txt
-        virtualenv: "{{ girder_venv }}"
-      when: setup_tests
-
-    - file:
-        state: link
-        src: /opt/romanesco/romanesco
-        dest: "/opt/girder/{{ girder_version }}/plugins/romanesco"
-      when: setup_tests
 
   tasks:
     - name: Install girder development requirements

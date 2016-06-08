@@ -2,7 +2,6 @@ import os
 import json
 #import glob
 import argparse
-import romanesco
 
 from girder_client import GirderClient
 
@@ -25,23 +24,14 @@ def import_analyses(client, analyses_path):
     for analysis_subfolder in os.listdir(analyses_path):
         analysis_path = os.path.join(analyses_path, analysis_subfolder)
 
-        # If there is an analysis.json, it is a Romanesco analysis
-        romanesco_analysis = os.path.join(analysis_path, 'analysis.json')
         metadata = {}
         minerva_metadata = {}
-        if os.path.exists(romanesco_analysis):
-            analysis = romanesco.load(romanesco_analysis)
-            analysis_name = analysis['name']
-            metadata['analysis'] = analysis
-            # set the analysis_type based on folder name
-            minerva_metadata['analysis_type'] = analysis_path.split('/')[-1]
-            minerva_metadata['analysis_name'] = analysis_name
-        else:
-            # look for a minerva.json
-            minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
-            with open(minerva_metadata_path) as minerva_metadata_file:
-                minerva_metadata = json.load(minerva_metadata_file)
-                analysis_name = minerva_metadata['analysis_name']
+
+        # look for a minerva.json
+        minerva_metadata_path = os.path.join(analysis_path, 'minerva.json')
+        with open(minerva_metadata_path) as minerva_metadata_file:
+            minerva_metadata = json.load(minerva_metadata_file)
+            analysis_name = minerva_metadata['analysis_name']
 
         if analysis_name not in items.keys():
             items[analysis_name] = client.createItem(minerva_analyses_folder['_id'],
