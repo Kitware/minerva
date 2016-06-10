@@ -4,50 +4,15 @@
 minerva.views.JsonConfigWidget = minerva.View.extend({
     initialize: function (settings) {
         var summary = this.summary = {};
-        var pointStyle = new minerva.collections.GeoJSONStyle([
-            {
-                name: 'radius',
-                type: 'number',
-                value: 8,
-                scale: 'constant',
-                summary: summary
-            }, {
-                name: 'strokeWidth',
-                type: 'number',
-                value: 1,
-                scale: 'constant',
-                summary: summary
-            }, {
-                name: 'strokeColor',
-                type: 'color',
-                value: '#000000',
-                scale: 'constant'
-            }, {
-                name: 'strokeOpacity',
-                type: 'number',
-                value: 1,
-                scale: 'constant'
-            }, {
-                name: 'fillColor',
-                type: 'color',
-                value: '#ff0000',
-                scale: 'constant'
-            }, {
-                name: 'fillOpacity',
-                type: 'number',
-                value: 0.75,
-                scale: 'constant'
-            }
-        ]);
 
         this.dataset = settings.dataset;
         this.pointStyleWidget = new minerva.views.GeoJSONStyleWidget({
-            collection: pointStyle,
             parentView: this
         });
     },
 
     events: {
+        'click .m-load-data-button': '_loadDataset',
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
             this.$('.g-validation-failed-message').text('');
@@ -66,6 +31,7 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
     },
 
     render: function () {
+        window.dataset = this.dataset;
         var geoData = this.dataset.get('geoData');
         if (geoData) {
             _.extend(this.summary, geoData.summary || {});
@@ -89,5 +55,12 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
     setCurrentDataset: function (dataset) {
         this.dataset = dataset;
         this.render();
+    },
+
+    _loadDataset: function (evt) {
+        evt.preventDefault();
+        this.dataset
+            .once('m:dataset_geo_dataLoaded', this.render, this)
+            .loadGeoData()
     }
 });

@@ -35,7 +35,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * For now, this is only done for GeoJSON datasets.
      */
     _preprocess: function () {
-        if (this.getDatasetType() === 'geojson') {
+        if (this.getDatasetType().match(/(geo)?json/)) {
             this.set('geoData', minerva.geojson.normalize(this.get('geoData')));
         }
     },

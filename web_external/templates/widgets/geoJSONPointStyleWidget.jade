@@ -1,0 +1,53 @@
+mixin range(label, min, max, step, value, property, enabled)
+  .form-group
+    label.control-label.col-md-3= label
+    .col-md-9
+      input.m-slider.form-control(
+        type='text'
+        data-slider-min=min
+        data-slider-max=max
+        data-slider-step=step
+        data-slider-value=value
+        data-property=property
+        data-slider-enabled=enabled)
+
+.form-horizontal
+  .panel.panel-primary
+    .panel-heading(data-toggle='collapse' data-target='#m-properties-control') Properties
+    #m-properties-control.collapse.in
+      .panel-body
+        .form-group
+          label.control-label.col-md-3 Shape
+          .col-md-9
+            select.form-control
+              option(selected=true) Circle
+        +range('Size', 0, 20, 0.1, radius, 'radius', true)
+
+  .panel(class={'panel-default': !stroke, 'panel-primary': stroke})
+    .panel-heading(data-target='#m-stroke-control')
+      .checkbox(style='display:inline')
+        label
+          input#m-enable-stroke.m-toggle-panel(type='checkbox' checked=stroke data-property='stroke')
+          | Stroke
+    #m-stroke-control.m-optional-panel.collapse(class={in: stroke})
+      .panel-body
+        +range('Width', 0, 5, 0.1, strokeWidth, 'strokeWidth', stroke)
+        .form-group
+          label.control-label.col-md-3 Color
+          .col-md-9
+            input.form-control(type='color' value=strokeColor disabled=!stroke data-property='strokeColor')
+        +range('Opacity', 0, 1, 0.01, strokeOpacity, 'strokeOpacity', stroke)
+
+  .panel(class={'panel-default': !fill, 'panel-primary': fill})
+    .panel-heading(data-target='#m-fill-control')
+      .checkbox(style='display:inline')
+        label
+          input#m-enable-fill.m-toggle-panel(type='checkbox' checked=fill data-property='fill')
+          | Fill
+    #m-fill-control.m-optional-panel.collapse(class={in: fill})
+      .panel-body
+        .form-group
+          label.control-label.col-md-3 Color
+          .col-md-9
+            input.form-control(type='color' value=fillColor disabled=!fill data-property='fillColor')
+        +range('Opacity', 0, 1, 0.01, fillOpacity, 'fillOpacity', fill)

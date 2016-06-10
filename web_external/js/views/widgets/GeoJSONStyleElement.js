@@ -27,10 +27,10 @@ minerva.models.GeoJSONProperty = Backbone.Model.extend({
 minerva.models.GeoJSONStyle = Backbone.Model.extend({
     defaults: {
         // how is the style generated
-        scale: 'constant',   // 'constant' | 'continuous' | 'categorical'
+        scale: 'constant',   // 'disabled' | 'constant' | 'continuous' | 'categorical'
 
         // what type is the range
-        type: 'number',     // 'number' | 'color'
+        type: 'number',     // 'number' | 'color' | 'boolean'
 
         // for color values, what color color ramp is selected
         ramp: 'Reds',
@@ -71,11 +71,19 @@ minerva.models.GeoJSONStyle = Backbone.Model.extend({
         }
 
         // remove keys with undefined values
-        _.each(hash, function (value, key) {
-            if (value !== undefined) {
+        _.each(hash, _.bind(function (value, key) {
+            if (key === 'range') {
+                filtered.range = (this.get('range') || []).slice();
+                _.each(value, function (v, i) {
+                    if (v !== undefined) {
+                        filtered[i] = v;
+                    }
+                });
+                filtered[key] = value;
+            } else if (value !== undefined) {
                 filtered[key] = value;
             }
-        });
+        }, this));
 
         // call super method
         return Backbone.Model.prototype.set.call(this, filtered, options);

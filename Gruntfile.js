@@ -77,7 +77,8 @@ module.exports = function (grunt) {
                     src: [
                         '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
                         '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css',
-                        '<%= plugin.minerva.bootstrapSelect %>/css/bootstrap-select.css'
+                        '<%= plugin.minerva.bootstrapSelect %>/css/bootstrap-select.css',
+                        '<%= plugin.minerva.extra %>/bootstrap-slider.css'
                     ],
                     dest: '<%= plugin.minerva.static %>/plugin.min.css'
                 }]
@@ -126,6 +127,10 @@ module.exports = function (grunt) {
                     {
                         src: ['<%= plugin.minerva.bootstrapSelect %>/js/bootstrap-select.js'],
                         dest: '<%= plugin.minerva.static %>/bootstrap-select.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js'],
+                        dest: '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
                     }
                 ]
             }
@@ -226,7 +231,8 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/colorbrewer.min.js',
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/datatables.min.js',
-                        '<%= plugin.minerva.static %>/bootstrap-select.min.js'
+                        '<%= plugin.minerva.static %>/bootstrap-select.min.js',
+                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
                     ]
                 }
             }

@@ -1,43 +1,98 @@
-minerva.views.GeoJSONStyleWidget = minerva.View.extend({
-    initialize: function () {
-        this.collection = this.collection || new minerva.collections.GeoJSONStyle();
+(function () {
 
-        this.listenTo(this.collection, 'add', this.addOne);
-        this.listenTo(this.collection, 'reset', this.render);
-        this.listenTo(this.collection, 'remove', this.removeElement);
+    var radius = {};
+    var stroke = {
+        enabled: true,
+        width: 2,
+        color: null,
+        opacity: 1
+    };
+    var fill = {
+        enabled: true,
+        color: null,
+        opacity: 1
+    };
+
+    minerva.models.GeoJSONStyle = Backbone.Model.extend({
+        defaults: {
+            radius: 8,
+            stroke: true,
+            strokeWidth: 2,
+            strokeColor: '#000000',
+            strokeOpacity: 1,
+            fill: true,
+            fillOpacity: 0.75,
+            fillColor: '#ff0000'
+        }
+    });
+})();
+
+minerva.views.GeoJSONStyleWidget = minerva.View.extend({
+    events: {
+        'change .m-toggle-panel': '_updatePanel',
+        'click .panel-heading': '_collapsePanel',
+        'change input,select': '_updateValue',
+        'shown.bs.collapse .collapse': '_fixTooltips'
+    },
+
+    initialize: function () {
+        this._pointStyle = new minerva.models.GeoJSONStyle();
+
     },
     render: function (evt) {
-        if (evt && evt.norender) {
-            return;
-        }
+        this.$el.html(
+            minerva.templates.geoJSONPointStyleWidget(this._pointStyle.attributes)
+        );
 
-        this.addAll();
+        this.$('.m-slider').bootstrapSlider({enabled: false});
+        this.$('.m-slider[data-slider-enabled]').bootstrapSlider('enable');
+
+        // needed to fix the initial position of tooltips
+        $('#g-dialog-container').one('shown.bs.modal', _.bind(this._fixTooltips, this));
         return this;
     },
-
-    /**
-     * Add a style element to the widget.
-     */
-    addOne: function (model) {
-        var view = new minerva.views.GeoJSONStyleElement({
-            model: model,
-            parentView: this
-        });
-        this.$el.append(view.render().el);
+    _fixTooltips: function () {
+        this.$('.m-slider').bootstrapSlider('relayout');
     },
-
-    /**
-     * Reset the view and add all style elements from the collection to the widget.
-     */
-    addAll: function () {
-        this.$el.empty();
-        this.collection.each(this.addOne, this);
+    _updatePanel: function (evt) {
+        var $el = $(evt.currentTarget);
+        var val = $el.is(':checked');
+        var panel = $el.closest('.panel');
+        var controls = $el.closest('.panel').find('.panel-body input,select');
+        var sliders = $el.closest('.panel').find('.panel-body .m-slider');
+        if (val) {
+            panel.removeClass('panel-default')
+                .addClass('panel-primary');
+            controls.prop('disabled', false);
+            sliders.bootstrapSlider('enable');
+        } else {
+            panel.addClass('panel-default')
+                .removeClass('panel-primary');
+            controls.prop('disabled', true);
+            sliders.bootstrapSlider('disable');
+        }
     },
-
-    /**
-     * Remove the style element from the widget.
-     */
-    removeElement: function (model) {
-        model.destroy();
+    _collapsePanel: function (evt) {
+        evt.stopPropagation();
+        var $el = $(evt.target);
+        var target = $el.data('target');
+        if (!$el.is('.m-toggle-panel')) {
+            this.$(target).collapse('toggle');
+        }
+    },
+    _updateValue: function (evt) {
+        var $el = $(evt.target);
+        var prop = $el.data('property');
+        var val = $el.val();
+        switch($el.prop('type')) {
+            case 'number':
+            case 'range':
+                val = parseFloat(val);
+                break;
+            case 'checkbox':
+                val = $el.is(':checked');
+                break;
+        }
+        this._pointStyle.set(prop, val);
     }
 });
