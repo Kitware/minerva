@@ -1,18 +1,5 @@
 (function () {
 
-    var radius = {};
-    var stroke = {
-        enabled: true,
-        width: 2,
-        color: null,
-        opacity: 1
-    };
-    var fill = {
-        enabled: true,
-        color: null,
-        opacity: 1
-    };
-
     minerva.models.GeoJSONStyle = Backbone.Model.extend({
         defaults: {
             radius: 8,
@@ -32,16 +19,26 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         'change .m-toggle-panel': '_updatePanel',
         'click .panel-heading': '_collapsePanel',
         'change input,select': '_updateValue',
-        'shown.bs.collapse .collapse': '_fixTooltips'
+        'shown.bs.collapse .collapse': '_fixTooltips',
+        'shown.bs.tab .m-style-tab': '_fixTooltips',
+        'click .m-style-tab': '_activateTab'
     },
 
     initialize: function () {
         this._pointStyle = new minerva.models.GeoJSONStyle();
+        this._lineStyle = new minerva.models.GeoJSONStyle();
+        this._polygonStyle = new minerva.models.GeoJSONStyle();
+        this._activeTab = 'point'
 
     },
     render: function (evt) {
         this.$el.html(
-            minerva.templates.geoJSONPointStyleWidget(this._pointStyle.attributes)
+            minerva.templates.geoJSONStyleWidget({
+                point: this._pointStyle.attributes,
+                line: this._lineStyle.attributes,
+                polygon: this._polygonStyle.attributes,
+                activeTab: this._activeTab
+            })
         );
 
         this.$('.m-slider').bootstrapSlider({enabled: false});
@@ -53,6 +50,11 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
     _fixTooltips: function () {
         this.$('.m-slider').bootstrapSlider('relayout');
+    },
+    _activateTab: function (evt) {
+        var $el = $(evt.currentTarget);
+        this.$($el.data('target')).tab('show');
+        this._activeTab = $el.data('tab');
     },
     _updatePanel: function (evt) {
         var $el = $(evt.currentTarget);
