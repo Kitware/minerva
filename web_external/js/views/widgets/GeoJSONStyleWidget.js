@@ -9,8 +9,22 @@
             strokeOpacity: 1,
             fill: true,
             fillOpacity: 0.75,
-            fillColor: '#ff0000'
-        }
+            fillColor: '#ff0000',
+            strokeColorKey: null,
+            fillColorKey: null
+        },
+        ramps: _.map(colorbrewer, _.bind(function (ramp, name) {
+            var n = "<ul class='m-color-ramp'>";
+            _.each(ramp[6], function (color, i) {
+                n += "<li style='background-color: " + color + "'/>";
+            });
+            n += '</ul>';
+            this[name] = {
+                value: ramp[6],
+                display: n
+            };
+            return this;
+        }, {}))[0]
     });
 })();
 
@@ -37,12 +51,15 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
                 point: this._pointStyle.attributes,
                 line: this._lineStyle.attributes,
                 polygon: this._polygonStyle.attributes,
-                activeTab: this._activeTab
+                activeTab: this._activeTab,
+                ramps: this._pointStyle.ramps,
+                summary: {}
             })
         );
 
         this.$('.m-slider').bootstrapSlider({enabled: false});
         this.$('.m-slider[data-slider-enabled]').bootstrapSlider('enable');
+        this.$('select.m-select-ramp').selectpicker({width: '100%'});
 
         // needed to fix the initial position of tooltips
         $('#g-dialog-container').one('shown.bs.modal', _.bind(this._fixTooltips, this));

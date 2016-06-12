@@ -12,16 +12,28 @@ mixin range(label, min, max, step, value, feature, property, enabled)
         data-feature=feature
         data-slider-enabled=enabled)
 
-mixin color(label, value, feature, property, enabled)
+mixin color(label, value, feature, property, enabled, colorby)
   .form-group
     label.control-label.col-md-3= label
-    .col-md-9
-      input.form-control(
-        type='color'
-        value=value[property]
-        disabled=!enabled
-        data-feature=feature
-        data-property=property)
+    .col-md-4
+      select.form-control
+        option(selected= !value[colorby]) Constant
+        each obj, key in summary
+          - var s = value[colorby] === key
+          option(selected=s) #{key}
+    .col-md-5
+      if value[colorby]
+        select.form-control.m-select-ramp
+          each ramp, name in ramps
+            - s = value[colorby] === name
+            option(data-content!=ramp.display data-ramp-name=name selected=s) #{name}
+      else
+        input.form-control(
+          type='color'
+          value=value[property]
+          disabled=!enabled
+          data-feature=feature
+          data-property=property)
 
 - activeTab = activeTab || 'point';
 ul.nav.nav-tabs
@@ -54,7 +66,7 @@ ul.nav.nav-tabs
       #m-point-stroke-control.m-optional-panel.collapse(class={in: point.stroke})
         .panel-body
           +range('Width', 0, 5, 0.1, point, 'point', 'strokeWidth', point.stroke)
-          +color('Color', point, 'point', 'strokeColor', point.stroke)
+          +color('Color', point, 'point', 'strokeColor', point.stroke, 'strokeColorKey')
           +range('Opacity', 0, 1, 0.01, point, 'point', 'strokeOpacity', point.stroke)
 
     .panel(class={'panel-default': !point.fill, 'panel-primary': point.fill})
@@ -65,7 +77,7 @@ ul.nav.nav-tabs
             | Fill
       #m-point-fill-control.m-optional-panel.collapse(class={in: point.fill})
         .panel-body
-          +color('Color', point, 'point', 'fillColor', point.fill)
+          +color('Color', point, 'point', 'fillColor', point.fill, 'fillColorKey')
           +range('Opacity', 0, 1, 0.01, point, 'point', 'fillOpacity', point.fill)
 
   - active = activeTab === 'line';
@@ -79,7 +91,7 @@ ul.nav.nav-tabs
       #m-line-stroke-control.m-optional-panel.collapse(class={in: line.stroke})
         .panel-body
           +range('Width', 0, 5, 0.1, line, 'line', 'strokeWidth', line.stroke)
-          +color('Color', line, 'line', 'strokeColor', line.stroke)
+          +color('Color', line, 'line', 'strokeColor', line.stroke, 'strokeColorKey')
           +range('Opacity', 0, 1, 0.01, line, 'line', 'strokeOpacity', line.stroke)
 
   - active = activeTab === 'polygon';
@@ -93,7 +105,7 @@ ul.nav.nav-tabs
       #m-polygon-stroke-control.m-optional-panel.collapse(class={in: polygon.stroke})
         .panel-body
           +range('Width', 0, 5, 0.1, polygon, 'polygon', 'strokeWidth', polygon.stroke)
-          +color('Color', polygon, 'polygon', 'strokeColor', polygon.stroke)
+          +color('Color', polygon, 'polygon', 'strokeColor', polygon.stroke, 'strokeColorKey')
           +range('Opacity', 0, 1, 0.01, polygon, 'polygon', 'strokeOpacity', polygon.stroke)
 
     .panel(class={'panel-default': !polygon.fill, 'panel-primary': polygon.fill})
@@ -104,5 +116,5 @@ ul.nav.nav-tabs
             | Fill
       #m-polygon-fill-control.m-optional-panel.collapse(class={in: polygon.fill})
         .panel-body
-          +color('Color', polygon, 'polygon', 'fillColor', polygon.fill)
+          +color('Color', polygon, 'polygon', 'fillColor', polygon.fill, 'fillColorKey')
           +range('Opacity', 0, 1, 0.01, polygon, 'polygon', 'fillOpacity', polygon.fill)
