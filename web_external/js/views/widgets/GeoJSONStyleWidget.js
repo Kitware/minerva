@@ -69,6 +69,63 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         $('#g-dialog-container').one('shown.bs.modal', _.bind(this._fixTooltips, this));
         return this;
     },
+
+    /**
+     * Save the user selected values into the geojson object.
+     */
+    save: function () {
+        var vis;
+        var geoData = this._dataset.get('geoData') || {};
+        var summary = geoData.summary || {};
+
+        function makeScale(ramp, summary) {
+            var scale, colors, n;
+
+            colors = colorbrewer[ramp];
+            indices = _.keys(colors).map(function (v) { return parseInt(v); });
+
+            if (_.isObject(summary.values)) { // categorical
+                n = _.sortedIndex(indices, _.size(summary.values));
+                n = Math.min(n, indices.length - 1);
+
+                scale = d3.scale.ordinal()
+                    .domain(_.keys(summary.values))
+                    .range(colors[indices[n]]);
+            } else {                          // continuous
+                n = indices.length - 1;
+                scale = d3.scale.quantize()
+                    .domain([summary.min, summary.max])
+                    .range(colors[indices[n]]);
+            }
+            return scale;
+        }
+
+        function makeVis(style, type) {
+
+            vis = _.extend({}, style.attributes);
+            if (vis.strokeColorKey) {
+                vis.strokeColor = _.compose(
+                    makeScale(vis.strokeColor, summary[vis.strokeColorKey]),
+                    function (props) { return props[vis.strokeColorKey]; }
+                );
+
+            }
+
+            if (vis.fillColorKey) {
+                vis.fillColor = _.compose(
+                    makeScale(vis.fillColor, summary[vis.fillColorKey]),
+                    function (props) { return props[vis.fillColorKey]; }
+                );
+            }
+            return minerva.geojson.style(geoData, vis, type);
+        }
+
+        makeVis(this._pointStyle, 'Point');
+        makeVis(this._lineStyle, 'LineString');
+        makeVis(this._polygonStyle, 'Polygon');
+        this._dataset.trigger('change:geoData');
+    },
+
     _fixTooltips: function () {
         this.$('.m-slider').bootstrapSlider('relayout');
     },

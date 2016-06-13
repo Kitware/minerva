@@ -40,6 +40,23 @@ minerva.geojson.merge = function merge(value, accumulated) {
 };
 
 /**
+ * A list of property keys that are ignored when generating
+ * geojson summaries.
+ */
+minerva.geojson.ignored_properties = [
+    'fill',
+    'fillColor',
+    'fillOpacity',
+    'radius',
+    'stroke',
+    'strokeColor',
+    'strokeWidth',
+    'strokeOpacity',
+    'fillColorKey',
+    'strokeColorKey'
+].sort();
+
+/**
  * Accumulate property values into a summary object.  The
  * output object will have keys encountered in the feature
  * array mapped to an object that summarizes the values
@@ -54,7 +71,7 @@ minerva.geojson.accumulate = function accumulate(features) {
     for (i = 0; i < features.length; i += 1) {
         feature = features[i];
         for (key in feature) {
-            if (feature.hasOwnProperty(key)) {
+            if (feature.hasOwnProperty(key) && !_.contains(minerva.geojson.ignored_properties, key)) {
                 accumulated[key] = minerva.geojson.merge(feature[key], accumulated[key]);
             }
         }
@@ -136,14 +153,20 @@ minerva.geojson.normalize = function normalize(geojson) {
  *
  * @note assumes the geojson object is normalized
  */
-minerva.geojson.style = function style(geojson, visProperties) {
+minerva.geojson.style = function style(geojson, visProperties, type) {
     _.each(geojson.features || [], function (feature) {
         var properties = feature.properties || {};
         var geometry = feature.geometry || {};
 
-        _.each(visProperties, function (scale, key) {
-            properties[key] = scale(properties, key, geometry);
-        });
+        if (type === undefined || geometry.type === type) {
+            _.each(visProperties, function (scale, key) {
+                if (_.isFunction(scale)) {
+                    properties[key] = scale(properties, key, geometry);
+                } else {
+                    properties[key] = scale;
+                }
+            });
+        }
 
         feature.properties = properties;
     });
