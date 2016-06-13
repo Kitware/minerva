@@ -3,11 +3,10 @@
  */
 minerva.views.JsonConfigWidget = minerva.View.extend({
     initialize: function (settings) {
-        var summary = this.summary = {};
-
         this.dataset = settings.dataset;
-        this.pointStyleWidget = new minerva.views.GeoJSONStyleWidget({
-            parentView: this
+        this.jsonStyleWidget = new minerva.views.GeoJSONStyleWidget({
+            parentView: this,
+            dataset: this.dataset
         });
     },
 
@@ -31,11 +30,6 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
     },
 
     render: function () {
-        window.dataset = this.dataset;
-        var geoData = this.dataset.get('geoData');
-        if (geoData) {
-            _.extend(this.summary, geoData.summary || {});
-        }
         var currentGeoRenderType = this.dataset.getGeoRenderType();
         var options = ['geojson', 'contour'];
         if (currentGeoRenderType === null || !_.contains(options, currentGeoRenderType)) {
@@ -48,7 +42,7 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
             currentGeoRenderType: currentGeoRenderType
         })).girderModal(this);
 
-        this.pointStyleWidget.setElement(modal.find('.m-geojson-style')).render();
+        this.jsonStyleWidget.setElement(modal.find('.m-geojson-style')).render();
         modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
     },
 

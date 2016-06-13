@@ -35,17 +35,21 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         'change input,select': '_updateValue',
         'shown.bs.collapse .collapse': '_fixTooltips',
         'shown.bs.tab .m-style-tab': '_fixTooltips',
-        'click .m-style-tab': '_activateTab'
+        'click .m-style-tab': '_activateTab',
+        'change .m-color-by': 'render'
     },
 
-    initialize: function () {
+    initialize: function (settings) {
+        this._dataset = settings.dataset;
         this._pointStyle = new minerva.models.GeoJSONStyle();
         this._lineStyle = new minerva.models.GeoJSONStyle();
         this._polygonStyle = new minerva.models.GeoJSONStyle();
-        this._activeTab = 'point'
+        this._activeTab = 'point';
 
+        this.listenTo(this._dataset, 'change:geoData', this.render);
     },
     render: function (evt) {
+        var geoData = this._dataset.get('geoData') || {};
         this.$el.html(
             minerva.templates.geoJSONStyleWidget({
                 point: this._pointStyle.attributes,
@@ -53,7 +57,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
                 polygon: this._polygonStyle.attributes,
                 activeTab: this._activeTab,
                 ramps: this._pointStyle.ramps,
-                summary: {}
+                summary: geoData.summary || {}
             })
         );
 
@@ -103,6 +107,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         var $el = $(evt.target);
         var prop = $el.data('property');
         var val = $el.val();
+        var feature;
         switch($el.prop('type')) {
             case 'number':
             case 'range':
@@ -112,6 +117,28 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
                 val = $el.is(':checked');
                 break;
         }
-        this._pointStyle.set(prop, val);
+        switch ($el.data('feature')) {
+            case 'point':
+                feature = this._pointStyle;
+                break;
+            case 'line':
+                feature = this._lineStyle;
+                break;
+            case 'polygon':
+                feature = this._polygonStyle;
+                break;
+            default:
+                throw new Error('Invalid feature type in UI');
+        }
+
+        if (prop === 'strokeColorKey' || prop === 'fillColorKey') {
+            if (val === 'Constant') {
+                val = null;
+            }
+            feature.set(prop, val);
+            this.render();
+        } else {
+            feature.set(prop, val);
+        }
     }
 });

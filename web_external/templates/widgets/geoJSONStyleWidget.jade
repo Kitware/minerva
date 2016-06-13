@@ -16,16 +16,21 @@ mixin color(label, value, feature, property, enabled, colorby)
   .form-group
     label.control-label.col-md-3= label
     .col-md-4
-      select.form-control
+      select.form-control(
+        data-feature=feature
+        data-property=colorby)
         option(selected= !value[colorby]) Constant
         each obj, key in summary
           - var s = value[colorby] === key
           option(selected=s) #{key}
     .col-md-5
       if value[colorby]
-        select.form-control.m-select-ramp
+        select.form-control.m-select-ramp(
+          disabled=!enabled
+          data-feature=feature
+          data-property=property)
           each ramp, name in ramps
-            - s = value[colorby] === name
+            - s = value[property] === name
             option(data-content!=ramp.display data-ramp-name=name selected=s) #{name}
       else
         input.form-control(
