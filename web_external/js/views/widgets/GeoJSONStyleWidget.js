@@ -10,7 +10,9 @@
             fill: true,
             fillOpacity: 0.75,
             fillColor: '#ff0000',
+            strokeRamp: 'Blues',
             strokeColorKey: null,
+            fillRamp: 'Reds',
             fillColorKey: null
         },
         ramps: _.map(colorbrewer, _.bind(function (ramp, name) {
@@ -46,6 +48,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         this._polygonStyle = new minerva.models.GeoJSONStyle();
         this._activeTab = 'point';
 
+        this.load();
         this.listenTo(this._dataset, 'change:geoData', this.render);
     },
     render: function (evt) {
@@ -71,6 +74,17 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
 
     /**
+     * Load user selected values from the dataset.
+     */
+    load: function () {
+        var mm = this._dataset.getMinervaMetadata() || {};
+        var vis = mm.visProperties || {};
+        this._pointStyle.set(vis.point || {});
+        this._lineStyle.set(vis.line || {});
+        this._polygonStyle.set(vis.polygon || {});
+    },
+
+    /**
      * Save the user selected values into the geojson object.
      */
     save: function () {
@@ -82,6 +96,10 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             var scale, colors, n;
 
             colors = colorbrewer[ramp];
+            // for an invalid ramp, just return black
+            if (!colors) {
+                return function () { return '#fffff'; };
+            }
             indices = _.keys(colors).map(function (v) { return parseInt(v); });
 
             if (_.isObject(summary.values)) { // categorical
@@ -100,12 +118,12 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             return scale;
         }
 
-        function makeVis(style, type) {
+        function makeVis(style) {
 
             vis = _.extend({}, style.attributes);
             if (vis.strokeColorKey) {
                 vis.strokeColor = _.compose(
-                    makeScale(vis.strokeColor, summary[vis.strokeColorKey]),
+                    makeScale(vis.strokeRamp, summary[vis.strokeColorKey]),
                     function (props) { return props[vis.strokeColorKey]; }
                 );
 
@@ -113,17 +131,21 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
 
             if (vis.fillColorKey) {
                 vis.fillColor = _.compose(
-                    makeScale(vis.fillColor, summary[vis.fillColorKey]),
+                    makeScale(vis.fillRamp, summary[vis.fillColorKey]),
                     function (props) { return props[vis.fillColorKey]; }
                 );
             }
-            return minerva.geojson.style(geoData, vis, type);
+            return vis;
         }
 
-        makeVis(this._pointStyle, 'Point');
-        makeVis(this._lineStyle, 'LineString');
-        makeVis(this._polygonStyle, 'Polygon');
-        this._dataset.trigger('change:geoData');
+        var props = {
+            point: makeVis(this._pointStyle),
+            line: makeVis(this._lineStyle),
+            polygon: makeVis(this._polygonStyle)
+        };
+        var mm = this._dataset.getMinervaMetadata();
+        mm.visProperties = props;
+        this._dataset.saveMinervaMetadata(mm);
     },
 
     _fixTooltips: function () {

@@ -90,6 +90,13 @@ minerva.geojson.accumulate = function accumulate(features) {
 minerva.geojson.normalize = function normalize(geojson) {
     var normalized;
 
+    if (_.isString(geojson)) {
+        try {
+            geojson = JSON.parse(geojson);
+        } catch (e) {
+        }
+    }
+
     switch (geojson.type) {
         case 'FeatureCollection':
             normalized = geojson;
@@ -153,20 +160,31 @@ minerva.geojson.normalize = function normalize(geojson) {
  *
  * @note assumes the geojson object is normalized
  */
-minerva.geojson.style = function style(geojson, visProperties, type) {
+minerva.geojson.style = function style(geojson, visProperties) {
+    visProperties = visProperties || {};
     _.each(geojson.features || [], function (feature) {
         var properties = feature.properties || {};
         var geometry = feature.geometry || {};
+        var style = {};
 
-        if (type === undefined || geometry.type === type) {
-            _.each(visProperties, function (scale, key) {
-                if (_.isFunction(scale)) {
-                    properties[key] = scale(properties, key, geometry);
-                } else {
-                    properties[key] = scale;
-                }
-            });
+        switch (geometry.type) {
+            case 'Point':
+                style = visProperties.point || {};
+                break;
+            case 'LineString':
+                style = visProperties.line || {};
+                break
+            case 'Polygon':
+                style = visProperties.polygon || {};
+                break;
         }
+        _.each(style, function (scale, key) {
+            if (_.isFunction(scale)) {
+                properties[key] = scale(properties, key, geometry);
+            } else {
+                properties[key] = scale;
+            }
+        });
 
         feature.properties = properties;
     });

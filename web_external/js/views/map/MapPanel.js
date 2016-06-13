@@ -152,7 +152,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             layerType = dataset.getGeoRenderType();
             // For now, set the visProperties here, but this should come from the user at
             // the same time they designate the layerType.
-            visProperties = dataset.get('visProperties');
+            visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
             minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
                 this.datasetLayerReprs[datasetId] = repr;
                 repr.render(this);

@@ -12,13 +12,9 @@
             each value in values
               - var sel=null; if (value === currentGeoRenderType) sel='selected';
               option(value=value, selected=sel)= value
-        if currentGeoRenderType === 'geojson'
-          .m-geojson-style
-        else
-          .m-geojson-style.hidden
+        .m-geojson-style.hidden
 
       .modal-footer
-        a.btn.btn-small.btn-default.m-load-data-button Load dataset
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-geo-render-button.btn.btn-small.btn-primary(type="submit")
           i.icon-check
