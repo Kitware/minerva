@@ -169,12 +169,15 @@ minerva.geojson.style = function style(geojson, visProperties) {
 
         switch (geometry.type) {
             case 'Point':
+            case 'MultiPoint':
                 style = visProperties.point || {};
                 break;
             case 'LineString':
+            case 'MultiLineString':
                 style = visProperties.line || {};
                 break;
             case 'Polygon':
+            case 'MultiPolygon':
                 style = visProperties.polygon || {};
                 break;
         }

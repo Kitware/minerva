@@ -112,6 +112,10 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
                     .range(colors[indices[n]]);
             } else {                          // continuous
                 n = indices.length - 1;
+                // handle the case when all values are the same
+                if (summary.min >= summary.max) {
+                    summary.max = summary.min + 1;
+                }
                 scale = d3.scale.quantize()
                     .domain([summary.min, summary.max])
                     .range(colors[indices[n]]);
