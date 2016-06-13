@@ -4,10 +4,6 @@
 minerva.views.JsonConfigWidget = minerva.View.extend({
     initialize: function (settings) {
         this.dataset = settings.dataset;
-        this.jsonStyleWidget = new minerva.views.GeoJSONStyleWidget({
-            parentView: this,
-            dataset: this.dataset
-        });
     },
 
     events: {
@@ -16,7 +12,7 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
             this.$('.g-validation-failed-message').text('');
 
             var overrideGeoRenderType = this.$('#m-geo-render-type option:selected').text();
-            if (overrideGeoRenderType === 'geojson') {
+            if (overrideGeoRenderType === 'geojson' && this.jsonStyleWidget) {
                 this.jsonStyleWidget.save();
             }
             this.dataset._initGeoRender(overrideGeoRenderType);
@@ -43,7 +39,6 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
             values: options,
             currentGeoRenderType: currentGeoRenderType
         })).girderModal(this);
-
         this._loadDataset();
         modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
     },
@@ -60,8 +55,10 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
     },
 
     _loadStyleConfig: function () {
-        this.jsonStyleWidget.setElement(
-            this.$('.m-geojson-style').removeClass('hidden')
-        ).render();
+        this.jsonStyleWidget = new minerva.views.GeoJSONStyleWidget({
+            parentView: this,
+            dataset: this.dataset,
+            el: this.$('.m-geojson-style').removeClass('hidden')
+        }).render();
     }
 });

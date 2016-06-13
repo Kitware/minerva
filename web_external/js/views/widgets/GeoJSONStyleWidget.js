@@ -42,14 +42,8 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this._dataset = settings.dataset;
-        this._pointStyle = new minerva.models.GeoJSONStyle();
-        this._lineStyle = new minerva.models.GeoJSONStyle();
-        this._polygonStyle = new minerva.models.GeoJSONStyle();
         this._activeTab = 'point';
-
-        this.load();
-        this.listenTo(this._dataset, 'change:geoData', this.render);
+        this.load(settings.dataset);
     },
     render: function (evt) {
         var geoData = this._dataset.get('geoData') || {};
@@ -76,7 +70,11 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     /**
      * Load user selected values from the dataset.
      */
-    load: function () {
+    load: function (dataset) {
+        this._dataset = dataset;
+        this._pointStyle = new minerva.models.GeoJSONStyle();
+        this._lineStyle = new minerva.models.GeoJSONStyle();
+        this._polygonStyle = new minerva.models.GeoJSONStyle();
         var mm = this._dataset.getMinervaMetadata() || {};
         var vis = mm.visProperties || {};
         this._pointStyle.set(vis.point || {});
