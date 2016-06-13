@@ -1,5 +1,4 @@
 (function () {
-
     minerva.models.GeoJSONStyle = Backbone.Model.extend({
         defaults: {
             radius: 8,
@@ -91,14 +90,18 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         var summary = geoData.summary || {};
 
         function makeScale(ramp, summary) {
-            var scale, colors, n;
+            var scale, colors, n, indices;
 
             colors = colorbrewer[ramp];
             // for an invalid ramp, just return black
             if (!colors) {
-                return function () { return '#fffff'; };
+                return function () { // eslint-disable-line underscore/prefer-constant
+                    return '#fffff';
+                };
             }
-            indices = _.keys(colors).map(function (v) { return parseInt(v); });
+            indices = _.keys(colors).map(function (v) {
+                return parseInt(v, 10);
+            });
 
             if (_.isObject(summary.values)) { // categorical
                 n = _.sortedIndex(indices, _.size(summary.values));
@@ -117,14 +120,12 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         }
 
         function makeVis(style) {
-
             vis = _.extend({}, style.attributes);
             if (vis.strokeColorKey) {
                 vis.strokeColor = _.compose(
                     makeScale(vis.strokeRamp, summary[vis.strokeColorKey]),
                     function (props) { return props[vis.strokeColorKey]; }
                 );
-
             }
 
             if (vis.fillColorKey) {
@@ -185,7 +186,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         var prop = $el.data('property');
         var val = $el.val();
         var feature;
-        switch($el.prop('type')) {
+        switch ($el.prop('type')) {
             case 'number':
             case 'range':
                 val = parseFloat(val);

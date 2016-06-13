@@ -51,7 +51,7 @@ minerva.views.JsonConfigWidget = minerva.View.extend({
     _loadDataset: function () {
         this.dataset
             .once('m:dataset_geo_dataLoaded', this._loadStyleConfig, this)
-            .loadGeoData()
+            .loadGeoData();
     },
 
     _loadStyleConfig: function () {

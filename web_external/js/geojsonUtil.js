@@ -173,7 +173,7 @@ minerva.geojson.style = function style(geojson, visProperties) {
                 break;
             case 'LineString':
                 style = visProperties.line || {};
-                break
+                break;
             case 'Polygon':
                 style = visProperties.polygon || {};
                 break;
