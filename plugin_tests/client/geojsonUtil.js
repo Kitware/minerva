@@ -246,8 +246,10 @@ describe('geojson', function () {
         });
 
         var vis = {
-            fillColor: sinon.stub().returns('green'),
-            strokeWidth: sinon.stub().returns(4)
+            point: {
+                fillColor: sinon.stub().returns('green'),
+                strokeWidth: sinon.stub().returns(4)
+            }
         };
 
         expect(_.pluck(style(geojson, vis).features, 'properties'))
@@ -271,32 +273,32 @@ describe('geojson', function () {
                 }
             ]);
 
-        sinon.assert.callCount(vis.fillColor, 3);
-        sinon.assert.callCount(vis.strokeWidth, 3);
+        sinon.assert.callCount(vis.point.fillColor, 3);
+        sinon.assert.callCount(vis.point.strokeWidth, 3);
 
         sinon.assert.calledWithMatch(
-            vis.fillColor.getCall(0),
+            vis.point.fillColor.getCall(0),
             {a: 1, b: 'red'}
         );
         sinon.assert.calledWithMatch(
-            vis.fillColor.getCall(1),
+            vis.point.fillColor.getCall(1),
             {a: -1, b: 'blue'}
         );
         sinon.assert.calledWithMatch(
-            vis.fillColor.getCall(2),
+            vis.point.fillColor.getCall(2),
             {c: 0}
         );
 
         sinon.assert.calledWithMatch(
-            vis.strokeWidth.getCall(0),
+            vis.point.strokeWidth.getCall(0),
             {a: 1, b: 'red'}
         );
         sinon.assert.calledWithMatch(
-            vis.strokeWidth.getCall(1),
+            vis.point.strokeWidth.getCall(1),
             {a: -1, b: 'blue'}
         );
         sinon.assert.calledWithMatch(
-            vis.strokeWidth.getCall(2),
+            vis.point.strokeWidth.getCall(2),
             {c: 0}
         );
     });
