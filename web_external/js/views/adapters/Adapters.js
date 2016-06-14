@@ -154,7 +154,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             polygon: this._configureProperties(visProperties.polygon, summary)
         };
         minerva.geojson.style(data, props);
-    },
+    };
 
     /**
      * Generate a normalized representation of vis properties suitable to be
@@ -162,7 +162,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      * color scale functions for fill and stroke styles.
      */
     this._configureProperties = function (style, summary) {
-        vis = _.extend({}, style);
+        var vis = _.extend({}, style);
         if (vis.strokeColorKey) {
             vis.strokeColor = _.compose(
                 minerva.geojson.colorScale(vis.strokeRamp, summary[vis.strokeColorKey]),

@@ -236,3 +236,19 @@ minerva.geojson.colorScale = function makeScale(ramp, summary) {
     }
     return scale;
 };
+
+/**
+ * Return an array of the indicated type from a geojson object.
+ * If no types are given, return all features.
+ */
+minerva.geojson.getFeatures = function getFeatures(data) {
+    var types = _.rest(arguments, 1).sort();
+    var all = (data || {}).features || [];
+    if (!types.length) {
+        return all;
+    }
+    return _.filter(all, function (f) {
+        var geom = f.geometry || {};
+        return _.indexOf(types, geom.type, true) >= 0;
+    });
+};
