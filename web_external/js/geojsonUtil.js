@@ -194,3 +194,45 @@ minerva.geojson.style = function style(geojson, visProperties) {
 
     return geojson;
 };
+
+/**
+ * Generate a d3-like scale function out of a colorbrewer
+ * ramp name and a geojson summary object.
+ *
+ * @param {string} ramp
+ * @param {object} summary
+ * @returns {function}
+ */
+minerva.geojson.colorScale = function makeScale(ramp, summary) {
+    var scale, colors, n, indices;
+
+    colors = colorbrewer[ramp];
+    // for an invalid ramp, just return black
+    if (!colors) {
+        return function () { // eslint-disable-line underscore/prefer-constant
+            return '#fffff';
+        };
+    }
+    indices = _.keys(colors).map(function (v) {
+        return parseInt(v, 10);
+    });
+
+    if (_.isObject(summary.values)) { // categorical
+        n = _.sortedIndex(indices, _.size(summary.values));
+        n = Math.min(n, indices.length - 1);
+
+        scale = d3.scale.ordinal()
+            .domain(_.keys(summary.values))
+            .range(colors[indices[n]]);
+    } else {                          // continuous
+        n = indices.length - 1;
+        // handle the case when all values are the same
+        if (summary.min >= summary.max) {
+            summary.max = summary.min + 1;
+        }
+        scale = d3.scale.quantize()
+            .domain([summary.min, summary.max])
+            .range(colors[indices[n]]);
+    }
+    return scale;
+};

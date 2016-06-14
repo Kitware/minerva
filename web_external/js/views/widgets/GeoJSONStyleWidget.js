@@ -85,66 +85,10 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
      * Save the user selected values into the geojson object.
      */
     save: function () {
-        var vis;
-        var geoData = this._dataset.get('geoData') || {};
-        var summary = geoData.summary || {};
-
-        function makeScale(ramp, summary) {
-            var scale, colors, n, indices;
-
-            colors = colorbrewer[ramp];
-            // for an invalid ramp, just return black
-            if (!colors) {
-                return function () { // eslint-disable-line underscore/prefer-constant
-                    return '#fffff';
-                };
-            }
-            indices = _.keys(colors).map(function (v) {
-                return parseInt(v, 10);
-            });
-
-            if (_.isObject(summary.values)) { // categorical
-                n = _.sortedIndex(indices, _.size(summary.values));
-                n = Math.min(n, indices.length - 1);
-
-                scale = d3.scale.ordinal()
-                    .domain(_.keys(summary.values))
-                    .range(colors[indices[n]]);
-            } else {                          // continuous
-                n = indices.length - 1;
-                // handle the case when all values are the same
-                if (summary.min >= summary.max) {
-                    summary.max = summary.min + 1;
-                }
-                scale = d3.scale.quantize()
-                    .domain([summary.min, summary.max])
-                    .range(colors[indices[n]]);
-            }
-            return scale;
-        }
-
-        function makeVis(style) {
-            vis = _.extend({}, style.attributes);
-            if (vis.strokeColorKey) {
-                vis.strokeColor = _.compose(
-                    makeScale(vis.strokeRamp, summary[vis.strokeColorKey]),
-                    function (props) { return props[vis.strokeColorKey]; }
-                );
-            }
-
-            if (vis.fillColorKey) {
-                vis.fillColor = _.compose(
-                    makeScale(vis.fillRamp, summary[vis.fillColorKey]),
-                    function (props) { return props[vis.fillColorKey]; }
-                );
-            }
-            return vis;
-        }
-
         var props = {
-            point: makeVis(this._pointStyle),
-            line: makeVis(this._lineStyle),
-            polygon: makeVis(this._polygonStyle)
+            point: this._pointStyle.attributes,
+            line: this._lineStyle.attributes,
+            polygon: this._polygonStyle.attributes
         };
         var mm = this._dataset.getMinervaMetadata();
         mm.visProperties = props;
