@@ -140,19 +140,22 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      *
      * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
      * @param {string} layerType - The type of map visualization used to render the dataset
+     * @param {Object} visProperties - Properties used to render the dataset as a layerType
      */
-    addDataset: function (dataset, layerType) {
+    addDataset: function (dataset, layerType, visProperties) {
         var datasetId = dataset.get('_id');
-        var visProperties;
 
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
             layerType = dataset.getGeoRenderType();
-            // For now, set the visProperties here, but this should come from the user at
-            // the same time they designate the layerType.
-            visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
+
+            // If visProperties is not provided, check for properties stored in the metadata.
+            if (!visProperties) {
+                visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
+            }
+
             minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
                 this.datasetLayerReprs[datasetId] = repr;
                 repr.render(this);
