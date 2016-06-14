@@ -86,6 +86,14 @@ describe('geojson', function () {
     });
 
     describe('normalize', function () {
+        it('parse string', function () {
+            expect(
+                minerva.geojson.normalize(
+                    '{"type":"FeatureCollection", "features":[]}'
+                )
+            ).toEqual({type: 'FeatureCollection', features: [], summary: {}});
+        });
+
         it('FeatureCollection', function () {
             var spec = {
                 type: 'FeatureCollection',
@@ -301,6 +309,82 @@ describe('geojson', function () {
             vis.point.strokeWidth.getCall(2),
             {c: 0}
         );
+    });
+
+    describe('colorScale', function () {
+        it('invalid ramp', function () {
+            expect(
+                minerva.geojson.colorScale('invalid color ramp', {})()
+            ).toBe('#ffffff');
+        });
+        describe('string values', function () {
+            it('one value', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    min: 0,
+                    max: 0
+                });
+
+                expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
+            });
+            it('value range', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    min: 0,
+                    max: 100
+                });
+
+                expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
+            });
+        });
+        describe('numeric values', function () {
+            it('two categories', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    values: {
+                        one: null,
+                        two: null
+                    }
+                });
+
+                expect(scale('one')).toBe(colorbrewer.Reds[3][0]);
+                expect(scale('two')).toBe(colorbrewer.Reds[3][1]);
+            });
+            it('three categories', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    values: {
+                        one: null,
+                        two: null,
+                        three: null
+                    }
+                });
+
+                expect(scale('one')).toBe(colorbrewer.Reds[3][0]);
+                expect(scale('two')).toBe(colorbrewer.Reds[3][1]);
+                expect(scale('three')).toBe(colorbrewer.Reds[3][2]);
+            });
+        });
+    });
+    describe('getFeatures', function () {
+        it('all', function () {
+            expect(
+                minerva.geojson.getFeatures({type: 'FeatureCollection', features: [{}, {}]})
+            ).toEqual([{}, {}]);
+        });
+        it('Point', function () {
+            expect(
+                minerva.geojson.getFeatures({
+                    type: 'FeatureCollection',
+                    features: [{
+                    }, {
+                        geometry: {
+                            type: 'Point'
+                        }
+                    }, {
+                        geometry: {
+                            type: 'MultiPoint'
+                        }
+                    }]
+            }, 'Point')).toEqual([{geometry: {type: 'Point'}}]);
+        });
     });
 });
 

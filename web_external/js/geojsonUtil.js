@@ -203,14 +203,14 @@ minerva.geojson.style = function style(geojson, visProperties) {
  * @param {object} summary
  * @returns {function}
  */
-minerva.geojson.colorScale = function makeScale(ramp, summary) {
+minerva.geojson.colorScale = function colorScale(ramp, summary) {
     var scale, colors, n, indices;
 
     colors = colorbrewer[ramp];
     // for an invalid ramp, just return black
     if (!colors) {
         return function () { // eslint-disable-line underscore/prefer-constant
-            return '#fffff';
+            return '#ffffff';
         };
     }
     indices = _.keys(colors).map(function (v) {
