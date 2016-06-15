@@ -27,12 +27,12 @@ import jsonpath_rw
 
 
 def jsonObjectReader(filepath):
-    '''
+    """
     Creates a generator that parses an array of json objects from a valid
     json array file, yielding each top level json object in the array.
 
     :param filepath: path to json file.
-    '''
+    """
     top_level_array = False
     array_stack = 0
     top_level_object = False
@@ -81,7 +81,7 @@ def jsonObjectReader(filepath):
 
 def jsonArrayHead(filepath, limit=10):
     # TODO rewrite to be more agnostic of source, file or mongo etc
-    '''
+    """
     Reads the top limit json objects out of a json array located
     in filepath, returns a list of Python dicts created from the
     json objects.
@@ -89,7 +89,7 @@ def jsonArrayHead(filepath, limit=10):
     :param filepath: path to json array file.
     :param limit: count of objects to return in list.
     :returns: List of Python dicts from json objects.
-    '''
+    """
     reader = jsonObjectReader(filepath)
     objs = []
     objCount = 0
