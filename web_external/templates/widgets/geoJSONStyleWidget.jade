@@ -47,7 +47,7 @@ ul.nav.nav-tabs
     a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-line-style' data-tab='line') Lines
   li(role='presentation' class={active: tabs.polygon && tabs.polygon.active})
     a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-polygon-style' data-tab='polygon') Polygons
-#m-style-tab-content.tab-content
+#m-style-tab-content.tab-content.clearfix
   - var active = tabs.point.active;
   #m-point-style.form-horizontal.tab-pane(role='tabpanel' class={active: active, in: active})
     .panel.panel-primary
