@@ -48,6 +48,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         var geoData = this._dataset.get('geoData') || {};
         this.$el.html(
             minerva.templates.geoJSONStyleWidget({
+                activeTab: this._activeTab,
                 point: this._pointStyle.attributes,
                 line: this._lineStyle.attributes,
                 polygon: this._polygonStyle.attributes,

@@ -40,16 +40,15 @@ mixin color(label, value, feature, property, enabled, colorby, rampKey)
           data-feature=feature
           data-property=property)
 
-- activeTab = activeTab || 'point';
 ul.nav.nav-tabs
   if tabs.point
-    li(role='presentation' class={active: activeTab === 'point'})
+    li(role='presentation' class={active: tabs.point.active})
       a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-point-style' data-tab='point') Points
   if tabs.line
-    li(role='presentation' class={active: activeTab === 'line'})
+    li(role='presentation' class={active: tabs.line.active})
       a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-line-style' data-tab='line') Lines
   if tabs.polygon
-    li(role='presentation' class={active: activeTab === 'polygon'})
+    li(role='presentation' class={active: tabs.polygon.active})
       a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-polygon-style' data-tab='polygon') Polygons
 #m-style-tab-content.tab-content
   if tabs.point
