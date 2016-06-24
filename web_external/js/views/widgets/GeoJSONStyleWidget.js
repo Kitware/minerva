@@ -169,33 +169,16 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         }
     },
     _getTabs: function (data) {
-        var tabs = {
-            point: false,
-            line: false,
-            polygon: false
+        var tabs = {};
+        tabs.point = {
+            active: this._activeTab === 'point'
         };
-        var points = minerva.geojson.getFeatures(data, 'Point', 'MultiPoint');
-        var lines = minerva.geojson.getFeatures(data, 'LineString', 'MultiLineString');
-        var polygons = minerva.geojson.getFeatures(data, 'Polygon', 'MultiPolygon');
-        if (points.length) {
-            tabs.point = {
-                active: this._activeTab === 'point'
-            };
-        } else if (this._activeTab === 'point') {
-            this._activeTab = 'line';
-        }
-        if (lines.length) {
-            tabs.line = {
-                active: this._activeTab === 'line'
-            };
-        } else if (this._activeTab === 'line') {
-            this._activeTab = 'polygon';
-        }
-        if (polygons.length) {
-            tabs.polygon = {
-                active: this._activeTab === 'polygon'
-            };
-        }
+        tabs.line = {
+            active: this._activeTab === 'line'
+        };
+        tabs.polygon = {
+            active: this._activeTab === 'polygon'
+        };
         return tabs;
     }
 });
