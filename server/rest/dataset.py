@@ -29,7 +29,6 @@ from girder.constants import AccessType
 from girder.utility import config
 
 from girder.plugins.minerva.constants import PluginSettings
-from girder.plugins.minerva.libs.carmen import get_resolver
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata
 from girder.plugins.minerva.utility.dataset_utility import \
@@ -47,8 +46,7 @@ class Dataset(Resource):
         self.route('POST', (':id', 'item'), self.promoteItemToDataset)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
-        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
-        self.route('POST', (':id', 'geocode_tweets'), self.createTweetGeocodes)
+        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)        
         self.client = None
 
     def _initClient(self):
@@ -186,32 +184,6 @@ class Dataset(Resource):
             item['meta']['minerva']['json_row'] = jsonRow
 
         return self.datasetJob(item, createJsonRowJob)
-
-    def geocodeTweets(self, item):
-        # WARNING: Expecting only one file per item, with a name
-        # as itemname.json
-
-        def geocoderJob(item, tmpdir):
-            jsonFilepath = os.path.join(tmpdir, item['name'],
-                                        item['name'] + '.json')
-
-            def tweetGeocoder(tweet):
-                resolver = get_resolver()
-                resolver.load_locations()
-                location = resolver.resolve_tweet(tweet)
-                if location is not None:
-                    tweet["location"] = location[1].__dict__
-                return tweet
-
-            jsonMapper = JsonMapper(tweetGeocoder)
-            objects = jsonObjectReader(jsonFilepath)
-            outfile = jsonMapper.mapToJsonFile(tmpdir, objects)
-            # move the converted file to the original file name to replace
-            # the item file with the new version
-            shutil.move(outfile, jsonFilepath)
-            self._addFileToItem(item, jsonFilepath)
-
-        return self.datasetJob(item, geocoderJob)
 
     def mongoCollection(self, connectionUri, collectionName):
         # TODO not sure if this is a good idea to do this db stuff here
@@ -396,16 +368,5 @@ class Dataset(Resource):
                'startTime or endTime params', required=False)
         .param('startTime', 'earliest time to include result', required=False)
         .param('endTime', 'latest time to include result', required=False)
-        .errorResponse('ID was invalid.')
-        .errorResponse('Write permission denied on the Item.', 403))
-
-    @access.public
-    @loadmodel(model='item', level=AccessType.WRITE)
-    def createTweetGeocodes(self, item, params):
-        return self.geocodeTweets(item)
-    createTweetGeocodes.description = (
-        Description('Replace Item File holding json array of tweets with ' +
-                    'json array of geocoded tweets, using Carmen.')
-        .param('id', 'The Item ID', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
