@@ -32,7 +32,7 @@ from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata
 from girder.plugins.minerva.utility.dataset_utility import \
-    jsonArrayHead, JsonMapper, GeoJsonMapper, jsonObjectReader
+    jsonArrayHead, GeoJsonMapper, jsonObjectReader
 
 import girder_client
 
@@ -46,7 +46,7 @@ class Dataset(Resource):
         self.route('POST', (':id', 'item'), self.promoteItemToDataset)
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
-        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)        
+        self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
         self.client = None
 
     def _initClient(self):
