@@ -13,7 +13,31 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         // Tabular data related attributes.
         tableData: null,
         readOnly: true,
-        visible: true
+        visible: true,
+        // Dataset styling information as passed to Adapters
+        visProperties: {}
+    },
+
+    /**
+     * Default initialization, attach event handlers to preprocess data
+     * on load.
+     */
+    initialize: function () {
+        minerva.models.MinervaModel.prototype.initialize.apply(this, arguments);
+        this.on('change:geoData', this._preprocess, this);
+        return this;
+    },
+
+    /**
+     * Preprocess data to generate summary information about the properties
+     * and value types.  This should be called whenever the dataset changes.
+     *
+     * For now, this is only done for GeoJSON datasets.
+     */
+    _preprocess: function () {
+        if (this.getDatasetType().match(/(geo)?json/)) {
+            this.set('geoData', minerva.geojson.normalize(this.get('geoData')));
+        }
     },
 
     /**

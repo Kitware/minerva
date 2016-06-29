@@ -54,6 +54,7 @@ module.exports = function (grunt) {
                 static: '<%= staticDir %>/built/plugins/minerva',
                 source: '<%= plugin.minerva.external %>/js',
                 geojs: '<%= plugin.minerva.root %>/node_modules/geojs',
+                'bootstrapSelect': '<%= plugin.minerva.root %>/node_modules/bootstrap-select/dist',
                 extra: '<%= plugin.minerva.external %>/extra',
                 jqueryui: '<%= plugin.minerva.root %>/node_modules/jquery-ui-bundle',
                 fontello: '<%= plugin.minerva.external %>/fontello'
@@ -75,7 +76,9 @@ module.exports = function (grunt) {
                 files: [{
                     src: [
                         '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
-                        '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css'
+                        '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css',
+                        '<%= plugin.minerva.bootstrapSelect %>/css/bootstrap-select.css',
+                        '<%= plugin.minerva.extra %>/bootstrap-slider.css'
                     ],
                     dest: '<%= plugin.minerva.static %>/plugin.min.css'
                 }]
@@ -91,6 +94,7 @@ module.exports = function (grunt) {
                             '<%= plugin.minerva.source %>/minerva-version.js',
                             '<%= plugin.minerva.source %>/view.js',
                             '<%= plugin.minerva.source %>/contourJsonReader.js',
+                            '<%= plugin.minerva.source %>/geojsonUtil.js',
                             '<%= plugin.minerva.source %>/app.js',
                             '<%= plugin.minerva.source %>/utilities.js',
                             '<%= plugin.minerva.source %>/MinervaModel.js',
@@ -119,6 +123,14 @@ module.exports = function (grunt) {
                     {
                         src: ['<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.js'],
                         dest: '<%= plugin.minerva.static %>/colorbrewer.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.bootstrapSelect %>/js/bootstrap-select.js'],
+                        dest: '<%= plugin.minerva.static %>/bootstrap-select.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js'],
+                        dest: '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
                     }
                 ]
             }
@@ -196,6 +208,16 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
+            },
+            'sinon': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.root %>/node_modules/sinon/pkg',
+                        src: ['sinon-1.17.4.js'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
             }
         },
         concat: {
@@ -208,7 +230,9 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/papaparse.min.js',
                         '<%= plugin.minerva.static %>/colorbrewer.min.js',
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
-                        '<%= plugin.minerva.static %>/datatables.min.js'
+                        '<%= plugin.minerva.static %>/datatables.min.js',
+                        '<%= plugin.minerva.static %>/bootstrap-select.min.js',
+                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
                     ]
                 }
             }
@@ -237,6 +261,9 @@ module.exports = function (grunt) {
             },
             'concat:minerva-ext': {
                 dependencies: ['copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
+            },
+            'copy:sinon': {
+                dependencies: ['shell:plugin-minerva']
             }
         },
         default: {
@@ -292,12 +319,11 @@ module.exports = function (grunt) {
         var i, plugin, pluginJs, pluginCss;
         var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
         var dependencies = [
+            '/' + staticDir + '/sinon-1.17.4.js',
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
-            // '/' + rootStaticDir + '/libs.min.js', // libs included in jade template
-            '/' + staticDir + '/jquery-ui.min.js',
-            '/' + staticDir + '/geo.min.js',
+            '/' + staticDir + '/minerva.ext.min.js',
             '/' + rootStaticDir + '/app.min.js'
         ];
         // if any plugin dependencies have js, add them
@@ -308,11 +334,6 @@ module.exports = function (grunt) {
                 dependencies.push('/' + pluginJs);
             }
         }
-        dependencies.concat([
-            '/' + staticDir + '/papaparse.min.js',
-            '/' + staticDir + '/jsonpath.min.js'
-        ]);
-
         var globs = grunt.config.get('uglify.minerva.files')[0].src;
         var jsFiles = [];
         globs.forEach(function (glob) {

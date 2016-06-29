@@ -131,6 +131,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      */
     this.init = function (container, dataset, visProperties, data) {
         this.geoJsLayer = container.createLayer('feature');
+        this._injectStyle(data, visProperties, data.summary || {});
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
             reader.read(data, _.bind(function () {
@@ -141,6 +142,41 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             console.error(err);
             this.trigger('m:map_layer_error', this);
         }
+    };
+
+    /**
+     * Inject style objects into geojson feature properties.
+     */
+    this._injectStyle = function (data, visProperties, summary) {
+        var props = {
+            point: this._configureProperties(visProperties.point, summary),
+            line: this._configureProperties(visProperties.line, summary),
+            polygon: this._configureProperties(visProperties.polygon, summary)
+        };
+        minerva.geojson.style(data, props);
+    };
+
+    /**
+     * Generate a normalized representation of vis properties suitable to be
+     * passed into geojs's json reader.  For now, this handles generating
+     * color scale functions for fill and stroke styles.
+     */
+    this._configureProperties = function (style, summary) {
+        var vis = _.extend({}, style);
+        if (vis.strokeColorKey) {
+            vis.strokeColor = _.compose(
+                minerva.geojson.colorScale(vis.strokeRamp, summary[vis.strokeColorKey]),
+                function (props) { return props[vis.strokeColorKey]; }
+            );
+        }
+
+        if (vis.fillColorKey) {
+            vis.fillColor = _.compose(
+                minerva.geojson.colorScale(vis.fillRamp, summary[vis.fillColorKey]),
+                function (props) { return props[vis.fillColorKey]; }
+            );
+        }
+        return vis;
     };
 }, minerva.rendering.geo.MapRepresentation);
 
