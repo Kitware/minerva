@@ -46,13 +46,20 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
     render: function (evt) {
         var geoData = this._dataset.get('geoData') || {};
+        var tabs = this._getTabs(geoData);
+
+        // noop if there are no points, lines, or polygons
+        if (this._activeTab === null) {
+            this.$el.empty().text('No renderable features');
+            return this;
+        }
+
         this.$el.html(
             minerva.templates.geoJSONStyleWidget({
-                activeTab: this._activeTab,
                 point: this._pointStyle.attributes,
                 line: this._lineStyle.attributes,
                 polygon: this._polygonStyle.attributes,
-                tabs: this._getTabs(geoData),
+                tabs: tabs,
                 ramps: this._pointStyle.ramps,
                 summary: geoData.summary || {}
             })
@@ -101,6 +108,10 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
     _activateTab: function (evt) {
         var $el = $(evt.currentTarget);
+        if ($el.parent().hasClass('disabled')) {
+            evt.stopPropagation();
+            return;
+        }
         this.$($el.data('target')).tab('show');
         this._activeTab = $el.data('tab');
     },
@@ -169,14 +180,32 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
         }
     },
     _getTabs: function (data) {
+        var points = !!minerva.geojson.getFeatures(data, 'Point', 'MultiPoint').length;
+        var lines = !!minerva.geojson.getFeatures(data, 'Line', 'MultiLine').length;
+        var polygons = !!minerva.geojson.getFeatures(data, 'Polygon', 'MultiPolygon').length;
         var tabs = {};
+
+        if (!points && !lines && !polygons) {
+            this._activeTab = null;
+        }
+
+        if (this._activeTab === 'point' && !points) {
+            this._activeTab = 'line';
+        }
+        if (this._activeTab === 'line' && !lines) {
+            this._activeTab = 'polygon';
+        }
+
         tabs.point = {
+            enabled: points,
             active: this._activeTab === 'point'
         };
         tabs.line = {
+            enabled: lines,
             active: this._activeTab === 'line'
         };
         tabs.polygon = {
+            enabled: polygons,
             active: this._activeTab === 'polygon'
         };
         return tabs;

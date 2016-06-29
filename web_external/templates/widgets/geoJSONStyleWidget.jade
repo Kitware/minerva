@@ -41,11 +41,11 @@ mixin color(label, value, feature, property, enabled, colorby, rampKey)
           data-property=property)
 
 ul.nav.nav-tabs
-  li(role='presentation' class={active: tabs.point && tabs.point.active})
+  li(role='presentation' class={active: tabs.point.active, disabled: !tabs.point.enabled})
     a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-point-style' data-tab='point') Points
-  li(role='presentation' class={active: tabs.line && tabs.line.active})
+  li(role='presentation' class={active: tabs.line.active, disabled: !tabs.line.enabled})
     a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-line-style' data-tab='line') Lines
-  li(role='presentation' class={active: tabs.polygon && tabs.polygon.active})
+  li(role='presentation' class={active: tabs.polygon.active, disabled: !tabs.polygon.enabled})
     a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-polygon-style' data-tab='polygon') Polygons
 #m-style-tab-content.tab-content.clearfix
   - var active = tabs.point.active;
