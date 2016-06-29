@@ -14,6 +14,8 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
                 return new minerva.models.PostgresSourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 'mongo') {
                 return new minerva.models.MongoSourceModel(attrs, options);
+            } else if (attrs.meta.minerva.source_type === 'slippy') {
+                return new minerva.models.SlippySourceModel(attrs, options);
             }
         }
 

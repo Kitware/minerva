@@ -35,9 +35,9 @@ minerva.views.AddSourceWidget = minerva.View.extend({
     initialize: function (settings) {
         this.collection = settings.collection;
         // TODO would be nice if new source types could register themselves,
-        // perhaps with a method on the minerva object, that we could then
+        // perhaps with a method on the Minerva object, that we could then
         // query here.  All the source types register themselves upon definition,
-        // and we query here upon instantation.  This registration process
+        // and we query here upon instantiation.  This registration process
         // should also add them to the SourceCollection model function.
         this.sourceTypes = {
             wms: {
@@ -64,6 +64,11 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'Mongo DB',
                 icon: 'icon-leaf',
                 widget: minerva.views.AddMongoSourceWidget
+            },
+            slippy: {
+                label: 'Slippy',
+                icon: 'icon-layers',
+                widget: minerva.views.AddSlippySourceWidget
             }
         };
     },

@@ -1,0 +1,21 @@
+.modal-dialog
+  .modal-content
+    form#m-add-slippy-source-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Enter slippy Service details
+
+      .modal-body
+        .form-group
+          label.control-label(for="m-slippy-name") Name
+          input.input-sm#m-slippy-name.form-control(type="text", placeholder="Enter slippy name")
+        .form-group
+          label.control-label(for="m-slippy-uri") slippy baseURL
+          input.input-sm#m-slippy-uri.form-control(type="text", placeholder="http://geodata.company.com/geoserver/slippy")
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-add-service-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Add slippy Source
