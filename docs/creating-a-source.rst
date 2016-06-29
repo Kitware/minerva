@@ -47,7 +47,6 @@ Now you should see the new test in your build directory
      Test #111: server_minerva.source
      Test #112: server_minerva.session
      Test #113: server_minerva.analysis
-     Test #114: server_minerva.geonames
      Test #115: server_minerva.s3_dataset
      Test #116: server_minerva.import_analyses
      Test #117: server_minerva.contour_analysis
@@ -56,7 +55,6 @@ Now you should see the new test in your build directory
      Test #120: server_minerva.geojson
      Test #121: server_minerva.mean_contour_analysis
      Test #122: pep8_style_minerva_constants
-     Test #123: pep8_style_minerva_geonames
      Test #124: pep8_style_minerva_rest
      Test #125: pep8_style_minerva_utility
      Test #126: pep8_style_minerva_bsve
