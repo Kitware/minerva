@@ -36,7 +36,7 @@ class SlippyDataset(Dataset):
         self.route('POST', (), self.createSlippyDataset)
 
     @access.user
-    @loadmodel(map={'SlippySourceId': 'SlippySource'}, model='item',
+    @loadmodel(map={'slippySourceId': 'SlippySource'}, model='item',
                level=AccessType.READ)
     def createSlippyDataset(self, SlippySource, params):
         baseURL = SlippySource['meta']['minerva']['slippy_params']['base_url']
@@ -60,7 +60,7 @@ class SlippyDataset(Dataset):
         Description('Create a Slippy Dataset from a Slippy Source.')
         .responseClass('Item')
         .param('name', 'The name of the Slippy dataset', required=True)
-        .param('SlippySourceId', 'Item ID of the Slippy Source', required=True)
+        .param('slippySourceId', 'Item ID of the Slippy Source', required=True)
         .param('typeName', 'The type name of the Slippy layer', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))

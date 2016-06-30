@@ -338,3 +338,29 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
         this.trigger('m:map_layer_renderable', this);
     };
 }, minerva.rendering.geo.MapRepresentation);
+
+/**
+ * GeoJs WMS MapRepresentation definition, with type 'wms'.
+ */
+minerva.rendering.geo.SlippyRepresentation = minerva.rendering.geo.defineMapLayer('slippy', function () {
+    /**
+     * Async function to define a rendered GeoJs tile layer for the passed in dataset.
+     *
+     * @param {Object} container - An implementor of the MapContainer interface
+     * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
+     * @fires 'm:map_layer_renderable' event upon successful layer render definition
+     * @fires 'm:map_layer_error' event upon an error defining the layer rendering
+     */
+    this.init = function (container, dataset) {
+        this.geoJsLayer = container.createLayer('osm', {
+            attribution: null,
+            keepLower: false,
+            url: minervaMetadata.base_url,
+            baseUrl: null
+        });
+        container.addFeatureInfoLayer(this.geoJsLayer);
+        var minervaMetadata = dataset.metadata();
+        this.geoJsLayer.layerName = minervaMetadata.type_name;
+        this.trigger('m:map_layer_renderable', this);
+    };
+}, minerva.rendering.geo.MapRepresentation);

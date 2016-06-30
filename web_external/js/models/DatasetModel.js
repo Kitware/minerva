@@ -123,6 +123,10 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 mm.geo_render = {
                     type: 'wms'
                 };
+            } else if (mm.dataset_type === 'slippy') {
+                mm.geo_render = {
+                    type: 'slippy'
+                };
             } else {
                 // An unknown type.
             }
