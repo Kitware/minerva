@@ -28,7 +28,8 @@ from girder.utility.model_importer import ModelImporter
 from girder.plugins.minerva.rest import \
         analysis, dataset, s3_dataset, session, geocode, source, \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
-        s3_source, postgres_source, mongo_source, mongo_dataset, slippy_source
+        s3_source, postgres_source, mongo_source, mongo_dataset, slippy_source, \
+        slippy_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
@@ -101,7 +102,8 @@ def load(info):
     info['apiRoot'].minerva_dataset_mongo = mongo_dataset.MongoDataset()
     info['serverRoot'].wms_proxy = WmsProxy()
 
-    info['apiRoot'].minerva_source_slippy = s3_source.S3Source()
+    info['apiRoot'].minerva_source_slippy = slippy_source.SlippySource()
+    info['apiRoot'].minerva_dataset_slippy = slippy_dataset.SlippyDataset()
 
     # If we are started up in testing mode, then serve minerva's sources as well
     # for debugging client tests.

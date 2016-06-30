@@ -3,6 +3,7 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
     events: {
         'click .m-add-source': 'addSourceDialog',
         'click .m-display-wms-layers-list': 'displayWmsLayersList',
+        'click .m-display-slippy-layers-list': 'displaySlippyLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
         'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
@@ -71,6 +72,28 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
         this.wmsLayersListWidget.render();
     },
 
+    displaySlippyLayersList: function (evt) {
+        // TODO this looks like a good interface for a generalized source-action
+        // Then we could just have a single source-action event handler
+        // which would pull the source type from the set of classes
+        // then create and dispatch to the correct widget type.
+        // First we should add in S3 as a source and get that working, then
+        // refactor.
+        var el = $(evt.currentTarget);
+        var slippySource = this.sourceCollection.get(el.attr('cid'));
+        if (!this.slippyLayersListWidget) {
+            this.slippyLayersListWidget = new minerva.views.SlippyLayersListWidget({
+                el: $('#g-dialog-container'),
+                source: slippySource,
+                collection: this.datasetCollection,
+                parentView: this
+            });
+        } else {
+            this.slippyLayersListWidget.setCurrentSource(slippySource);
+        }
+        this.slippyLayersListWidget.render();
+    },
+
     displaySourceInfo: function (evt) {
         var el = $(evt.currentTarget);
         var source = this.sourceCollection.get(el.attr('cid'));
@@ -117,6 +140,10 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
             wms: {
                 icon: 'icon-layers',
                 action: 'm-display-wms-layers-list'
+            },
+            slippy: {
+                icon: 'icon-layers',
+                action: 'm-display-slippy-layers-list'
             },
             elasticsearch: {
                 icon: 'icon-search',
