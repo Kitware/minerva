@@ -26,7 +26,7 @@ from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
-        analysis, dataset, s3_dataset, session, geocode, source, \
+        analysis, dataset, s3_dataset, session, source, \
         wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
         s3_source, postgres_source, mongo_source, mongo_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
@@ -53,11 +53,6 @@ def validate_settings(event):
     key = event.info['key']
     val = event.info['value']
 
-    if key == 'minerva.geonames_folder':
-        ModelImporter.model('folder').load(val, exc=True, force=True)
-        event.preventDefault().stopPropagation()
-
-
 def load(info):
     # Load the mako template for Minerva and serve it as the root document.
     minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
@@ -70,12 +65,6 @@ def load(info):
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
 
-    # Admin endpoint for initializing the geonames database
-    info['apiRoot'].geonames = geocodeREST = geocode.Geonames()
-    info['apiRoot'].geonames.route('POST', ('setup',),
-                                   geocodeREST.setup)
-    info['apiRoot'].geonames.route('GET', ('geocode',),
-                                   geocodeREST.geocode)
     events.bind('model.setting.validate', 'minerva', validate_settings)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()

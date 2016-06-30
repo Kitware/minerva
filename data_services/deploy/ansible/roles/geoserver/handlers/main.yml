@@ -1,3 +1,0 @@
-- name: restart tomcat
-  service: name=tomcat7 state=restarted
-  sudo: yes
