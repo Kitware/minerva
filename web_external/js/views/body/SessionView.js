@@ -181,10 +181,6 @@ minerva.views.SessionView = minerva.View.extend({
                     view: minerva.views.PanelGroup,
                     panelViews: [
                         {
-                            id: 'm-analysis-panel',
-                            view: minerva.views.AnalysisPanel
-                        },
-                        {
                             id: 'm-source-panel',
                             view: minerva.views.SourcePanel
                         },
@@ -195,10 +191,6 @@ minerva.views.SessionView = minerva.View.extend({
                         {
                             id: 'm-layer-panel',
                             view: minerva.views.LayersPanel
-                        },
-                        {
-                            id: 'm-jobs-panel',
-                            view: minerva.views.JobsPanel
                         }
                     ]
                 }

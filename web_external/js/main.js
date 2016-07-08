@@ -32,8 +32,11 @@ $(function () {
 
         function pollSearch(query)
         {
+            console.log('pollSearch');
+            console.log(query);
             BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
             {
+                console.log('response from search result api');
                 console.log(response);
                 // store available data source types for reference
                 if ( !dataSources ) { dataSources = response.availableSourceTypes; }
@@ -59,8 +62,10 @@ $(function () {
 
         function getGeoJSON(query)
         {
+            console.log('getGeoJSON');
             BSVE.api.get('/api/search/util/geomap/geojson/' + query.requestId + '/all', function(response)
             {
+                console.log('response from getGeoJSON');
                 console.log(response);
             });
         }

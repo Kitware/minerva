@@ -54,7 +54,9 @@ class WfsSource(Source):
         print url
         resp = bu._session.request(url=url, headers=bu._auth_header(),
                                    method="GET")
+        print resp.status_code
         print resp.content
+
         #print rest.text
         # baseURL is passed but unused
         if resp.status_code != 200:

@@ -13,8 +13,28 @@ minerva.views.SessionsView = minerva.View.extend({
         girder.cancelRestRequests('fetch');
 
         this.collection = new minerva.collections.SessionCollection();
+
         this.collection.on('g:changed', function () {
-            this.render();
+            // Look for a default session, if it doesn't exist, create it.
+            var defaultSessions = _.filter(this.collection.models, function (session) {
+                return session.attributes.name == 'default';
+            });
+            if (defaultSessions.length > 0) {
+                this._gotoSession(defaultSessions[0]);
+            } else {
+                var session = new minerva.models.SessionModel();
+                session.set({
+                    folderId: this.collection.folderId,
+                    name: 'default'
+                });
+                session.on('g:saved', function () {
+                    session.on('m:metadata_saved', function () {
+                        this.collection.add(session);
+                        this._gotoSession(session);
+                    }, this);
+                    session.createSessionMetadata();
+                }, this).save();
+            }
         }, this);
 
         this.paginateWidget = new girder.views.PaginateWidget({
@@ -72,12 +92,20 @@ minerva.views.SessionsView = minerva.View.extend({
 });
 
 minerva.router.route('', 'index', function () {
-    girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
+    if (girder.currentUser) {
+        girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
+    } else {
+        girder.login('default', 'default');
+    }
 });
 minerva.router.route('sessions', 'sessions', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
 });
 
 girder.events.on('g:login', function () {
-    girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
+    if (girder.currentUser) {
+        girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
+    } else {
+        girder.login('default', 'default');
+    }
 });
