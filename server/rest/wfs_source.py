@@ -48,9 +48,14 @@ class WfsSource(Source):
         secret = environ.get('BSVE_SECRETKEY')
         bu = bsve_utility.BsveUtility(user=user, apikey=apikey, secret=secret,
                                       base=baseURL)
-        url = '%s/api/data/v2/sources/wfs/meta/GetCapabilities' % baseURL
+        url = '%s/data/v2/sources/wfs/meta/GetCapabilities' % baseURL
+        #url = '%s/data/v2/sources/wfs/meta/GetCapabilities' % baseURL
+        print bu._auth_header()
+        print url
         resp = bu._session.request(url=url, headers=bu._auth_header(),
                                    method="GET")
+        print resp.content
+        #print rest.text
         # baseURL is passed but unused
         if resp.status_code != 200:
             raise RestException('WFS Source GetCapabilities returned %s' % (resp.status_code))

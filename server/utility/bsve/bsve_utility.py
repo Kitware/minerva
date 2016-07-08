@@ -164,6 +164,14 @@ class BsveUtility(object):
         endpoint = '/api/search/v1/result'
         return self._request('GET', endpoint, params={'requestId': requestId})
 
+    def search_result_geojson(self, requestId):
+        """Query the BSVE for the geojson results of a the given search request.
+
+        :returns dict[]: The array of results or None if not finished
+        """
+        endpoint = '/api/search/util/geomap/geojson/%s/all' % (requestId)
+        return self._request('GET', endpoint)
+
     @classmethod
     def construct_search_query(cls, term, from_date, to_date,
                                time_zone='UTC', sources=None, locations=None):
@@ -203,6 +211,16 @@ class BsveUtility(object):
         while result is None:
             time.sleep(1)
             result = self.search_result(request)
+
+        # TODO add an if
+        #print ("finding geojson")
+        geojson = self.search_result_geojson(request)
+        with open('search_result.geojson', 'w') as outfile:
+            json.dump(geojson, outfile)
+        #print("GEOJSON")
+        #print (geojson)
+        #print ("GEOJSON")
+
         return result
 
     @assert_status
@@ -456,6 +474,7 @@ def main():
             locations=args.locations
         )
         output = bsve.search(data)
+
     elif args.command == 'list':
         output = bsve.list_sources()
     elif args.command == 'custom':
@@ -485,7 +504,7 @@ def main():
 
     if isinstance(output, (dict, list, tuple)):
         output = json.dumps(output, indent=2)
-    print(output)
+    #print(output)
 
 if __name__ == '__main__':
     main()

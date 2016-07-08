@@ -41,7 +41,7 @@ minerva.models.WfsDatasetModel = minerva.models.DatasetModel.extend({
                 if (!baseUrl.endsWith('/')) {
                     baseUrl += '/';
                 }
-                var url = baseUrl + 'api/data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name + '&$format=json';
+                var url = baseUrl + 'data/v2/sources/wfs/data?$filter=name+eq+' + mm.type_name + '&$format=json';
                 $.ajax({
                     url: url,
                     contentType: 'application/json',
@@ -49,6 +49,7 @@ minerva.models.WfsDatasetModel = minerva.models.DatasetModel.extend({
                     dataType: 'text',
                     beforeSend: function (xhr) { xhr.setRequestHeader('harbinger-authentication', auth['harbinger-authentication']); },
                     success: _.bind(function (data) {
+                        console.log(data);
                         data = JSON.parse(data);
                         this.set('geoData', data.result);
                         this.trigger('m:dataset_geo_dataLoaded', this);

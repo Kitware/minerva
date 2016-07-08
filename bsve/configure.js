@@ -6,7 +6,7 @@ var path = require('path');
 /**
  * Common configuration variables.
  */
-var name = 'minerva';
+var name = 'geoviz';
 var webroot = path.resolve(
     __dirname, name, 'WebContent'
 );
