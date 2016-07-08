@@ -85,6 +85,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      */
     renderMap: function () {
         if (!this.map) {
+            console.log(girder.currentUser);
+            console.log(this.session);
             var mapSettings = this.session.metadata().map;
             this.map = geo.map({
                 node: '.m-map-panel-map',
