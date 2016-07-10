@@ -85,8 +85,6 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      */
     renderMap: function () {
         if (!this.map) {
-            console.log(girder.currentUser);
-            console.log(this.session);
             var mapSettings = this.session.metadata().map;
             this.map = geo.map({
                 node: '.m-map-panel-map',
@@ -208,6 +206,27 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 }
             }
         }, this);
+
+        minerva.events.on('m:add_external_geojson', function (gj) {
+            // This is probably better in the DataPanel or DatasetCollection
+            // create a dataset from the gj, add it to the collection
+            var geojsonDataset = new minerva.models.DatasetModel({
+                name: gj.name,
+                folderId: this.collection.folderId
+            }).on('g:saved', function () {
+                geojsonDataset.on('m:metadata_saved', function () {
+                    this.collection.add(geojsonDataset);
+                }, this).saveMinervaMetadata({
+                    "dataset_type": "geojson",
+                    "geojson": {
+                        "data": gj.geojson
+                    }
+                });
+            }, this).on('g:error', function (err) {
+                console.error(err);
+            }).save();
+        }, this);
+
 
         this.listenTo(this.collection, 'change:opacity', function (dataset) {
             if (this.mapCreated) {

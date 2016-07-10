@@ -11,7 +11,7 @@ stdout = sys.stdout
 sys.stdout = sys.stderr
 root = server.setup(plugins=['minerva']).root
 path = os.path.abspath(os.path.dirname(__file__))
-host = 'https://minerva.bsvecosystem.net/'
+host = 'https://minerva-beta.bsvecosystem.net/'
 
 
 def compile(template):

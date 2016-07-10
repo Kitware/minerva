@@ -5,7 +5,19 @@ $(function () {
         parentView: null
     });
     minerva.events.trigger('g:appload.after');
+/*
+    var exampleGJ = '{"type": "FeatureCollection", "features": [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-77.03238901390978, 38.913188059745586] }, "properties": { "title": "Mapbox DC", "icon": "monument" } }, { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-122.414, 37.776] }, "properties": { "title": "Mapbox SF", "icon": "harbor" } }] }';
 
+    function sendGJ () {
+        console.log('sendGJ');
+        var gjObj = {
+            'geojson': exampleGJ,
+            'name': 'blarg'
+        }
+        minerva.events.trigger('m:add_external_geojson', gjObj);
+    }
+    setTimeout(function(){ sendGJ(); }, 5000);
+*/
     BSVE.init(function()
     {
         console.log("BSVE.init");
@@ -34,10 +46,12 @@ $(function () {
         {
             console.log('pollSearch');
             console.log(query);
+            var stopPolling = false;
             BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
             {
                 console.log('response from search result api');
                 console.log(response);
+
                 // store available data source types for reference
                 if ( !dataSources ) { dataSources = response.availableSourceTypes; }
 
@@ -47,12 +61,17 @@ $(function () {
                     if ( response.sourceTypeResults[dataSources[i]].message == "Successfully processed." )
                     {
                         // it's done so fetch updated geoJSON and remove this data source from list
-                        dataSources.splice(i,1);
-                        getGeoJSON(query);
+                        var dataSource = dataSources.splice(i,1);
+                        console.log('calling getGeoJSON with datasource ');
+                        console.log(dataSource);
+                        console.log(query);
+                        getGeoJSON(query, dataSource[0]);
+                        //stopPolling = true;
+                        //console.log('STOP polling');
                     }
                 }
 
-                if (dataSources.length)
+                if (dataSources.length && !stopPolling)
                 {
                     // continue polling since there are still in progress sources
                     setTimeout(function(){ pollSearch(query); }, 2000);
@@ -60,13 +79,19 @@ $(function () {
             });
         }
 
-        function getGeoJSON(query)
+        function getGeoJSON(query, dataSourceName)
         {
             console.log('getGeoJSON');
+            console.log(query);
             BSVE.api.get('/api/search/util/geomap/geojson/' + query.requestId + '/all', function(response)
             {
                 console.log('response from getGeoJSON');
                 console.log(response);
+                var gjObj = {
+                    'geojson': response,
+                    'name': dataSourceName
+                }
+                minerva.events.trigger('m:add_external_geojson', gjObj);
             });
         }
 
@@ -100,7 +125,6 @@ $(function () {
             });
         });
     });
-
 
 
 
