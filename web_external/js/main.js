@@ -14,6 +14,7 @@ $(function () {
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false, // used for dismissing modal alert for tagging confirmation
             dataSources = null;
+        console.log('GeoViz 0.0.20');
         console.log(user);
 
         /*
@@ -23,80 +24,92 @@ $(function () {
         BSVE.api.search.submit(function(query)
         {
             // query object will include all of the search params including the requestId which can be used to make data requests
+            console.log('GeoViz submitted search');
+            console.log(query);
+            // Store DataSource features that have already been processed.
+            var sourceTypeFeatures = {};
+
+            function pollSearch(query)
+            {
+                var stopPolling = false;
+                BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
+                {
+                    //console.log('GeoViz got response to query');
+                    //console.log(query);
+                    //console.log(response);
+                    // store available data source types for reference
+                    if ( !dataSources ) {
+                        //console.log('created dataSources');
+                        dataSources = response.availableSourceTypes;
+                    }
+
+                    for ( var i = dataSources.length - 1; i >= 0; i-- )
+                    {
+                        //console.log('looping over datasources with length ' + dataSources.length + ' i='+i);
+                        //console.log(response.sourceTypeResults[dataSources[i]].message);
+                        // check each data source in the result
+
+                        if ( response.sourceTypeResults[dataSources[i]].message == "Successfully processed." )
+                        {
+                            // it's done so fetch updated geoJSON and remove this data source from list
+                            var dataSource = dataSources.splice(i,1);
+                            //console.log('after splice, dataSource='+dataSource+' '+dataSource[0]);
+                            getGeoJSON(query, dataSource[0]);
+                        }
+                    }
+
+                    if (dataSources.length && !stopPolling)
+                    {
+                        // continue polling since there are still in progress sources
+                        setTimeout(function(){ pollSearch(query); }, 2000);
+                    }
+                });
+            }
+
+            function getGeoJSON(query, dataSourceName)
+            {
+                console.log('GeoViz calling getGeoJSON');
+                //console.log(query);
+                BSVE.api.get('/api/search/util/geomap/geojson/' + query.requestId + '/all', function(response)
+                {
+                    console.log('Geojson response for '+dataSourceName);
+                    console.log(response);
+                    if (response.features && response.features.length > 0) {
+                        var groupedBySourceType = _.groupBy(response.features, function (feature) {
+                            return feature.properties.SourceType;
+                        });
+                        console.log(groupedBySourceType);
+                        // Create a Dataset for each SourceType features array.
+                        var sourceTypesWithFeatures = _.keys(groupedBySourceType);
+                        _.each(sourceTypesWithFeatures, function (sourceType) {
+                            console.log('Checking for features of ' + sourceType);
+                            if (groupedBySourceType[sourceType] && groupedBySourceType[sourceType].length > 0) {
+                                if (_.has(sourceTypeFeatures, sourceType)) {
+                                    console.log('Already created a dataset for ' + sourceType);
+                                } else {
+                                    // Replace the overall features array with the subset for sourceType.
+                                    response.features = groupedBySourceType[sourceType];
+                                    var gjObj = {
+                                        'geojson': response,
+                                        'name': query.term + ' ' + sourceType + ' ' + response.features.length
+                                    }
+                                    sourceTypeFeatures[sourceType] = response.features.length;
+                                    minerva.events.trigger('m:add_external_geojson', gjObj);
+                                }
+                            } else {
+                                console.log('No features for '+ sourceType);
+                            }
+                        });
+                    } else {
+                        console.log(dataSourceName + ' response is missing features');
+                    }
+                });
+            }
+
+            // Start polling.
             pollSearch(query);
         }, true, true, true); // set all 3 flags to true, which will hide the searchbar altogether
 
-
-        function pollSearch(query)
-        {
-            var stopPolling = false;
-            BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
-            {
-                // store available data source types for reference
-                if ( !dataSources ) { dataSources = response.availableSourceTypes; }
-
-                for ( var i = dataSources.length - 1; i >= 0; i-- )
-                {
-                    // check each data source in the result
-                    if ( response.sourceTypeResults[dataSources[i]].message == "Successfully processed." )
-                    {
-                        // it's done so fetch updated geoJSON and remove this data source from list
-                        var dataSource = dataSources.splice(i,1);
-                        getGeoJSON(query, dataSource[0]);
-                    }
-                }
-
-                if (dataSources.length && !stopPolling)
-                {
-                    // continue polling since there are still in progress sources
-                    setTimeout(function(){ pollSearch(query); }, 2000);
-                }
-            });
-        }
-
-        function getGeoJSON(query, dataSourceName)
-        {
-            BSVE.api.get('/api/search/util/geomap/geojson/' + query.requestId + '/all', function(response)
-            {
-                var gjObj = {
-                    'geojson': response,
-                    'name': query.term + ' ' + dataSourceName
-                }
-                minerva.events.trigger('m:add_external_geojson', gjObj);
-            });
-        }
-
-        /*
-         * create a dossier bar for item tagging
-         * The provided callback will be executed when the user clicks on one of the tagging buttons in the dossier bar control.
-         */
-        BSVE.ui.dossierbar.create(function(status)
-        {
-            // create item object to save
-            var item = {
-                dataSource : 'GeoVIZ',
-                title : 'GeoVIZ Item',
-                sourceDate : BSVE.api.dates.yymmdd(Date.now()),
-                itemDetail : {
-                    statusIconType: 'Map',
-                    Description : '...' // this is where the generated content will go
-                }
-            };
-
-            BSVE.api.tagItem(item, status, function()
-            {
-                // item successfully tagged
-                if (!dismissed)
-                {
-                    BSVE.ui.alert('Item was tagged successfully', true, function(val)
-                    {
-                        if ( val ) dismissed = true;
-                    });
-                }
-            });
-        });
     });
-
-
 
 });
