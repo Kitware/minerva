@@ -1,11 +1,4 @@
 $(function () {
-    minerva.events.trigger('g:appload.before');
-    minerva.mainApp = new minerva.App({
-        el: 'body',
-        parentView: null
-    });
-    minerva.events.trigger('g:appload.after');
-
     BSVE.init(function()
     {
         // in the ready callback function, access to workbench vars are now available.
@@ -14,8 +7,17 @@ $(function () {
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false, // used for dismissing modal alert for tagging confirmation
             dataSources = null;
-        console.log('GeoViz 0.0.20');
+        console.log('GeoViz 0.0.26');
         console.log(user);
+
+        window.girder_bsve_user = user;
+
+        minerva.events.trigger('g:appload.before');
+        minerva.mainApp = new minerva.App({
+            el: 'body',
+            parentView: null
+        });
+        minerva.events.trigger('g:appload.after');
 
         /*
          * Create a search submit handler.
@@ -87,13 +89,20 @@ $(function () {
                                 if (_.has(sourceTypeFeatures, sourceType)) {
                                     console.log('Already created a dataset for ' + sourceType);
                                 } else {
-                                    // Replace the overall features array with the subset for sourceType.
-                                    response.features = groupedBySourceType[sourceType];
+                                    var geojsonData = {
+                                        'type': 'FeatureCollection'
+                                    };
+                                    geojsonData.features = groupedBySourceType[sourceType];
+                                    console.log(groupedBySourceType[sourceType].length);
+                                    console.log(geojsonData);
+                                    console.log('Creating a dataset for ' + sourceType + ' of length ' + geojsonData.features.length);
                                     var gjObj = {
-                                        'geojson': response,
-                                        'name': query.term + ' ' + sourceType + ' ' + response.features.length
+                                        'geojson': geojsonData,
+                                        'name': query.term + ': ' + sourceType + ' - ' + geojsonData.features.length
                                     }
-                                    sourceTypeFeatures[sourceType] = response.features.length;
+                                    console.log(gjObj);
+                                    console.log("the gjObj feature len is " + gjObj.geojson.features.length);
+                                    sourceTypeFeatures[sourceType] = geojsonData.features.length;
                                     minerva.events.trigger('m:add_external_geojson', gjObj);
                                 }
                             } else {

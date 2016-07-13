@@ -15,6 +15,9 @@ minerva.views.SessionsView = minerva.View.extend({
         this.collection = new minerva.collections.SessionCollection();
 
         this.collection.on('g:changed', function () {
+            // Utility to Create a session with a randomish name, for now we'll go with a 'default' session.
+            // name: Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5) + Date.now()//
+
             // Look for a default session, if it doesn't exist, create it.
             var defaultSessions = _.filter(this.collection.models, function (session) {
                 return session.attributes.name == 'default';
@@ -91,11 +94,50 @@ minerva.views.SessionsView = minerva.View.extend({
     }
 });
 
+function _loginOrCreateBsveUser() {
+    var email = window.girder_bsve_user;
+    // Set all names and password to the email, without punctuation.
+    var name = email.replace(/\./g, '');
+    name = name.replace(/@/g, '');
+    // Get the list of users based on this email.
+    girder.restRequest({
+        type: 'GET',
+        path: 'user',
+        data: {
+            text: name
+        }
+    }).done(_.bind(function (users) {
+        users = _.filter(users, function (user) {
+            return user.firstName === name;
+        });
+        if (users.length > 0) {
+            // User found, so login.
+            var theUser = users[0];
+            girder.login(theUser.firstName, theUser.firstName);
+        } else {
+            // No user found, create a user, then login.
+            girder.restRequest({
+                type: 'POST',
+                path: 'user',
+                data: {
+                    login: name,
+                    email: email,
+                    firstName: name,
+                    lastName: name,
+                    password: name
+                }
+            }).done(_.bind(function (user) {
+                girder.login(name, name);
+            }, this));
+         }
+    }, this));
+}
+
 minerva.router.route('', 'index', function () {
     if (girder.currentUser) {
         girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
     } else {
-        girder.login('default', 'default');
+        _loginOrCreateBsveUser();
     }
 });
 minerva.router.route('sessions', 'sessions', function () {
@@ -106,6 +148,6 @@ girder.events.on('g:login', function () {
     if (girder.currentUser) {
         girder.events.trigger('g:navigateTo', minerva.views.SessionsView);
     } else {
-        girder.login('default', 'default');
+        _loginOrCreateBsveUser();
     }
 });
