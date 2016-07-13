@@ -134,9 +134,6 @@ minerva.views.SessionView = minerva.View.extend({
         } else {
             this.render();
         }
-        this.collection.on('g:changed', function () {
-            this.render();
-        }, this);
         this.model = settings.session;
         this.datasetsCollection = settings.datasetsCollection;
         this.analysisCollection = settings.analysisCollection;
@@ -147,6 +144,62 @@ minerva.views.SessionView = minerva.View.extend({
         }, this);
         this.sourceCollection = settings.sourceCollection;
 
+        this.collection.on('g:changed', function () {
+            // Look for a BSVE Reference source in Source Collection.
+            // Create it if it doesn't exist.
+            // Add all of its layers.
+            var bsveReferenceSources = _.filter(this.sourceCollection.models, function (source) {
+                return source.attributes.name == 'BSVE Reference';
+            });
+            if (bsveReferenceSources.length > 0) {
+                var bsveRef = bsveReferenceSources[0];
+                _.each(bsveRef.metadata().layers, function (layer) {
+                    var found = _.find(this.datasetsCollection.models, function (dataset) {
+                        return dataset.attributes.name === layer.layer_title;
+                    }, this);
+                    if (!found) {
+                        var params = {
+                            typeName: layer.layer_type,
+                            name: layer.layer_title,
+                            wfsSourceId: bsveRef.get('_id')
+                        };
+                        var wfsDataset = new minerva.models.WfsDatasetModel({});
+                        wfsDataset.once('m:wfsDatasetAdded', function () {
+                            this.$el.modal('hide');
+                            this.datasetsCollection.add(wfsDataset);
+                        }, this).createWfsDataset(params);
+                    }
+                }, this);
+                this.render();
+            } else {
+                var params = {
+                    name: 'BSVE Reference',
+                    baseURL: 'https://api-qa.bsvecosystem.net'
+                };
+                var bsveRef = new minerva.models.WfsSourceModel({});
+                bsveRef.on('m:sourceReceived', function () {
+                    this.sourceCollection.add(bsveRef);
+                    _.each(bsveRef.metadata().layers, function (layer) {
+                        var found = _.find(this.datasetsCollection.models, function (dataset) {
+                            return dataset.attributes.name === layer.layer_title;
+                        }, this);
+                        if (!found) {
+                            var params = {
+                                typeName: layer.layer_type,
+                                name: layer.layer_title,
+                                wfsSourceId: bsveRef.get('_id')
+                            };
+                            var wfsDataset = new minerva.models.WfsDatasetModel({});
+                            wfsDataset.once('m:wfsDatasetAdded', function () {
+                                this.$el.modal('hide');
+                                this.datasetsCollection.add(wfsDataset);
+                            }, this).createWfsDataset(params);
+                        }
+                    }, this);
+                        this.render();
+                }, this).createSource(params);
+            }
+        }, this);
         // listen for a change on a dataset being displayed
         // this should add or remove it from the current session
         this.listenTo(this.datasetsCollection, 'change:displayed', function (dataset) {
