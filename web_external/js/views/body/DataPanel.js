@@ -6,7 +6,23 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .m-configure-geo-render': 'configureGeoRender'
+        'click .m-configure-geo-render': 'configureGeoRender',
+        'click .icon-download': 'downloadDatasetEvent'
+    },
+
+    downloadDatasetEvent: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        dataset.on('m:dataset_geo_dataLoaded', function () {
+            var geojsonData = dataset.get('geoData');
+            var a = window.document.createElement('a');
+            a.href = window.URL.createObjectURL(new Blob([JSON.stringify(geojsonData)], {type: 'application/json'}));
+            var filename = dataset.get('name') + '.geojson';
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }, this).loadGeoData();
     },
 
     /**
