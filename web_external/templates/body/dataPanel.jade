@@ -1,7 +1,6 @@
 include ../layout/panelMixins.jade
 
-+panel-title('Datasets', 'm-data-panel')
-  i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
++panel-title('Available Layers', 'm-data-panel')
 
 if datasets
   +panel-content('collapse in')
@@ -9,27 +8,17 @@ if datasets
       each dataset in datasets
         if dataset.metadata()
           .dataset
-            span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
+            span(title=dataset.get('name'))= dataset.get('name').length > 30 ? dataset.get('name').slice(0,30) + "..." : dataset.get('name')
               - var attributes = {'m-dataset-id': dataset.get('_id')}
+
+              if dataset.getDatasetType() === 'wfs'
+                i.icon-book
+              else
+                i.icon-search
 
               //- Eye icon to move dataset into current session
               if dataset.isGeoRenderable()
                 - var classes = (dataset.get('displayed') ? 'icon-eye icon-disabled dataset-in-session' : 'icon-eye icon-enabled add-dataset-to-session')
-                i(class=classes)&attributes(attributes)
-
-              //- Trash icon to delete dataset
-              - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
-              i(class=classes)&attributes(attributes)
-
-              //- Info icon for minerva metadata display
-              i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
-              - var geoRenderType = dataset.getGeoRenderType()
-
-              //- Cog icon for geo rendering configuration
-              if geoRenderType !== null && geoRenderType !== 'wms'
-                - var classes = 'icon-cog m-configure-geo-render'
-                - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-                - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                 i(class=classes)&attributes(attributes)
 
               //- Table icon for csv

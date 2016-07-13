@@ -181,10 +181,6 @@ minerva.views.SessionView = minerva.View.extend({
                     view: minerva.views.PanelGroup,
                     panelViews: [
                         {
-                            id: 'm-source-panel',
-                            view: minerva.views.SourcePanel
-                        },
-                        {
                             id: 'm-data-panel',
                             view: minerva.views.DataPanel
                         },
@@ -245,6 +241,8 @@ minerva.views.SessionView = minerva.View.extend({
 minerva.router.route('maps', 'maps', function () {
     girder.events.trigger('g:navigateTo', minerva.views.SessionView);
 });
+
+
 
 minerva.router.route('session/:id', 'session', function (id) {
     // fetch the session and render it
