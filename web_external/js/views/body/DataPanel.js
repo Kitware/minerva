@@ -13,7 +13,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     downloadDatasetEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        dataset.on('m:dataset_geo_dataLoaded', function () {
+        dataset.once('m:dataset_geo_dataLoaded', function () {
             var geojsonData = dataset.get('geoData');
             var a = window.document.createElement('a');
             a.href = window.URL.createObjectURL(new Blob([JSON.stringify(geojsonData)], {type: 'application/json'}));
@@ -194,6 +194,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             this.render();
         }, this);
 
+        // Delete any search datasets from the start.
+        var searchDatasets = _.filter(this.collection.models, function (dataset) {
+            return dataset.getDatasetType() !== 'wfs';
+        }, this);
+        _.each(searchDatasets, function (dataset) {
+            dataset.destroy();
+            this.collection.remove(dataset);
+        }, this);
+
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);
             if (status === girder.jobs_JobStatus.SUCCESS) {
@@ -209,12 +218,39 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             }
         }, this));
 
+        this.federatedSearch = true;
+        minerva.events.on('m:federated_search', function (query) {
+            // If this is the same as what we already have, do nothing.
+            if (this.federatedSearch &&
+                this.federatedSearch.term === query.term &&
+                this.federatedSearch.startDate === query.startDate &&
+                this.federatedSearch.endDate === query.endDate) {
+            } else {
+                this.federatedSearch = {
+                    term: query.term,
+                    startDate: query.startDate,
+                    endDate: query.endDate,
+                    termText: 'term: ' + query.term,
+                    dateText: 'date: '+query.startDate+' to '+query.endDate
+                };
+                var searchDatasets = _.filter(this.collection.models, function (dataset) {
+                    return dataset.getDatasetType() !== 'wfs';
+                }, this);
+                _.each(searchDatasets, function (dataset) {
+                    dataset.destroy();
+                    this.collection.remove(dataset);
+                }, this);
+                this.render();
+            }
+        }, this);
+
         minerva.views.Panel.prototype.initialize.apply(this);
     },
 
     render: function () {
         this.$el.html(minerva.templates.dataPanel({
-            datasets: this.collection.models
+            datasets: this.collection.models,
+            federatedSearch: this.federatedSearch
         }));
 
         // TODO pagination and search?
