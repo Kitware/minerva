@@ -8,7 +8,7 @@ $(function () {
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false, // used for dismissing modal alert for tagging confirmation
             dataSources = null;
-        console.log('GeoViz 0.0.39');
+        console.log('GeoViz 0.0.40');
         console.log(user);
 
         // TODO fix this grossness.

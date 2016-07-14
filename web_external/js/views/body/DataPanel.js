@@ -223,15 +223,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             // If this is the same as what we already have, do nothing.
             if (this.federatedSearch &&
                 this.federatedSearch.term === query.term &&
-                this.federatedSearch.startDate === query.startDate &&
-                this.federatedSearch.endDate === query.endDate) {
+                this.federatedSearch.fromDate === query.fromDate &&
+                this.federatedSearch.toDate === query.toDate) {
             } else {
                 this.federatedSearch = {
                     term: query.term,
-                    startDate: query.startDate,
-                    endDate: query.endDate,
+                    fromDate: query.fromDate,
+                    toDate: query.toDate,
                     termText: 'term: ' + query.term,
-                    dateText: 'date: '+query.startDate+' to '+query.endDate
+                    dateText: 'date: '+query.fromDate+' to '+query.toDate
                 };
                 var searchDatasets = _.filter(this.collection.models, function (dataset) {
                     return dataset.getDatasetType() !== 'wfs';

@@ -8,14 +8,14 @@ minerva.views.LayoutHeaderView = minerva.View.extend({
             // If this is the same as what we already have, do nothing.
             if (this.federatedSearch &&
                 this.federatedSearch.term === query.term &&
-                this.federatedSearch.startDate === query.startDate &&
-                this.federatedSearch.endDate === query.endDate) {
+                this.federatedSearch.fromDate === query.fromDate &&
+                this.federatedSearch.toDate === query.toDate) {
             } else {
                 this.federatedSearch = {
                     term: query.term,
-                    startDate: query.startDate,
-                    endDate: query.endDate,
-                    bannerText: query.term + ': '+query.startDate+' - '+query.endDate
+                    fromDate: query.fromDate,
+                    toDate: query.toDate,
+                    bannerText: query.term + ': '+query.fromDate+' - '+query.toDate
                 };
                 this.render();
             }
