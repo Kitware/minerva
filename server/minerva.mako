@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="pragma" content="no-cache">
+
+     ## Standard minerva block
     <title>${title}</title>
     <link rel="stylesheet"
           href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
@@ -25,8 +30,14 @@
     <link rel="icon"
           type="image/png"
           href="${staticRoot}/img/Girder_Favicon.png">
-  </head>
+
+    ## Custom bsve stylesheet
+    <link rel="stylesheet"
+        href="bsve-minerva.css">
+   </head>
+
   <body>
+    ## Standard minerva block
     <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
 
@@ -51,8 +62,9 @@
         % endif
     % endfor
 
-    <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/t/dt/dt-1.10.11,b-1.1.2,b-colvis-1.1.2,sc-1.4.1/datatables.min.js"></script>
-
+    ## BSVE API source
+    <script type="text/javascript" src="//developer.bsvecosystem.net/sdk/api/BSVE.API.js"></script>
+    <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>
    </body>
 </html>
