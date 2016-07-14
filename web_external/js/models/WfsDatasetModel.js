@@ -49,7 +49,6 @@ minerva.models.WfsDatasetModel = minerva.models.DatasetModel.extend({
                     dataType: 'text',
                     beforeSend: function (xhr) { xhr.setRequestHeader('harbinger-authentication', auth['harbinger-authentication']); },
                     success: _.bind(function (data) {
-                        console.log(data);
                         data = JSON.parse(data);
                         this.set('geoData', data.result);
                         this.trigger('m:dataset_geo_dataLoaded', this);
