@@ -214,14 +214,15 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 name: gj.name,
                 folderId: this.collection.folderId
             }).on('g:saved', function () {
-                geojsonDataset.on('m:metadata_saved', function () {
-                    this.collection.add(geojsonDataset);
-                }, this).saveMinervaMetadata({
+                geojsonDataset.metadata({
                     "dataset_type": "geojson",
                     "geojson": {
                         "data": gj.geojson
                     }
                 });
+                geojsonDataset.once('m:metadata_saved', function () {
+                    this.collection.add(geojsonDataset);
+                }, this)._initGeoRender();
             }, this).on('g:error', function (err) {
                 console.error(err);
             }).save();
