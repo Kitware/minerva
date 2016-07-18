@@ -8,7 +8,7 @@ $(function () {
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false, // used for dismissing modal alert for tagging confirmation
             dataSources = null;
-        console.log('GeoViz 0.0.40');
+        console.log('GeoViz 0.0.41');
         console.log(user);
 
         // TODO fix this grossness.
@@ -39,6 +39,7 @@ $(function () {
 
             function pollSearch(query)
             {
+                console.log('about to trigger m:federated_search');
                 minerva.events.trigger('m:federated_search', query);
                 var stopPolling = false;
                 BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
