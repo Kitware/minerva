@@ -8,7 +8,7 @@ $(function () {
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false, // used for dismissing modal alert for tagging confirmation
             dataSources = null;
-        console.log('GeoViz 0.0.41');
+        console.log('GeoViz 0.0.42');
         console.log(user);
 
         // TODO fix this grossness.
@@ -36,12 +36,13 @@ $(function () {
             //
             // Store DataSource features that have already been processed.
             var sourceTypeFeatures = {};
+            // Store requestIds that have finished;
+            var finishedRequestIds = {};
 
             function pollSearch(query)
             {
                 console.log('about to trigger m:federated_search');
                 minerva.events.trigger('m:federated_search', query);
-                var stopPolling = false;
                 BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
                 {
                     // Store available data source types for reference.
@@ -62,10 +63,16 @@ $(function () {
                         }
                     }
 
-                    if (dataSources.length && !stopPolling)
+                    if (dataSources.length)
                     {
-                        // continue polling since there are still in progress sources
-                        setTimeout(function(){ pollSearch(query); }, 2000);
+                        if (_.has(finishedRequestIds, query.requestId)) {
+                            delete finishedRequestIds[query.requestId];
+                            console.log('stop polling');
+                            console.log(query);
+                        } else {
+                            // continue polling since there are still in progress sources
+                            setTimeout(function(){ pollSearch(query); }, 2000);
+                        }
                     }
                 });
             }
@@ -99,6 +106,8 @@ $(function () {
                                     sourceTypeFeatures[sourceType] = geojsonData.features.length;
                                     minerva.events.trigger('m:add_external_geojson', gjObj);
                                 }
+                                // Assume this means we got some request data back.
+                                finishedRequestIds[query.requestId] = query.requestId;
                             } else {
                                 console.log('No features for '+ sourceType);
                             }
