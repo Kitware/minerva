@@ -6,9 +6,8 @@ $(function () {
         var user = BSVE.api.user(), // current logged in user
             authTicket = BSVE.api.authTicket(), // harbinger-auth-ticket
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
-            dismissed = false, // used for dismissing modal alert for tagging confirmation
-            dataSources = null;
-        console.log('GeoViz 0.0.42');
+            dismissed = false; // used for dismissing modal alert for tagging confirmation
+        console.log('GeoViz 0.0.43');
         console.log(user);
 
         // TODO fix this grossness.
@@ -22,6 +21,9 @@ $(function () {
         });
         minerva.events.trigger('g:appload.after');
 
+        // Store most recent requestId.
+        var currentRequestId = false;
+
         /*
          * Create a search submit handler.
          * The provided callback function will be executed when a fed search is performed.
@@ -34,14 +36,14 @@ $(function () {
             // There is a problem trying to trigger the federated search here, as the
             // Minerva app may not be ready to listen yet.
             //
+            var dataSources = null;
             // Store DataSource features that have already been processed.
             var sourceTypeFeatures = {};
-            // Store requestIds that have finished;
-            var finishedRequestIds = {};
+            var finishedCurrentRequest = false;
+            currentRequestId = query.requestId;
 
             function pollSearch(query)
             {
-                console.log('about to trigger m:federated_search');
                 minerva.events.trigger('m:federated_search', query);
                 BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
                 {
@@ -65,10 +67,9 @@ $(function () {
 
                     if (dataSources.length)
                     {
-                        if (_.has(finishedRequestIds, query.requestId)) {
-                            delete finishedRequestIds[query.requestId];
-                            console.log('stop polling');
-                            console.log(query);
+                        if (currentRequestId != query.requestId || finishedCurrentRequest) {
+                            if(currentRequestId != query.requestId) { console.log('stop polling bc of requestId'); }
+			    else { console.log('stop polling bc of finished'); }
                         } else {
                             // continue polling since there are still in progress sources
                             setTimeout(function(){ pollSearch(query); }, 2000);
@@ -107,7 +108,7 @@ $(function () {
                                     minerva.events.trigger('m:add_external_geojson', gjObj);
                                 }
                                 // Assume this means we got some request data back.
-                                finishedRequestIds[query.requestId] = query.requestId;
+                                finishedCurrentRequest = true;
                             } else {
                                 console.log('No features for '+ sourceType);
                             }

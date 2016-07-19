@@ -5,8 +5,6 @@ minerva.views.LayoutHeaderView = minerva.View.extend({
     initialize: function () {
        this.federatedSearch = false;
        minerva.events.on('m:federated_search', function (query) {
-            console.log('HeaderView getting m:federated_search');
-            console.log(query);
             // If this is the same as what we already have, do nothing.
             if (this.federatedSearch &&
                 this.federatedSearch.term === query.term &&
