@@ -24,7 +24,7 @@ if datasets
                 i(class=classes)&attributes(attributes)
       if federatedSearch
         #m-federated-search-title.dataset-subsection
-          | Search Results
+          | Geotagged Search Results
         each dataset in datasets
           if dataset.metadata() && dataset.getDatasetType() !== 'wfs'
             .dataset
