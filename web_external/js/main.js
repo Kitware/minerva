@@ -7,7 +7,7 @@ $(function () {
             authTicket = BSVE.api.authTicket(), // harbinger-auth-ticket
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false; // used for dismissing modal alert for tagging confirmation
-        console.log('GeoViz 0.0.43');
+        console.log('GeoViz 0.0.44');
         console.log(user);
 
         // TODO fix this grossness.

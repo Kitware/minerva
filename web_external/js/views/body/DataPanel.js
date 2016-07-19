@@ -237,6 +237,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
                     return dataset.getDatasetType() !== 'wfs';
                 }, this);
                 _.each(searchDatasets, function (dataset) {
+                    dataset.set('displayed', false);
                     dataset.destroy();
                     this.collection.remove(dataset);
                 }, this);
