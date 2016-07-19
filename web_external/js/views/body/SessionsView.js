@@ -97,8 +97,7 @@ minerva.views.SessionsView = minerva.View.extend({
 function _loginOrCreateBsveUser() {
     var email = window.girder_bsve_user;
     // Set all names and password to the email, without punctuation.
-    var name = email.replace(/\./g, '');
-    name = name.replace(/@/g, '');
+    var name = email.replace(/[^0-9a-z]/gi, '');
     // Get the list of users based on this email.
     girder.restRequest({
         type: 'GET',
