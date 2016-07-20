@@ -7,7 +7,7 @@ include ../widgets/legendWidget.jade
   .layersList
     ul.datasets
       each dataset, index in datasets
-        li.dataset= dataset.get('name').length > 26 ? dataset.get('name').slice(0,26) + "..." : dataset.get('name')
+        li.dataset= dataset.get('name').length > 22 ? dataset.get('name').slice(0,22) + "..." : dataset.get('name')
           if dataset.getDatasetType() === 'wfs'
             i.icon-book
           else
