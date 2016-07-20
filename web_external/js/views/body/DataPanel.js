@@ -220,29 +220,22 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
         this.federatedSearch = true;
         minerva.events.on('m:federated_search', function (query) {
-            // If this is the same as what we already have, do nothing.
-            if (this.federatedSearch &&
-                this.federatedSearch.term === query.term &&
-                this.federatedSearch.fromDate === query.fromDate &&
-                this.federatedSearch.toDate === query.toDate) {
-            } else {
-                this.federatedSearch = {
-                    term: query.term,
-                    fromDate: query.fromDate,
-                    toDate: query.toDate,
-                    termText: 'term: ' + query.term,
-                    dateText: 'date: '+query.fromDate+' to '+query.toDate
-                };
-                var searchDatasets = _.filter(this.collection.models, function (dataset) {
-                    return dataset.getDatasetType() !== 'wfs';
-                }, this);
-                _.each(searchDatasets, function (dataset) {
-                    dataset.set('displayed', false);
-                    dataset.destroy();
-                    this.collection.remove(dataset);
-                }, this);
-                this.render();
-            }
+            this.federatedSearch = {
+                term: query.term,
+                fromDate: query.fromDate,
+                toDate: query.toDate,
+                termText: 'term: ' + query.term,
+                dateText: 'date: '+query.fromDate+' to '+query.toDate
+            };
+            var searchDatasets = _.filter(this.collection.models, function (dataset) {
+                return dataset.getDatasetType() !== 'wfs';
+            }, this);
+            _.each(searchDatasets, function (dataset) {
+                dataset.set('displayed', false);
+                dataset.destroy();
+                this.collection.remove(dataset);
+            }, this);
+            this.render();
         }, this);
 
         minerva.views.Panel.prototype.initialize.apply(this);

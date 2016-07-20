@@ -1,5 +1,30 @@
 $(function () {
 
+    /**
+     * To test this locally, uncomment this block and then run
+     * window.minerva_bsve() in your browser's javascript console.
+     */
+    //window.minerva_bsve = function () {
+        //window.girder_bsve_user = 'snarg@snarg.com';
+        //minerva.events.trigger('g:appload.before');
+        //minerva.mainApp = new minerva.App({
+            //el: 'body',
+            //parentView: null
+        //});
+        //minerva.events.trigger('g:appload.after');
+    //};
+    /**
+     * After minerva displays, run window.minerva_bsve_test().
+     * This will create a geojson dataset with a single point, in Nigeria.
+     */
+    //window.minerva_bsve_test = function () {
+        //var q = { term: 'fluz', fromDate: 'mon', toDate: 'nev'};
+        //minerva.events.trigger('m:federated_search', q);
+        //var geojsonData = '{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[10,10]},"properties":{"Source":"Point Of Need","Sample ID":"BT ALPHA QC AB2","Test":"Ebola Zaire","Date Time":"1464206640000","Disease":"Ebola","SourceType":"PON","DataSourceName":"PON","Simulated":"false","Assay Set ID":"BioThreat Panel v2.4"}}]}';
+        //var gjObj = { 'geojson': geojsonData, 'name': 'Test - 1' };
+        //minerva.events.trigger('m:add_external_geojson', gjObj);
+    //};
+
     BSVE.init(function()
     {
         // in the ready callback function, access to workbench vars are now available.
@@ -7,7 +32,7 @@ $(function () {
             authTicket = BSVE.api.authTicket(), // harbinger-auth-ticket
             tenancy = BSVE.api.tenancy(), // logged in user's tenant
             dismissed = false; // used for dismissing modal alert for tagging confirmation
-        console.log('GeoViz 0.0.44');
+        console.log('GeoViz 0.0.45');
         console.log(user);
 
         // TODO fix this grossness.
@@ -21,8 +46,9 @@ $(function () {
         });
         minerva.events.trigger('g:appload.after');
 
-        // Store most recent requestId.
+        // Store most recent and previous requestId.
         var currentRequestId = false;
+        var previousRequestId = false;
 
         /*
          * Create a search submit handler.
@@ -30,6 +56,16 @@ $(function () {
          */
         BSVE.api.search.submit(function(query)
         {
+            // There are several problems here that will need to be rethought.
+            // 1) We may get this search callback before the Minerva app is ready
+            // 2) Due to polling, we may have a pollSearch callback executed after
+            // the time that an additional search has been done, so that pollSearch should
+            // do nothing.
+            // 3) The search GeoJson doesn't appear to behave correctly.  There can
+            // be a response with 'Successfully processed' but that doesn't have any geojson,
+            // also all geojson is returned at once, rather than per source type, then the geojson
+            // needs to be split apart into geojson specific to source types.
+            //
             // query object will include all of the search params including the requestId which can be used to make data requests
             console.log('GeoViz submitted search');
             console.log(query);
@@ -44,7 +80,14 @@ $(function () {
 
             function pollSearch(query)
             {
-                minerva.events.trigger('m:federated_search', query);
+                // Need to wait somehow for the Minerva app to be ready before triggering.
+                if (currentRequestId !== previousRequestId) {
+                    // This must be a new query that we haven't yet triggered.
+                    minerva.events.trigger('m:federated_search', query);
+                    previousRequestId = currentRequestId;
+                    // This could probably be combined with the logic below to
+                    // stop polling, but there wasn't time to think it through.
+                }
                 BSVE.api.get('/api/search/result?requestId=' + query.requestId, function(response)
                 {
                     // Store available data source types for reference.
@@ -68,8 +111,11 @@ $(function () {
                     if (dataSources.length)
                     {
                         if (currentRequestId != query.requestId || finishedCurrentRequest) {
-                            if(currentRequestId != query.requestId) { console.log('stop polling bc of requestId'); }
-			    else { console.log('stop polling bc of finished'); }
+                            if(currentRequestId != query.requestId) {
+                                console.log('stop polling bc of requestId');
+                            } else {
+                                console.log('stop polling bc of finished');
+                            }
                         } else {
                             // continue polling since there are still in progress sources
                             setTimeout(function(){ pollSearch(query); }, 2000);
