@@ -174,7 +174,7 @@ minerva.views.SessionView = minerva.View.extend({
             } else {
                 var params = {
                     name: 'BSVE Reference',
-                    baseURL: 'https://api-qa.bsvecosystem.net'
+                    baseURL: 'https://api-dev.bsvecosystem.net'
                 };
                 var bsveRef = new minerva.models.WfsSourceModel({});
                 bsveRef.on('m:sourceReceived', function () {
