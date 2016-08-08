@@ -3,10 +3,19 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         // TODO namespace.
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
+        'click .m-add-wms': 'addWmsDataset',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender'
+    },
+
+    addWmsDataset: function (event) {
+        var addWmsWidget = new minerva.views.AddWmsSourceWidget({
+            el: $('#g-dialog-container'),
+            parentView: this
+        });
+        addWmsWidget.render();
     },
 
     /**

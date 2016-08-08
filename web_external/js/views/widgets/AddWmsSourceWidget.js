@@ -22,13 +22,12 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
     },
 
     initialize: function (settings) {
-        this.collection = settings.collection;
         this.title = 'Enter WMS Source details';
+        return this;
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addWmsSourceWidget({}));
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        var modal = this.$el.html(minerva.templates.addWmsSourceWidget({})).girderModal(this);
         return this;
     }
 
