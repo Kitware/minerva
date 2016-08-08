@@ -44,11 +44,6 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'WMS',
                 icon: 'icon-layers',
                 widget: minerva.views.AddWmsSourceWidget
-            },
-            s3: {
-                label: 'S3 bucket',
-                icon: 'icon-cloud',
-                widget: minerva.views.AddS3SourceWidget
             }
         };
     },
