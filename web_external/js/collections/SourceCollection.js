@@ -6,8 +6,6 @@ minerva.collections.SourceCollection = minerva.collections.MinervaCollection.ext
         if (attrs.meta && ('minerva' in attrs.meta)) {
             if (attrs.meta.minerva.source_type === 'wms') {
                 return new minerva.models.WmsSourceModel(attrs, options);
-            } else if (attrs.meta.minerva.source_type === 'elasticsearch') {
-                return new minerva.models.ElasticsearchSourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 's3') {
                 return new minerva.models.S3SourceModel(attrs, options);
             } else if (attrs.meta.minerva.source_type === 'postgres') {

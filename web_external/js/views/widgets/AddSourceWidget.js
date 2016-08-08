@@ -45,11 +45,6 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 icon: 'icon-layers',
                 widget: minerva.views.AddWmsSourceWidget
             },
-            elasticsearch: {
-                label: 'Elasticsearch',
-                icon: 'icon-search',
-                widget: minerva.views.AddElasticsearchSourceWidget
-            },
             s3: {
                 label: 'S3 bucket',
                 icon: 'icon-cloud',

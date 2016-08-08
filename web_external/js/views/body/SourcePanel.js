@@ -5,7 +5,6 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
         'click .m-display-wms-layers-list': 'displayWmsLayersList',
         'click .m-icon-info': 'displaySourceInfo',
         'click .m-delete-source': 'deleteSource',
-        'click .m-display-elasticsearch-query': 'displayElasticsearchQuery',
         'click .m-display-s3-bucket-hierarchy': 'selectS3Files',
         'click .m-display-mongo-collections': 'displayMongoCollections'
     },
@@ -89,20 +88,6 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
         source.destroy();
     },
 
-    displayElasticsearchQuery: function (evt) {
-        var el = $(evt.currentTarget);
-        var source = this.sourceCollection.get(el.attr('cid'));
-        if (!this.elasticsearchWidget) {
-            this.elasticsearchWidget = new minerva.views.ElasticsearchWidget({
-                el: $('#g-dialog-container'),
-                source: source,
-                collection: this.datasetCollection,
-                parentView: this
-            });
-        }
-        this.elasticsearchWidget.render();
-    },
-
     initialize: function (settings) {
         this.session = settings.session.model;
         this.sourceCollection = settings.session.sourceCollection;
@@ -117,10 +102,6 @@ minerva.views.SourcePanel = minerva.views.Panel.extend({
             wms: {
                 icon: 'icon-layers',
                 action: 'm-display-wms-layers-list'
-            },
-            elasticsearch: {
-                icon: 'icon-search',
-                action: 'm-display-elasticsearch-query'
             },
             s3: {
                 icon: 'icon-cloud',
