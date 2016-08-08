@@ -42,7 +42,6 @@ add_minerva_server_test(s3_source)
 add_minerva_server_test(import_analyses)
 add_minerva_server_test(wms)
 add_minerva_server_test(geojson)
-add_minerva_server_test(postgres)
 add_minerva_server_test(mongo_dataset)
 
 

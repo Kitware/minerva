@@ -50,11 +50,6 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 icon: 'icon-cloud',
                 widget: minerva.views.AddS3SourceWidget
             },
-            postgres: {
-                label: 'PostgreSQL',
-                icon: 'icon-database',
-                widget: minerva.views.AddPostgresSourceWidget
-            },
             mongo: {
                 label: 'Mongo DB',
                 icon: 'icon-leaf',
