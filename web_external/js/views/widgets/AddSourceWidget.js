@@ -49,11 +49,6 @@ minerva.views.AddSourceWidget = minerva.View.extend({
                 label: 'S3 bucket',
                 icon: 'icon-cloud',
                 widget: minerva.views.AddS3SourceWidget
-            },
-            mongo: {
-                label: 'Mongo DB',
-                icon: 'icon-leaf',
-                widget: minerva.views.AddMongoSourceWidget
             }
         };
     },
