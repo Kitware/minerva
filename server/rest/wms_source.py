@@ -36,13 +36,14 @@ class WmsSource(Source):
 
     @access.user
     def createWmsSource(self, params):
-        def sourceMetadata(username, password, baseURL, hostName):
+        def sourceMetadata(username, password, baseURL, hostName, name):
             minerva_metadata = {
                 'source_type': 'wms',
                 'wms_params': {
                     'base_url': baseURL,
                     'host_name': hostName
-                }
+                },
+                'name': name
             }
 
             if username and password:
@@ -63,7 +64,7 @@ class WmsSource(Source):
                             password=password)
         layersType = list(wms.contents)
         layers = []
-        source = sourceMetadata(username, password, baseURL, hostName)
+        source = sourceMetadata(username, password, baseURL, hostName, name)
 
         from girder.plugins.minerva.rest.wms_dataset import WmsDataset
         wmsDataset = WmsDataset()
