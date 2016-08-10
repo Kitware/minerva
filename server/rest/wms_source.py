@@ -43,7 +43,7 @@ class WmsSource(Source):
                     'base_url': baseURL,
                     'host_name': hostName
                 },
-                'name': name
+                'wms_source_name': name
             }
 
             if username and password:
