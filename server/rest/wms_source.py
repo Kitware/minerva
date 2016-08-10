@@ -36,6 +36,22 @@ class WmsSource(Source):
 
     @access.user
     def createWmsSource(self, params):
+        def sourceMetadata(username, password, baseURL, hostName):
+            minerva_metadata = {
+                'source_type': 'wms',
+                'wms_params': {
+                    'base_url': baseURL,
+                    'host_name': hostName
+                }
+            }
+
+            if username and password:
+                credentials = encryptCredentials("{}:{}".format(
+                    username, password))
+                minerva_metadata['wms_params']['credentials'] = credentials
+
+            return minerva_metadata
+
         name = params['name']
         baseURL = params['baseURL']
         parsedUrl = getUrlParts(baseURL)
@@ -44,31 +60,26 @@ class WmsSource(Source):
         password = params['password'] if 'password' in params else None
         wms = WebMapService(baseURL, version='1.1.1',
                             username=username,
-                            password=password
-                            )
+                            password=password)
         layersType = list(wms.contents)
         layers = []
+        source = sourceMetadata(username, password, baseURL, hostName)
+
+        from girder.plugins.minerva.rest.wms_dataset import WmsDataset
+        wmsDataset = WmsDataset()
+
         for layerType in layersType:
             layer = {
                 'layer_title': wms[layerType].title,
                 'layer_type': layerType
             }
+
+            wmsDataset.createWmsDataset({'meta': {'minerva': source}},
+                                        params={'typeName': layer['layer_type'],
+                                                'name': layer['layer_title']})
             layers.append(layer)
 
-        minerva_metadata = {
-            'source_type': 'wms',
-            'layers': layers,
-            'wms_params': {
-                'base_url': baseURL,
-                'host_name': hostName
-            }
-        }
-        if username and password:
-            credentials = encryptCredentials("{}:{}".format(
-                username, password))
-            minerva_metadata['wms_params']['credentials'] = credentials
-        desc = 'wms source for  %s' % name
-        return self.createSource(name, minerva_metadata, desc)
+        return layers
     createWmsSource.description = (
         Description('Create a source from an external wms server.')
         .responseClass('Item')

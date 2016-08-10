@@ -15,8 +15,6 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
             var wmsSource = new minerva.models.WmsSourceModel({});
             wmsSource.on('m:sourceReceived', function () {
                 this.$el.modal('hide');
-                // TODO: might need to be added to a new panel/data sources ?
-                this.collection.add(wmsSource);
             }, this).createSource(params);
         }
     },

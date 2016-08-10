@@ -185,10 +185,6 @@ minerva.views.SessionView = minerva.View.extend({
                             view: minerva.views.AnalysisPanel
                         },
                         {
-                            id: 'm-source-panel',
-                            view: minerva.views.SourcePanel
-                        },
-                        {
                             id: 'm-data-panel',
                             view: minerva.views.DataPanel
                         },
