@@ -7,7 +7,13 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .m-configure-geo-render': 'configureGeoRender'
+        'click .m-configure-geo-render': 'configureGeoRender',
+	'click .source-title': 'toggleDatasets'
+    },
+
+    toggleDatasets: function (event) {
+	$(event.currentTarget).next().slideToggle('slow');
+	
     },
 
     addWmsDataset: function (event) {
