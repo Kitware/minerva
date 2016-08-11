@@ -207,7 +207,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
     render: function () {
         this.$el.html(minerva.templates.dataPanel({
-            datasets: this.collection.models
+            sourceDatasetMapping: _.groupBy(
+		this.collection.models,
+		function(model) {
+		    return model.get("meta").minerva.source.meta.minerva.wms_source_name
+		}
+	    )
         }));
 
         // TODO pagination and search?

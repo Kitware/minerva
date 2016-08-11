@@ -4,9 +4,10 @@ include ../layout/panelMixins.jade
   i.m-add-wms.m-icon-enabled.icon-upload(title="Add WMS dataset")
   i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
 
-if datasets
+if sourceDatasetMapping
   +panel-content('collapse in')
-    .datasets
+    each datasets, source in sourceDatasetMapping
+      h5= source
       each dataset in datasets
         if dataset.metadata()
           .dataset
