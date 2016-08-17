@@ -19,7 +19,7 @@
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import getUrlParts
+from girder.api.rest import getUrlParts, Resource
 
 # A Quick implementation to call GetCapabilities
 from owslib.wms import WebMapService
@@ -28,7 +28,7 @@ from girder.plugins.minerva.rest.source import Source
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 
-class WmsSource(Source):
+class WmsSource(Resource):
 
     def __init__(self):
         self.resourceName = 'minerva_source_wms'
