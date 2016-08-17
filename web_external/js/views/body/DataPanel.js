@@ -13,7 +13,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
     toggleDatasets: function (event) {
 	$(event.currentTarget).next().slideToggle('slow');
-	
     },
 
     addWmsDataset: function (event) {
