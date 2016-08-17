@@ -75,10 +75,11 @@ class WmsSource(Source):
                 'layer_type': layerType
             }
 
-            wmsDataset.createWmsDataset({'meta': {'minerva': source}},
-                                        params={'typeName': layer['layer_type'],
-                                                'name': layer['layer_title']})
-            layers.append(layer)
+            dataset = wmsDataset.createWmsDataset({'meta': {'minerva': source}},
+                                                  params={'typeName': layer['layer_type'],
+                                                          'name': layer['layer_title']})
+
+            layers.append(dataset)
 
         return layers
     createWmsSource.description = (

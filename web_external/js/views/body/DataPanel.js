@@ -18,6 +18,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
+	    collection: this.collection,
             parentView: this
         });
         addWmsWidget.render();
