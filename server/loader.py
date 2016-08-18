@@ -27,7 +27,7 @@ from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
         analysis, dataset, session, \
-        wms_dataset, wms_source, geojson_dataset
+        wms_dataset, geojson_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
@@ -70,7 +70,6 @@ def load(info):
     info['apiRoot'].minerva_analysis = analysis.Analysis()
     info['apiRoot'].minerva_session = session.Session()
 
-    info['apiRoot'].minerva_source_wms = wms_source.WmsSource()
     info['apiRoot'].minerva_dataset_wms = wms_dataset.WmsDataset()
 
     info['apiRoot'].minerva_dataset_geojson = geojson_dataset.GeojsonDataset()

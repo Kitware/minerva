@@ -2,7 +2,7 @@ minerva.models.WmsSourceModel = minerva.models.SourceModel.extend({
 
     createSource: function (params) {
         girder.restRequest({
-            path: '/minerva_source_wms',
+            path: '/minerva_dataset_wms',
             type: 'POST',
             data: params,
             error: null // ignore default error behavior (validation may fail)
