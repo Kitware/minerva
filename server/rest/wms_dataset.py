@@ -40,14 +40,13 @@ class WmsDataset(Dataset):
 
     @access.user
     def createWmsSource(self, params):
-        def sourceMetadata(username, password, baseURL, hostName, name):
+        def sourceMetadata(username, password, baseURL, hostName):
             minerva_metadata = {
                 'source_type': 'wms',
                 'wms_params': {
                     'base_url': baseURL,
                     'host_name': hostName
-                },
-                'wms_source_name': name
+                }
             }
 
             if username and password:
@@ -68,7 +67,7 @@ class WmsDataset(Dataset):
                             password=password)
         layersType = list(wms.contents)
         layers = []
-        source = sourceMetadata(username, password, baseURL, hostName, name)
+        source = sourceMetadata(username, password, baseURL, hostName)
 
 
         for layerType in layersType:
@@ -77,7 +76,7 @@ class WmsDataset(Dataset):
                 'layer_type': layerType
             }
 
-            dataset = self.createWmsDataset({'meta': {'minerva': source}},
+            dataset = self.createWmsDataset({'meta': {'minerva': source}, 'layer_source': name},
                                                   params={'typeName': layer['layer_type'],
                                                           'name': layer['layer_title']})
 

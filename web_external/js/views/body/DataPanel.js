@@ -216,7 +216,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             sourceDatasetMapping: _.groupBy(
 		this.collection.models,
 		function(model) {
-		    return model.get("meta").minerva.source.meta.minerva.wms_source_name
+		    return model.get("meta").minerva.source.layer_source
 		}
 	    )
         }));
