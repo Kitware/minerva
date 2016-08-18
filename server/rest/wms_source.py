@@ -24,7 +24,6 @@ from girder.api.rest import getUrlParts, Resource
 # A Quick implementation to call GetCapabilities
 from owslib.wms import WebMapService
 
-from girder.plugins.minerva.rest.source import Source
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 
