@@ -12,9 +12,17 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     toggleDatasets: function (event) {
-	$(event.currentTarget).next().slideToggle('slow');
-    },
+	var listOfLayers = $(event.currentTarget).next();
 
+	if (listOfLayers.css('display') == 'none') {
+	    listOfLayers.css('display','block');
+	    this.sourceToggle[$(event.currentTarget).text()] = true;
+	} else {
+	    listOfLayers.css('display','none');
+	    this.sourceToggle[$(event.currentTarget).text()] = false;
+	}
+    },
+    
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
@@ -179,6 +187,25 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
     initialize: function (settings) {
         this.collection = settings.session.datasetsCollection;
+
+	this.sourceDataset = _.groupBy(
+	    this.collection.models,
+	    function(model) {
+		return model.get("meta").minerva.source.layer_source
+	    }
+	);
+
+	// Keep track of which sources are expanded
+	var sourceToggle  = {};
+
+	Object.keys(this.sourceDataset).forEach(function(key) {
+	    sourceToggle[key] = false;
+	})
+
+	this.sourceToggle = sourceToggle;
+	
+
+	
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -212,13 +239,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     render: function () {
+	
         this.$el.html(minerva.templates.dataPanel({
-            sourceDatasetMapping: _.groupBy(
-		this.collection.models,
-		function(model) {
-		    return model.get("meta").minerva.source.layer_source
-		}
-	    )
+            sourceDatasetMapping: this.sourceDataset,
+	    sourceToggle: this.sourceToggle
         }));
 
         // TODO pagination and search?

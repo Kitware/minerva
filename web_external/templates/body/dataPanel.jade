@@ -8,7 +8,11 @@ if sourceDatasetMapping
   +panel-content('collapse in')
     each datasets, source in sourceDatasetMapping
       .source-title= source
-      .datasets()
+      if sourceToggle[source] == true
+        - var val = "display: block;"
+      else
+        - var val = "display: none;"
+      .dataset(style=val)
         each dataset in datasets
           if dataset.metadata()
             .dataset
