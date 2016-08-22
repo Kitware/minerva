@@ -374,4 +374,15 @@ module.exports = function (grunt) {
             apiRoot: '/api/v1'
         }));
     });
+
+    // load bsve config if present
+    var bsve;
+    try {
+        bsve = require('./bsve/configure');
+    } catch (e) {
+    }
+    if (bsve) {
+        console.log('Loading BSVE configuration.');
+        bsve(grunt);
+    }
 };
