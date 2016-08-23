@@ -34,7 +34,6 @@ function(add_minerva_eslint_test name path)
 endfunction()
 
 add_minerva_server_test(dataset)
-add_minerva_server_test(source)
 add_minerva_server_test(session)
 add_minerva_server_test(analysis)
 add_minerva_server_test(import_analyses)
