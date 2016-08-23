@@ -16,10 +16,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
 	if (listOfLayers.css('display') == 'none') {
 	    listOfLayers.css('display','block');
-	    this.sourceToggle[$(event.currentTarget).text()] = true;
+	    this.visibleSourceGroups[$(event.currentTarget).text()] = true;
 	} else {
 	    listOfLayers.css('display','none');
-	    this.sourceToggle[$(event.currentTarget).text()] = false;
+	    this.visibleSourceGroups[$(event.currentTarget).text()] = false;
 	}
     },
     
@@ -184,27 +184,26 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         });
         this.datasetInfoWidget.render();
     },
-
+    
     initialize: function (settings) {
         this.collection = settings.session.datasetsCollection;
 
 	this.sourceDataset = _.groupBy(
-	    this.collection.models,
-	    function(model) {
-		return model.get("meta").minerva.source.layer_source
-	    }
-	);
+	    _.sortBy(
+		this.collection.models,
+		this.getSourceNameFromModel
+	    ), 
+	    this.getSourceNameFromModel
+        );
 
 	// Keep track of which sources are expanded
-	var sourceToggle  = {};
+	var visibleSourceGroups  = {};
 
 	Object.keys(this.sourceDataset).forEach(function(key) {
-	    sourceToggle[key] = false;
+	    visibleSourceGroups[key] = false;
 	})
 
-	this.sourceToggle = sourceToggle;
-	
-
+	this.visibleSourceGroups = visibleSourceGroups;
 	
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -238,11 +237,22 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         minerva.views.Panel.prototype.initialize.apply(this);
     },
 
+    getSourceNameFromModel: function (model) {
+	return model.get("meta").minerva.source.layer_source
+    },
+
     render: function () {
+	this.sourceDataset = _.groupBy(
+	    _.sortBy(
+		this.collection.models,
+		this.getSourceNameFromModel
+	    ), 
+	    this.getSourceNameFromModel
+        );
 	
         this.$el.html(minerva.templates.dataPanel({
             sourceDatasetMapping: this.sourceDataset,
-	    sourceToggle: this.sourceToggle
+	    visibleSourceGroups: this.visibleSourceGroups
         }));
 
         // TODO pagination and search?

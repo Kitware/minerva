@@ -8,7 +8,7 @@ if sourceDatasetMapping
   +panel-content('collapse in')
     each datasets, source in sourceDatasetMapping
       .source-title= source
-      if sourceToggle[source] == true
+      if visibleSourceGroups[source] == true
         - var val = "display: block;"
       else
         - var val = "display: none;"
