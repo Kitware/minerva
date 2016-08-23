@@ -188,22 +188,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     initialize: function (settings) {
         this.collection = settings.session.datasetsCollection;
 
-	this.sourceDataset = _.groupBy(
-	    _.sortBy(
-		this.collection.models,
-		this.getSourceNameFromModel
-	    ), 
-	    this.getSourceNameFromModel
-        );
-
-	// Keep track of which sources are expanded
-	var visibleSourceGroups  = {};
-
-	Object.keys(this.sourceDataset).forEach(function(key) {
-	    visibleSourceGroups[key] = false;
-	})
-
-	this.visibleSourceGroups = visibleSourceGroups;
+	this.visibleSourceGroups = {};
 	
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -256,7 +241,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         }));
 
         // TODO pagination and search?
-
         return this;
     }
 
