@@ -17,13 +17,9 @@
 #  limitations under the License.
 ###############################################################################
 from base64 import b64encode
-import httplib
-import binascii
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import loadmodel
 from girder.api.rest import getUrlParts
-from girder.constants import AccessType
 
 from owslib.wms import WebMapService
 
@@ -31,6 +27,7 @@ from girder.plugins.minerva.rest.dataset import Dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
+import requests
 
 class WmsDataset(Dataset):
 
@@ -69,7 +66,6 @@ class WmsDataset(Dataset):
         layers = []
         source = sourceMetadata(username, password, baseURL, hostName)
 
-
         for layerType in layersType:
             layer = {
                 'layer_title': wms[layerType].title,
@@ -83,7 +79,7 @@ class WmsDataset(Dataset):
             layers.append(dataset)
 
         return layers
-       
+
     @access.user
     def createWmsDataset(self, wmsSource, params):
         baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
@@ -100,16 +96,15 @@ class WmsDataset(Dataset):
             headers = {}
             credentials = None
 
-        conn = httplib.HTTPConnection(parsedUrl.netloc)
-        conn.request("GET",
-                     parsedUrl.path +
-                     "?service=WMS&request=" +
-                     "GetLegendGraphic&format=image" +
-                     "%2Fpng&width=20&height=20&layer=" +
-                     typeName, headers=headers
-                     )
-        response = conn.getresponse()
-        legend = binascii.b2a_base64(response.read())
+        request_url = parsedUrl.scheme + '://' + parsedUrl.netloc + parsedUrl.path
+        r = requests.get(request_url, params={
+            'service': 'WMS',
+            'request': 'GetLegendGraphic',
+            'format': 'image/png',
+            'width': 20,
+            'height': 20,
+            'layer': params['typeName']}, headers=headers)
+        legend = b64encode(r.content)
 
         self.requireParams(('name'), params)
         name = params['name']
