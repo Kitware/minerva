@@ -80,7 +80,7 @@ class WmsTestCase(base.TestCase):
         """
 
         # Create the source.
-        path = '/minerva_source_wms'
+        path = '/minerva_datasets_wms'
         name = 'testWMS'
         typeName = 'geonode:boxes_with_date'
         username = ''
@@ -93,13 +93,14 @@ class WmsTestCase(base.TestCase):
             'baseURL': baseURL
         }
 
+        
         with HTTMock(wms_mock):
             response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
 
         # Create the dataset.
-        path = '/minerva_dataset_wms'
+        path = '/minerva_datasets_wms'
         name = 'testWMSdataset'
         wmsParams = {}
         params = {

@@ -70,7 +70,7 @@ def load(info):
     info['apiRoot'].minerva_analysis = analysis.Analysis()
     info['apiRoot'].minerva_session = session.Session()
 
-    info['apiRoot'].minerva_dataset_wms = wms_dataset.WmsDataset()
+    info['apiRoot'].minerva_datasets_wms = wms_dataset.WmsDataset()
 
     info['apiRoot'].minerva_dataset_geojson = geojson_dataset.GeojsonDataset()
 

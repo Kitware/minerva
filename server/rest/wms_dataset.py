@@ -35,7 +35,7 @@ from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 class WmsDataset(Dataset):
 
     def __init__(self):
-        self.resourceName = 'minerva_dataset_wms'
+        self.resourceName = 'minerva_datasets_wms'
         self.route('POST', (), self.createWmsSource)
 
     @access.user
@@ -125,10 +125,11 @@ class WmsDataset(Dataset):
         dataset = self.constructDataset(name, minerva_metadata)
         return dataset
 
-    createWmsDataset.description = (
+    createWmsSource.description = (
         Description('Create a WMS Dataset from a WMS Source.')
         .responseClass('Item')
         .param('name', 'The name of the wms dataset', required=True)
         .param('typeName', 'The type name of the WMS layer', required=True)
+        .param('username', '', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Read permission denied on the Item.', 403))
