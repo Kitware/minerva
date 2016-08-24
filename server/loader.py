@@ -58,7 +58,15 @@ def load(info):
     minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
     minerva_webroot = Webroot(minerva_mako)
     minerva_webroot.updateHtmlVars(info['serverRoot'].vars)
-    minerva_webroot.updateHtmlVars({'title': 'Minerva'})
+    minerva_html_vars = {'title': 'Minerva'}
+    minerva_webroot.updateHtmlVars(minerva_html_vars)
+
+    def add_downstream_plugin_js_urls(downstream_plugin_js_urls):
+        """ Allow additional external JS resources to be loaded from downstream plugins. """
+        minerva_html_vars.setdefault('externalJsUrls', []).extend(downstream_plugin_js_urls.info)
+        minerva_webroot.updateHtmlVars(minerva_html_vars)
+
+    events.bind('minerva.additional_js_urls', 'minerva', add_downstream_plugin_js_urls)
 
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (minerva_webroot,
