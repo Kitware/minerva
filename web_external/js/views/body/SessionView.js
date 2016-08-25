@@ -259,11 +259,11 @@ minerva.router.route('session/:id', 'session', function (id) {
         datasetsCollection.once('g:changed', function () {
             var analysisCollection = new minerva.collections.AnalysisCollection();
             analysisCollection.once('g:changed', function () {
-                    girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
-                        analysisCollection: analysisCollection,
-                        datasetsCollection: datasetsCollection,
-                        session: session
-                    });
+                girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
+                    analysisCollection: analysisCollection,
+                    datasetsCollection: datasetsCollection,
+                    session: session
+                });
             }).fetch();
         }).fetch();
     }, this).on('g:error', function () {

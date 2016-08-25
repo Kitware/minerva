@@ -8,25 +8,24 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
-	'click .source-title': 'toggleDatasets'
+        'click .source-title': 'toggleDatasets'
     },
 
     toggleDatasets: function (event) {
-	var listOfLayers = $(event.currentTarget).next();
+        var listOfLayers = $(event.currentTarget).next();
 
-	if (listOfLayers.css('display') == 'none') {
-	    listOfLayers.css('display','block');
-	    this.visibleSourceGroups[$(event.currentTarget).text()] = true;
-	} else {
-	    listOfLayers.css('display','none');
-	    this.visibleSourceGroups[$(event.currentTarget).text()] = false;
-	}
+        if (listOfLayers.css('display') === 'none') {
+            listOfLayers.css('display', 'block');
+            this.visibleSourceGroups[$(event.currentTarget).text()] = true;
+        } else {
+            listOfLayers.css('display', 'none');
+            this.visibleSourceGroups[$(event.currentTarget).text()] = false;
+        }
     },
-    
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
-	    collection: this.collection,
+            collection: this.collection,
             parentView: this
         });
         addWmsWidget.render();
@@ -184,12 +183,9 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         });
         this.datasetInfoWidget.render();
     },
-    
     initialize: function (settings) {
         this.collection = settings.session.datasetsCollection;
-
-	this.visibleSourceGroups = {};
-	
+        this.visibleSourceGroups = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -223,21 +219,20 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     getSourceNameFromModel: function (model) {
-	return model.get("meta").minerva.source.layer_source
+        return model.get('meta').minerva.source.layer_source;
     },
 
     render: function () {
-	this.sourceDataset = _.groupBy(
-	    _.sortBy(
+        this.sourceDataset = _.groupBy(
+            _.sortBy(
 		this.collection.models,
 		this.getSourceNameFromModel
-	    ), 
-	    this.getSourceNameFromModel
+            ),
+            this.getSourceNameFromModel
         );
-	
         this.$el.html(minerva.templates.dataPanel({
             sourceDatasetMapping: this.sourceDataset,
-	    visibleSourceGroups: this.visibleSourceGroups
+            visibleSourceGroups: this.visibleSourceGroups
         }));
 
         // TODO pagination and search?

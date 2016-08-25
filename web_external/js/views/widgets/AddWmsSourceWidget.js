@@ -14,24 +14,24 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
             };
             var wmsSource = new minerva.models.WmsSourceModel({});
             wmsSource.on('m:sourceReceived', function (datasets) {
-		_.each(datasets, _.bind(function(dataset) {
-		    this.collection.add(dataset, {silent: true});
-		    this.collection.trigger('add');
-		}, this));
-		
+                _.each(datasets, _.bind(function (dataset) {
+                    this.collection.add(dataset, {silent: true});
+                    this.collection.trigger('add');
+                }, this));
                 this.$el.modal('hide');
             }, this).createSource(params);
         }
     },
 
     initialize: function (settings) {
-	this.collection = settings.collection;
+        this.collection = settings.collection;
         this.title = 'Enter WMS Source details';
         return this;
     },
 
     render: function () {
         var modal = this.$el.html(minerva.templates.addWmsSourceWidget({})).girderModal(this);
+        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }
 
