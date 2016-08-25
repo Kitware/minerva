@@ -73,9 +73,11 @@ class WmsDataset(Dataset):
                 'layer_type': layerType
             }
 
-            dataset = self.createWmsDataset({'meta': {'minerva': source}, 'layer_source': name},
-                                            params={'typeName': layer['layer_type'],
-                                                    'name': layer['layer_title']})
+            dataset = self.createWmsDataset({'meta': {'minerva': source},
+                                             'layer_source': name},
+                                            params={
+                                                'typeName': layer['layer_type'],
+                                                'name': layer['layer_title']})
 
             layers.append(dataset)
 
@@ -97,7 +99,8 @@ class WmsDataset(Dataset):
             headers = {}
             credentials = None
 
-        request_url = parsedUrl.scheme + '://' + parsedUrl.netloc + parsedUrl.path
+        request_url = parsedUrl.scheme + '://' + parsedUrl.netloc + \
+            parsedUrl.path
         r = requests.get(request_url, params={
             'service': 'WMS',
             'request': 'GetLegendGraphic',
