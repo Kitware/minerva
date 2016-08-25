@@ -16,6 +16,6 @@
   },
   "devDependencies": {
     "grunt-contrib-watch": "^1.0.0",
-    "sinon": "^1.17.4"
+    "sinon": "1.17.5"
   }
 }

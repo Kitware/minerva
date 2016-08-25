@@ -214,7 +214,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.root %>/node_modules/sinon/pkg',
-                        src: ['sinon-1.17.4.js'],
+                        src: ['sinon-1.17.5.js'],
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
@@ -319,7 +319,7 @@ module.exports = function (grunt) {
         var i, plugin, pluginJs, pluginCss;
         var buffer = fs.readFileSync('clients/web/test/testEnv.jadehtml');
         var dependencies = [
-            '/' + staticDir + '/sinon-1.17.4.js',
+            '/' + staticDir + '/sinon-1.17.5.js',
             '/clients/web/static/built/libs.min.js',
             '/test/minerva/minervaTestUtils.js',
             '/clients/web/test/testUtils.js',
