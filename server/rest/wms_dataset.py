@@ -29,6 +29,7 @@ from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 import requests
 
+
 class WmsDataset(Dataset):
 
     def __init__(self):
@@ -73,8 +74,8 @@ class WmsDataset(Dataset):
             }
 
             dataset = self.createWmsDataset({'meta': {'minerva': source}, 'layer_source': name},
-                                                  params={'typeName': layer['layer_type'],
-                                                          'name': layer['layer_title']})
+                                            params={'typeName': layer['layer_type'],
+                                                    'name': layer['layer_title']})
 
             layers.append(dataset)
 
