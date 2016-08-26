@@ -58,7 +58,7 @@ def load(info):
     minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
     minerva_webroot = Webroot(minerva_mako)
     minerva_webroot.updateHtmlVars(info['serverRoot'].vars)
-    minerva_html_vars = {'title': 'Minerva'}
+    minerva_html_vars = {'title': 'Minerva', 'externalJsUrls': []}
     minerva_webroot.updateHtmlVars(minerva_html_vars)
 
     def add_downstream_plugin_js_urls(downstream_plugin_js_urls):
