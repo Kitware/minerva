@@ -9,13 +9,13 @@
     "bootstrap-select": "^1.10.0",
     "bootstrap-slider": "^7.1.0",
     "colorbrewer": "1.0.0",
-    "geojs": "0.9.0",
+    "geojs": "0.10.1",
     "jade": "~1.11.0",
     "jquery-ui-bundle": "^1.11.4",
     "underscore": "~1.5"
   },
   "devDependencies": {
     "grunt-contrib-watch": "^1.0.0",
-    "sinon": "^1.17.4"
+    "sinon": "1.17.5"
   }
 }
