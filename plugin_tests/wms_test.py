@@ -75,19 +75,6 @@ class WmsTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-    @staticmethod
-    def isHomogeneousList(meta_list, value):
-        """ Checks if meta_list is homogeneous and the value is correct """
-
-        # Sets can have the same parameter once which means if we convert the list to a set
-        # and it only has 1 parameter that means all the elements were the same.
-        # Checking only the first one should be sufficient after checking length of the set.
-
-        if len(set(meta_list)) == 1 and meta_list[0] == value:
-            return True
-        else:
-            return False
-        
     def testCreateWmsSourceAndDataset(self):
         """
         Test the minerva WMS source and dataset API endpoints.
@@ -121,12 +108,11 @@ class WmsTestCase(base.TestCase):
 
         source_name = [d['meta']['minerva']['source']['layer_source'] for d in wmsSource]
         
-            
-        self.assertTrue(self.isHomogeneousList(source_type, 'wms'),
+        self.assertTrue(len(set(source_type)) == 1 and source_type[0] == 'wms',
                         'incorrect wms dataset typeName')
-        self.assertTrue(self.isHomogeneousList(base_url, baseURL),
+        self.assertTrue(len(set(base_url)) == 1 and base_url[0] == baseURL,
                         'incorrect wms dataset baseURL')
-        self.assertTrue(self.isHomogeneousList(source_name, name),
+        self.assertTrue(len(set(source_name)) == 1 and source_name[0] == name,
                         'incorrect wms source name')
 
 
@@ -159,5 +145,5 @@ class WmsTestCase(base.TestCase):
         credentials = [decryptCredentials(bytes(d['meta']['minerva']['credentials']))
                        for d in wmsSource]
 
-        self.assertTrue(self.isHomogeneousList(credentials,
-                                               "{}:{}".format(username, password)))
+        self.assertTrue(len(set(credentials)) == 1 and
+                        credentials[0] == "{}:{}".format(username, password))
