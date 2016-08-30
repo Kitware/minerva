@@ -224,15 +224,16 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
     render: function () {
         this.sourceDataset = _.groupBy(
-            _.sortBy(
-		this.collection.models,
-		this.getSourceNameFromModel
-            ),
+            this.collection.models,
             this.getSourceNameFromModel
         );
+
+        var sourceNames = Object.keys(this.sourceDataset).sort();
+
         this.$el.html(minerva.templates.dataPanel({
             sourceDatasetMapping: this.sourceDataset,
-            visibleSourceGroups: this.visibleSourceGroups
+            visibleSourceGroups: this.visibleSourceGroups,
+            sourceNames: sourceNames
         }));
 
         // TODO pagination and search?

@@ -6,14 +6,14 @@ include ../layout/panelMixins.jade
 
 if sourceDatasetMapping
   +panel-content('collapse in')
-    each datasets, source in sourceDatasetMapping
+    each source in sourceNames
       .source-title= source
       if visibleSourceGroups[source] == true
         - var val = "display: block;"
       else
         - var val = "display: none;"
       .dataset(style=val)
-        each dataset in datasets
+        each dataset in sourceDatasetMapping[source]
           if dataset.metadata()
             .dataset
               span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
