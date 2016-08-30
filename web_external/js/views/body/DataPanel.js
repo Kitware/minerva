@@ -228,12 +228,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             this.getSourceNameFromModel
         );
 
-        var sourceNames = Object.keys(this.sourceDataset).sort();
-
         this.$el.html(minerva.templates.dataPanel({
             sourceDatasetMapping: this.sourceDataset,
             visibleSourceGroups: this.visibleSourceGroups,
-            sourceNames: sourceNames
+            sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
         }));
 
         // TODO pagination and search?
