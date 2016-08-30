@@ -139,7 +139,7 @@ class WmsTestCase(base.TestCase):
             response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
-       
+
         from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
         
         credentials = [decryptCredentials(bytes(d['meta']['minerva']['credentials']))
@@ -147,3 +147,40 @@ class WmsTestCase(base.TestCase):
 
         self.assertTrue(len(set(credentials)) == 1 and
                         credentials[0] == "{}:{}".format(username, password))
+
+    def testCheckDatasetsExistInDatabase(self):
+
+        # Create the source.
+        path = '/minerva_datasets_wms'
+        name = 'testWMS'
+        username = ''
+        password = ''
+        baseURL = 'http://fake.geoserver.fak/geoserver/ows'
+        params = {
+            'name': name,
+            'username': username,
+            'password': password,
+            'baseURL': baseURL
+        }
+
+        with HTTMock(wms_mock):
+            response = self.request(path=path, method='POST', params=params, user=self._user)
+
+        self.assertStatusOk(response)
+        from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
+
+        dataset_folder = findDatasetFolder(self._user, self._user)
+
+        items = self.model('folder').childItems(dataset_folder)
+
+        db_datasets = [i['meta']['minerva']['type_name'] for i in items]
+
+        wmsSource = response.json
+
+        response_datasets = [d['meta']['minerva']['type_name'] for d in wmsSource]
+
+        self.assertEquals(len(db_datasets), len(response_datasets),
+                          'Number of datasets do not match with  thedb')
+
+        self.assertEquals(set(db_datasets), set(response_datasets),
+                          'Dataset type_names do not math with the db')
