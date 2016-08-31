@@ -66,6 +66,7 @@ class WmsDataset(Dataset):
         layersType = list(wms.contents)
         layers = []
         source = sourceMetadata(username, password, baseURL, hostName)
+        source['layer_source'] = name
 
         for layerType in layersType:
             layer = {
@@ -73,8 +74,7 @@ class WmsDataset(Dataset):
                 'layer_type': layerType
             }
 
-            dataset = self.createWmsDataset({'meta': {'minerva': source},
-                                             'layer_source': name},
+            dataset = self.createWmsDataset(source,
                                             params={
                                                 'typeName': layer['layer_type'],
                                                 'name': layer['layer_title']})
@@ -85,13 +85,13 @@ class WmsDataset(Dataset):
 
     @access.user
     def createWmsDataset(self, wmsSource, params):
-        baseURL = wmsSource['meta']['minerva']['wms_params']['base_url']
+        baseURL = wmsSource['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
 
-        if 'credentials' in wmsSource['meta']['minerva']['wms_params']:
+        if 'credentials' in wmsSource['wms_params']:
             credentials = (
-                wmsSource['meta']['minerva']['wms_params']['credentials']
+                wmsSource['wms_params']['credentials']
             )
             basic_auth = 'Basic ' + b64encode(decryptCredentials(credentials))
             headers = {'Authorization': basic_auth}

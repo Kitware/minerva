@@ -106,10 +106,10 @@ class WmsTestCase(base.TestCase):
         wmsSource = response.json
 
         # Source generates multiple datasets now
-        source_type = [d['meta']['minerva']['source']['meta']['minerva']['source_type']
+        source_type = [d['meta']['minerva']['source']['source_type']
                       for d in wmsSource]
 
-        base_url = [d['meta']['minerva']['source']['meta']['minerva']['wms_params']['base_url']
+        base_url = [d['meta']['minerva']['source']['wms_params']['base_url']
                     for d in wmsSource]
 
         source_name = [d['meta']['minerva']['source']['layer_source'] for d in wmsSource]
