@@ -219,12 +219,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     getSourceNameFromModel: function (model) {
-        return model.get('meta').minerva.source.layer_source;
+        return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
     render: function () {
         this.sourceDataset = _.groupBy(
-            this.collection.models,
+            _.filter(this.collection.models, this.getSourceNameFromModel),
             this.getSourceNameFromModel
         );
 
