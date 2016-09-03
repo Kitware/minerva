@@ -8,7 +8,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
-        'click .source-title': 'toggleDatasets'
+        'click .source-title': 'toggleDatasets',
+        'click .m-configure-wms-styling': 'styleWmsDataset'
     },
 
     toggleDatasets: function (event) {
@@ -29,6 +30,16 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             parentView: this
         });
         addWmsWidget.render();
+    },
+
+    // Ability to style a wms layer
+    styleWmsDataset: function (event) {
+	var styleWmsWidget = new minerva.views.StyleWmsDatasetWidget({
+	    el: $('#g-dialog-container'),
+	    collection: this.collection,
+	    parentView: this
+	});
+	styleWmsWidget.render();
     },
 
     /**
