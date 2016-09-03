@@ -34,9 +34,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
     // Ability to style a wms layer
     styleWmsDataset: function (event) {
-	var styleWmsWidget = new minerva.views.StyleWmsDatasetWidget({
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        var styleWmsWidget = new minerva.views.StyleWmsDatasetWidget({
 	    el: $('#g-dialog-container'),
 	    collection: this.collection,
+	    dataset: dataset,
 	    parentView: this
 	});
 	styleWmsWidget.render();
