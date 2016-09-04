@@ -16,13 +16,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-from urlparse import urlparse
+from urllib import urlencode
+from urlparse import parse_qs, urlsplit, urlunsplit
 
 from girder.api import access
 from girder.api.rest import Resource
 
 from owslib.wms import WebMapService
-from owslib.wfs import WebFeatureService
 
 
 class WmsStyle(Resource):
@@ -42,14 +42,19 @@ class WmsStyle(Resource):
             return "vector"
 
     @staticmethod
-    def _generate_url(wms_url, service):
+    def _generate_url(wms_url, service, request, version, typeName):
         """ Generates different urls(wfs or wcs) from a wms url """
 
-        parsed = urlparse(wms_url)
-        parsed = parsed._replace(path=service)
-        parsed = parsed._replace(query=None)
+        scheme, netloc, path, query_string, fragment = urlsplit(wms_url)
+        query_params = parse_qs(query_string)
 
-        return parsed.geturl()
+        query_params['service'] = [service]
+        query_params['request'] = [request]
+        query_params['typeName'] = [typeName]
+        query_params['version'] = [version]
+        new_query_string = urlencode(query_params, doseq=True)
+
+        return urlunsplit((scheme, netloc, path, new_query_string, fragment))
 
     @access.user
     def createWmsStyle(self, params):
@@ -63,9 +68,19 @@ class WmsStyle(Resource):
         # Guess the layer type
         layer_type = self._guess_type(type_name)
 
-        # Generate wfs url
-        wfs_url = self._generate_url(params['baseURL'], 'geoserver/wfs')
+        if layer_type == 'vector':
 
-        wfs = WebFeatureService(url=wfs_url)
+            # Generate wfs url
+            wfs_url = self._generate_url(params['baseURL'],
+                                         'wfs',
+                                         'describefeaturetype',
+                                         '1.0.0',
+                                         params['typeName'])
+
+            print wfs_url
+
+
+        elif layer_type == 'raster':
+            pass
 
         return params
