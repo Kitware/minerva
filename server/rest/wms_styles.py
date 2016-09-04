@@ -18,11 +18,13 @@
 ###############################################################################
 from urllib import urlencode
 from urlparse import parse_qs, urlsplit, urlunsplit
+import xml.etree.ElementTree as ET
 
 from girder.api import access
 from girder.api.rest import Resource
 
 from owslib.wms import WebMapService
+import requests
 
 
 class WmsStyle(Resource):
@@ -56,6 +58,52 @@ class WmsStyle(Resource):
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
 
+    @staticmethod
+    def _get_xml_response(url):
+        """ Get xml response from the request """
+
+        response = requests.get(url)
+        tree = ET.fromstring(response.content)
+
+        return tree
+
+    @staticmethod
+    def _get_attributes(xml_response):
+        """ Gets the attributes from a vector layer """
+
+        attributes = []
+
+        keys = xml_response\
+               .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
+
+        for elem in keys:
+            attributes.append(elem.get('name'))
+
+        return attributes
+
+    @staticmethod
+    def _get_vector_type(xml_response):
+        """ Gets the vector type """
+
+        vector_type = "unknown"
+
+        keys = xml_response\
+               .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
+
+        for elem in keys:
+            type_guess = elem.get('type')
+            if type_guess.startswith('gml'):
+                if "Line" in type_guess:
+                    vector_type = "line"
+                elif "Point" in type_guess:
+                    vector_type = "point"
+                elif "Surface" in type_guess:
+                    vector_type = "polygon"
+                elif "Geometry" in type_guess:
+                    vector_type = "polygon"
+
+        return vector_type
+
     @access.user
     def createWmsStyle(self, params):
 
@@ -68,6 +116,8 @@ class WmsStyle(Resource):
         # Guess the layer type
         layer_type = self._guess_type(type_name)
 
+        layer_params = {}
+
         if layer_type == 'vector':
 
             # Generate wfs url
@@ -77,10 +127,12 @@ class WmsStyle(Resource):
                                          '1.0.0',
                                          params['typeName'])
 
-            print wfs_url
-
+            xml_response = self._get_xml_response(wfs_url)
+            layer_params['layerType'] = layer_type
+            layer_params['vectorType'] = self._get_vector_type(xml_response)
+            layer_params['attributes'] = self._get_attributes(xml_response)
 
         elif layer_type == 'raster':
-            pass
+            layer_params['layerType'] = layer_type
 
-        return params
+        return layer_params
