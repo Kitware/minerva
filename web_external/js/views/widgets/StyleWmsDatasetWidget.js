@@ -21,7 +21,7 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
     initialize: function (settings) {
 	this.dataset = settings.dataset;
 	var params = {
-	    layerName: this.dataset.get('meta').minerva.type_name,
+	    typeName: this.dataset.get('meta').minerva.type_name,
 	    baseURL: this.dataset.get('meta').minerva.base_url,
 	    datasetId: this.dataset.get('_id')
 	}
