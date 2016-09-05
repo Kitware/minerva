@@ -32,6 +32,8 @@ class WmsStyle(Resource):
     def __init__(self):
         self.resourceName = 'minerva_wms_style'
         self.route('POST', (), self.createWmsStyle)
+        self._type_name = None
+        self._base_url = None
 
     @staticmethod
     def _guess_type(layer):
@@ -65,8 +67,7 @@ class WmsStyle(Resource):
 
         return tree
 
-    @staticmethod
-    def _get_attributes(xml_response):
+    def _get_attributes(self, xml_response):
         """ Gets the attributes from a vector layer """
 
         attributes = {}
@@ -192,11 +193,11 @@ class WmsStyle(Resource):
             layer_params['attributes'] = self._get_attributes(wfs_response)
 
             # Construct the url for getting the number of features
-            count_url = self._generate_url(params['baseURL'],
+            count_url = self._generate_url(self._base_url,
                                            service='wfs',
                                            request='getfeature',
                                            version='1.1',
-                                           typename=params['typeName'],
+                                           typename=self._type_name,
                                            resultType='hits')
 
             count_response = self._get_xml_response(count_url)
