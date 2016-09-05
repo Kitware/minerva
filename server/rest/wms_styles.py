@@ -44,17 +44,15 @@ class WmsStyle(Resource):
             return "vector"
 
     @staticmethod
-    def _generate_url(wms_url, service, request, version, typeName):
+    def _generate_url(wms_url, **kwargs):
         """ Generates different urls(wfs or wcs) from a wms url """
 
         scheme, netloc, path, query_string, fragment = urlsplit(wms_url)
-        query_params = parse_qs(query_string)
 
-        query_params['service'] = [service]
-        query_params['request'] = [request]
-        query_params['typeName'] = [typeName]
-        query_params['version'] = [version]
-        new_query_string = urlencode(query_params, doseq=True)
+        if kwargs:
+            query_string = kwargs
+
+        new_query_string = urlencode(query_string, doseq=True)
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
 
@@ -129,15 +127,15 @@ class WmsStyle(Resource):
 
             # Generate wfs url
             wfs_url = self._generate_url(params['baseURL'],
-                                         'wfs',
-                                         'describefeaturetype',
-                                         '1.0.0',
-                                         params['typeName'])
+                                         service='wfs',
+                                         request='describefeaturetype',
+                                         version='1.0.0',
+                                         typename=params['typeName'])
 
-            xml_response = self._get_xml_response(wfs_url)
+            wfs_response = self._get_xml_response(wfs_url)
             layer_params['layerType'] = layer_type
-            layer_params['vectorType'] = self._get_vector_type(xml_response)
-            layer_params['attributes'] = self._get_attributes(xml_response)
+            layer_params['vectorType'] = self._get_vector_type(wfs_response)
+            layer_params['attributes'] = self._get_attributes(wfs_response)
 
         elif layer_type == 'raster':
             layer_params['layerType'] = layer_type
