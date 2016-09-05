@@ -77,11 +77,12 @@ class WmsStyle(Resource):
         for elem in keys:
             attribute = {}
             # the_geom should be ignored
-            if elem.get('name') != 'the_geom':
+            if elem.get('name') != 'the_geom' and elem.get('name') != 'wkb_geometry':
                 if elem.get('type') == 'xsd:string':
                     attribute['type'] = 'text'
                 else:
                     attribute['type'] = 'numeric'
+                    attribute['range'] = self._get_attribute_range(elem.get('name'))
                 attributes[elem.get('name')] = attribute
 
         return attributes
@@ -115,28 +116,75 @@ class WmsStyle(Resource):
 
         return int(xml_response.get('numberOfFeatures'))
 
+    def _parse_min_max_response(self, url, attribute):
+        """ Parses the min and max parameter """
+
+        response = self._get_xml_response(url)
+
+        try:
+            for elem in response.getiterator():
+                if attribute in elem.tag:
+                    value = elem.text
+            return value
+        except UnboundLocalError:
+            return None
+
+
+    def _get_attribute_range(self, attribute):
+        """ Gets the min max value for a given numeric attribute """
+
+        # Create the url for each attribute
+        # "+D" is for descending
+        # "+A" is for ascending
+        max_range_url = self._generate_url(self._base_url,
+                                            service='wfs',
+                                            request='getfeature',
+                                            typename=self._type_name,
+                                            version='1.1.0',
+                                            maxfeatures=1,
+                                            propertyname=attribute,
+                                            sortby=attribute) + "+D"
+
+        min_range_url = self._generate_url(self._base_url,
+                                            service='wfs',
+                                            request='getfeature',
+                                            typename=self._type_name,
+                                            version='1.1.0',
+                                            maxfeatures=1,
+                                            propertyname=attribute,
+                                            sortby=attribute) + "+A"
+
+        maximum = self._parse_min_max_response(max_range_url, attribute)
+        minimum = self._parse_min_max_response(min_range_url, attribute)
+
+        if maximum and minimum:
+            return {'min': minimum, 'max': maximum}
+
     @access.user
     def createWmsStyle(self, params):
 
+        self._base_url = params['baseURL']
+        self._type_name = params['typeName']
+
         # Create WMS instance
-        wms = WebMapService(params['baseURL'])
+        wms = WebMapService(self._base_url)
 
         # Get the layer
-        type_name = wms[params['typeName']]
+        layer = wms[self._type_name]
 
         # Guess the layer type
-        layer_type = self._guess_type(type_name)
+        layer_type = self._guess_type(layer)
 
         layer_params = {}
 
         if layer_type == 'vector':
 
             # Generate wfs url
-            wfs_url = self._generate_url(params['baseURL'],
+            wfs_url = self._generate_url(self._base_url,
                                          service='wfs',
                                          request='describefeaturetype',
                                          version='1.0.0',
-                                         typename=params['typeName'])
+                                         typename=self._type_name)
 
             wfs_response = self._get_xml_response(wfs_url)
             layer_params['layerType'] = layer_type
