@@ -109,6 +109,12 @@ class WmsStyle(Resource):
 
         return vector_type
 
+    @staticmethod
+    def _get_number_of_features(xml_response):
+        """ Gets number of features """
+
+        return int(xml_response.get('numberOfFeatures'))
+
     @access.user
     def createWmsStyle(self, params):
 
@@ -136,6 +142,17 @@ class WmsStyle(Resource):
             layer_params['layerType'] = layer_type
             layer_params['vectorType'] = self._get_vector_type(wfs_response)
             layer_params['attributes'] = self._get_attributes(wfs_response)
+
+            # Construct the url for getting the number of features
+            count_url = self._generate_url(params['baseURL'],
+                                           service='wfs',
+                                           request='getfeature',
+                                           version='1.1',
+                                           typename=params['typeName'],
+                                           resultType='hits')
+
+            count_response = self._get_xml_response(count_url)
+            layer_params['numberOfFeatures'] = self._get_number_of_features(count_response)
 
         elif layer_type == 'raster':
             layer_params['layerType'] = layer_type
