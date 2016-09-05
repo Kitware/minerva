@@ -71,13 +71,20 @@ class WmsStyle(Resource):
     def _get_attributes(xml_response):
         """ Gets the attributes from a vector layer """
 
-        attributes = []
+        attributes = {}
 
         keys = xml_response\
                .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
 
         for elem in keys:
-            attributes.append(elem.get('name'))
+            attribute = {}
+            # the_geom should be ignored
+            if elem.get('name') != 'the_geom':
+                if elem.get('type') == 'xsd:string':
+                    attribute['type'] = 'text'
+                else:
+                    attribute['type'] = 'numeric'
+                attributes[elem.get('name')] = attribute
 
         return attributes
 
