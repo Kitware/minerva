@@ -81,6 +81,7 @@ class WmsStyle(Resource):
             if elem.get('name') != 'the_geom' and elem.get('name') != 'wkb_geometry':
                 if elem.get('type') == 'xsd:string':
                     attribute['type'] = 'text'
+                    attribute['entry'] = self._get_unique_entries(elem.get('name'))
                 else:
                     attribute['type'] = 'numeric'
                     attribute['range'] = self._get_attribute_range(elem.get('name'))
@@ -164,6 +165,27 @@ class WmsStyle(Resource):
 
         if maximum and minimum:
             return {'min': minimum, 'max': maximum}
+
+    def _get_unique_entries(self, attribute):
+        """ Returns a list of unique entries for a given attribute """
+
+        entry_url = self._generate_url(self._base_url,
+                                       service='wfs',
+                                       request='getfeature',
+                                       typename=self._type_name,
+                                       version='1.1.0',
+                                       propertyname=attribute)
+
+        entry_xml = self._get_xml_response(entry_url)
+
+        entries = []
+
+        for elem in entry_xml.getiterator():
+            if attribute in elem.tag:
+                entries.append(elem.text)
+
+        return list(set(entries))
+
 
     @access.user
     def createWmsStyle(self, params):
