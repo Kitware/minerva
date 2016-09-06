@@ -138,22 +138,26 @@ class WmsStyle(Resource):
         # "+D" is for descending
         # "+A" is for ascending
         max_range_url = self._generate_url(self._base_url,
-                                            service='wfs',
-                                            request='getfeature',
-                                            typename=self._type_name,
-                                            version='1.1.0',
-                                            maxfeatures=1,
-                                            propertyname=attribute,
-                                            sortby=attribute) + "+D"
+                                           service='wfs',
+                                           request='getfeature',
+                                           typename=self._type_name,
+                                           version='1.1.0',
+                                           maxfeatures=1,
+                                           propertyname=attribute,
+                                           filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
+                                           "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
+                                           sortby=attribute) + "+D"
 
         min_range_url = self._generate_url(self._base_url,
-                                            service='wfs',
-                                            request='getfeature',
-                                            typename=self._type_name,
-                                            version='1.1.0',
-                                            maxfeatures=1,
-                                            propertyname=attribute,
-                                            sortby=attribute) + "+A"
+                                           service='wfs',
+                                           request='getfeature',
+                                           typename=self._type_name,
+                                           version='1.1.0',
+                                           maxfeatures=1,
+                                           propertyname=attribute,
+                                           filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
+                                           "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
+                                           sortby=attribute) + "+A"
 
         maximum = self._parse_min_max_response(max_range_url, attribute)
         minimum = self._parse_min_max_response(min_range_url, attribute)
