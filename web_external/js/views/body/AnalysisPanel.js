@@ -49,7 +49,6 @@
                 el: $('#g-dialog-container'),
                 parentView: this,
                 datasetCollection: this.datasetCollection,
-                sourceCollection: this.sourceCollection,
                 analysis: analysis
             });
             analysisWidget.render();
@@ -58,7 +57,6 @@
         initialize: function (settings) {
             this.collection = settings.session.analysisCollection;
             this.datasetCollection = settings.session.datasetsCollection;
-            this.sourceCollection = settings.session.sourceCollection;
             this.listenTo(this.collection, 'g:changed', function () {
                 console.log('AP g:changed');
                 this.render();

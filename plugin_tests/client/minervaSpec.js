@@ -47,7 +47,6 @@ describe('Main view', function () {
         runs(function () {
             var panels = $('#m-panel-groups');
             expect(panels.find('#m-analysis-panel').length).toBe(1);
-            expect(panels.find('#m-source-panel').length).toBe(1);
             expect(panels.find('#m-data-panel').length).toBe(1);
             expect(panels.find('#m-layer-panel').length).toBe(1);
             expect(panels.find('#m-jobs-panel').length).toBe(1);

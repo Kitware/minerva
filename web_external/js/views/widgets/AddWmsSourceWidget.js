@@ -13,10 +13,12 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
                 password: this.$('#m-wms-password').val()
             };
             var wmsSource = new minerva.models.WmsSourceModel({});
-            wmsSource.on('m:sourceReceived', function () {
+            wmsSource.on('m:sourceReceived', function (datasets) {
+                _.each(datasets, _.bind(function (dataset) {
+                    this.collection.add(dataset, {silent: true});
+                    this.collection.trigger('add');
+                }, this));
                 this.$el.modal('hide');
-                // TODO: might need to be added to a new panel/data sources ?
-                this.collection.add(wmsSource);
             }, this).createSource(params);
         }
     },
@@ -24,10 +26,11 @@ minerva.views.AddWmsSourceWidget = minerva.View.extend({
     initialize: function (settings) {
         this.collection = settings.collection;
         this.title = 'Enter WMS Source details';
+        return this;
     },
 
     render: function () {
-        var modal = this.$el.html(minerva.templates.addWmsSourceWidget({}));
+        var modal = this.$el.html(minerva.templates.addWmsSourceWidget({})).girderModal(this);
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         return this;
     }

@@ -47,7 +47,6 @@ Now you should see the new test in your build directory
      Test #111: server_minerva.source
      Test #112: server_minerva.session
      Test #113: server_minerva.analysis
-     Test #115: server_minerva.s3_dataset
      Test #116: server_minerva.import_analyses
      Test #117: server_minerva.contour_analysis
      Test #118: server_minerva.wms
