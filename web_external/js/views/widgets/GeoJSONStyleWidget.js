@@ -1,6 +1,11 @@
 (function () {
     minerva.models.GeoJSONStyle = Backbone.Model.extend({
         defaults: {
+            cluster: false,
+            clusterDistance: 10,
+            clusterFillColor: '#000000',
+            clusterStrokeColor: '#000000',
+            clusterRadius: 15,
             radius: 8,
             stroke: true,
             strokeWidth: 2,

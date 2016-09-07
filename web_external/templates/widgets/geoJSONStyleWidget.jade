@@ -61,6 +61,20 @@ ul.nav.nav-tabs
                 option(selected=true) Circle
           +range('Size', 0, 20, 0.1, point, 'point', 'radius', true)
 
+    .panel(class={'panel-default': !point.cluster, 'panel-primary': point.cluster})
+      .panel-heading(data-target='#m-point-cluster-control')
+        .checkbox(style='display:inline')
+          label
+            input#m-enable-point-cluster.m-toggle-panel(type='checkbox' checked=point.cluster data-feature='point' data-property='cluster')
+            | Cluster
+      #m-point-cluster-control.m-optional-panel.collapse(class={in: point.cluster})
+        .panel-body
+          +range('Size', 0, 50, 0.1, point, 'point', 'clusterRadius', point.cluster)
+          +color('Fill', point, 'point', 'clusterFillColor', point.cluster, 'clusterColorKey', 'clusterRamp')
+          +color('Stroke', point, 'point', 'clusterStrokeColor', point.cluster, 'clusterColorKey', 'clusterRamp')
+          +range('Distance', 0, 50, 0.1, point, 'point', 'clusterDistance', point.cluster)
+          +range('Opacity', 0, 1, 0.01, point, 'point', 'clusterOpacity', point.cluster)
+
     .panel(class={'panel-default': !point.stroke, 'panel-primary': point.stroke})
       .panel-heading(data-target='#m-point-stroke-control')
         .checkbox(style='display:inline')
