@@ -36,23 +36,25 @@ class WmsDataset(Dataset):
         self.resourceName = 'minerva_datasets_wms'
         self.route('POST', (), self.createWmsSource)
 
+    @staticmethod
+    def _sourceMetadata(username, password, baseURL, hostName):
+        minerva_metadata = {
+            'source_type': 'wms',
+            'wms_params': {
+                'base_url': baseURL,
+                'host_name': hostName
+            }
+        }
+
+        if username and password:
+            credentials = encryptCredentials("{}:{}".format(
+                username, password))
+            minerva_metadata['wms_params']['credentials'] = credentials
+
+        return minerva_metadata
+
     @access.user
     def createWmsSource(self, params):
-        def sourceMetadata(username, password, baseURL, hostName):
-            minerva_metadata = {
-                'source_type': 'wms',
-                'wms_params': {
-                    'base_url': baseURL,
-                    'host_name': hostName
-                }
-            }
-
-            if username and password:
-                credentials = encryptCredentials("{}:{}".format(
-                    username, password))
-                minerva_metadata['wms_params']['credentials'] = credentials
-
-            return minerva_metadata
 
         name = params['name']
         baseURL = params['baseURL']
@@ -65,7 +67,7 @@ class WmsDataset(Dataset):
                             password=password)
         layersType = list(wms.contents)
         layers = []
-        source = sourceMetadata(username, password, baseURL, hostName)
+        source = self._sourceMetadata(username, password, baseURL, hostName)
         source['layer_source'] = name
 
         for layerType in layersType:
