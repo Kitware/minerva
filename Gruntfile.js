@@ -162,7 +162,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= plugin.minerva.geojs %>',
-                        src: ['geo.min.js'],
+                        src: ['geo.js'],
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
@@ -225,7 +225,7 @@ module.exports = function (grunt) {
                 files: {
                     '<%= plugin.minerva.static %>/minerva.ext.min.js':
                     [
-                        '<%= plugin.minerva.static %>/geo.min.js',
+                        '<%= plugin.minerva.static %>/geo.js',
                         '<%= plugin.minerva.static %>/jsonpath.min.js',
                         '<%= plugin.minerva.static %>/papaparse.min.js',
                         '<%= plugin.minerva.static %>/colorbrewer.min.js',
@@ -294,7 +294,7 @@ module.exports = function (grunt) {
             },
             'plugin-minerva-copy-geojs': {
                 files: [
-                    '<%= plugin.minerva.geojs %>/geo.min.js'
+                    '<%= plugin.minerva.geojs %>/geo.js'
                 ],
                 tasks: ['copy:geojs']
             }

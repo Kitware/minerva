@@ -50,11 +50,20 @@ class GeojsonDataset(Dataset):
         }
         # Use the first geojson or json file found as the dataset.
         for file in self.model('item').childFiles(item=item, limit=0):
-            if 'geojson' in file['exts'] or 'json' in file['exts']:
+            if ('geojson' in file['exts'] or 'json' in file['exts'] or
+                    file.get('mimeType') in (
+                        'application/json', 'application/vnd.geo+json',
+                    )):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 minerva_metadata['geojson_file'] = {
                     'name': file['name'], '_id': file['_id']}
+                minerva_metadata['geo_render'] = {
+                    'type': 'geojson', 'file_id': file['_id']}
+                minerva_metadata['original_type'] = 'geojson'
+                minerva_metadata['source'] = {
+                    'layer_source': 'GeoJSON'}
+                minerva_metadata['source_type'] = 'item'
                 break
         if 'geojson_file' not in minerva_metadata:
             raise RestException('Item contains no geojson file.')

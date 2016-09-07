@@ -1,0 +1,8 @@
+if geojson
+  a.g-minerva-geojson-remove(title="Stop using this file for a Minerva GeoJSON datset")
+    span.fa-stack
+      i.icon-globe
+      i.icon-cancel.fa-cancel-cover
+else if !minerva
+  a.g-minerva-geojson-create(title="Use this file for a Minerva GeoJSON dataset")
+    i.icon-globe
