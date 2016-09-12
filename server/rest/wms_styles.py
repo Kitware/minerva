@@ -131,9 +131,14 @@ class WmsStyle(Resource):
         except UnboundLocalError:
             return None
 
+    @staticmethod
+    def _get_bands(xml_response):
+        """ Gets the name of the bands """
 
     def _get_attribute_range(self, attribute):
         """ Gets the min max value for a given numeric attribute """
+        wcs_namespace = "{http://www.opengis.net/wcs/1.1.1}"
+        ows_namespace = "{http://www.opengis.net/ows/1.1}"
 
         # Create the url for each attribute
         # "+D" is for descending
@@ -148,6 +153,9 @@ class WmsStyle(Resource):
                                            filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
                                            "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
                                            sortby=attribute) + "+D"
+        bands = []
+        minimum = []
+        maximum = []
 
         min_range_url = self._generate_url(self._base_url,
                                            service='wfs',
@@ -159,12 +167,27 @@ class WmsStyle(Resource):
                                            filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
                                            "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
                                            sortby=attribute) + "+A"
+        for elem in xml_response.iter():
+            if elem.tag == "{}{}".format(wcs_namespace, "Key"):
+                bands.append(elem.text)
+            elif elem.tag == "{}{}".format(ows_namespace, "MinimumValue"):
+                minimum.append(elem.text)
+            elif elem.tag == "{}{}".format(ows_namespace, "MaximumValue"):
+                maximum.append(elem.text)
 
         maximum = self._parse_min_max_response(max_range_url, attribute)
         minimum = self._parse_min_max_response(min_range_url, attribute)
+        if len(bands) == 1:
+            return {bands[0]:
+                    {'properties':
+                     {'min': minimum[0],
+                      'max': maximum[0]}}}
+        elif len(bands) > 1:
+            return bands
 
         if maximum and minimum:
             return {'min': minimum, 'max': maximum}
+        return bands
 
     def _get_unique_entries(self, attribute):
         """ Returns a list of unique entries for a given attribute """
@@ -231,5 +254,20 @@ class WmsStyle(Resource):
 
         elif layer_type == 'raster':
             layer_params['layerType'] = layer_type
+
+            # Generate a wcs url
+            wcs_url = self._generate_url(self._base_url,
+                                         service='wcs',
+                                         request='describecoverage',
+                                         version='1.1.1',
+                                         identifiers=self._type_name)
+
+            wcs_response = self._get_xml_response(wcs_url)
+            bands = self._get_bands(wcs_response)
+            layer_params['bands'] = bands
+            if isinstance(bands, dict):
+                    layer_params['rasterType'] = 'singleband'
+            elif isinstance(bands, list):
+                    layer_params['rasterType'] = 'multiband'
 
         return layer_params
