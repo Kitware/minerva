@@ -24,6 +24,7 @@ from girder.api.rest import getUrlParts
 from owslib.wms import WebMapService
 
 from girder.plugins.minerva.rest.dataset import Dataset
+from girder.plugins.minerva.rest.wms_styles import WmsStyle
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
@@ -91,6 +92,8 @@ class WmsDataset(Dataset):
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
 
+        layer_info = WmsStyle(typeName, baseURL).get_layer_info()
+
         if 'credentials' in wmsSource['wms_params']:
             credentials = (
                 wmsSource['wms_params']['credentials']
@@ -119,7 +122,8 @@ class WmsDataset(Dataset):
             'legend': legend,
             'source': wmsSource,
             'type_name': typeName,
-            'base_url': baseURL
+            'base_url': baseURL,
+            'layer_info': layer_info
         }
         if credentials:
             minerva_metadata['credentials'] = credentials
