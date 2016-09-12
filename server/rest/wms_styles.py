@@ -34,6 +34,58 @@ class WmsStyle(Resource):
         self.route('POST', (), self.createWmsStyle)
         self._type_name = None
         self._base_url = None
+def wps_template(type_name, attribute):
+    return \
+    """<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+  <ows:Identifier>gs:Aggregate</ows:Identifier>
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>features</ows:Identifier>
+      <wps:Reference mimeType="text/xml" xlink:href="http://geoserver/wfs" method="POST">
+        <wps:Body>
+          <wfs:GetFeature service="WFS" version="1.0.0" outputFormat="GML2" xmlns:sf="http://www.openplans.org/spearfish">
+            <wfs:Query typeName="{}"/>
+          </wfs:GetFeature>
+        </wps:Body>
+      </wps:Reference>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>aggregationAttribute</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>{}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>function</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Min</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>function</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Max</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>function</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Count</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>singlePass</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>false</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput mimeType="text/xml">
+      <ows:Identifier>result</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>""".format(type_name, attribute)
 
     @staticmethod
     def _guess_type(layer):
@@ -135,38 +187,13 @@ class WmsStyle(Resource):
     def _get_bands(xml_response):
         """ Gets the name of the bands """
 
-    def _get_attribute_range(self, attribute):
-        """ Gets the min max value for a given numeric attribute """
         wcs_namespace = "{http://www.opengis.net/wcs/1.1.1}"
         ows_namespace = "{http://www.opengis.net/ows/1.1}"
 
-        # Create the url for each attribute
-        # "+D" is for descending
-        # "+A" is for ascending
-        max_range_url = self._generate_url(self._base_url,
-                                           service='wfs',
-                                           request='getfeature',
-                                           typename=self._type_name,
-                                           version='1.1.0',
-                                           maxfeatures=1,
-                                           propertyname=attribute,
-                                           filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
-                                           "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
-                                           sortby=attribute) + "+D"
         bands = []
         minimum = []
         maximum = []
 
-        min_range_url = self._generate_url(self._base_url,
-                                           service='wfs',
-                                           request='getfeature',
-                                           typename=self._type_name,
-                                           version='1.1.0',
-                                           maxfeatures=1,
-                                           propertyname=attribute,
-                                           filter="<Not><PropertyIsNull><PropertyName>{}</PropertyName>" \
-                                           "<Literal></Literal></PropertyIsNull></Not>".format(attribute),
-                                           sortby=attribute) + "+A"
         for elem in xml_response.iter():
             if elem.tag == "{}{}".format(wcs_namespace, "Key"):
                 bands.append(elem.text)
@@ -175,8 +202,6 @@ class WmsStyle(Resource):
             elif elem.tag == "{}{}".format(ows_namespace, "MaximumValue"):
                 maximum.append(elem.text)
 
-        maximum = self._parse_min_max_response(max_range_url, attribute)
-        minimum = self._parse_min_max_response(min_range_url, attribute)
         if len(bands) == 1:
             return {bands[0]:
                     {'properties':
@@ -185,8 +210,6 @@ class WmsStyle(Resource):
         elif len(bands) > 1:
             return bands
 
-        if maximum and minimum:
-            return {'min': minimum, 'max': maximum}
         return bands
 
     def _get_unique_entries(self, attribute):
@@ -240,17 +263,6 @@ class WmsStyle(Resource):
             layer_params['layerType'] = layer_type
             layer_params['vectorType'] = self._get_vector_type(wfs_response)
             layer_params['attributes'] = self._get_attributes(wfs_response)
-
-            # Construct the url for getting the number of features
-            count_url = self._generate_url(self._base_url,
-                                           service='wfs',
-                                           request='getfeature',
-                                           version='1.1',
-                                           typename=self._type_name,
-                                           resultType='hits')
-
-            count_response = self._get_xml_response(count_url)
-            layer_params['numberOfFeatures'] = self._get_number_of_features(count_response)
 
         elif layer_type == 'raster':
             layer_params['layerType'] = layer_type
