@@ -20,20 +20,10 @@ from urllib import urlencode
 from urlparse import parse_qs, urlsplit, urlunsplit
 import xml.etree.ElementTree as ET
 
-from girder.api import access
-from girder.api.rest import Resource
-
 from owslib.wms import WebMapService
 import requests
 
 
-class WmsStyle(Resource):
-
-    def __init__(self):
-        self.resourceName = 'minerva_wms_style'
-        self.route('POST', (), self.createWmsStyle)
-        self._type_name = None
-        self._base_url = None
 def wps_template(type_name, attribute):
     return \
     """<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
@@ -87,6 +77,13 @@ def wps_template(type_name, attribute):
   </wps:ResponseForm>
 </wps:Execute>""".format(type_name, attribute)
 
+
+class WmsStyle(object):
+
+    def __init__(self, type_name, base_url):
+        self._type_name = type_name
+        self._base_url = base_url
+
     @staticmethod
     def _guess_type(layer):
         """ Helper function to guess the type of dataset """
@@ -131,13 +128,13 @@ def wps_template(type_name, attribute):
             attribute = {}
             # the_geom should be ignored
             if elem.get('name') != 'the_geom' and elem.get('name') != 'wkb_geometry':
+
                 if elem.get('type') == 'xsd:string':
-                    attribute['type'] = 'text'
-                    attribute['entry'] = self._get_unique_entries(elem.get('name'))
+                    pass
                 else:
                     attribute['type'] = 'numeric'
-                    attribute['range'] = self._get_attribute_range(elem.get('name'))
-                attributes[elem.get('name')] = attribute
+                    attribute['properties'] = self._get_min_max_count(elem.get('name'))
+                    attributes[elem.get('name')] = attribute
 
         return attributes
 
@@ -164,24 +161,30 @@ def wps_template(type_name, attribute):
 
         return vector_type
 
-    @staticmethod
-    def _get_number_of_features(xml_response):
-        """ Gets number of features """
+    def _get_min_max_count(self, attribute):
+        """ Gets the min max and count values for a given
+        numeric attribute """
 
-        return int(xml_response.get('numberOfFeatures'))
-
-    def _parse_min_max_response(self, url, attribute):
-        """ Parses the min and max parameter """
-
-        response = self._get_xml_response(url)
-
-        try:
-            for elem in response.getiterator():
-                if attribute in elem.tag:
-                    value = elem.text
-            return value
-        except UnboundLocalError:
+        url = self._base_url.split("?")[0].replace('ows', 'wps')
+        headers = {'Content-Type': 'application/xml'}
+        xml_data = wps_template(self._type_name, attribute)
+        res = requests.post(url, data=xml_data, headers=headers)
+        # Means wps is not activated
+        if res.status_code == 404:
             return None
+        elif 'Exception' in res.text:
+            return None
+        else:
+            prop = {}
+            xml_res = ET.fromstring(res.content)
+            for elem in xml_res.iter():
+                if 'Min' in elem.tag:
+                    prop['min'] = elem.text
+                elif 'Max' in elem.tag:
+                    prop['max'] = elem.text
+                elif 'Count' in elem.tag:
+                    prop['count'] = elem.text
+            return prop
 
     @staticmethod
     def _get_bands(xml_response):
@@ -212,32 +215,7 @@ def wps_template(type_name, attribute):
 
         return bands
 
-    def _get_unique_entries(self, attribute):
-        """ Returns a list of unique entries for a given attribute """
-
-        entry_url = self._generate_url(self._base_url,
-                                       service='wfs',
-                                       request='getfeature',
-                                       typename=self._type_name,
-                                       version='1.1.0',
-                                       propertyname=attribute)
-
-        entry_xml = self._get_xml_response(entry_url)
-
-        entries = []
-
-        for elem in entry_xml.getiterator():
-            if attribute in elem.tag:
-                entries.append(elem.text)
-
-        return list(set(entries))
-
-
-    @access.user
-    def createWmsStyle(self, params):
-
-        self._base_url = params['baseURL']
-        self._type_name = params['typeName']
+    def get_layer_info(self):
 
         # Create WMS instance
         wms = WebMapService(self._base_url)
