@@ -4,20 +4,6 @@
 
 minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
 
-    _get_style: function (params) {
-	girder.restRequest({
-	    path: '/minerva_wms_style',
-	    type: 'POST',
-	    data: params,
-	    error: null
-	}).done(_.bind(function (resp) {
-	    this.dataset.set({'wmsStyle': resp});
-	}, this)).error(_.bind(function (err) {
-	    this.trigger('m:error', err);
-	}, this));
-	return this;
-    },
-
     initialize: function (settings) {
 	this.dataset = settings.dataset;
 	var params = {
@@ -25,11 +11,25 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
 	    baseURL: this.dataset.get('meta').minerva.base_url,
 	    datasetId: this.dataset.get('_id')
 	}
-	this._get_style(params);
+    },
+
+    _get_geospatial_type: function (dataset) {
+	subType = this.dataset.get('meta').minerva.layer_info.subType;
+	return subType
+    },
+
+    _get_template: function(subType) {
+	if (subType === 'multiband') {
+	    return minerva.templates.styleMultiBandRasterWidget({});
+	} else {
+	    return minerva.templates.styleWmsDatasetWidget({});
+	}
     },
 
     render: function () {
-	var modal = this.$el.html(minerva.templates.styleWmsDatasetWidget({})).girderModal(this);
+	var subType = this._get_geospatial_type(this.dataset);
+	var template = this._get_template(subType);
+	var modal = this.$el.html(template).girderModal(this);
 	modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 	return this;
     }
