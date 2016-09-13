@@ -239,7 +239,7 @@ class WmsStyle(object):
 
             wfs_response = self._get_xml_response(wfs_url)
             layer_params['layerType'] = layer_type
-            layer_params['vectorType'] = self._get_vector_type(wfs_response)
+            layer_params['subType'] = self._get_vector_type(wfs_response)
             layer_params['attributes'] = self._get_attributes(wfs_response)
 
         elif layer_type == 'raster':
@@ -256,8 +256,8 @@ class WmsStyle(object):
             bands = self._get_bands(wcs_response)
             layer_params['bands'] = bands
             if isinstance(bands, dict):
-                    layer_params['rasterType'] = 'singleband'
+                    layer_params['subType'] = 'singleband'
             elif isinstance(bands, list):
-                    layer_params['rasterType'] = 'multiband'
+                    layer_params['subType'] = 'multiband'
 
         return layer_params
