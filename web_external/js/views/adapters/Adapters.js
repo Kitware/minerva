@@ -329,6 +329,9 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     SRS: projection,
                     TILED: true
                 };
+		if (minervaMetadata.sld) {
+		    params.SLD_BODY = minervaMetadata.sld
+		}
                 if (minervaMetadata.hasOwnProperty('credentials')) {
                     params.minerva_credentials = minervaMetadata.credentials;
                 }

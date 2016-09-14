@@ -23,6 +23,11 @@ import xml.etree.ElementTree as ET
 from owslib.wms import WebMapService
 import requests
 
+from girder.api import access
+from girder.api.rest import Resource
+from girder.plugins.minerva.utility.minerva_utility import updateMinervaMetadata
+from girder.utility.model_importer import ModelImporter
+
 
 def wps_template(type_name, attribute):
     return \
@@ -206,14 +211,13 @@ class WmsStyle(object):
                 maximum.append(elem.text)
 
         if len(bands) == 1:
-            return {bands[0]:
+            return 'singleband', {bands[0]:
                     {'properties':
                      {'min': minimum[0],
                       'max': maximum[0]}}}
         elif len(bands) > 1:
-            return bands
-
-        return bands
+            band_dict = {str(k):v for k,v in dict(enumerate(bands, 1)).items()}
+            return 'multiband', band_dict
 
     def get_layer_info(self):
 
@@ -253,11 +257,68 @@ class WmsStyle(object):
                                          identifiers=self._type_name)
 
             wcs_response = self._get_xml_response(wcs_url)
-            bands = self._get_bands(wcs_response)
+            sub_type, bands = self._get_bands(wcs_response)
             layer_params['bands'] = bands
-            if isinstance(bands, dict):
-                    layer_params['subType'] = 'singleband'
-            elif isinstance(bands, list):
-                    layer_params['subType'] = 'multiband'
+            layer_params['subType'] = sub_type
 
         return layer_params
+
+def multiband_template(red, green, blue, type_name):
+    return \
+    """<?xml version="1.0" encoding="utf-8" ?>
+<StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<NamedLayer>
+<Name>{}</Name>
+<UserStyle>
+<Title>Style</Title>
+<IsDefault>1</IsDefault>
+<FeatureTypeStyle>
+<Rule>
+<RasterSymbolizer>
+<Opacity>1.0</Opacity>
+<ChannelSelection>
+<RedChannel>
+<SourceChannelName>{}</SourceChannelName>
+</RedChannel>
+<GreenChannel>
+<SourceChannelName>{}</SourceChannelName>
+</GreenChannel>
+<BlueChannel>
+<SourceChannelName>{}</SourceChannelName>
+</BlueChannel>
+</ChannelSelection>
+</RasterSymbolizer>
+</Rule>
+</FeatureTypeStyle>
+</UserStyle>
+</NamedLayer>
+</StyledLayerDescriptor>""".format(type_name, red, green, blue)
+
+class Sld(Resource):
+
+    def __init__(self):
+        self.resourceName = 'minerva_style_wms'
+        self.route('POST', (), self.sld_factory)
+
+    def sld_factory(self, params):
+        if str(params['subType']) == 'multiband':
+            sld = multiband_template(str(params['redChannel']).split(':')[0],
+                                     str(params['greenChannel']).split(':')[0],
+                                     str(params['blueChannel']).split(':')[0],
+                                     str(params['typeName']))
+        else:
+            print params
+        clean_sld = sld.splitlines()
+        sld_str = ''.join(clean_sld)
+        self._update_metadata(str(params['_id']), sld_str)
+
+    @access.user
+    def _update_metadata(self, item_id, sld):
+        """ Adds a new field to metadata """
+
+        item = self.model('item').load(item_id, user=self.getCurrentUser())
+        item['meta']['minerva']['sld'] = sld
+
+        updateMinervaMetadata(item, item['meta']['minerva'])
+
+
