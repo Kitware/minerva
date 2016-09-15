@@ -263,61 +263,22 @@ class WmsStyle(object):
 
         return layer_params
 
-def multiband_template(red, green, blue, type_name):
-    return \
-    """<?xml version="1.0" encoding="utf-8" ?>
-<StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<NamedLayer>
-<Name>{}</Name>
-<UserStyle>
-<Title>Style</Title>
-<IsDefault>1</IsDefault>
-<FeatureTypeStyle>
-<Rule>
-<RasterSymbolizer>
-<Opacity>1.0</Opacity>
-<ChannelSelection>
-<RedChannel>
-<SourceChannelName>{}</SourceChannelName>
-</RedChannel>
-<GreenChannel>
-<SourceChannelName>{}</SourceChannelName>
-</GreenChannel>
-<BlueChannel>
-<SourceChannelName>{}</SourceChannelName>
-</BlueChannel>
-</ChannelSelection>
-</RasterSymbolizer>
-</Rule>
-</FeatureTypeStyle>
-</UserStyle>
-</NamedLayer>
-</StyledLayerDescriptor>""".format(type_name, red, green, blue)
 
 class Sld(Resource):
 
     def __init__(self):
         self.resourceName = 'minerva_style_wms'
-        self.route('POST', (), self.sld_factory)
+        self.route('POST', (), self.sld_meta)
 
-    def sld_factory(self, params):
-        if str(params['subType']) == 'multiband':
-            sld = multiband_template(str(params['redChannel']).split(':')[0],
-                                     str(params['greenChannel']).split(':')[0],
-                                     str(params['blueChannel']).split(':')[0],
-                                     str(params['typeName']))
-        else:
-            print params
-        clean_sld = sld.splitlines()
-        sld_str = ''.join(clean_sld)
-        self._update_metadata(str(params['_id']), sld_str)
+    def sld_meta(self, params):
+        self._update_metadata(str(params['_id']), params)
 
     @access.user
     def _update_metadata(self, item_id, sld):
         """ Adds a new field to metadata """
 
         item = self.model('item').load(item_id, user=self.getCurrentUser())
-        item['meta']['minerva']['sld'] = sld
+        item['meta']['minerva']['sld_params'] = sld
 
         updateMinervaMetadata(item, item['meta']['minerva'])
 

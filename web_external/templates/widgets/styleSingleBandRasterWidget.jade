@@ -1,0 +1,30 @@
+.modal-dialog
+  .modal-content
+    form#m-wms-singleband-style-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Style Singleband Raster
+      .modal-body
+          .row
+            .col-md-6
+              .form-group
+                label.control-label(for="m-min-value") Minimum
+                input.input-sm#m-min-value.form-control(type="number", placeholder=minimum, value=minimum)
+            .col-md-6
+              .form-group
+                label.control-label(for="m-max-value") Maximum
+                input.input-sm#m-max-value.form-control(type="number", placeholder=maximum, value=maximum)
+            .col-md-12
+              .form-group
+                label.control-label(for="m-color-ramp") Color Ramp
+                select.form-control#m-color-ramp.m-select-ramp(
+                  data-feature=feature
+                  data-property=rampKey)
+                  each ramp, name in ramps
+                    option(data-content!=ramp.display data-ramp-name=name) #{name}
+      .modal-footer
+        button.btn.btn-small.btn-primary
+              i.icon-plus-squared
+              | Save Style
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
