@@ -6,7 +6,7 @@ minerva.models.WmsDatasetModel = minerva.models.DatasetModel.extend({
 
     createWmsDataset: function (params) {
         girder.restRequest({
-            path: '/minerva_dataset_wms',
+            path: '/minerva_datasets_wms',
             type: 'POST',
             data: params,
             error: null // ignore default error behavior (validation may fail)

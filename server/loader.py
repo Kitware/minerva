@@ -26,9 +26,8 @@ from girder.utility.webroot import Webroot
 from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
-        analysis, dataset, s3_dataset, session, source, \
-        wms_dataset, wms_source, geojson_dataset, elasticsearch_source, \
-        s3_source, postgres_source, mongo_source, mongo_dataset
+        analysis, dataset, session, \
+        wms_dataset, geojson_dataset
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 
 
@@ -78,24 +77,11 @@ def load(info):
     info['apiRoot'].minerva_dataset = dataset.Dataset()
     info['apiRoot'].minerva_analysis = analysis.Analysis()
     info['apiRoot'].minerva_session = session.Session()
-    info['apiRoot'].minerva_dataset_s3 = s3_dataset.S3Dataset()
 
-    info['apiRoot'].minerva_source = source.Source()
-
-    info['apiRoot'].minerva_source_wms = wms_source.WmsSource()
-    info['apiRoot'].minerva_source_s3 = s3_source.S3Source()
-    info['apiRoot'].minerva_dataset_wms = wms_dataset.WmsDataset()
+    info['apiRoot'].minerva_datasets_wms = wms_dataset.WmsDataset()
 
     info['apiRoot'].minerva_dataset_geojson = geojson_dataset.GeojsonDataset()
 
-    info['apiRoot'].minerva_source_elasticsearch = \
-        elasticsearch_source.ElasticsearchSource()
-    info['apiRoot'].minerva_query_elasticsearch = \
-        elasticsearch_source.ElasticsearchQuery()
-    info['apiRoot'].minerva_source_postgres = \
-        postgres_source.PostgresSource()
-    info['apiRoot'].minerva_source_mongo = mongo_source.MongoSource()
-    info['apiRoot'].minerva_dataset_mongo = mongo_dataset.MongoDataset()
     info['serverRoot'].wms_proxy = WmsProxy()
 
     # If we are started up in testing mode, then serve minerva's sources as well

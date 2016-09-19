@@ -139,6 +139,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      */
     getGeoRenderType: function () {
         var mm = this.metadata();
+        if (!mm) {
+            return null;
+        }
         if (!mm.geo_render) {
             this._initGeoRender();
         }
@@ -204,6 +207,9 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     loadTabularData: function () {
         // TODO looks similar enough to loadGeoData, consider unification.
         var mm = this.metadata();
+        if (!mm) {
+            return;
+        }
         if (this.get('tableData') !== null) {
             this.trigger('m:dataset_table_dataLoaded', this);
         } else {
