@@ -94,7 +94,7 @@ class WmsDataset(Dataset):
 
         try:
             layer_info = WmsStyle(typeName, baseURL).get_layer_info()
-        except:
+        except TypeError:
             layer_info = ""
 
         if 'credentials' in wmsSource['wms_params']:

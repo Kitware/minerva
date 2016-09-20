@@ -37,12 +37,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         var styleWmsWidget = new minerva.views.StyleWmsDatasetWidget({
-	    el: $('#g-dialog-container'),
-	    collection: this.collection,
-	    dataset: dataset,
-	    parentView: this
-	});
-	styleWmsWidget.render();
+            el: $('#g-dialog-container'),
+            collection: this.collection,
+            dataset: dataset,
+            parentView: this
+        });
+        styleWmsWidget.render();
     },
 
     /**

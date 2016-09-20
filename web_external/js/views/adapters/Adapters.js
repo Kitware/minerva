@@ -17,11 +17,10 @@ function generate_sequence(start, stop, count) {
     var sequence = [];
     var step = (stop - start) / (count - 1.0);
     for (var i = 0; i < count; i++) {
-      sequence.push(parseFloat(start + i * step));
+        sequence.push(parseFloat(start + i * step));
     }
     return sequence;
 }
-
 
 (function () {
     /**
@@ -335,8 +334,7 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
         this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
         var projection = 'EPSG:3857';
 
-
-	this.geoJsLayer.url(
+        this.geoJsLayer.url(
             _.bind(function (x, y, zoom) {
                 var bb = this.geoJsLayer.gcsTileBounds({x: x, y: y, level: zoom}, projection);
                 var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
@@ -344,7 +342,7 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     SERVICE: 'WMS',
                     VERSION: '1.1.1',
                     REQUEST: 'GetMap',
-		    LAYERS: minervaMetadata.type_name,
+                    LAYERS: minervaMetadata.type_name,
                     STYLES: '',
                     BBOX: bbox_mercator,
                     WIDTH: 256,
@@ -353,96 +351,79 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     TRANSPARENT: true,
                     SRS: projection
                 };
-		// There is a lot of repeated code here. It can be easily refactored
-		// but expecting much more complex vis options so for now keep them
-		// separate
-		if (minervaMetadata.sld_params) {
-		    if (minervaMetadata.sld_params.subType === 'multiband') {
-			var sld_body = multiband_template({
-			    typeName: minervaMetadata.sld_params.typeName,
-			    redChannel: minervaMetadata.sld_params.redChannel.split(":")[0].toString(),
-			    greenChannel: minervaMetadata.sld_params.greenChannel.split(":")[0].toString(),
-			    blueChannel: minervaMetadata.sld_params.blueChannel.split(":")[0].toString()})
-			params.SLD_BODY = sld_body;
+                // There is a lot of repeated code here. It can be easily refactored
+                // but expecting much more complex vis options so for now keep them
+                // separate
 
-		    } else if (minervaMetadata.sld_params.subType === 'singleband') {
-			var min = parseFloat(minervaMetadata.sld_params.min)
-			var max = parseFloat(minervaMetadata.sld_params.max)
-			var ramp = minervaMetadata.sld_params['ramp[]']
-			var count = ramp.length
-			var seq = generate_sequence(min, max, count);
-			var color_value_pairs = seq.map(function (num, i) {
-			    return [num, ramp[i]];
-			});
-			var colorMapTemplate = _.template('<ColorMapEntry color="<%= color %>" quantity="<%= value %>" />')
-			var colorMapEntry = _.map(color_value_pairs, function (pair)
-						  {return colorMapTemplate({color: pair[1],
-									    value: pair[0]})}).join("");
-			var sld_body = singleband_template({
-			    typeName: minervaMetadata.sld_params.typeName,
-			    colorMapEntry: colorMapEntry
-			});
-			params.SLD_BODY = sld_body;
-		    } else if (minervaMetadata.sld_params.subType === 'unknown' || minervaMetadata.sld_params.subType === 'polygon') {
-			var min = parseFloat(minervaMetadata.sld_params.min)
-			var max = parseFloat(minervaMetadata.sld_params.max)
-			var ramp = minervaMetadata.sld_params['ramp[]']
-			var count = ramp.length
-			var attribute = minervaMetadata.sld_params.attribute
-			var seq = generate_sequence(min, max, count);
-			var color_value_pairs = seq.map(function (num, i) {
-			    return [num, ramp[i]];
-			});
-			var colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
-			var colorValueMapping = _.map(color_value_pairs, function (pair)
-						      {return colorMapTemplate({color: pair[1],
-										value: pair[0]})}).join("");
-			var sld_body = polygon_template({
-			    typeName: minervaMetadata.sld_params.typeName,
-			    colorValueMapping: colorValueMapping,
-			    attribute: attribute});
-			params.SLD_BODY = sld_body;
+                var sld_body = null;
+                var min = null;
+                var max = null;
+                var ramp = null;
+                var count = null;
+                var seq = null;
+                var colorMapTemplate = null;
+                var colorValuePairs = null;
+                var attribute = null;
+                if (minervaMetadata.sld_params) {
+                    if (minervaMetadata.sld_params.subType === 'multiband') {
+                        sld_body = multiband_template({
+                            typeName: minervaMetadata.sld_params.typeName,
+                            redChannel: minervaMetadata.sld_params.redChannel.split(':')[0].toString(),
+                            greenChannel: minervaMetadata.sld_params.greenChannel.split(':')[0].toString(),
+                            blueChannel: minervaMetadata.sld_params.blueChannel.split(':')[0].toString()});
+                    } else if (minervaMetadata.sld_params.subType === 'singleband') {
+                        min = parseFloat(minervaMetadata.sld_params.min);
+                        max = parseFloat(minervaMetadata.sld_params.max);
+                        ramp = minervaMetadata.sld_params['ramp[]'];
+                        count = ramp.length;
+                        seq = generate_sequence(min, max, count);
+                        colorValuePairs = seq.map(function (num, i) {
+                            return [num, ramp[i]];
+                        });
+                        colorMapTemplate = _.template('<ColorMapEntry color="<%= color %>" quantity="<%= value %>" />');
+                        var colorMapEntry = _.map(colorValuePairs, function (pair) {
+                            return colorMapTemplate({
+                                color: pair[1],
+                                value: pair[0] }); }).join('');
+                        sld_body = singleband_template({
+                            typeName: minervaMetadata.sld_params.typeName,
+                            colorMapEntry: colorMapEntry
+                        });
+                    } else {
+                        min = parseFloat(minervaMetadata.sld_params.min);
+                        max = parseFloat(minervaMetadata.sld_params.max);
+                        ramp = minervaMetadata.sld_params['ramp[]'];
+                        count = ramp.length;
+                        attribute = minervaMetadata.sld_params.attribute;
+                        seq = generate_sequence(min, max, count);
+                        colorValuePairs = seq.map(function (num, i) {
+                            return [num, ramp[i]];
+                        });
+                        colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
+                        var colorValueMapping = _.map(colorValuePairs, function (pair) {
+                            return colorMapTemplate({
+                                color: pair[1],
+                                value: pair[0]}); }).join('');
 
-		    } else if (minervaMetadata.sld_params.subType === 'point') {
-			var min = parseFloat(minervaMetadata.sld_params.min)
-			var max = parseFloat(minervaMetadata.sld_params.max)
-			var ramp = minervaMetadata.sld_params['ramp[]']
-			var count = ramp.length
-			var attribute = minervaMetadata.sld_params.attribute
-			var seq = generate_sequence(min, max, count);
-			var color_value_pairs = seq.map(function (num, i) {
-			    return [num, ramp[i]];
-			});
-			var colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
-			var colorValueMapping = _.map(color_value_pairs, function (pair)
-						      {return colorMapTemplate({color: pair[1],
-										value: pair[0]})}).join("");
-			var sld_body = point_template({
-			    typeName: minervaMetadata.sld_params.typeName,
-			    colorValueMapping: colorValueMapping,
-			    attribute: attribute});
-			params.SLD_BODY = sld_body;
-		    } else if (minervaMetadata.sld_params.subType === 'line') {
-			var min = parseFloat(minervaMetadata.sld_params.min)
-			var max = parseFloat(minervaMetadata.sld_params.max)
-			var ramp = minervaMetadata.sld_params['ramp[]']
-			var count = ramp.length
-			var attribute = minervaMetadata.sld_params.attribute
-			var seq = generate_sequence(min, max, count);
-			var color_value_pairs = seq.map(function (num, i) {
-			    return [num, ramp[i]];
-			});
-			var colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
-			var colorValueMapping = _.map(color_value_pairs, function (pair)
-						      {return colorMapTemplate({color: pair[1],
-										value: pair[0]})}).join("");
-			var sld_body = line_template({
-			    typeName: minervaMetadata.sld_params.typeName,
-			    colorValueMapping: colorValueMapping,
-			    attribute: attribute});
-			params.SLD_BODY = sld_body;
-		    }
-		}
+                        if (minervaMetadata.sld_params.subType === 'point') {
+                            sld_body = point_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute });
+                        } else if (minervaMetadata.sld_params.subType === 'line') {
+                            sld_body = line_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute });
+                        } else {
+                            sld_body = polygon_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute});
+                        }
+                    }
+                    params.SLD_BODY = sld_body;
+                }
                 if (minervaMetadata.hasOwnProperty('credentials')) {
                     params.minerva_credentials = minervaMetadata.credentials;
                 }

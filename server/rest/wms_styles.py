@@ -17,7 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 from urllib import urlencode
-from urlparse import parse_qs, urlsplit, urlunsplit
+from urlparse import urlsplit, urlunsplit
 import xml.etree.ElementTree as ET
 
 from owslib.wms import WebMapService
@@ -26,7 +26,6 @@ import requests
 from girder.api import access
 from girder.api.rest import Resource
 from girder.plugins.minerva.utility.minerva_utility import updateMinervaMetadata
-from girder.utility.model_importer import ModelImporter
 
 
 def wps_template(type_name, attribute):
@@ -80,7 +79,7 @@ def wps_template(type_name, attribute):
       <ows:Identifier>result</ows:Identifier>
     </wps:RawDataOutput>
   </wps:ResponseForm>
-</wps:Execute>""".format(type_name, attribute)
+</wps:Execute>""".format(type_name, attribute)  # noqa
 
 
 class WmsStyle(object):
@@ -91,7 +90,7 @@ class WmsStyle(object):
 
     @staticmethod
     def _guess_type(layer):
-        """ Helper function to guess the type of dataset """
+        """Helper function to guess the type of dataset"""
 
         # If WCS is in the layer keywords it is a Raster
         if "WCS" in layer.keywords:
@@ -101,7 +100,7 @@ class WmsStyle(object):
 
     @staticmethod
     def _generate_url(wms_url, **kwargs):
-        """ Generates different urls(wfs or wcs) from a wms url """
+        """Generates different urls(wfs or wcs) from a wms url"""
 
         scheme, netloc, path, query_string, fragment = urlsplit(wms_url)
 
@@ -114,7 +113,7 @@ class WmsStyle(object):
 
     @staticmethod
     def _get_xml_response(url):
-        """ Get xml response from the request """
+        """Get xml response from the request"""
 
         response = requests.get(url)
         tree = ET.fromstring(response.content)
@@ -122,12 +121,12 @@ class WmsStyle(object):
         return tree
 
     def _get_attributes(self, xml_response):
-        """ Gets the attributes from a vector layer """
+        """Gets the attributes from a vectorlayer"""
 
         attributes = {}
 
         keys = xml_response\
-               .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
+            .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
 
         for elem in keys:
             attribute = {}
@@ -145,12 +144,12 @@ class WmsStyle(object):
 
     @staticmethod
     def _get_vector_type(xml_response):
-        """ Gets the vector type """
+        """Gets the vector type"""
 
         vector_type = "unknown"
 
         keys = xml_response\
-               .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
+            .iterfind('.//{http://www.w3.org/2001/XMLSchema}element')
 
         for elem in keys:
             type_guess = elem.get('type')
@@ -167,8 +166,9 @@ class WmsStyle(object):
         return vector_type
 
     def _get_min_max_count(self, attribute):
-        """ Gets the min max and count values for a given
-        numeric attribute """
+        """Gets the min max and count values for a given
+        numeric attribute
+        """
 
         url = self._base_url.split("?")[0].replace('ows', 'wps')
         headers = {'Content-Type': 'application/xml'}
@@ -193,7 +193,7 @@ class WmsStyle(object):
 
     @staticmethod
     def _get_bands(xml_response):
-        """ Gets the name of the bands """
+        """Gets the name of the bands"""
 
         wcs_namespace = "{http://www.opengis.net/wcs/1.1.1}"
         ows_namespace = "{http://www.opengis.net/ows/1.1}"
@@ -211,12 +211,9 @@ class WmsStyle(object):
                 maximum.append(elem.text)
 
         if len(bands) == 1:
-            return 'singleband', {bands[0]:
-                    {'properties':
-                     {'min': minimum[0],
-                      'max': maximum[0]}}}
+            return 'singleband', {bands[0]: {'properties': {'min': minimum[0], 'max': maximum[0]}}}
         elif len(bands) > 1:
-            band_dict = {str(k):v for k,v in dict(enumerate(bands, 1)).items()}
+            band_dict = {str(k): v for k, v in dict(enumerate(bands, 1)).items()}
             return 'multiband', band_dict
 
     def get_layer_info(self):
@@ -275,11 +272,9 @@ class Sld(Resource):
 
     @access.user
     def _update_metadata(self, item_id, sld):
-        """ Adds a new field to metadata """
+        """Adds a new field to metadata"""
 
         item = self.model('item').load(item_id, user=self.getCurrentUser())
         item['meta']['minerva']['sld_params'] = sld
 
         updateMinervaMetadata(item, item['meta']['minerva'])
-
-
