@@ -92,7 +92,10 @@ class WmsDataset(Dataset):
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
 
-        layer_info = WmsStyle(typeName, baseURL).get_layer_info()
+        try:
+            layer_info = WmsStyle(typeName, baseURL).get_layer_info()
+        except:
+            layer_info = ""
 
         if 'credentials' in wmsSource['wms_params']:
             credentials = (
