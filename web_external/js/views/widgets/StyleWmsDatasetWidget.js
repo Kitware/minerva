@@ -161,14 +161,10 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
 		this.$('#m-min-value').val(sldMeta.min);
 		this.$('#m-max-value').val(sldMeta.max);
 		this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
-	    } else if (subType === 'unknown' || subType === 'polygon') {
+	    } else {
 		var sldMeta = this.dataset.get('meta').minerva.sld_params;
 		this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
 		this.$('#m-attribute').val(sldMeta.attribute);
-	    } else if (subType === 'point') {
-		var sldMeta = this.dataset.get('meta').minerva.sld_params;
-		this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
-		this.$('#m-attribute').val(sldMeta.attribute);		
 	    }
 	}
 	modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
