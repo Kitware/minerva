@@ -6,6 +6,8 @@ var singleband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><Sty
 
 var polygon_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Polygon</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PolygonSymbolizer><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
+var point_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Point</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName>circle</WellKnownName><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></Mark></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
 function generate_sequence(start, stop, count) {
     // Generates a sequence of numbers with the given
     // start, stop and count variables
@@ -349,6 +351,9 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     TRANSPARENT: true,
                     SRS: projection
                 };
+		// There is a lot of repeated code here. It can be easily refactored
+		// but expecting much more complex vis options so for now keep them
+		// separate
 		if (minervaMetadata.sld_params) {
 		    if (minervaMetadata.sld_params.subType === 'multiband') {
 			var sld_body = multiband_template({
@@ -396,6 +401,25 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
 			    attribute: attribute});
 			params.SLD_BODY = sld_body;
 
+		    } else if (minervaMetadata.sld_params.subType === 'point') {
+			var min = parseFloat(minervaMetadata.sld_params.min)
+			var max = parseFloat(minervaMetadata.sld_params.max)
+			var ramp = minervaMetadata.sld_params['ramp[]']
+			var count = ramp.length
+			var attribute = minervaMetadata.sld_params.attribute
+			var seq = generate_sequence(min, max, count);
+			var color_value_pairs = seq.map(function (num, i) {
+			    return [num, ramp[i]];
+			});
+			var colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
+			var colorValueMapping = _.map(color_value_pairs, function (pair)
+						      {return colorMapTemplate({color: pair[1],
+										value: pair[0]})}).join("");
+			var sld_body = point_template({
+			    typeName: minervaMetadata.sld_params.typeName,
+			    colorValueMapping: colorValueMapping,
+			    attribute: attribute});
+			params.SLD_BODY = sld_body;
 		    }
 		}
                 if (minervaMetadata.hasOwnProperty('credentials')) {

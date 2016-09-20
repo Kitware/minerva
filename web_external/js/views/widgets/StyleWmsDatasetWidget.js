@@ -165,6 +165,10 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
 		var sldMeta = this.dataset.get('meta').minerva.sld_params;
 		this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
 		this.$('#m-attribute').val(sldMeta.attribute);
+	    } else if (subType === 'point') {
+		var sldMeta = this.dataset.get('meta').minerva.sld_params;
+		this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
+		this.$('#m-attribute').val(sldMeta.attribute);		
 	    }
 	}
 	modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
