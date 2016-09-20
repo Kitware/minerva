@@ -72,15 +72,11 @@ class WmsDataset(Dataset):
         source['layer_source'] = name
 
         for layerType in layersType:
-            layer = {
-                'layer_title': wms[layerType].title,
-                'layer_type': layerType
-            }
-
             dataset = self.createWmsDataset(source,
                                             params={
-                                                'typeName': layer['layer_type'],
-                                                'name': layer['layer_title']})
+                                                'typeName': layerType,
+                                                'name': wms[layerType].title,
+                                                'abstract': wms[layerType].abstract})
 
             layers.append(dataset)
 
@@ -120,13 +116,15 @@ class WmsDataset(Dataset):
 
         self.requireParams(('name'), params)
         name = params['name']
+
         minerva_metadata = {
             'dataset_type': 'wms',
             'legend': legend,
             'source': wmsSource,
             'type_name': typeName,
             'base_url': baseURL,
-            'layer_info': layer_info
+            'layer_info': layer_info,
+            'abstract': params['abstract']
         }
         if credentials:
             minerva_metadata['credentials'] = credentials
