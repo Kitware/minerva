@@ -167,6 +167,8 @@ class Dataset(Resource):
             geojsonFilepath = converter(item, tmpdir)
             self._addFileToItem(item, geojsonFilepath)
             geojsonFile = self._findGeoJsonFile(item)
+            item['meta']['minerva']['source'] = {
+                'layer_source': 'GeoJSON'}
             item['meta']['minerva']['geojson_file'] = {
                 'name': geojsonFile['name'],
                 '_id': geojsonFile['_id']
@@ -302,6 +304,8 @@ class Dataset(Resource):
                     'name': file['name'], '_id': file['_id']}]
                 minerva_metadata['geojson_file'] = {
                     'name': file['name'], '_id': file['_id']}
+                minerva_metadata['source'] = {
+                    'layer_source': 'GeoJSON'}
                 break
             elif 'json' in file['exts']:
                 minerva_metadata['original_type'] = 'json'

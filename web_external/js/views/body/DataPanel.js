@@ -3,10 +3,32 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         // TODO namespace.
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
+        'click .m-add-wms': 'addWmsDataset',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .m-configure-geo-render': 'configureGeoRender'
+        'click .m-configure-geo-render': 'configureGeoRender',
+        'click .source-title': 'toggleDatasets'
+    },
+
+    toggleDatasets: function (event) {
+        var listOfLayers = $(event.currentTarget).next();
+
+        if (listOfLayers.css('display') === 'none') {
+            listOfLayers.css('display', 'block');
+            this.visibleSourceGroups[$(event.currentTarget).text()] = true;
+        } else {
+            listOfLayers.css('display', 'none');
+            this.visibleSourceGroups[$(event.currentTarget).text()] = false;
+        }
+    },
+    addWmsDataset: function (event) {
+        var addWmsWidget = new minerva.views.AddWmsSourceWidget({
+            el: $('#g-dialog-container'),
+            collection: this.collection,
+            parentView: this
+        });
+        addWmsWidget.render();
     },
 
     /**
@@ -161,9 +183,9 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         });
         this.datasetInfoWidget.render();
     },
-
     initialize: function (settings) {
         this.collection = settings.session.datasetsCollection;
+        this.visibleSourceGroups = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -196,13 +218,23 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         minerva.views.Panel.prototype.initialize.apply(this);
     },
 
+    getSourceNameFromModel: function (model) {
+        return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
+    },
+
     render: function () {
+        this.sourceDataset = _.groupBy(
+            _.filter(this.collection.models, this.getSourceNameFromModel),
+            this.getSourceNameFromModel
+        );
+
         this.$el.html(minerva.templates.dataPanel({
-            datasets: this.collection.models
+            sourceDatasetMapping: this.sourceDataset,
+            visibleSourceGroups: this.visibleSourceGroups,
+            sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
         }));
 
         // TODO pagination and search?
-
         return this;
     }
 

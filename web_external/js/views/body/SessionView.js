@@ -145,7 +145,6 @@ minerva.views.SessionView = minerva.View.extend({
                 dataset.set('displayed', true);
             }
         }, this);
-        this.sourceCollection = settings.sourceCollection;
 
         // listen for a change on a dataset being displayed
         // this should add or remove it from the current session
@@ -183,10 +182,6 @@ minerva.views.SessionView = minerva.View.extend({
                         {
                             id: 'm-analysis-panel',
                             view: minerva.views.AnalysisPanel
-                        },
-                        {
-                            id: 'm-source-panel',
-                            view: minerva.views.SourcePanel
                         },
                         {
                             id: 'm-data-panel',
@@ -264,15 +259,11 @@ minerva.router.route('session/:id', 'session', function (id) {
         datasetsCollection.once('g:changed', function () {
             var analysisCollection = new minerva.collections.AnalysisCollection();
             analysisCollection.once('g:changed', function () {
-                var sourceCollection = new minerva.collections.SourceCollection();
-                sourceCollection.once('g:changed', function () {
-                    girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
-                        analysisCollection: analysisCollection,
-                        datasetsCollection: datasetsCollection,
-                        sourceCollection: sourceCollection,
-                        session: session
-                    });
-                }).fetch();
+                girder.events.trigger('g:navigateTo', minerva.views.SessionView, {
+                    analysisCollection: analysisCollection,
+                    datasetsCollection: datasetsCollection,
+                    session: session
+                });
             }).fetch();
         }).fetch();
     }, this).on('g:error', function () {

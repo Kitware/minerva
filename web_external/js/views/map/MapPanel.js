@@ -143,6 +143,9 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
      * @param {Object} visProperties - Properties used to render the dataset as a layerType
      */
     addDataset: function (dataset, layerType, visProperties) {
+        if (!dataset.metadata()) {
+            return;
+        }
         var datasetId = dataset.get('_id');
 
         if (!_.contains(this.datasetLayerReprs, datasetId)) {
