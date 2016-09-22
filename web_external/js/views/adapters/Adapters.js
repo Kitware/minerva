@@ -1,5 +1,27 @@
 minerva.core = minerva.core || {};
 
+var multiband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Style</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><RedChannel><SourceChannelName><%= redChannel %></SourceChannelName></RedChannel><GreenChannel><SourceChannelName><%= greenChannel %></SourceChannelName></GreenChannel><BlueChannel><SourceChannelName><%= blueChannel %></SourceChannelName></BlueChannel></ChannelSelection></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+var singleband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>SLD Single Band</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><GrayChannel><SourceChannelName>1</SourceChannelName></GrayChannel></ChannelSelection><ColorMap extended="true"><%= colorMapEntry %></ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+var polygon_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Polygon</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PolygonSymbolizer><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+var point_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Point</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName>circle</WellKnownName><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></Mark></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+var line_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Line</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><LineSymbolizer><Stroke><CssParameter name="stroke"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Stroke></LineSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+function generate_sequence(start, stop, count) {
+    // Generates a sequence of numbers with the given
+    // start, stop and count variables
+
+    var sequence = [];
+    var step = (stop - start) / (count - 1.0);
+    for (var i = 0; i < count; i++) {
+        sequence.push(parseFloat(start + i * step));
+    }
+    return sequence;
+}
+
 (function () {
     /**
      * Definition of the AdapterRegistry, which maps adapters types
@@ -311,6 +333,7 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
         this.geoJsLayer.layerName = minervaMetadata.type_name;
         this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
         var projection = 'EPSG:3857';
+
         this.geoJsLayer.url(
             _.bind(function (x, y, zoom) {
                 var bb = this.geoJsLayer.gcsTileBounds({x: x, y: y, level: zoom}, projection);
@@ -319,16 +342,88 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     SERVICE: 'WMS',
                     VERSION: '1.1.1',
                     REQUEST: 'GetMap',
-                    LAYERS: this.geoJsLayer.layerName,
+                    LAYERS: minervaMetadata.type_name,
                     STYLES: '',
                     BBOX: bbox_mercator,
                     WIDTH: 256,
                     HEIGHT: 256,
                     FORMAT: 'image/png',
                     TRANSPARENT: true,
-                    SRS: projection,
-                    TILED: true
+                    SRS: projection
                 };
+                // There is a lot of repeated code here. It can be easily refactored
+                // but expecting much more complex vis options so for now keep them
+                // separate
+
+                var sld_body = null;
+                var min = null;
+                var max = null;
+                var ramp = null;
+                var count = null;
+                var seq = null;
+                var colorMapTemplate = null;
+                var colorValuePairs = null;
+                var attribute = null;
+                if (minervaMetadata.sld_params) {
+                    if (minervaMetadata.sld_params.subType === 'multiband') {
+                        sld_body = multiband_template({
+                            typeName: minervaMetadata.sld_params.typeName,
+                            redChannel: minervaMetadata.sld_params.redChannel.split(':')[0].toString(),
+                            greenChannel: minervaMetadata.sld_params.greenChannel.split(':')[0].toString(),
+                            blueChannel: minervaMetadata.sld_params.blueChannel.split(':')[0].toString()});
+                    } else if (minervaMetadata.sld_params.subType === 'singleband') {
+                        min = parseFloat(minervaMetadata.sld_params.min);
+                        max = parseFloat(minervaMetadata.sld_params.max);
+                        ramp = minervaMetadata.sld_params['ramp[]'];
+                        count = ramp.length;
+                        seq = generate_sequence(min, max, count);
+                        colorValuePairs = seq.map(function (num, i) {
+                            return [num, ramp[i]];
+                        });
+                        colorMapTemplate = _.template('<ColorMapEntry color="<%= color %>" quantity="<%= value %>" />');
+                        var colorMapEntry = _.map(colorValuePairs, function (pair) {
+                            return colorMapTemplate({
+                                color: pair[1],
+                                value: pair[0] }); }).join('');
+                        sld_body = singleband_template({
+                            typeName: minervaMetadata.sld_params.typeName,
+                            colorMapEntry: colorMapEntry
+                        });
+                    } else {
+                        min = parseFloat(minervaMetadata.sld_params.min);
+                        max = parseFloat(minervaMetadata.sld_params.max);
+                        ramp = minervaMetadata.sld_params['ramp[]'];
+                        count = ramp.length;
+                        attribute = minervaMetadata.sld_params.attribute;
+                        seq = generate_sequence(min, max, count);
+                        colorValuePairs = seq.map(function (num, i) {
+                            return [num, ramp[i]];
+                        });
+                        colorMapTemplate = _.template('<ogc:Literal><%= value %></ogc:Literal><ogc:Literal><%= color %></ogc:Literal>');
+                        var colorValueMapping = _.map(colorValuePairs, function (pair) {
+                            return colorMapTemplate({
+                                color: pair[1],
+                                value: pair[0]}); }).join('');
+
+                        if (minervaMetadata.sld_params.subType === 'point') {
+                            sld_body = point_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute });
+                        } else if (minervaMetadata.sld_params.subType === 'line') {
+                            sld_body = line_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute });
+                        } else {
+                            sld_body = polygon_template({
+                                typeName: minervaMetadata.sld_params.typeName,
+                                colorValueMapping: colorValueMapping,
+                                attribute: attribute});
+                        }
+                    }
+                    params.SLD_BODY = sld_body;
+                }
                 if (minervaMetadata.hasOwnProperty('credentials')) {
                     params.minerva_credentials = minervaMetadata.credentials;
                 }
