@@ -156,7 +156,23 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
         this._injectStyle(data, visProperties, data.summary || {});
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
-            reader.read(data, _.bind(function () {
+            var points, allData;
+            reader.read(data, _.bind(function (features) {
+                if (visProperties.point && visProperties.point.cluster) {
+                    points = features[0];
+                    allData = points.data();
+                    this._injectClusterStyle(points, 'radius', visProperties.point.clusterRadius);
+                    this._injectClusterStyle(points, 'stroke', true);
+                    this._injectClusterStyle(points, 'fill', true);
+                    this._injectClusterStyle(points, 'strokeColor', visProperties.point.clusterStrokeColor);
+                    this._injectClusterStyle(points, 'fillColor', visProperties.point.clusterFillColor);
+                    this._injectClusterStyle(points, 'strokeOpacity', 1);
+                    this._injectClusterStyle(points, 'strokeWidth', 1);
+                    this._injectClusterStyle(points, 'fillOpacity', 1);
+                    points.clustering({
+                        radius: visProperties.point.clusterDistance // need to fix geojs for this to work
+                    }).data(allData);
+                }
                 this.trigger('m:map_layer_renderable', this);
             }, this));
         } catch (err) {
@@ -164,6 +180,19 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             console.error(err);
             this.trigger('m:map_layer_error', this);
         }
+    };
+
+    /**
+     * Inject cluster styling into the style object.
+     */
+    this._injectClusterStyle = function (feature, property, clusterStyle) {
+        var styleFunc = feature.style(property);
+        feature.style(property, function (d) {
+            if (d.__cluster) {
+                return clusterStyle;
+            }
+            return styleFunc.apply(this, arguments);
+        });
     };
 
     /**

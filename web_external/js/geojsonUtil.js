@@ -44,6 +44,11 @@ minerva.geojson.merge = function merge(value, accumulated) {
  * geojson summaries.
  */
 minerva.geojson.ignored_properties = [
+    'cluster',
+    'clusterDistance',
+    'clusterFillColor',
+    'clusterStrokeColor',
+    'clusterRadius',
     'fill',
     'fillColor',
     'fillOpacity',
