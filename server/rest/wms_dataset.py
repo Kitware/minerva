@@ -24,6 +24,7 @@ from girder.api.rest import getUrlParts
 from owslib.wms import WebMapService
 
 from girder.plugins.minerva.rest.dataset import Dataset
+from girder.plugins.minerva.rest.wms_styles import WmsStyle
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
@@ -36,23 +37,25 @@ class WmsDataset(Dataset):
         self.resourceName = 'minerva_datasets_wms'
         self.route('POST', (), self.createWmsSource)
 
+    @staticmethod
+    def _sourceMetadata(username, password, baseURL, hostName):
+        minerva_metadata = {
+            'source_type': 'wms',
+            'wms_params': {
+                'base_url': baseURL,
+                'host_name': hostName
+            }
+        }
+
+        if username and password:
+            credentials = encryptCredentials("{}:{}".format(
+                username, password))
+            minerva_metadata['wms_params']['credentials'] = credentials
+
+        return minerva_metadata
+
     @access.user
     def createWmsSource(self, params):
-        def sourceMetadata(username, password, baseURL, hostName):
-            minerva_metadata = {
-                'source_type': 'wms',
-                'wms_params': {
-                    'base_url': baseURL,
-                    'host_name': hostName
-                }
-            }
-
-            if username and password:
-                credentials = encryptCredentials("{}:{}".format(
-                    username, password))
-                minerva_metadata['wms_params']['credentials'] = credentials
-
-            return minerva_metadata
 
         name = params['name']
         baseURL = params['baseURL']
@@ -65,19 +68,15 @@ class WmsDataset(Dataset):
                             password=password)
         layersType = list(wms.contents)
         layers = []
-        source = sourceMetadata(username, password, baseURL, hostName)
+        source = self._sourceMetadata(username, password, baseURL, hostName)
         source['layer_source'] = name
 
         for layerType in layersType:
-            layer = {
-                'layer_title': wms[layerType].title,
-                'layer_type': layerType
-            }
-
             dataset = self.createWmsDataset(source,
                                             params={
-                                                'typeName': layer['layer_type'],
-                                                'name': layer['layer_title']})
+                                                'typeName': layerType,
+                                                'name': wms[layerType].title,
+                                                'abstract': wms[layerType].abstract})
 
             layers.append(dataset)
 
@@ -88,6 +87,11 @@ class WmsDataset(Dataset):
         baseURL = wmsSource['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
+
+        try:
+            layer_info = WmsStyle(typeName, baseURL).get_layer_info()
+        except TypeError:
+            layer_info = ""
 
         if 'credentials' in wmsSource['wms_params']:
             credentials = (
@@ -112,12 +116,15 @@ class WmsDataset(Dataset):
 
         self.requireParams(('name'), params)
         name = params['name']
+
         minerva_metadata = {
             'dataset_type': 'wms',
             'legend': legend,
             'source': wmsSource,
             'type_name': typeName,
-            'base_url': baseURL
+            'base_url': baseURL,
+            'layer_info': layer_info,
+            'abstract': params['abstract']
         }
         if credentials:
             minerva_metadata['credentials'] = credentials
