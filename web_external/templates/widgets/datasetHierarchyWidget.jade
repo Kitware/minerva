@@ -1,0 +1,14 @@
+.modal-dialog
+  .modal-content.model-hierarchy
+    form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | S3 Bucket
+        .modal-body
+          .datasetHierarchy
+        .modal-footer
+          a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+          button.m-use-selected-button.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Use Selected

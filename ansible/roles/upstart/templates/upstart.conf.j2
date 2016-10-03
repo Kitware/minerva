@@ -1,0 +1,30 @@
+# Start on startup after everything has been mounted
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on shutdown
+
+setuid {{ service_user }}
+
+# Automatically respawn
+respawn
+respawn limit {{ service_respawn_limit }}
+
+# Log console output to /var/log/upstart/{{ service_name }}.log
+console log
+
+# Ensure log directory exists
+pre-start script
+  mkdir -p {{ service_log_file | dirname }}
+end script
+
+# Run the server
+script
+
+  chdir {{ service_chdir }}
+  {% if service_venv is defined %}
+
+  . {{ service_venv }}/bin/activate
+
+  {% endif %}
+  # Run compiler start and redirect output to log file
+  {{ service_env }} exec {{ service_exec }}
+end script

@@ -1,0 +1,12 @@
+{
+    "name": "Minerva Geospatial Application",
+    "description": "An application for geospatial analytics.",
+    "version": "0.1.0",
+    "dependencies": [
+        "gravatar",
+        "jobs"
+    ],
+    "grunt": {
+        "file": "Gruntfile.js"
+    }
+}

@@ -1,0 +1,55 @@
+.m-session-header
+  display flex
+  align-items center
+  position absolute
+  top $headerHeight
+  left $leftColWidth
+  right 0
+  padding .5em 1em 
+  background-color rgba(242,239,233,.7);
+  z-index 9 
+
+  .m-sessions-list
+    flex 1
+
+  .m-sessions-list-menu
+    margin-left 1em
+    width 30em
+    padding .5em 1.5em
+    max-height 75vh
+    overflow auto
+
+    li
+      margin .5em 0
+      padding .5em 0
+      line-height 1.5
+      border-top 1px solid #ececec
+      &:last-child
+        border-bottom 1px solid #ececec
+
+  .m-session-title
+    font-size 1.2em
+    color #333
+    cursor pointer
+    i
+      margin-left .3em
+      font-size .8em
+
+  .m-session-link
+    margin 0
+    padding 0
+
+  .m-session-description
+    flex 1
+    color #333
+    font-size .8em
+
+  .m-save-session-button
+    margin-right 10px
+
+.m-panel-title
+  font-weight bold
+  text-align left
+  background-color #f0f0f0
+  cursor pointer
+  padding 5px 5px

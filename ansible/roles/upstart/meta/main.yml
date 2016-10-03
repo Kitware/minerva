@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Rhys Adams
+  description: Adds an Upstart service.
+  company: SSIL
+  license: BSD
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+      - precise
+  categories:
+    - system
+allow_duplicates: yes
+dependencies: []

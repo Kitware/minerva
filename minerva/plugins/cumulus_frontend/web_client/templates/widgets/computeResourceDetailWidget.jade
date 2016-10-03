@@ -1,0 +1,42 @@
+#compute-resource-detail-widget.modal-dialog
+  .modal-content
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+            | #{resource.get('name')} [#{resource.get('status')}]
+        .modal-body
+          h5 Configuration
+          table.table.table-hover
+            tbody
+              tr
+                td Instance Count
+                td #{resource.get('config').launch.params.node_instance_count}
+              tr
+                td Instance Type
+                td #{resource.get('config').launch.params.node_instance_type}
+              tr
+                td Creation Playbook
+                td #{resource.get('type')}
+
+
+          ul.nav.nav-tabs(role='tablist')
+            li(role='presentation', class=(activeTab == 'log-output' ? 'active': ''))
+              a(href='#log-output', data-tab='log-output', aria-controls='log-output', role='tab', data-toggle='tab') Logs
+            li(role='presentation', class=(activeTab == 'raw-log-output' ? 'active': ''))
+              a(href='#raw-log-output', data-tab='raw-log-output', aria-controls='raw-log-output', role='tab', data-toggle='tab') Raw Logs
+
+          .tab-content
+            .tab-pane(id='log-output', role='tabpanel', class=(activeTab == 'log-output') ? 'active': '')
+              pre
+                each message in resource.get('abbrev_log')
+                  | #{message.message}...
+
+                  if message.status
+                    span(style='float:right') #{message.status}.
+                  br
+            .tab-pane(id='raw-log-output', role='tabpanel', class=(activeTab == 'raw-log-output') ? 'active': '')
+              pre
+                | #{JSON.stringify(resource.get('log'), null, 4)}
+
+        .modal-footer
+          a.btn.btn-small.btn-default(data-dismiss="modal") Close

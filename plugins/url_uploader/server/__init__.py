@@ -97,8 +97,8 @@ def readUrl(self, params):
 def uploadUrl(self, params):
     user = self.getCurrentUser()
     gc = girder_client.GirderClient(port=8080)
-    gc.authenticate('epidemico', 'epidemico')
-    folder_id = '570ae8510640fd1adfc989e4'
+    gc.authenticate('', '')
+    folder_id = params['folder_id']
     path = './zip_file/*'
     files = glob.glob(path)
     for file in files:

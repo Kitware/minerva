@@ -1,0 +1,5 @@
+---
+minerva_base_path: "/opt/minerva"
+minerva_install_root: "{{ minerva_base_path }}/{{ minerva_version }}"
+
+minerva_repo: "https://github.com/Kitware/minerva.git"

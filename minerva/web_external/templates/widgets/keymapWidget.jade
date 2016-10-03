@@ -1,0 +1,52 @@
+.modal-dialog
+    .modal-content
+        form#m-keymap-mapping-form.modal-form(role="form")
+            .modal-header
+                button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+                h4.modal-title
+                    if (create)
+                        | Create key mappings using
+                        a(target="_blank", href="http://goessner.net/articles/JsonPath/")  JSONPath
+                        |  syntax
+                    else
+                        | Update key mappings using
+                        a(target="_blank", href="http://goessner.net/articles/JsonPath/")  JSONPath
+                        |  syntax
+            .modal-body
+                .latLongMapping
+                    .form-group.coordMapping
+                        label.control-label(for="m-latitude-mapper") Latitude (Y)
+                        - var latitudeKeypathVal = create ? '' : latitudeKeypath
+                        input.input-sm#m-latitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=latitudeKeypathVal)
+                        #latitude-example-value.example-value
+                            | resulting value
+                            - var latitudeExampleVal = create ? '' : latExampleVal
+                            input.coordExampleValue.input-sm#m-latitude-example-value.form-control(type="text", readonly value=latitudeExampleVal)
+                    .coordMappingSpacer 
+                    .form-group.coordMapping
+                        label.control-label(for="m-longitude-mapper") Longitude (X)
+                        - var longitudeKeypathVal = create ? '' : longitudeKeypath
+                        input.input-sm#m-longitude-mapper.form-control(type="text" placeholder="Enter JsonPath expression" value=longitudeKeypathVal)
+                        #longitude-example-value.example-value
+                            | resulting value
+                            - var longitudeExampleVal = create ? '' : longExampleVal
+                            input.coordExampleValue.input-sm#m-longitude-example-value.form-control(type="text", readonly value=longitudeExampleVal)
+
+                .g-validation-failed-message
+            .jsonrowDataContainer
+                .jsonrowDataContainerHeader
+                    h4.modal-title
+                        | Data Preview (first row)
+                        i.icon-down-open.show-keymap-preview
+                        i.icon-up-open.hide-keymap-preview
+                .jsonrowData
+                    textarea#jsonrow-preview.form-control(rows=20, readonly)
+            .modal-footer
+                a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+                button.m-save-keymap-mapping.btn.btn-small.btn-primary(type="submit")
+                    if (create)
+                        i.icon-plus-squared
+                        | Create
+                    else
+                        i.icon-plus-squared
+                        | Save

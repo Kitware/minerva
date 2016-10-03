@@ -1,0 +1,20 @@
+.modal-dialog
+  .modal-content
+    form#m-mmwr-import-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | MMWR data import
+        .modal-body
+            .form-group
+                label.control-label(for="m-mmwrImportDatasetName") Output Dataset Name
+                input.input-sm#m-mmwrImportDatasetName.form-control(type="text")
+            .form-group
+                label.control-label(for="m-mmwrDataCount") Number of items to download
+                input.input-sm#m-mmwrDataCount.form-control(type="number", min="0", step="100", value="5000")
+            .g-validation-failed-message
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-runMmwrImport.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run

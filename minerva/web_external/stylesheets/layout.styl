@@ -1,0 +1,89 @@
+@import 'nib'
+
+
+$headerHeight = 3.5em
+$portraitHeight = 38px
+$headerColor = #fff
+$leftColWidth = 280px
+
+.m-header-wrapper
+  display flex
+  position fixed
+  top 0
+  left 0
+  width 100%
+  height $headerHeight
+  background-color $headerColor
+  transition background-color 0.4s ease-in-out
+  z-index 10
+
+  .m-logo-wrapper
+    display flex
+    align-items center
+    justify-content flex-start
+    width $leftColWidth
+    padding-left 2em
+    background-color #fff
+    img
+      height 2.5em
+
+  a, a:visited
+    color #333
+    &:hover
+      text-decoration underline !important
+
+  .m-login-link-wrapper
+    font-size 16px
+
+  .m-user-link-wrapper
+    display inline-block
+
+  .m-portrait-wrapper
+    border-radius 50%
+    display inline-block
+    margin-right 10px
+    height $portraitHeight
+    width $portraitHeight
+    background-size $portraitHeight $portraitHeight
+
+  .m-current-user-wrapper
+    display flex
+    flex 1
+    justify-content flex-end
+    padding 0 1em
+    color #fff
+
+  .m-current-user-text
+    display: flex
+    align-items center
+
+  .m-icons-wrapper
+    display inline
+    line-height $headerHeight
+    font-size 21px
+
+    &>a
+      color #444
+      margin-right 4px
+      border 1px solid transparent
+      border-radius 3px
+      padding 3px
+
+      &:hover
+        color #449
+        border 1px solid #e2e2e2
+        background linear-gradient(top, white 60%, #f6f6f6 100%)
+
+      &:active
+        background linear-gradient(bottom, white 60%, #f6f6f6 100%)
+
+#g-app-body-container.minerva-app
+  position relative
+  width 100%
+  height 100%
+  margin 0
+  padding 0
+  overflow hidden
+
+html, body
+  height 100%

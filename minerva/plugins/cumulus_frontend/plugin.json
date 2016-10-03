@@ -1,0 +1,6 @@
+{
+    "name": "cumulus_frontend",
+    "description": "A frontend for the cumulus plugin in Minerva",
+    "version": "0.0.0",
+    "dependencies": ["minerva", "cumulus"]
+}

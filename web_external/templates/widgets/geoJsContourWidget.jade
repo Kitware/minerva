@@ -1,0 +1,26 @@
+.modal-dialog
+  .modal-content
+    form#m-geojs-contour-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Contour
+        .modal-body
+          .form-group.m-geojs-contour-input-dataset
+            label.control-label(for="m-geojs-contour-input-dataset") Input Dataset
+            select.form-control.input-sm#m-geojs-contour-input-dataset
+              each dataset in datasets
+                if dataset.metadata().original_type === "s3" && dataset.metadata().selectedItems && dataset.metadata().selectedItems.length > 0
+                  option(value=dataset.get("_id"))= dataset.get('name')
+            .g-validation-failed-message
+          .form-group
+            label.control-label(for="m-geojs-contour-parameter") Parameter
+            input.input-sm#m-geojs-contour-parameter.form-control(type="text", placeholder="Enter parameter")
+          .form-group
+            label.control-label(for="m-geojs-contour-timestep") Timestep
+            input.input-sm#m-geojs-contour-timestep.form-control(type="text", placeholder="Enter timestep")
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-run-geojs-contour.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run

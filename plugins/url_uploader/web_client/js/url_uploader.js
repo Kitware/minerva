@@ -24,6 +24,7 @@ girder.views.UrlUploaderWidget = girder.View.extend({
             this.parent = settings.parent || settings.folder;
             this.parentType = settings.parentType || 'folder';
         }
+        this.folderId = settings.parentView.parent.id;
         this.files = [];
         this.url = null;
         this.form = settings.form;
@@ -73,7 +74,7 @@ girder.views.UrlUploaderWidget = girder.View.extend({
             girder.restRequest({
                 path: '/item/upload',
                 type: 'POST',
-                data: {file_name: resp[0].file_name}
+                data: {file_name: resp[0].file_name, folder_id: this.folderId}
             });
         }, this));
     },

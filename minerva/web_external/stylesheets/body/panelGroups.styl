@@ -1,0 +1,40 @@
+#m-left-panel-group
+  position absolute
+  top 0
+  padding-top $headerHeight
+  max-height 100vh
+  width $leftColWidth
+  z-index 9
+  overflow auto
+
+// @todo assumes all panelgroups are divs
+#m-left-panel-group > div
+  opacity .90
+  &:hover
+    opacity 1
+
+#m-main-panel-group
+  height 100%
+  width 100%
+
+#m-panel-groups
+  position relative
+  width 100%
+  height 100%
+
+// @todo assumes all panelgroups are divs, and all panel views are encapsulated in a div
+#m-panel-groups > div > div
+  background-color #ffffff
+  margin-bottom 2px
+  border-radius 3px
+  height auto
+  border 1px solid #d6d6d6
+
+.m-panel-content
+  margin 5px
+
+.m-panel-content:empty
+  margin 0px
+
+.m-panel-title > span
+  float right

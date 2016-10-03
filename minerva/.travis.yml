@@ -1,0 +1,90 @@
+language: python
+python:
+    - "2.7"
+
+env:
+  - MINERVA_TEST_GROUP=server
+  - MINERVA_TEST_GROUP=client
+
+cache:
+  directories:
+  - $HOME/virtualenv/python2.7.9
+  - $HOME/.cache
+
+sudo: false
+
+compiler:
+    - gcc
+
+addons:
+  apt:
+    packages:
+    - libpng12-dev
+    - libgdal1-dev
+    - pkg-config
+    - libnetcdf-dev
+
+before_install:
+    # update pip for binary wheel caching
+    - pip install -U pip virtualenv
+
+    # minerva has been cloned to Kitware/minerva by travis
+    # girder needs to be cloned and then minerva moved under girder
+    - cd $HOME/build
+    # remove existing girder dir, it remains from caching operations
+    - rm -rf girder
+    - git clone https://github.com/girder/girder.git
+    - cd girder
+    - git checkout `cat $TRAVIS_BUILD_DIR/.girder-version`
+    - cd $HOME/build
+    - mv Kitware/minerva girder/plugins
+    - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
+
+
+    - cd girder
+    # copy the placeholder bsve credentials, needed even though we mock bsve api calls
+    - cp plugins/minerva/server/jobs/bsve.json.in plugins/minerva/server/jobs/bsve.json
+
+    # Show the memory state; this lets us more quickly determine when the
+    # travis environment is bad
+    - vmstat
+    - export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
+    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
+    - if [ -n "${PY3}" ]; then export MONGO_VERSION=3.0.2; export PY_COVG="OFF"; else export MONGO_VERSION=2.6.9; export PY_COVG="ON"; export DEPLOY=true; fi
+
+    # mongo
+    - CACHE=$HOME/.cache source $HOME/build/girder/scripts/install_mongo.sh
+    - mkdir /tmp/db
+    - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
+    - mongod --version
+
+    # cmake
+    - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
+
+    # install spark
+    - CACHE=$HOME/.cache SCALA_VERSION=2.10.5 SPARK_VERSION=1.3.1 source $HOME/build/girder/plugins/minerva/.travis/install_spark.sh
+    - export SPARK_MASTER_IP=localhost
+    - $SPARK_HOME/sbin/start-master.sh
+    - sleep 3
+    - $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
+
+install:
+    - cd $HOME/build/girder
+    - mkdir _build
+    - export GIRDER_SOURCE_DIR="$PWD"
+    - export GIRDER_BUILD_DIR="$PWD/_build"
+    - pip install -r "${GIRDER_SOURCE_DIR}/plugins/minerva/cmake/travis-pip-freeze.txt" -U
+
+    - cd /home/travis/build/girder
+    # handle caching of npm modules
+    - mkdir -p $HOME/.cache/node_modules || true
+    - ln -sf $HOME/.cache/node_modules .
+    - npm prune
+    # build and install girder
+    - npm install
+    # replace girder's ctest config with minerva's
+    - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
+
+script:
+    - JASMINE_TIMEOUT=15000 PYTHONPATH="$PYTHONPATH:$GIRDER_SOURCE_DIR/plugins/minerva" ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
+    - if [ -f _build/test_failed ] ; then false ; fi

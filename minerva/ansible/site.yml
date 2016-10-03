@@ -1,0 +1,188 @@
+- name: Deploy girder
+  hosts: girder
+  vars:
+    girder_venv: "{{ girder_base_path }}/.venv"
+  pre_tasks:
+    - name: Check that girder_version is available
+      fail: msg="You must set girder_version!"
+      when: girder_version is not defined or girder_version == ""
+
+    - name: Check that minerva_version is available
+      fail: msg="You must set minerva_version!"
+      when: minerva_version is not defined or minerva_version == ""
+
+    - name: Create users
+      user:
+        name: "{{ item }}"
+      become: yes
+      become_user: root
+      with_items:
+        - "{{ girder_user }}"
+
+  roles:
+    - role: girder
+      become: yes
+      become_user: "{{ girder_user }}"
+
+    - role: minerva
+      become: yes
+      become_user: "{{ girder_user }}"
+      tags:
+        - minerva
+
+    - role: upstart
+      service_name: "girder"
+      service_chdir: "{{ girder_path }}"
+      service_user: "{{ girder_user }}"
+      service_exec: "python -m girder"
+      service_venv: "{{ girder_venv }}"
+      service_log_file: "{{ girder_path }}/logs/girder.log"
+      become: yes
+      become_user: root
+
+- name: Configure girder
+  hosts: girder
+  vars:
+    girder_port: "{{ girder_port|default(8080) }}"
+  tags:
+    - config
+  tasks:
+    # This has to be installed system wide so girder module
+    # (which won't be running in the virtualenv) has access
+    - name: Install girder client
+      pip:
+        name: girder-client
+        version: 1.1.1
+      become: yes
+      become_user: root
+
+    - name: Wait for girder to be up and running
+      wait_for:
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: "{{ girder_port }}"
+        delay: 5
+
+    - name: Create 'admin' User
+      girder:
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: "{{ girder_port }}"
+        user:
+          firstName: "Admin"
+          lastName: "User"
+          login: "admin"
+          password: "letmein"
+          email: "admin.user@kitware.com"
+          admin: yes
+        state: present
+
+    - name: Create filesystem assetstore
+      girder:
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: "{{ girder_port }}"
+        username: "admin"
+        password: "letmein"
+        assetstore:
+          name: "Filesystem Assetstore"
+          type: "filesystem"
+          root: "{{ girder_base_path }}/data/{{ girder_version }}"
+          current: true
+        state: present
+
+    - name: Ensure minerva plugin is enabled
+      girder:
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: "{{ girder_port }}"
+        username: "admin"
+        password: "letmein"
+        plugins:
+          - minerva
+        state: present
+
+    - name: Restart the server
+      service:
+        name: girder
+        state: restarted
+      become: yes
+      become_user: root
+
+
+    - name: Build/Rebuild frontend assets
+      shell: >
+        npm install --production
+      args:
+        chdir: "{{ girder_path }}"
+      become: yes
+      become_user: "{{ girder_user }}"
+      tags:
+        - config
+
+
+
+- name: Set up tests
+  hosts: girder
+  become: yes
+  become_user: "{{ girder_user }}"
+  tags:
+    - testing
+  vars:
+    girder_venv: "{{ girder_base_path }}/.venv"
+
+
+
+  tasks:
+    - name: Install girder development requirements
+      pip:
+        requirements: "/opt/girder/{{ girder_version }}/requirements-dev.txt"
+        virtualenv: "{{ girder_venv }}"
+      when: setup_tests
+
+    - name: Install minerva development requirements
+      pip:
+        requirements: "/opt/minerva/{{ minerva_version }}/requirements-dev.txt"
+        virtualenv: "{{ girder_venv }}"
+      when: setup_tests
+
+    - block:
+        - name: Do a full npm install in girder
+          shell: >-
+            npm install
+          args:
+            chdir: "/opt/girder/{{ girder_version }}/"
+          when: setup_tests
+      rescue:
+        - name: Try installing with npm from bitbucket
+          shell: >-
+            npm install
+          args:
+            chdir: "/opt/girder/{{ girder_version }}/"
+          environment:
+            PHANTOMJS_CDNURL: https://bitbucket.org/ariya/phantomjs/downloads
+          when: setup_tests
+
+    - name: Create the build directory
+      file:
+        state: directory
+        path: /opt/build
+        owner: "{{ girder_user }}"
+        group: "{{ girder_user }}"
+        mode: 0755
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - name: Install CMake
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - cmake
+      become: yes
+      become_user: root
+      when: setup_tests
+
+    - name: Build the test directory
+      shell: >-
+        . /opt/girder/.venv/bin/activate && cmake /opt/girder/{{ girder_version }}/
+      args:
+        chdir: /opt/build
+      when: setup_tests

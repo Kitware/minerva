@@ -1,0 +1,9 @@
+{
+    "predef"        : [         // Extra globals.
+        "minerva",
+        "geo",
+        "Papa",
+        "jsonPath",
+        "colorbrewer"
+    ]
+}

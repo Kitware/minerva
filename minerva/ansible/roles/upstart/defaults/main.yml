@@ -1,0 +1,7 @@
+---
+service_chdir: '{{ service_exec | dirname }}'
+service_log_file: '{{ service_chdir }}/log/{{ service_name }}.log'
+service_user: '{{ ansible_ssh_user }}'
+service_respawn_limit: '20 5'
+service_restart: true
+service_env: ''

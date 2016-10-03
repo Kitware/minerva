@@ -1,0 +1,13 @@
+*.py[cod]
+node_modules
+npm-debug.log
+*.swp
+.tern-*
+src
+/docs/_build/
+.vagrant
+*~
+/*.egg-info/
+/build/
+/dist/
+ansible/site.retry

@@ -1,0 +1,9 @@
+.modal-dialog
+  .modal-content
+    form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Dataset Info
+        .modal-body
+            textarea#datasetInfo.form-control(rows=20, readonly)

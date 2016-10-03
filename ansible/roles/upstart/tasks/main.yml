@@ -1,0 +1,24 @@
+---
+- name: Add Upstart service
+  tags:
+    - upstart
+  template: src=upstart.conf.j2 dest=/etc/init/{{ service_name }}.conf
+  sudo: yes
+
+- name: Make sure log directory exists with correct permissions
+  tags:
+    - upstart
+  file: >
+    state=directory
+    path={{ service_log_file | dirname }}
+    owner={{ service_user }}
+    group={{ service_user }}
+    mode=u+rw
+  sudo: yes
+
+- name: Restart service
+  tags:
+    - upstart
+  service: name={{ service_name }} state=restarted
+  sudo: yes
+  when: service_restart

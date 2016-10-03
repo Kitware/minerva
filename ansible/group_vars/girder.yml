@@ -1,0 +1,3 @@
+girder_base_path: "{{ install_base_path }}/girder"
+girder_path: "{{ girder_base_path }}/{{ girder_version }}"
+girder_user: "girder"

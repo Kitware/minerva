@@ -1,0 +1,15 @@
+.modal-dialog
+  .modal-content
+    form#m-json-geo-render-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Visual mapping
+      .modal-body
+        .m-geojson-style.hidden
+
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-geo-render-button.btn.btn-small.btn-primary(type="submit")
+          i.icon-check
+          | Save
