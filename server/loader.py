@@ -29,20 +29,21 @@ from girder.plugins.minerva.rest import \
         analysis, dataset, session, \
         wms_dataset, geojson_dataset, wms_styles
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
+from girder.plugins.minerva.utility.cookie import getExtraHeaders
 
 
 class WmsProxy(object):
     exposed = True
 
     def GET(self, url, **params):
+        headers = getExtraHeaders()
         if 'minerva_credentials' in params:
             creds = params['minerva_credentials']
             del params['minerva_credentials']
             auth = 'Basic ' + b64encode(decryptCredentials(bytes(creds)))
-            headers = {'Authorization': auth}
-            r = requests.get(url, params=params, headers=headers)
-        else:
-            r = requests.get(url, params=params)
+            headers['Authorization'] = auth
+
+        r = requests.get(url, params=params, headers=headers)
         cherrypy.response.headers['Content-Type'] = r.headers['content-type']
         return r.content
 
