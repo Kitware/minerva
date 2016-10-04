@@ -1,0 +1,34 @@
+.modal-dialog
+  .modal-content
+    form#m-gaia-process-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Gaia Process
+        .modal-body
+            .form-group.m-gaiaProcessDatasetNameGroup
+                label.control-label(for="m-gaiaProcessDatasetName") Process Name
+                input.input-sm#m-gaiaProcessDatasetName.form-control(type="text")
+            .form-group.m-gaiaProcessParamsGroup
+              label.control-label(for="m-gaia-process-type") Select Process
+              select.input-sm#m-gaia-process-type.form-control
+                each process in processes
+                  option(value=process)= process
+                  
+            .form-group.m-gaiaProcessParamsGroup
+              label.control-label(for="m-gaia-layer-type1") Select Layer 1
+              select.input-sm#m-gaia-layer-type-one.form-control
+                each layer in layers
+                  option(value=layer.id)= layer.title
+                  
+            .form-group.m-gaiaProcessParamsGroup
+              label.control-label(for="m-gaia-layer-type2") Select Layer 2
+              select.input-sm#m-gaia-layer-type-two.form-control
+                each layer in layers
+                  option(value=layer.id)= layer.title
+            .g-validation-failed-message
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-runGaiaProcess.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run
