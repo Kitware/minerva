@@ -1,0 +1,6 @@
+.form-group.m-gaiaProcessParamsGroup
+  label.control-label(for="m-gaia-layer-type") Select #{type} layer
+  select.input-sm#m-gaia-layer-type.form-control
+    option(value='', selected, disabled) Please select a layer
+    each layer in layers
+      option(value=JSON.stringify({layer: layer, type: type}))= layer.title

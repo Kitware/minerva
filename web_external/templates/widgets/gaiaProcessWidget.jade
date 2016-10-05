@@ -12,20 +12,11 @@
             .form-group.m-gaiaProcessParamsGroup
               label.control-label(for="m-gaia-process-type") Select Process
               select.input-sm#m-gaia-process-type.form-control
+                option(value='', selected, disabled) Please select a process
                 each process in processes
-                  option(value=process)= process
-                  
-            .form-group.m-gaiaProcessParamsGroup
-              label.control-label(for="m-gaia-layer-type1") Select Layer 1
-              select.input-sm#m-gaia-layer-type-one.form-control
-                each layer in layers
-                  option(value=layer.id)= layer.title
-                  
-            .form-group.m-gaiaProcessParamsGroup
-              label.control-label(for="m-gaia-layer-type2") Select Layer 2
-              select.input-sm#m-gaia-layer-type-two.form-control
-                each layer in layers
-                  option(value=layer.id)= layer.title
+                  option(value=process.data)= process.title
+            #m-gaia-process-inputs
+            #m-gaia-process-args
             .g-validation-failed-message
         .modal-footer
             a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
