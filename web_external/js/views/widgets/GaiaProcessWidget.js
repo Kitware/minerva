@@ -8,6 +8,7 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
             e.preventDefault();
             var inputs = [];
             var process;
+            var args = {};
 
             var processName = $('#m-gaiaProcessDatasetName').val();
 
@@ -15,32 +16,45 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
                 return string.charAt(0).toUpperCase() + string.slice(1);
             };
 
-            $('input[type=text], select').each(function () {
-                if (!$(this).val()) {
-                    return;
-                } else {
-                    var value;
-                    try {
-                        value = JSON.parse($(this).val());
-                        console.log(value)
-                        if (value.type) {
-                            inputs.push({
-                                '_type': 'girder.plugins.gaia_minerva.inputs.Minerva' + capitalizeFirstLetter(value.type) + 'IO',
-                                'item_id': value.layer.id
-                            });
-                        }
-                        if (!value.type) {
-                            process = _.first(_.keys(value));
-                        }
-                    } catch (err) {
+            var IsJsonString = function (str) {
+                var obj;
+                try {
+                    obj = JSON.parse(str);
+                } catch (e) {
+                    return false;
+                }
+                return _.isObject(obj);
+            };
 
+            $('input[type=text], input[type=number], select').each(function (indx, elm) {
+                var value = $(elm).val();
+                var name = elm.name;
+                var inputParams;
+                if (!value) {
+                    return;
+                }
+                if (IsJsonString(value)) {
+                    inputParams = JSON.parse(value);
+                }
+                if (!inputParams) {
+                    args[name] = value;
+                } else {
+                    if (inputParams.type) {
+                        inputs.push({
+                            '_type': 'girder.plugins.gaia_minerva.inputs.Minerva' + capitalizeFirstLetter(inputParams.type) + 'IO',
+                            'item_id': inputParams.layer.id
+                        });
+                    } else {
+                        process = _.first(_.keys(inputParams));
                     }
                 }
             });
 
             var query = Object.assign({
                 '_type': 'gaia.geo.' + process
-            }, {inputs: inputs})
+            }, {inputs: inputs}, args);
+
+            console.log(query)
 
             girder.restRequest({
                 path: 'gaia_analysis?datasetName=' + processName + '&process=' + JSON.stringify(query),
@@ -73,7 +87,8 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
         var gaiaArgsView = _.map(this.requiredArguments, _.bind(function (value, title) {
             return minerva.templates.gaiaProcessArgsWidget({
                 type: value,
-                title: this.splitOnUnderscore(title)
+                title: title,
+                formattedTitle: this.splitOnUnderscore(title)
             });
         }, this));
         $('#m-gaia-process-args').append(gaiaArgsView);
