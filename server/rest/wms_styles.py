@@ -267,10 +267,10 @@ class Sld(Resource):
         self.resourceName = 'minerva_style_wms'
         self.route('POST', (), self.sld_meta)
 
+    @access.user
     def sld_meta(self, params):
         self._update_metadata(str(params['_id']), params)
 
-    @access.user
     def _update_metadata(self, item_id, sld):
         """Adds a new field to metadata"""
 
