@@ -10,7 +10,7 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
             var process;
             var args = {};
 
-            var processName = $('#m-gaiaProcessDatasetName').val();
+            var datasetName = $('#m-gaiaProcessDatasetName').val();
 
             var capitalizeFirstLetter = function (string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
@@ -37,7 +37,11 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
                     inputParams = JSON.parse(value);
                 }
                 if (!inputParams) {
-                    args[name] = value;
+                    if (!isNaN(value)) {
+                        args[name] = parseFloat(value);
+                    } else {
+                        args[name] = value;
+                    }
                 } else {
                     if (inputParams.type) {
                         inputs.push({
@@ -54,11 +58,12 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
                 '_type': 'gaia.geo.' + process
             }, {inputs: inputs}, args);
 
-            console.log(query)
+            console.log(JSON.stringify(query))
 
             girder.restRequest({
-                path: 'gaia_analysis?datasetName=' + processName + '&process=' + JSON.stringify(query),
-                type: 'POST'
+                path: 'gaia_analysis?datasetName=' + datasetName,
+                type: 'POST',
+                data: query
             }).done(_.bind(function () {
                 girder.events.trigger('m:job.created');
                 this.$el.modal('hide');
@@ -84,20 +89,18 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
         this.requiredInputs = _.first(_.values(JSON.parse(process))).required_inputs;
         this.requiredArguments = _.first(_.values(JSON.parse(process))).required_args;
 
-        var gaiaArgsView = _.map(this.requiredArguments, _.bind(function (value, title) {
+        var gaiaArgsView = _.map(this.requiredArguments, _.bind(function (value) {
             return minerva.templates.gaiaProcessArgsWidget({
-                type: value,
-                title: title,
-                formattedTitle: this.splitOnUnderscore(title)
+                value: value
             });
         }, this));
         $('#m-gaia-process-args').append(gaiaArgsView);
-        var gaiaInputsView = _.flatten(_.map(this.requiredInputs, _.bind(function (value, type) {
-            var numberOfPossibleLayers = value.min;
+        var gaiaInputsView = _.flatten(_.map(this.requiredInputs, _.bind(function (value) {
+            var numberOfPossibleLayers = value.max;
             return _.times(numberOfPossibleLayers, _.bind(function () {
                 return minerva.templates.gaiaProcessInputsWidget({
                     layers: this.layers,
-                    type: type
+                    type: value.type
                 });
             }, this));
         }, this)));
