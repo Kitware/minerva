@@ -58,12 +58,11 @@ minerva.views.GaiaProcessWidget = minerva.View.extend({
                 '_type': 'gaia.geo.' + process
             }, {inputs: inputs}, args);
 
-            console.log(JSON.stringify(query))
-
             girder.restRequest({
                 path: 'gaia_analysis?datasetName=' + datasetName,
                 type: 'POST',
-                data: query
+                contentType: 'application/json',
+                data: JSON.stringify(query)
             }).done(_.bind(function () {
                 girder.events.trigger('m:job.created');
                 this.$el.modal('hide');
