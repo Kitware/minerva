@@ -1,10 +1,12 @@
 import cherrypy
 import json
+import urllib
 
 
 def getExtraHeaders():
     try:
-        headers = json.loads(cherrypy.request.cookie.get('minervaHeaders'))
+        cookie = cherrypy.request.cookie.get('minervaHeaders').value
+        headers = json.loads(urllib.unquote(cookie))
     except Exception:
         headers = {}
     return headers
