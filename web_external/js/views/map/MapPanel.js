@@ -108,6 +108,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                                  _.has(mapSettings, 'basemap_args')
                                  ? mapSettings.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
+            this.uiLayer.createWidget('slider', {position: {right: 40, top: 40}});
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
