@@ -152,7 +152,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
-            layerType = dataset.getGeoRenderType();
+            layerType = dataset.getMinervaMetadata().adapter || dataset.getGeoRenderType();
 
             // If visProperties is not provided, check for properties stored in the metadata.
             if (!visProperties) {
