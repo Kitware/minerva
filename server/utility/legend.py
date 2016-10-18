@@ -1,6 +1,6 @@
-import matplotlib #noqa
-matplotlib.use('Agg') #noqa
-import matplotlib.pyplot as plt #noqa
+import matplotlib  # noqa
+matplotlib.use('Agg')  # noqa
+import matplotlib.pyplot as plt  # noqa
 
 from base64 import b64encode
 from io import BytesIO
