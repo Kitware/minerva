@@ -22,7 +22,7 @@ def range_count(start, stop, count):
     step = (stop - start) / float(count-1)
     return [round(start + i * step, 2) for i in xrange(count)]
 
-def get_vector_axes(params):
+def get_axes(params):
     fig = plt.figure()
     figlegend = plt.figure(figsize=(3, 3))
     ax = fig.add_subplot(111)
@@ -31,23 +31,29 @@ def get_vector_axes(params):
                        6)
 
     axes = [ax.scatter(0, 0, color=c) for c in params['ramp[]']]
-    figlegend.legend(axes, vals, 'center', title=params['attribute'])
+
+    try:
+        figlegend.legend(axes, vals, 'center', title=params['attribute'])
+    except KeyError:
+        figlegend.legend(axes, vals, 'center')
+
     return figlegend
 
 def generate_legend(params):
 
     if params['subType'] == 'point':
-        figlegend = get_vector_axes(params)
+        figlegend = get_axes(params)
         return encode_png(figlegend)
     elif params['subType'] == 'line':
-        figlegend = get_vector_axes(params)
+        figlegend = get_axes(params)
         return encode_png(figlegend)
     elif params['subType'] == 'polygon':
-        figlegend = get_vector_axes(params)
+        figlegend = get_axes(params)
         return encode_png(figlegend)
     elif params['subType'] == 'singleband':
-        print "It is a singleband raster"
+        figlegend = get_axes(params)
+        return encode_png(figlegend)
     elif params['subType'] == 'multiband':
-        print "It is a multiband raster"
+        return None
 
     plt.cla()
