@@ -92,6 +92,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
         rUrl += '&x=' + Math.round(pnt.x) + '&y=' + Math.round(pnt.y);
         rUrl += '&format_options=callback:' + this.callback;
+        console.log(rUrl);
         return rUrl;
     },
 

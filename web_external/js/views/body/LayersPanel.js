@@ -4,7 +4,17 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
         'click .m-toggle-dataset': 'toggleDatasetEvent',
         'change .m-opacity-range': 'changeLayerOpacity',
-        'click .m-order-layer': 'reorderLayer'
+        'click .m-order-layer': 'reorderLayer',
+        'click .m-query-layers': 'queryLayers'
+    },
+
+    queryLayers: function (event) {
+        // Query layers with given coordinates
+        var displayedDatasets = _.chain(this.collection.models)
+            .filter(function (set) { return set.get('displayed'); })
+            .map(function (dataset) { return dataset.get('_id'); });
+
+        console.log(displayedDatasets);
     },
 
     removeDatasetEvent: function (event) {
