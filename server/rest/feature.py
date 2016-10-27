@@ -9,10 +9,27 @@ class FeatureInfo(Resource):
         self.resourceName = 'minerva_get_feature_info'
         self.route('GET', (), self.getFeatureInfo)
 
+    def _getMinervaItem(self, itemId):
+        """ Returns minerva metadata for a given item_id """
+
+        item = self.model('item').load(itemId,
+                                       user=self.getCurrentUser())
+        return item
+
     @access.user
     def getFeatureInfo(self, params):
-        print params
-        return "response"
+
+        activeLayers = params['activeLayers[]']
+
+        # Return a list for all cases
+        if isinstance(activeLayers, (str, unicode)):
+            activeLayers = [activeLayers]
+
+        for i in activeLayers:
+            item = self._getMinervaItem(i)
+
+
+        return activeLayers
 
     getFeatureInfo.description = (
         Description('Query values for overlayed datasets for a given lat long')
