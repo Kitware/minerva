@@ -18,21 +18,16 @@ class FeatureInfo(Resource):
                                        user=self.getCurrentUser())
         return item
 
-    @staticmethod
-    def _getCorrectUrl(item):
-        """Checks if an item is a bsve or regular wms item"""
-
-        return item['meta']['minerva'].get(
-            'base_url',
-            'https://api-dev.bsvecosystem.net/data/v2/sources/geotiles/data/result')
-
 
     @staticmethod
-    def callFeatureInfo(baseUrl, params, typeName):
+    def callFeatureInfo(baseUrl, params, typeNames):
         """Calls geoserver to get information about
-        a lat long location"""
+        a lat long location. Note that typeNames can
+        be a list of layers"""
 
         baseUrl = baseUrl.replace('GetCapabilities', 'GetFeatureInfo')
+        typeNames = ",".join(typeNames)
+
 
         parameters = {
             'exceptions': 'application/vnd.ogc.se_xml',
@@ -41,8 +36,8 @@ class FeatureInfo(Resource):
             'srs': 'EPSG:3857',
             'info_format': 'application/json',
             'format': 'image/png',
-            'query_layers': typeName,
-            'layers': typeName,
+            'query_layers': typeNames,
+            'layers': typeNames,
             'bbox': params['bbox'],
             'width': params['width'],
             'height': params['height'],
@@ -68,13 +63,25 @@ class FeatureInfo(Resource):
 
         for i in activeLayers:
             item = self._getMinervaItem(i)
-            url = self._getCorrectUrl(item)
+            url = item['meta']['minerva'].get(
+                'base_url',
+                'https://api-dev.bsvecosystem.net/data/v2/sources/geotiles/data/result')
+
             layerSource.append((url, item['meta']['minerva']['type_name']))
 
         layerUrlMap = defaultdict(list)
         for k, v in layerSource: layerUrlMap[k].append(v)
 
-        return layerUrlMap
+        grandResponse = []
+        for baseUrl, layers in layerUrlMap.items():
+            if 'bsvecosystem' in baseUrl:
+                pass
+            else:
+                response = self.callFeatureInfo(baseUrl, params, layers)
+            grandResponse.append(response)
+
+
+        return grandResponse
 
 
     getFeatureInfo.description = (
