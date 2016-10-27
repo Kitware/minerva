@@ -12,9 +12,20 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         // Query layers with given coordinates
         var displayedDatasets = _.chain(this.collection.models)
             .filter(function (set) { return set.get('displayed'); })
-            .map(function (dataset) { return dataset.get('_id'); });
+            .map(function (dataset) { return dataset.get('_id'); })
+            .value();
 
-        console.log(displayedDatasets);
+        girder.restRequest({
+            path: '/minerva_get_feature_info',
+            type: 'GET',
+            data: {
+                'activeLayers': displayedDatasets,
+                'bbox': '-17827100.874872178,3159419.412863344,616113.6067295261,7813494.391536558',
+                'x': 767,
+                'y': 286,
+                'width': 1918,
+                'height': 484}
+        })
     },
 
     removeDatasetEvent: function (event) {
