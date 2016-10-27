@@ -212,6 +212,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             this.render();
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();
+        }, this).listenTo(minerva.events, 'm:updateDatasets', function () {
+            this.collection.fetch(undefined, true);
         }, this);
 
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {
