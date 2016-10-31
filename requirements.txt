@@ -5,6 +5,7 @@ geopy==1.10.0
 girder-client==1.1.0
 ijson==2.2.0
 jsonpath-rw==1.4.0
+matplotlib==1.5.3
 numpy==1.10.1
 owslib==0.9.1
 python-dateutil==2.4.2

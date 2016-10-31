@@ -26,6 +26,7 @@ import requests
 from girder.api import access
 from girder.api.rest import Resource
 from girder.plugins.minerva.utility.minerva_utility import updateMinervaMetadata
+from girder.plugins.minerva.utility.legend import generate_legend
 
 
 def wps_template(type_name, attribute):
@@ -269,7 +270,9 @@ class Sld(Resource):
 
     @access.user
     def sld_meta(self, params):
-        self._update_metadata(str(params['_id']), params)
+        self._update_metadata(str(params['_id']), params, 'sld_params')
+        legend = generate_legend(params)
+        self._update_metadata(str(params['_id']), legend, 'legend')
 
     def _update_metadata(self, item_id, sld):
         """Adds a new field to metadata"""
