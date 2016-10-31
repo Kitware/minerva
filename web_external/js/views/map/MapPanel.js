@@ -127,7 +127,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
             this.map.geoOn(geo.event.mouseclick, function (evt) {
                 this.featureInfoWidget.content = '';
-                this.featureInfoWidget.callInfo(0, evt.geo);
+                this.featureInfoWidget.callInfo(evt);
             });
         }
         this.map.draw();
