@@ -274,10 +274,10 @@ class Sld(Resource):
         legend = generate_legend(params)
         self._update_metadata(str(params['_id']), legend, 'legend')
 
-    def _update_metadata(self, item_id, sld):
+    def _update_metadata(self, item_id, params, meta_key):
         """Adds a new field to metadata"""
 
         item = self.model('item').load(item_id, user=self.getCurrentUser())
-        item['meta']['minerva']['sld_params'] = sld
+        item['meta']['minerva'][meta_key] = params
 
         updateMinervaMetadata(item, item['meta']['minerva'])
