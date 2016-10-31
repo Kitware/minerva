@@ -4,28 +4,7 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
         'click .m-toggle-dataset': 'toggleDatasetEvent',
         'change .m-opacity-range': 'changeLayerOpacity',
-        'click .m-order-layer': 'reorderLayer',
-        'click .m-query-layers': 'queryLayers'
-    },
-
-    queryLayers: function (event) {
-        // Query layers with given coordinates
-        var displayedDatasets = _.chain(this.collection.models)
-            .filter(function (set) { return set.get('displayed'); })
-            .map(function (dataset) { return dataset.get('_id'); })
-            .value();
-
-        girder.restRequest({
-            path: '/minerva_get_feature_info',
-            type: 'GET',
-            data: {
-                'activeLayers': displayedDatasets,
-                'bbox': '-17827100.874872178,3159419.412863344,616113.6067295261,7813494.391536558',
-                'x': 767,
-                'y': 286,
-                'width': 1918,
-                'height': 484}
-        })
+        'click .m-order-layer': 'reorderLayer'
     },
 
     removeDatasetEvent: function (event) {

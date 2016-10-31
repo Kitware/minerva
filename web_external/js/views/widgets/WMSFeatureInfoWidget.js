@@ -1,6 +1,79 @@
 minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
-    callInfo: function (layer_idx, coords) {
+    callInfo: function (event) {
+        // Query layers with given coordinates
+        var displayedDatasets = _.chain(this.parentView.collection.models)
+            .filter(function (set) { return set.get('displayed'); })
+            .map(function (dataset) { return dataset.get('_id'); })
+            .value();
+
+        var coord = event.geo;
+        var pnt = this.map.gcsToDisplay(coord);
+
+        // Spherical Mercator projection.
+        var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
+
+        if (mapBounds.left > mapBounds.right) {
+            // 20037508.34 is the maximum extent of the Spherical Mercator projection.
+            mapBounds.right = 20037508.34 + (20037508.34 - mapBounds.right);
+        }
+        var bbox = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
+        var width = this.map.node().width();
+        var height = this.map.node().height();
+        var x = Math.round(pnt.x)
+        var y = Math.round(pnt.y)
+
+        var panel = this;
+
+        if (displayedDatasets.length > 0) {
+            girder.restRequest({
+                path: '/minerva_get_feature_info',
+                type: 'GET',
+                data: {
+                    'activeLayers': displayedDatasets,
+                    'bbox': bbox,
+                    'x': x,
+                    'y': y,
+                    'width': width,
+                    'height': height}
+            }).done(function (data) {
+                    var layer_div = document.createElement('div');
+                    layer_div.className = 'accordion';
+                    var tbl_div = document.createElement('div');
+                    var tbl_body = document.createElement('table');
+                    var odd_even = false;
+                    var header = false;
+                    var obj = JSON.parse(data);
+                    $.each(obj.features, function () {
+                        var tbl_row;
+                        if (!header) {
+                            tbl_row = tbl_body.insertRow();
+                            tbl_row.className = 'header';
+                            $.each(this.properties, function (k) {
+                                var cell = tbl_row.insertCell();
+                                cell.appendChild(document.createTextNode(k ? k.toString() : ''));
+                            });
+                            header = true;
+                        }
+                        tbl_row = tbl_body.insertRow();
+                        tbl_row.className = odd_even ? 'odd' : 'even';
+                        $.each(this.properties, function (k, v) {
+                            var cell = tbl_row.insertCell();
+                            cell.appendChild(document.createTextNode(v ? v.toString() : ''));
+                        });
+                        odd_even = !odd_even;
+                    });
+                    tbl_div.appendChild(tbl_body);
+                    layer_div.appendChild(tbl_div);
+                    panel.content = panel.content + layer_div.outerHTML;
+                    $('#m-wms-info-dialog').html(panel.content);
+                    $('#m-wms-info-dialog').dialog('open');
+            })
+        }
+
+    },
+
+    callInfo2: function (layer_idx, coords) {
         if (this.layers.length > 0) {
             var url = this.getUrl(layer_idx, coords);
             var layer_name = this.layers[layer_idx].layerName;
@@ -73,7 +146,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     getUrl: function (layer_idx, coord) {
         var pnt = this.map.gcsToDisplay(coord);
         // Spherical Mercator projection.
-        var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
+       var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
 
         if (mapBounds.left > mapBounds.right) {
             // 20037508.34 is the maximum extent of the Spherical Mercator projection.
