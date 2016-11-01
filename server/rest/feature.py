@@ -1,6 +1,7 @@
 from collections import defaultdict
 from urllib import quote
 
+from girder import events
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource
@@ -94,10 +95,14 @@ class FeatureInfo(Resource):
 
         grandResponse = []
         for baseUrl, layers in layerUrlMap.items():
-            if 'bsvecosystem' in baseUrl:
-                response = self.callBsveFeatureInfo(baseUrl, params, layers)
-            else:
+            event = events.trigger('minerva.get_layer_info', {
+                'layers': layers
+            })
+            print 'Default prevented: ' + str(event.defaultPrevented)
+            print 'responses: ' + str(event.responses)
+            if not event.defaultPrevented:
                 response = self.callFeatureInfo(baseUrl, params, layers)
+
             grandResponse.append(response)
 
 
