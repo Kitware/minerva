@@ -11,16 +11,17 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .source-title': 'toggleDatasets',
         'click .m-configure-wms-styling': 'styleWmsDataset'
     },
-
     toggleDatasets: function (event) {
         var listOfLayers = $(event.currentTarget).next();
 
         if (listOfLayers.css('display') === 'none') {
             listOfLayers.css('display', 'block');
             this.visibleSourceGroups[$(event.currentTarget).text()] = true;
+            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
         } else {
             listOfLayers.css('display', 'none');
             this.visibleSourceGroups[$(event.currentTarget).text()] = false;
+            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
         }
     },
     addWmsDataset: function (event) {
