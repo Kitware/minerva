@@ -7,7 +7,7 @@ include ../layout/panelMixins.jade
 if sourceDatasetMapping
   +panel-content('collapse in')
     each source in sourceNames
-      .source-title= source
+      div(class='source-title', id=source)= source
         i(title='Collection', class='icon-folder')
       if visibleSourceGroups[source] == true
         - var val = "display: block;"
