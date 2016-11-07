@@ -250,6 +250,13 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             dataset.save = function () {};
             dataset.destroy = function () {};
 
+            dataset.saveMinervaMetadata = function (mm) {
+                if (mm) {
+                    dataset.setMinervaMetadata(mm);
+                }
+                return dataset;
+            };
+
             this.collection.add(dataset);
         }, this);
 
