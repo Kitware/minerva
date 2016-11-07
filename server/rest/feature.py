@@ -1,11 +1,9 @@
 from collections import defaultdict
-from urllib import quote
 
 from girder import events
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource
-from girder.plugins.minerva.utility.cookie import getExtraHeaders
 
 import requests
 
@@ -23,16 +21,11 @@ class FeatureInfo(Resource):
                                        user=self.getCurrentUser())
         return item
 
-
     @staticmethod
     def callFeatureInfo(baseUrl, params, typeNames):
-        """Calls geoserver to get information about
-        a lat long location. Note that typeNames can
-        be a list of layers"""
-
+        """Calls geoserver to get at long location information"""
         baseUrl = baseUrl.replace('GetCapabilities', 'GetFeatureInfo')
         typeNames = ",".join(typeNames)
-
 
         parameters = {
             'exceptions': 'application/vnd.ogc.se_xml',
@@ -66,16 +59,16 @@ class FeatureInfo(Resource):
 
         layerSource = []
 
+        bsveurl = 'https://api-dev.bsvecosystem.net/data/v2/sources/' \
+                  'geotiles/data/result'
         for i in activeLayers:
             item = self._getMinervaItem(i)
-            url = item['meta']['minerva'].get(
-                'base_url',
-                'https://api-dev.bsvecosystem.net/data/v2/sources/geotiles/data/result')
-
+            url = item['meta']['minerva'].get('base_url', bsveurl)
             layerSource.append((url, item['meta']['minerva']['type_name']))
 
         layerUrlMap = defaultdict(list)
-        for k, v in layerSource: layerUrlMap[k].append(v)
+        for k, v in layerSource:
+            layerUrlMap[k].append(v)
 
         grandResponse = []
         for baseUrl, layers in layerUrlMap.items():
@@ -89,10 +82,7 @@ class FeatureInfo(Resource):
                 response = self.callFeatureInfo(baseUrl, params, layers)
 
             grandResponse.append(response)
-
-
         return grandResponse
-
 
     getFeatureInfo.description = (
         Description('Query values for overlayed datasets for a given lat long')
