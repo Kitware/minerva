@@ -40,7 +40,6 @@ before_install:
     - mv Kitware/minerva girder/plugins
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
 
-
     - cd girder
     # copy the placeholder bsve credentials, needed even though we mock bsve api calls
     - cp plugins/minerva/server/jobs/bsve.json.in plugins/minerva/server/jobs/bsve.json
