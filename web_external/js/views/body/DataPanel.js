@@ -198,6 +198,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         this.datasetInfoWidget.render();
     },
     initialize: function (settings) {
+        var externalId = 1;
         this.collection = settings.session.datasetsCollection;
         this.visibleSourceGroups = {};
         this.listenTo(this.collection, 'g:changed', function () {
@@ -212,6 +213,51 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             this.render();
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();
+        }, this).listenTo(minerva.events, 'm:updateDatasets', function () {
+            this.collection.fetch(undefined, true);
+        }, this).listenTo(minerva.events, 'm:addExternalGeoJSON', function (options) {
+            if (!options || !options.data) {
+                console.warn('Invalid external geojson');
+                return;
+            }
+            var dataset = new minerva.models.DatasetModel({
+                _id: externalId++,
+                name: options.name || 'External GeoJSON',
+                folderId: options.folderId || this.collection.folderId
+            });
+            dataset.set({
+                meta: {
+                    minerva: {
+                        dataset_type: 'geojson',
+                        original_type: 'geojson',
+                        geo_render: {
+                            type: 'geojson'
+                        },
+                        geojson: {
+                            data: options.data
+                        },
+                        source: {
+                            layer_source: 'GeoJSON',
+                            source_type: 'geojson'
+                        }
+                    }
+                }
+            });
+
+            // these datasets are temporary, so these are noops
+            dataset.sync = function () {};
+            dataset.fetch = function () {};
+            dataset.save = function () {};
+            dataset.destroy = function () {};
+
+            dataset.saveMinervaMetadata = function (mm) {
+                if (mm) {
+                    dataset.setMinervaMetadata(mm);
+                }
+                return dataset;
+            };
+
+            this.collection.add(dataset);
         }, this);
 
         girder.eventStream.on('g:event.job_status', _.bind(function (event) {

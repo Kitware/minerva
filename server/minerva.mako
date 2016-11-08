@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${title}</title>
     <link rel="stylesheet"
           href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
@@ -49,6 +51,10 @@
             ## since this is related to the Girder Admin configure plugins page for Minerva.
             <script src="${staticRoot}/built/plugins/minerva/minerva.app.min.js"></script>
         % endif
+    % endfor
+
+    % for externalJsUrl in externalJsUrls:
+        <script type="text/javascript" src="${externalJsUrl}"></script>
     % endfor
 
     <script src="${staticRoot}/built/plugins/minerva/minerva.main.min.js"></script>

@@ -108,6 +108,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                                  _.has(mapSettings, 'basemap_args')
                                  ? mapSettings.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
+            this.uiLayer.createWidget('slider', {position: {right: 40, top: 40}});
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
@@ -126,7 +127,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             this.map.featureInfoWidget.setElement($('#m-map-panel')).render();
             this.map.geoOn(geo.event.mouseclick, function (evt) {
                 this.featureInfoWidget.content = '';
-                this.featureInfoWidget.callInfo(0, evt.geo);
+                this.featureInfoWidget.callInfo(evt);
             });
         }
         this.map.draw();
@@ -152,7 +153,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
-            layerType = dataset.getGeoRenderType();
+            layerType = dataset.getMinervaMetadata().adapter || dataset.getGeoRenderType();
 
             // If visProperties is not provided, check for properties stored in the metadata.
             if (!visProperties) {

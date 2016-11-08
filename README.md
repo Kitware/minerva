@@ -1,4 +1,6 @@
 ## Minerva
+[![Build Status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
+
 Minerva is an application framework that provides client/server/services
 capabilities using [Girder](http://www.github.com/Girder/girder), [GeoJS]
 (http://www.github.com/OpenGeoscience/geojs) and other open source tools.

@@ -27,22 +27,23 @@ from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
         analysis, dataset, session, \
-        wms_dataset, geojson_dataset, wms_styles
+        wms_dataset, geojson_dataset, wms_styles, feature
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
+from girder.plugins.minerva.utility.cookie import getExtraHeaders
 
 
 class WmsProxy(object):
     exposed = True
 
     def GET(self, url, **params):
+        headers = getExtraHeaders()
         if 'minerva_credentials' in params:
             creds = params['minerva_credentials']
             del params['minerva_credentials']
             auth = 'Basic ' + b64encode(decryptCredentials(bytes(creds)))
-            headers = {'Authorization': auth}
-            r = requests.get(url, params=params, headers=headers)
-        else:
-            r = requests.get(url, params=params)
+            headers['Authorization'] = auth
+
+        r = requests.get(url, params=params, headers=headers)
         cherrypy.response.headers['Content-Type'] = r.headers['content-type']
         return r.content
 
@@ -57,7 +58,15 @@ def load(info):
     minerva_mako = os.path.join(os.path.dirname(__file__), "minerva.mako")
     minerva_webroot = Webroot(minerva_mako)
     minerva_webroot.updateHtmlVars(info['serverRoot'].vars)
-    minerva_webroot.updateHtmlVars({'title': 'Minerva'})
+    minerva_html_vars = {'title': 'Minerva', 'externalJsUrls': []}
+    minerva_webroot.updateHtmlVars(minerva_html_vars)
+
+    def add_downstream_plugin_js_urls(downstream_plugin_js_urls):
+        """ Allow additional external JS resources to be loaded from downstream plugins. """
+        minerva_html_vars.setdefault('externalJsUrls', []).extend(downstream_plugin_js_urls.info)
+        minerva_webroot.updateHtmlVars(minerva_html_vars)
+
+    events.bind('minerva.additional_js_urls', 'minerva', add_downstream_plugin_js_urls)
 
     # Move girder app to /girder, serve minerva app from /
     info['serverRoot'], info['serverRoot'].girder = (minerva_webroot,
@@ -73,6 +82,7 @@ def load(info):
     info['apiRoot'].minerva_datasets_wms = wms_dataset.WmsDataset()
     info['apiRoot'].minerva_style_wms = wms_styles.Sld()
     info['apiRoot'].minerva_dataset_geojson = geojson_dataset.GeojsonDataset()
+    info['apiRoot'].minerva_get_feature_info = feature.FeatureInfo()
 
     info['serverRoot'].wms_proxy = WmsProxy()
 
