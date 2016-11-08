@@ -20,8 +20,8 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         var bbox = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
         var width = this.map.node().width();
         var height = this.map.node().height();
-        var x = Math.round(pnt.x)
-        var y = Math.round(pnt.y)
+        var x = Math.round(pnt.x);
+        var y = Math.round(pnt.y);
 
         var panel = this;
 
@@ -37,40 +37,39 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                     'width': width,
                     'height': height}
             }).done(function (data) {
-                    var layer_div = document.createElement('div');
-                    layer_div.className = 'accordion';
-                    var tbl_div = document.createElement('div');
-                    var tbl_body = document.createElement('table');
-                    var odd_even = false;
-                    var header = false;
-                    var obj = JSON.parse(data);
-                    $.each(obj.features, function () {
-                        var tbl_row;
-                        if (!header) {
-                            tbl_row = tbl_body.insertRow();
-                            tbl_row.className = 'header';
-                            $.each(this.properties, function (k) {
-                                var cell = tbl_row.insertCell();
-                                cell.appendChild(document.createTextNode(k ? k.toString() : ''));
-                            });
-                            header = true;
-                        }
+                var layer_div = document.createElement('div');
+                layer_div.className = 'accordion';
+                var tbl_div = document.createElement('div');
+                var tbl_body = document.createElement('table');
+                var odd_even = false;
+                var header = false;
+                var obj = JSON.parse(data);
+                $.each(obj.features, function () {
+                    var tbl_row;
+                    if (!header) {
                         tbl_row = tbl_body.insertRow();
-                        tbl_row.className = odd_even ? 'odd' : 'even';
-                        $.each(this.properties, function (k, v) {
+                        tbl_row.className = 'header';
+                        $.each(this.properties, function (k) {
                             var cell = tbl_row.insertCell();
-                            cell.appendChild(document.createTextNode(v ? v.toString() : ''));
+                            cell.appendChild(document.createTextNode(k ? k.toString() : ''));
                         });
-                        odd_even = !odd_even;
+                        header = true;
+                    }
+                    tbl_row = tbl_body.insertRow();
+                    tbl_row.className = odd_even ? 'odd' : 'even';
+                    $.each(this.properties, function (k, v) {
+                        var cell = tbl_row.insertCell();
+                        cell.appendChild(document.createTextNode(v ? v.toString() : ''));
                     });
-                    tbl_div.appendChild(tbl_body);
-                    layer_div.appendChild(tbl_div);
-                    panel.content = panel.content + layer_div.outerHTML;
-                    $('#m-wms-info-dialog').html(panel.content);
-                    $('#m-wms-info-dialog').dialog('open');
-            })
+                    odd_even = !odd_even;
+                });
+                tbl_div.appendChild(tbl_body);
+                layer_div.appendChild(tbl_div);
+                panel.content = panel.content + layer_div.outerHTML;
+                $('#m-wms-info-dialog').html(panel.content);
+                $('#m-wms-info-dialog').dialog('open');
+            });
         }
-
     },
 
     initialize: function (settings) {
