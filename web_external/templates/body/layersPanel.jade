@@ -12,7 +12,10 @@ include ../widgets/legendWidget.jade
             i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           else
             i.icon-eye.m-toggle-dataset&attributes({'m-dataset-id': dataset.get('_id')})
-            i.icon-trash.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+            .m-push-right
+              if dataset.getDatasetType() === 'geojson'
+                i.icon-download.m-download-geojson&attributes({'m-dataset-id': dataset.get('_id')})
+              i.icon-trash.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           .m-layer-control-container
             each option in layersOrderOptions
               if ((index === 0 && option.class.indexOf('up') > -1) || (index === datasets.length - 1 && option.class.indexOf('down') > -1 ))
