@@ -1,10 +1,26 @@
 minerva.views.LayersPanel = minerva.views.Panel.extend({
 
     events: {
+        'click .m-download-geojson': 'downloadGeojsonEvent',
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
         'click .m-toggle-dataset': 'toggleDatasetEvent',
         'change .m-opacity-range': 'changeLayerOpacity',
         'click .m-order-layer': 'reorderLayer'
+    },
+
+    downloadGeojsonEvent: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        dataset.once('m:dataset_geo_dataLoaded', function (dataset) {
+            var data = dataset.get('geoData');
+            var a = window.document.createElement('a');
+            a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
+            var filename = dataset.get('name') + '.geojson';
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }).loadGeoData();
     },
 
     removeDatasetEvent: function (event) {
