@@ -26,6 +26,8 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
     removeDatasetEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
+        // Make opacity 1 when a layer is deleted
+        dataset.set('opacity', 1);
         dataset.set('displayed', false);
     },
 
