@@ -311,8 +311,10 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         // Restore state of collapsed panels
         if (_.has(model.metadata(), 'layout')) {
             _.each(model.metadata().layout, function (sourceView, sourceViewId) {
-                if (_.has(sourceView, 'collapsed') && sourceView.collapsed === false) {
-                    $('#' + sourceViewId).find('i.icon-folder').toggleClass('icon-folder-open', 'icon-folder');
+                if (_.has(sourceView, 'collapsed') &&
+                    sourceView.collapsed === false) {
+                    $('#' + sourceViewId).find('i.icon-folder')
+                        .toggleClass('icon-folder-open', 'icon-folder');
                 }
             }, this);
         }
