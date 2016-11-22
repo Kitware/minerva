@@ -11,18 +11,26 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .source-title': 'toggleDatasets',
         'click .m-configure-wms-styling': 'styleWmsDataset'
     },
-
     toggleDatasets: function (event) {
         var listOfLayers = $(event.currentTarget).next();
 
         if (listOfLayers.css('display') === 'none') {
             listOfLayers.css('display', 'block');
             this.visibleSourceGroups[$(event.currentTarget).text()] = true;
+            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
+            this.getDatasetModel().addLayoutAttributes(event.target.id, {
+                collapsed: false
+            });
         } else {
             listOfLayers.css('display', 'none');
             this.visibleSourceGroups[$(event.currentTarget).text()] = false;
+            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
+            this.getDatasetModel().addLayoutAttributes(event.target.id, {
+                collapsed: true
+            });
         }
     },
+
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
@@ -282,7 +290,13 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
+    getDatasetModel: function () {
+        return this.parentView.parentView.model;
+    },
+
     render: function () {
+        var model = this.getDatasetModel();
+
         this.sourceDataset = _.groupBy(
             _.filter(this.collection.models, this.getSourceNameFromModel),
             this.getSourceNameFromModel
@@ -293,6 +307,17 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             visibleSourceGroups: this.visibleSourceGroups,
             sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
         }));
+
+        // Restore state of collapsed panels
+        if (_.has(model.metadata(), 'layout')) {
+            _.each(model.metadata().layout, function (sourceView, sourceViewId) {
+                if (_.has(sourceView, 'collapsed') &&
+                    sourceView.collapsed === false) {
+                    $('#' + sourceViewId).find('i.icon-folder')
+                        .toggleClass('icon-folder-open', 'icon-folder');
+                }
+            }, this);
+        }
 
         // TODO pagination and search?
         return this;

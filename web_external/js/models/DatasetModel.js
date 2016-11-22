@@ -194,6 +194,22 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         }
     },
 
+    /*
+     * Function to save layout state of entities that are linked to datasets
+     */
+    addLayoutAttributes: function (entity, attributes) {
+        var metadata = this.metadata();
+        if (!_.has(metadata, 'layout')) {
+            metadata.layout = {};
+        }
+
+        if (!_.has(_.keys(metadata.layout, entity))) {
+            metadata.layout[entity] = attributes;
+        } else {
+            _.extend(metadata.layout[entity], attributes);
+        }
+    },
+
     //
     // Tabular data api.
     //
