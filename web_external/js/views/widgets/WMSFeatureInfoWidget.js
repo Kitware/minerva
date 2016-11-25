@@ -3,7 +3,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     callInfo: function (event) {
         // Query layers with given coordinates
         var displayedDatasets = _.chain(this.parentView.collection.models)
-            .filter(function (set) { return set.get('displayed'); })
+            .filter(function (set) { return set.get('displayed') && set.getDatasetType() !== 'geojson'; })
             .map(function (dataset) { return dataset.get('_id'); })
             .value();
 
