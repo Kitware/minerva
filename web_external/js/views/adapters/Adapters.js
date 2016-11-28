@@ -159,11 +159,11 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
         var _createFeature = this.geoJsLayer.createFeature;
         this.geoJsLayer.createFeature = function (name, arg) {
             if (!arg) {
-                arg = {}
+                arg = {};
             }
             arg.selectionAPI = true;
             return _createFeature.call(this, name, arg);
-        }
+        };
 
         this._injectStyle(data, visProperties, data.summary || {});
         try {
