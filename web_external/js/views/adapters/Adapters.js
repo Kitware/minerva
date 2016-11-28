@@ -153,6 +153,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      */
     this.init = function (container, dataset, visProperties, data) {
         this.geoJsLayer = container.createLayer('feature');
+        dataset.geoJsLayer = this.geoJsLayer;
 
         // force selection api on all features for this layer
         var _createFeature = this.geoJsLayer.createFeature;
