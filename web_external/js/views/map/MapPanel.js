@@ -23,12 +23,12 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
     changeLayerZIndex: function (dataset) {
         var baseMapZIndex = 1;
         if (dataset.get('order')) {
-            this.datasetLayerReprs[dataset.id][dataset.get('order')]();
+            this.datasetLayerReprs[dataset.id]['geoJsLayer'][dataset.get('order')]();
         }
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
         if (dataset.get('order') === 'moveToBottom') {
-            this.datasetLayerReprs[dataset.id].moveUp(baseMapZIndex);
+            this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveUp(baseMapZIndex);
         }
         this.map.draw();
     },
