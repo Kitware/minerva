@@ -7,9 +7,11 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
             .map(function (dataset) { return dataset.get('_id'); })
             .value();
 
-        var geojsonProperties = _.chain(this.parentView.collection.models)
+        var geojsonLayers = [];
+        _.chain(this.parentView.collection.models)
             .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
             .map(function (dataset) {
+                var layer = {};
                 var features = dataset.geoJsLayer.features();
                 var props = [];
                 _.each(features, function (feature) {
@@ -18,12 +20,10 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                         props.push.apply(props, _.pluck(hits.found, 'properties'));
                     }
                 });
-                return props;
+                layer['id'] = dataset.get('name');
+                layer['properties'] = props;
+                geojsonLayers.push(layer);
             })
-            .flatten(true)
-            .value();
-
-        console.log(geojsonProperties);
 
         var coord = event.geo;
         var pnt = this.map.gcsToDisplay(coord);
