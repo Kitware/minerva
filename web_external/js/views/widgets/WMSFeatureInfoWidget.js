@@ -1,36 +1,34 @@
 minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
     callInfo: function (event) {
+        var that = this;
 
-        var that = this
-
-        function getActiveWmsLayers () {
+        function getActiveWmsLayers() {
             return _.chain(that.parentView.collection.models)
                 .filter(function (set) { return set.get('displayed') && set.getDatasetType() !== 'geojson'; })
                 .map(function (dataset) { return dataset.get('_id'); })
                 .value();
         }
 
-        function getActiveGeojsonLayers () {
+        function getActiveGeojsonLayers() {
             var geojsonLayers = [];
             _.chain(that.parentView.collection.models)
                 .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
                 .map(function (dataset) {
                     var layer = {};
                     var features = dataset.geoJsLayer.features();
-                    var props = [];
                     _.each(features, function (feature) {
                         var hits = feature.pointSearch(event.geo);
-                        if (hits && hits.found) {
-                            props.push.apply(props, _.pluck(hits.found, 'properties'));
+                        if (hits && hits.found.length !== 0) {
+                            layer['properties'] = hits.found[0].properties;
                         }
                     });
                     layer['id'] = dataset.get('name');
-                    layer['properties'] = props;
                     geojsonLayers.push(layer);
+                    return geojsonLayers;
                 });
 
-            return geojsonLayers
+            return geojsonLayers;
         }
 
         function getInspectMapParams(event) {
@@ -72,39 +70,6 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                 var activeGeojsonLayers = getActiveGeojsonLayers();
                 var inspectResp = obj.features.concat(activeGeojsonLayers);
                 that.renderContents(inspectResp);
-
-                /*
-                var layer_div = document.createElement('div');
-                layer_div.className = 'accordion';
-                var tbl_div = document.createElement('div');
-                var tbl_body = document.createElement('table');
-                var odd_even = false;
-                var header = false;
-                var obj = JSON.parse(data);
-                $.each(obj.features, function () {
-                    var tbl_row;
-                    if (!header) {
-                        tbl_row = tbl_body.insertRow();
-                        tbl_row.className = 'header';
-                        $.each(this.properties, function (k) {
-                            var cell = tbl_row.insertCell();
-                            cell.appendChild(document.createTextNode(k ? k.toString() : ''));
-                        });
-                        header = true;
-                    }
-                    tbl_row = tbl_body.insertRow();
-                    tbl_row.className = odd_even ? 'odd' : 'even';
-                    $.each(this.properties, function (k, v) {
-                        var cell = tbl_row.insertCell();
-                        cell.appendChild(document.createTextNode(v ? v.toString() : ''));
-                    });
-                    odd_even = !odd_even;
-                });
-                tbl_div.appendChild(tbl_body);
-                layer_div.appendChild(tbl_div);
-                that.content = that.content + layer_div.outerHTML;
-                $('#m-wms-info-dialog').html(that.content);
-                */
             });
         } else {
             var activeGeojsonLayers = getActiveGeojsonLayers();
@@ -127,12 +92,12 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     },
 
     renderContents: function (inspectResp) {
-        $('#m-wms-info-dialog').html(
-            minerva.templates.wmsFeatureInfoContent({
-                layersInfo: inspectResp
-            })
-        );
         if (inspectResp.length !== 0) {
+            $('#m-wms-info-dialog').html(
+                minerva.templates.wmsFeatureInfoContent({
+                    layersInfo: inspectResp
+                })
+            );
             $('#m-wms-info-dialog').dialog('open');
         }
     },

@@ -1,1 +1,13 @@
-h4 #{layersInfo}
+if layersInfo
+  each layer in layersInfo
+    h4= layer.id
+    .accordion
+      div
+        table
+          tbody
+            tr(class="header")
+              each value, key in layer.properties
+                td= key
+            tr(class="even")
+              each value, key in layer.properties
+                td= value
