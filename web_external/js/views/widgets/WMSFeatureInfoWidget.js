@@ -129,7 +129,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
     renderContents: function (inspectResp) {
         $('#m-wms-info-dialog').html(
             minerva.templates.wmsFeatureInfoContent({
-                contents: inspectResp
+                layersInfo: inspectResp
             })
         );
         if (inspectResp.length !== 0) {
