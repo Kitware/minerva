@@ -15,12 +15,17 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
             _.chain(that.parentView.collection.models)
                 .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
                 .map(function (dataset) {
+                    var i;
                     var layer = {};
                     var features = dataset.geoJsLayer.features();
                     _.each(features, function (feature) {
                         var hits = feature.pointSearch(event.geo);
-                        if (hits && hits.found.length !== 0) {
-                            layer['properties'] = hits.found[0].properties;
+                        if (hits && hits.found) {
+                            for (i = hits.found.length - 1; i >= 0; i -= 1) {
+                                if (hits.found[i].properties) {
+                                    layer['properties'] = hits.found[i].properties;
+                                }
+                            }
                         }
                     });
                     layer['id'] = dataset.get('name');
