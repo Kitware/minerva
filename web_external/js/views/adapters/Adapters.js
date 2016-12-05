@@ -153,6 +153,18 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      */
     this.init = function (container, dataset, visProperties, data) {
         this.geoJsLayer = container.createLayer('feature');
+        dataset.geoJsLayer = this.geoJsLayer;
+
+        // force selection api on all features for this layer
+        var _createFeature = this.geoJsLayer.createFeature;
+        this.geoJsLayer.createFeature = function (name, arg) {
+            if (!arg) {
+                arg = {};
+            }
+            arg.selectionAPI = true;
+            return _createFeature.call(this, name, arg);
+        };
+
         this._injectStyle(data, visProperties, data.summary || {});
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});

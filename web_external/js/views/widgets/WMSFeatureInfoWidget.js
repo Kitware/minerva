@@ -1,74 +1,84 @@
 minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
     callInfo: function (event) {
-        // Query layers with given coordinates
-        var displayedDatasets = _.chain(this.parentView.collection.models)
-            .filter(function (set) { return set.get('displayed') && set.getDatasetType() !== 'geojson'; })
-            .map(function (dataset) { return dataset.get('_id'); })
-            .value();
+        var that = this;
 
-        var coord = event.geo;
-        var pnt = this.map.gcsToDisplay(coord);
-
-        // Spherical Mercator projection.
-        var mapBounds = this.map.bounds(undefined, 'EPSG:3857');
-
-        if (mapBounds.left > mapBounds.right) {
-            // 20037508.34 is the maximum extent of the Spherical Mercator projection.
-            mapBounds.right = 20037508.34 + (20037508.34 - mapBounds.right);
+        function getActiveWmsLayers() {
+            return _.chain(that.parentView.collection.models)
+                .filter(function (set) { return set.get('displayed') && set.getDatasetType() !== 'geojson'; })
+                .map(function (dataset) { return dataset.get('_id'); })
+                .value();
         }
-        var bbox = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
-        var width = this.map.node().width();
-        var height = this.map.node().height();
-        var x = Math.round(pnt.x);
-        var y = Math.round(pnt.y);
 
-        var panel = this;
+        function getActiveGeojsonLayers() {
+            var geojsonLayers = [];
+            _.chain(that.parentView.collection.models)
+                .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
+                .map(function (dataset) {
+                    var i;
+                    var layer = {};
+                    var features = dataset.geoJsLayer.features();
+                    _.each(features, function (feature) {
+                        var hits = feature.pointSearch(event.geo);
+                        if (hits && hits.found) {
+                            for (i = hits.found.length - 1; i >= 0; i -= 1) {
+                                if (hits.found[i].properties) {
+                                    layer['properties'] = hits.found[i].properties;
+                                }
+                            }
+                        }
+                    });
+                    layer['id'] = dataset.get('name');
+                    geojsonLayers.push(layer);
+                    return geojsonLayers;
+                });
 
-        if (displayedDatasets.length > 0) {
+            return geojsonLayers;
+        }
+
+        function getInspectMapParams(event) {
+            var mapParams = {};
+            var coord = event.geo;
+            var pnt = that.map.gcsToDisplay(coord);
+
+            // Spherical Mercator projection.
+            var mapBounds = that.map.bounds(undefined, 'EPSG:3857');
+
+            if (mapBounds.left > mapBounds.right) {
+                // 20037508.34 is the maximum extent of the Spherical Mercator projection.
+                mapBounds.right = 20037508.34 + (20037508.34 - mapBounds.right);
+            }
+            mapParams['x'] = Math.round(pnt.x);
+            mapParams['y'] = Math.round(pnt.y);
+            mapParams['bbox'] = mapBounds.left + ',' + mapBounds.bottom + ',' + mapBounds.right + ',' + mapBounds.top;
+            mapParams['width'] = that.map.node().width();
+            mapParams['height'] = that.map.node().height();
+            return mapParams;
+        }
+
+        var activeWmsLayers = getActiveWmsLayers();
+        var mapParams = getInspectMapParams(event);
+
+        if (activeWmsLayers.length > 0) {
             girder.restRequest({
                 path: '/minerva_get_feature_info',
                 type: 'GET',
                 data: {
-                    'activeLayers': displayedDatasets,
-                    'bbox': bbox,
-                    'x': x,
-                    'y': y,
-                    'width': width,
-                    'height': height}
+                    'activeLayers': activeWmsLayers,
+                    'bbox': mapParams.bbox,
+                    'x': mapParams.x,
+                    'y': mapParams.y,
+                    'width': mapParams.width,
+                    'height': mapParams.height}
             }).done(function (data) {
-                var layer_div = document.createElement('div');
-                layer_div.className = 'accordion';
-                var tbl_div = document.createElement('div');
-                var tbl_body = document.createElement('table');
-                var odd_even = false;
-                var header = false;
                 var obj = JSON.parse(data);
-                $.each(obj.features, function () {
-                    var tbl_row;
-                    if (!header) {
-                        tbl_row = tbl_body.insertRow();
-                        tbl_row.className = 'header';
-                        $.each(this.properties, function (k) {
-                            var cell = tbl_row.insertCell();
-                            cell.appendChild(document.createTextNode(k ? k.toString() : ''));
-                        });
-                        header = true;
-                    }
-                    tbl_row = tbl_body.insertRow();
-                    tbl_row.className = odd_even ? 'odd' : 'even';
-                    $.each(this.properties, function (k, v) {
-                        var cell = tbl_row.insertCell();
-                        cell.appendChild(document.createTextNode(v ? v.toString() : ''));
-                    });
-                    odd_even = !odd_even;
-                });
-                tbl_div.appendChild(tbl_body);
-                layer_div.appendChild(tbl_div);
-                panel.content = panel.content + layer_div.outerHTML;
-                $('#m-wms-info-dialog').html(panel.content);
-                $('#m-wms-info-dialog').dialog('open');
+                var activeGeojsonLayers = getActiveGeojsonLayers();
+                var inspectResp = obj.features.concat(activeGeojsonLayers);
+                that.renderContents(inspectResp);
             });
+        } else {
+            var activeGeojsonLayers = getActiveGeojsonLayers();
+            that.renderContents(activeGeojsonLayers);
         }
     },
 
@@ -84,6 +94,17 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
             'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +
             'SERVICE=WMS&FEATURE_COUNT=50&styles=&' +
             'srs=EPSG:3857&INFO_FORMAT=application/json&format=image%2Fpng';
+    },
+
+    renderContents: function (inspectResp) {
+        if (inspectResp.length !== 0) {
+            $('#m-wms-info-dialog').html(
+                minerva.templates.wmsFeatureInfoContent({
+                    layersInfo: inspectResp
+                })
+            );
+            $('#m-wms-info-dialog').dialog('open');
+        }
     },
 
     render: function () {
