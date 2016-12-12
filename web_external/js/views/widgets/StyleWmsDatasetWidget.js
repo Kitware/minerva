@@ -48,7 +48,8 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 this.dataset.fetch();
             }, this));
         },
-        'submit #m-wms-style-form': function (e) {
+
+        'submit #m-wms-point-style-form': function (e) {
             e.preventDefault();
             var attribute = this.$('#m-attribute').val();
             var dataMeta = this.dataset.get('meta').minerva.layer_info.attributes;
@@ -61,7 +62,8 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 max: dataMeta[attribute].properties.max,
                 count: dataMeta[attribute].properties.count,
                 ramp: this.ramps[this.$('#m-color-ramp').val()].value,
-                ramp_name: this.$('#m-color-ramp').val()
+                ramp_name: this.$('#m-color-ramp').val(),
+                marker: this.$('#m-marker').val()
             };
 
             girder.restRequest({
@@ -116,6 +118,7 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
     },
 
     _get_template: function (subType) {
+        var attributes = null;
         subType = this._get_geospatial_type();
         if (subType === 'multiband') {
             var bands = this._get_bands();
@@ -133,8 +136,15 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 max: maximum,
                 ramps: this.ramps
             });
+        } else if (subType === 'point') {
+            attributes = this._get_attributes();
+            return minerva.templates.stylePointWidget({
+                attributes: attributes,
+                ramps: this.ramps,
+                markers: ['circle', 'square', 'triangle', 'star', 'cross', 'x']
+            });
         } else {
-            var attributes = this._get_attributes();
+            attributes = this._get_attributes();
             return minerva.templates.styleWmsDatasetWidget({
                 attributes: attributes,
                 ramps: this.ramps
@@ -159,6 +169,10 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 this.$('#m-min-value').val(sldMeta.min);
                 this.$('#m-max-value').val(sldMeta.max);
                 this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
+            } else if (subType === 'point') {
+                this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
+                this.$('#m-attribute').val(sldMeta.attribute);
+                this.$('#m-marker').val(sldMeta.marker);
             } else {
                 this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
                 this.$('#m-attribute').val(sldMeta.attribute);

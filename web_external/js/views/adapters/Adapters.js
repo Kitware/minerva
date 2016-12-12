@@ -405,7 +405,6 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                 var colorMapTemplate = null;
                 var colorValuePairs = null;
                 var attribute = null;
-                var pointMarker = 'circle';
                 if (minervaMetadata.sld_params) {
                     if (minervaMetadata.sld_params.subType === 'multiband') {
                         sld_body = multiband_template({
@@ -448,11 +447,12 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                                 value: pair[0]}); }).join('');
 
                         if (minervaMetadata.sld_params.subType === 'point') {
+                            var marker = minervaMetadata.sld_params.marker;
                             sld_body = point_template({
                                 typeName: minervaMetadata.sld_params.typeName,
                                 colorValueMapping: colorValueMapping,
                                 attribute: attribute,
-                                marker: pointMarker});
+                                marker: marker});
                         } else if (minervaMetadata.sld_params.subType === 'line') {
                             sld_body = line_template({
                                 typeName: minervaMetadata.sld_params.typeName,
