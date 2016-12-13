@@ -28,8 +28,10 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                             }
                         }
                     });
-                    layer['id'] = dataset.get('name');
-                    geojsonLayers.push(layer);
+                    if (layer.properties) {
+                        layer['id'] = dataset.get('name');
+                        geojsonLayers.push(layer);
+                    }
                     return geojsonLayers;
                 });
 
