@@ -48,7 +48,6 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 this.dataset.fetch();
             }, this));
         },
-
         'submit #m-wms-point-style-form': function (e) {
             e.preventDefault();
             var attribute = this.$('#m-attribute').val();
@@ -64,6 +63,32 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 ramp: this.ramps[this.$('#m-color-ramp').val()].value,
                 ramp_name: this.$('#m-color-ramp').val(),
                 marker: this.$('#m-marker').val()
+            };
+
+            girder.restRequest({
+                path: '/minerva_style_wms',
+                type: 'POST',
+                data: params,
+                error: null
+            }).then(_.bind(function () {
+                this.$el.modal('hide');
+                this.dataset.fetch();
+            }, this));
+        },
+        'submit #m-wms-style-form': function (e) {
+            e.preventDefault();
+            var attribute = this.$('#m-attribute').val();
+            var dataMeta = this.dataset.get('meta').minerva.layer_info.attributes;
+            var params = {
+                subType: this._get_geospatial_type(),
+                _id: this.dataset.id,
+                typeName: this.dataset.get('meta').minerva.type_name,
+                attribute: attribute,
+                min: dataMeta[attribute].properties.min,
+                max: dataMeta[attribute].properties.max,
+                count: dataMeta[attribute].properties.count,
+                ramp: this.ramps[this.$('#m-color-ramp').val()].value,
+                ramp_name: this.$('#m-color-ramp').val()
             };
 
             girder.restRequest({
