@@ -9,7 +9,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
         'click .source-title': 'toggleDatasets',
-        'click .m-configure-wms-styling': 'styleWmsDataset'
+        'click .m-configure-wms-styling': 'styleWmsDataset',
+        'click .m-add-postgres-db': 'addPostgres'
     },
     toggleDatasets: function (event) {
         var listOfLayers = $(event.currentTarget).next();
@@ -29,6 +30,14 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
                 collapsed: true
             });
         }
+    },
+    addPostgres: function(event) {
+        var addPostgresWidget = new minerva.views.AddPostgresWidget({
+            el: $('#g-dialog-container'),
+            collection: this.collection,
+            parentView: this
+        });
+        addPostgresWidget.render();
     },
 
     addWmsDataset: function (event) {
