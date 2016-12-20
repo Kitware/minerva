@@ -9,10 +9,10 @@
         .form-group
           label.control-label(for="m-database-name") Database Name
           input.input-sm#m-database-name.form-control(type="text", placeholder="Name")
-        .form-group(title='This is of the form [(dialect)://][(user name)[:(password)]@](server)[:(port)]/(database)[?(options)].  Dialect is one of mongodb, postgresql, sqlite, mysql, oracle, or mssql.  For example, postgresql://localhost/sampledb')
+        .form-group(title='This is of the form [postgresql://][(user name)[:(password)]@](server)[:(port)]/(database)[?(options)]. For example, postgresql://localhost/sampledb')
           label.control-label(for="g-new-dbas-dburi") Database URI
           input.input-sm.form-control#g-new-dbas-dburi(
-            type="text", placeholder="URI -- (dialect)://(user):(password)@(server):(port)/(database)?(options)")
+            type="text", placeholder="URI -- postgresql://(user):(password)@(server):(port)/(database)?(options)")
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-service-button.btn.btn-small.btn-primary

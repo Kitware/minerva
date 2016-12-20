@@ -31,7 +31,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             });
         }
     },
-    addPostgres: function(event) {
+    addPostgres: function (event) {
         var addPostgresWidget = new minerva.views.AddPostgresWidget({
             el: $('#g-dialog-container'),
             collection: this.collection,
