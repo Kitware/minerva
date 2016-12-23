@@ -7,12 +7,20 @@
           | Enter Database details
       .modal-body
         .form-group
-          label.control-label(for="m-database-name") Database Name
-          input.input-sm#m-database-name.form-control(type="text", placeholder="Name")
-        .form-group(title='This is of the form [postgresql://][(user name)[:(password)]@](server)[:(port)]/(database)[?(options)]. For example, postgresql://localhost/sampledb')
-          label.control-label(for="g-new-dbas-dburi") Database URI
-          input.input-sm.form-control#g-new-dbas-dburi(
-            type="text", placeholder="URI -- postgresql://(user):(password)@(server):(port)/(database)?(options)")
+          label.control-label(for="m-db-username") User Name
+          input.input-sm#m-db-username.form-control(type="text", placeholder="Database User Name")
+        .form-group
+          label.control-label(for="m-db-password") Password
+          input.input-sm#m-db-password.form-control(type="password", placeholder="Database Password")
+        .form-group
+          label.control-label(for="m-db-server") Server
+          input.input-sm#m-db-server.form-control(type="text", placeholder="localhost")
+        .form-group
+          label.control-label(for="m-db-port") Port
+          input.input-sm#m-db-port.form-control(type="text", placeholder="5432")
+        .form-group
+          label.control-label(for="m-db-name") Database Name
+          input.input-sm#m-db-name.form-control(type="text", placeholder="testdb")
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-service-button.btn.btn-small.btn-primary
