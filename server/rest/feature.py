@@ -59,11 +59,9 @@ class FeatureInfo(Resource):
 
         layerSource = []
 
-        bsveurl = 'https://api-dev.bsvecosystem.net/data/v2/sources/' \
-                  'geotiles/data/result'
         for i in activeLayers:
             item = self._getMinervaItem(i)
-            url = item['meta']['minerva'].get('base_url', bsveurl)
+            url = item['meta']['minerva'].get('base_url')
             layerSource.append((url, item['meta']['minerva']['type_name']))
 
         layerUrlMap = defaultdict(list)
