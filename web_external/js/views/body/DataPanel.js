@@ -8,27 +8,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
-        'click .source-title': 'toggleDatasets',
-        'click .m-configure-wms-styling': 'styleWmsDataset'
-    },
-    toggleDatasets: function (event) {
-        var listOfLayers = $(event.currentTarget).next();
-
-        if (listOfLayers.css('display') === 'none') {
-            listOfLayers.css('display', 'block');
-            this.visibleSourceGroups[$(event.currentTarget).text()] = true;
-            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
-            this.getDatasetModel().addLayoutAttributes(event.target.id, {
-                collapsed: false
-            });
-        } else {
-            listOfLayers.css('display', 'none');
-            this.visibleSourceGroups[$(event.currentTarget).text()] = false;
-            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
-            this.getDatasetModel().addLayoutAttributes(event.target.id, {
-                collapsed: true
-            });
-        }
+        'click .m-configure-wms-styling': 'styleWmsDataset',
     },
 
     addWmsDataset: function (event) {
@@ -208,7 +188,6 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     initialize: function (settings) {
         var externalId = 1;
         this.collection = settings.session.datasetsCollection;
-        this.visibleSourceGroups = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -290,8 +269,9 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
-    categorizeLayers: function (datasetArray) {
-        return  _.groupBy(datasetArray, function (dataset) {
+    categorizeLayers: function (source) {
+        var datasetArray = this.sourceDataset[source];
+        this.sourceCategoryDataset[source] = _.groupBy(datasetArray, function (dataset) {
             return dataset.get('meta').minerva.category;
         });
     },
@@ -307,12 +287,11 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             _.filter(this.collection.models, this.getSourceNameFromModel),
             this.getSourceNameFromModel
         );
-
-        var sourceCategoryDataset = _.map(_.values(this.sourceDataset), this.categorizeLayers);
+        this.sourceCategoryDataset = {};
+        _.map(_.keys(this.sourceDataset), this.categorizeLayers, this);
 
         this.$el.html(minerva.templates.dataPanel({
-            sourceDatasetMapping: this.sourceDataset,
-            visibleSourceGroups: this.visibleSourceGroups,
+            sourceCategoryDataset: this.sourceCategoryDataset,
             sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
         }));
 
