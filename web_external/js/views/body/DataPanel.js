@@ -290,6 +290,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
+    categorizeLayers: function (datasetArray) {
+        return  _.groupBy(datasetArray, function (dataset) {
+            return dataset.get('meta').minerva.category;
+        });
+    },
+
     getDatasetModel: function () {
         return this.parentView.parentView.model;
     },
@@ -301,6 +307,8 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             _.filter(this.collection.models, this.getSourceNameFromModel),
             this.getSourceNameFromModel
         );
+
+        var sourceCategoryDataset = _.map(_.values(this.sourceDataset), this.categorizeLayers);
 
         this.$el.html(minerva.templates.dataPanel({
             sourceDatasetMapping: this.sourceDataset,
