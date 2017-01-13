@@ -9,11 +9,22 @@ if sourceCategoryDataset
   each categories, source in sourceCategoryDataset
     div(class='source-title', id=source)= source
       i(title='Collection', class='icon-folder')
-    div(class=source+'-category-collection', style='display: none')
+    if visibleMenus[source] !== undefined
+      - var sourceVal = "display: block;"
+    else
+      - var sourceVal = "display: none;"
+    div(class=source, style=sourceVal)
       each datasets, category in categories
         div(class='category-title', id=category)=category
           i(title='Collection', class='icon-folder')
-        div(class=category+'-dataset-collection' style='display: none')
+        if sourceVal == "display: block;"
+          if visibleMenus[source][category] == true
+            - var categoryVal = "display: block;"
+          else
+            - var categoryVal = "display: none;"
+        else
+          - var categoryVal = "display: none;"
+        div(class=category style=categoryVal)
           each dataset in datasets
             if dataset.metadata()
               .dataset

@@ -9,8 +9,45 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
         'click .m-configure-wms-styling': 'styleWmsDataset',
+        'click .source-title': 'toggleSources',
+        'click .category-title': 'toggleCategories'
     },
+    _addCategories: function (source, category) {
+        this.visibleMenus[source][category] = true;
+    },
+    _deleteCategories: function (source, category) {
+        this.visibleMenus[source] = _.omit(this.visibleMenus[source], category);
+    },
+    toggleCategories: function (event) {
+        // Get the div belov the title which was clicked
+        var subDiv = $(event.currentTarget).next();
+        var source = $(event.currentTarget).parent().attr('class');
+        var category = $(event.currentTarget).text();
 
+        if (subDiv.css('display') === 'none') {
+            subDiv.css('display', 'block');
+            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
+            this._addCategories(source, category);
+        } else {
+            subDiv.css('display', 'none');
+            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
+            this._deleteCategories(source, category);
+        }
+    },
+    toggleSources: function (event) {
+        var subDiv = $(event.currentTarget).next();
+        var source = $(event.currentTarget).text();
+
+        if (subDiv.css('display') === 'none') {
+            subDiv.css('display', 'block');
+            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
+            this.visibleMenus[source] = {};
+        } else {
+            subDiv.css('display', 'none');
+            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
+            this.visibleMenus = _.omit(this.visibleMenus, source);
+        }
+    },
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
@@ -188,6 +225,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     initialize: function (settings) {
         var externalId = 1;
         this.collection = settings.session.datasetsCollection;
+        this.visibleMenus = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -292,7 +330,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
 
         this.$el.html(minerva.templates.dataPanel({
             sourceCategoryDataset: this.sourceCategoryDataset,
-            sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
+            visibleMenus: this.visibleMenus
         }));
 
         // Restore state of collapsed panels
