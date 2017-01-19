@@ -2,7 +2,7 @@ minerva.core = minerva.core || {};
 
 var multiband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Style</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><RedChannel><SourceChannelName><%= redChannel %></SourceChannelName></RedChannel><GreenChannel><SourceChannelName><%= greenChannel %></SourceChannelName></GreenChannel><BlueChannel><SourceChannelName><%= blueChannel %></SourceChannelName></BlueChannel></ChannelSelection></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
-var singleband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>SLD Single Band</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><GrayChannel><SourceChannelName>1</SourceChannelName></GrayChannel></ChannelSelection><ColorMap extended="true"><%= colorMapEntry %></ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+var singleband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>SLD Single Band</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><GrayChannel><SourceChannelName>1</SourceChannelName></GrayChannel></ChannelSelection><ColorMap extended="true"><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMin %>" label="0"/><%= colorMapEntry %><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMax %>" label="0"/></ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
 var polygon_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Polygon</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PolygonSymbolizer><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
@@ -399,6 +399,7 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                 var sld_body = null;
                 var min = null;
                 var max = null;
+                var nodata = null;
                 var ramp = null;
                 var count = null;
                 var seq = null;
@@ -415,6 +416,17 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                     } else if (minervaMetadata.sld_params.subType === 'singleband') {
                         min = parseFloat(minervaMetadata.sld_params.min);
                         max = parseFloat(minervaMetadata.sld_params.max);
+                        nodata = parseFloat(minervaMetadata.sld_params.nodata);
+                        // If nodata is greater than max it has to be added
+                        // to the end, otherwise it has to be added to the
+                        // begining
+                        var nodataMin = min - 1;
+                        var nodataMax = max + 1;
+                        if (nodata > max) {
+                            nodataMax = nodata;
+                        } else if (nodata < min ) {
+                            nodataMin = nodata;
+                        }
                         ramp = minervaMetadata.sld_params['ramp[]'];
                         count = ramp.length;
                         seq = generate_sequence(min, max, count);
@@ -428,7 +440,9 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                                 value: pair[0] }); }).join('');
                         sld_body = singleband_template({
                             typeName: minervaMetadata.sld_params.typeName,
-                            colorMapEntry: colorMapEntry
+                            colorMapEntry: colorMapEntry,
+                            nodataMin: nodataMin,
+                            nodataMax: nodataMax
                         });
                     } else {
                         min = parseFloat(minervaMetadata.sld_params.min);

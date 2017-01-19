@@ -34,6 +34,7 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
                 typeName: this.dataset.get('meta').minerva.type_name,
                 min: this.$('#m-min-value').val(),
                 max: this.$('#m-max-value').val(),
+                nodata: this.$('#m-nodata-value').val(),
                 ramp: this.ramps[this.$('#m-color-ramp').val()].value,
                 ramp_name: this.$('#m-color-ramp').val()
             };
@@ -193,6 +194,7 @@ minerva.views.StyleWmsDatasetWidget = minerva.View.extend({
             } else if (subType === 'singleband') {
                 this.$('#m-min-value').val(sldMeta.min);
                 this.$('#m-max-value').val(sldMeta.max);
+                this.$('#m-nodata-value').val(sldMeta.nodata);
                 this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
             } else if (subType === 'point') {
                 this.$('#m-color-ramp').selectpicker('val', sldMeta.ramp_name);
