@@ -424,7 +424,7 @@ minerva.rendering.geo.WmsRepresentation = minerva.rendering.geo.defineMapLayer('
                         var nodataMax = max + 1;
                         if (nodata > max) {
                             nodataMax = nodata;
-                        } else if (nodata < min ) {
+                        } else if (nodata < min) {
                             nodataMin = nodata;
                         }
                         ramp = minervaMetadata.sld_params['ramp[]'];
