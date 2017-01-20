@@ -10,28 +10,39 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                 .value();
         }
 
+        /**
+         * Filter out properties used for styling the geojson
+         */
+        function filterStyleProperties(props) {
+            var styleProps = _.keys(minerva.models.GeoJSONStyle.prototype.defaults);
+            props = _.extend({}, props);
+            _.each(styleProps, function (s) {
+                delete props[s];
+            });
+            return props;
+        }
+
         function getActiveGeojsonLayers() {
             var geojsonLayers = [];
             _.chain(that.parentView.collection.models)
                 .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
                 .map(function (dataset) {
                     var i;
-                    var layer = {};
+                    var name = dataset.get('name');
                     var features = dataset.geoJsLayer.features();
                     _.each(features, function (feature) {
                         var hits = feature.pointSearch(event.geo);
                         if (hits && hits.found) {
                             for (i = hits.found.length - 1; i >= 0; i -= 1) {
                                 if (hits.found[i].properties) {
-                                    layer['properties'] = hits.found[i].properties;
+                                    geojsonLayers.push({
+                                        properties: filterStyleProperties(hits.found[i].properties),
+                                        id: name
+                                    });
                                 }
                             }
                         }
                     });
-                    if (layer.properties) {
-                        layer['id'] = dataset.get('name');
-                        geojsonLayers.push(layer);
-                    }
                     return geojsonLayers;
                 });
 
