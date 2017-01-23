@@ -310,7 +310,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     categorizeLayers: function (source) {
         var datasetArray = this.sourceDataset[source];
         this.sourceCategoryDataset[source] = _.groupBy(datasetArray, function (dataset) {
-            return dataset.get('meta').minerva.category;
+            return dataset.get('meta').minerva.category || 'Other';
         });
     },
 
