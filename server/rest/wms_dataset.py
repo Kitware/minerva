@@ -54,6 +54,17 @@ class WmsDataset(Dataset):
 
         return minerva_metadata
 
+    @staticmethod
+    def _get_category(layer_information):
+        """Get the category from available layer information"""
+
+        category = [k for k in layer_information.keywords
+                    if k.startswith('category:')]
+        if not category:
+            return "Other"
+        else:
+            return category[0].split(":")[1]
+
     @access.user
     def createWmsSource(self, params):
 
@@ -76,7 +87,8 @@ class WmsDataset(Dataset):
                                             params={
                                                 'typeName': layerType,
                                                 'name': wms[layerType].title,
-                                                'abstract': wms[layerType].abstract})
+                                                'abstract': wms[layerType].abstract,
+                                                'category': self._get_category(wms[layerType])})
 
             layers.append(dataset)
 
@@ -84,6 +96,7 @@ class WmsDataset(Dataset):
 
     @access.user
     def createWmsDataset(self, wmsSource, params):
+
         baseURL = wmsSource['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
@@ -124,7 +137,8 @@ class WmsDataset(Dataset):
             'type_name': typeName,
             'base_url': baseURL,
             'layer_info': layer_info,
-            'abstract': params['abstract']
+            'abstract': params['abstract'],
+            'category': params['category']
         }
         if credentials:
             minerva_metadata['credentials'] = credentials

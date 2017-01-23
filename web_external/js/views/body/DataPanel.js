@@ -8,29 +8,46 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-geo-render': 'configureGeoRender',
-        'click .source-title': 'toggleDatasets',
-        'click .m-configure-wms-styling': 'styleWmsDataset'
+        'click .m-configure-wms-styling': 'styleWmsDataset',
+        'click .source-title': 'toggleSources',
+        'click .category-title': 'toggleCategories'
     },
-    toggleDatasets: function (event) {
-        var listOfLayers = $(event.currentTarget).next();
+    _addCategories: function (source, category) {
+        this.visibleMenus[source][category] = true;
+    },
+    _deleteCategories: function (source, category) {
+        this.visibleMenus[source] = _.omit(this.visibleMenus[source], category);
+    },
+    toggleCategories: function (event) {
+        // Get the div belov the title which was clicked
+        var subDiv = $(event.currentTarget).next();
+        var source = $(event.currentTarget).parent().attr('class');
+        var category = $(event.currentTarget).text();
 
-        if (listOfLayers.css('display') === 'none') {
-            listOfLayers.css('display', 'block');
-            this.visibleSourceGroups[$(event.currentTarget).text()] = true;
+        if (subDiv.css('display') === 'none') {
+            subDiv.css('display', 'block');
             $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
-            this.getDatasetModel().addLayoutAttributes(event.target.id, {
-                collapsed: false
-            });
+            this._addCategories(source, category);
         } else {
-            listOfLayers.css('display', 'none');
-            this.visibleSourceGroups[$(event.currentTarget).text()] = false;
+            subDiv.css('display', 'none');
             $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
-            this.getDatasetModel().addLayoutAttributes(event.target.id, {
-                collapsed: true
-            });
+            this._deleteCategories(source, category);
         }
     },
+    toggleSources: function (event) {
+        var subDiv = $(event.currentTarget).next();
+        var source = $(event.currentTarget).text();
 
+        if (subDiv.css('display') === 'none') {
+            subDiv.css('display', 'block');
+            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
+            this.visibleMenus[source] = {};
+        } else {
+            subDiv.css('display', 'none');
+            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
+            this.visibleMenus = _.omit(this.visibleMenus, source);
+        }
+    },
     addWmsDataset: function (event) {
         var addWmsWidget = new minerva.views.AddWmsSourceWidget({
             el: $('#g-dialog-container'),
@@ -208,7 +225,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     initialize: function (settings) {
         var externalId = 1;
         this.collection = settings.session.datasetsCollection;
-        this.visibleSourceGroups = {};
+        this.visibleMenus = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -290,6 +307,13 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
+    categorizeLayers: function (source) {
+        var datasetArray = this.sourceDataset[source];
+        this.sourceCategoryDataset[source] = _.groupBy(datasetArray, function (dataset) {
+            return dataset.get('meta').minerva.category || 'Other';
+        });
+    },
+
     getDatasetModel: function () {
         return this.parentView.parentView.model;
     },
@@ -301,11 +325,12 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             _.filter(this.collection.models, this.getSourceNameFromModel),
             this.getSourceNameFromModel
         );
+        this.sourceCategoryDataset = {};
+        _.map(_.keys(this.sourceDataset), this.categorizeLayers, this);
 
         this.$el.html(minerva.templates.dataPanel({
-            sourceDatasetMapping: this.sourceDataset,
-            visibleSourceGroups: this.visibleSourceGroups,
-            sourceNames: _.keys(this.sourceDataset).sort(girder.localeSort)
+            sourceCategoryDataset: this.sourceCategoryDataset,
+            visibleMenus: this.visibleMenus
         }));
 
         // Restore state of collapsed panels
