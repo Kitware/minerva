@@ -30,10 +30,17 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
         assetstore.on('g:created', function (astore) {
             var _id = astore.id;
             girder.restRequest({
-                path: '/database_assetstore' + '/' + _id + '/' + 'tables',
+                path: '/database_assetstore' + '/' + _id + '/' + 'geo_tables',
                 type: 'GET'
             }).done(function (data) {
-                console.log(data);
+                var geoList = _.map(data, function (prop) {
+                    return prop['f_table_name'] + ':' + prop['type'];
+                });
+                var listPostgresLayersWidget = new minerva.views.ListPostgresLayersWidget({
+                    el: $('#g-dialog-container')
+                });
+
+                listPostgresLayersWidget.render(geoList);
             });
         });
 

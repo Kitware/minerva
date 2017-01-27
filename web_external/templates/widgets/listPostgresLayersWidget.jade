@@ -1,0 +1,18 @@
+.modal-dialog
+  .modal-content
+    form#m-add-postgres-layers-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Postgres Datasets
+      .modal-body
+        select.input-sm.form-control#g-postgres-layer-list(multiple=false, size=selectSize)
+          for dataset in layerArray
+            option(value=dataset)= dataset
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-geo-render-button.btn.btn-small.btn-primary(type="submit")
+          i.icon-check
+          | Add Layer
+
+
