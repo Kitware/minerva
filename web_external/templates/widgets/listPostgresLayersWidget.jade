@@ -6,9 +6,13 @@
         h4.modal-title
           | Postgres Datasets
       .modal-body
+        label.control-label(for="g-postgres-layer-list") Layer
         select.input-sm.form-control#g-postgres-layer-list(multiple=false, size=selectSize)
           for dataset in layerArray
             option(value=dataset)= dataset
+        .form-group
+          label.control-label(for="m-num-features") Number of features
+          input.input-sm#m-num-features.form-control(type="number", placeholder=100, value=100)
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-geo-render-button.btn.btn-small.btn-primary(type="submit")
