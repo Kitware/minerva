@@ -4,6 +4,7 @@
 minerva.views.AddPostgresWidget = minerva.View.extend({
     events: {
         'submit #m-add-postgres-db-form': function (e) {
+            e.preventDefault();
             var params = {
                 username: this.$('#m-db-username').val(),
                 password: this.$('#m-db-password').val(),
@@ -16,6 +17,7 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
         }
     },
     addPostgresAssetstore: function (e, error, params) {
+        e.preventDefault();
         var assetstore = new girder.views.NewAssetstoreWidget();
         // construct the uri here
         var uri = 'postgresql://' + params.username +
@@ -34,7 +36,9 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
                 type: 'GET'
             }).done(function (data) {
                 var geoList = _.map(data, function (prop) {
-                    return prop['f_table_name'] + ':' + prop['type'];
+                    return prop['f_table_catalog'] + ':' +
+                        prop['f_table_name'] + ':' +
+                        prop['type'];
                 });
                 var listPostgresLayersWidget = new minerva.views.ListPostgresLayersWidget({
                     el: $('#g-dialog-container')
