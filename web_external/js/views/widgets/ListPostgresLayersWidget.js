@@ -24,6 +24,19 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             return resp['folder']['_id'];
         });
     },
+    getMinervaDatasetId: function (userId, name) {
+        return girder.restRequest({
+            path: '/minerva_dataset',
+            type: 'GET',
+            data: {userId: userId},
+            error: null
+        }).then(function (resp) {
+            var datasetId = _.filter(resp, function (dataset) {
+                return dataset['name'] === name;
+            });
+            return datasetId[0]['_id'];
+        });
+    },
     importGeojson: function (assetstoreId, parentId) {
         var limit = this.$('#m-num-features').val();
         var layer = this.$('#g-postgres-layer-list').val().split(':');
@@ -48,18 +61,34 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             error: null
         });
     },
+    promotoToGeojsonDataset: function (datasetId) {
+        girder.restRequest({
+            path: '/minerva_dataset_geojson',
+            type: 'POST',
+            'data': {itemId: datasetId},
+            'error': null
+        });
+    },
     events: {
         'submit #m-add-postgres-layers-form': function (e) {
             var userId = girder.currentUser.get('_id');
             var layer = this.$('#g-postgres-layer-list').val().split(':');
             var database = layer[0];
+            var layerName = layer[1];
             var that = this;
             e.preventDefault();
             $.when(
                 this.getAssetstoreId(database),
                 this.getMinervaDatasetFolderId(userId)
-            ).then(function(assetstoreId, parentId){
+            ).then(function (assetstoreId, parentId) {
                 that.importGeojson(assetstoreId, parentId);
+                girder.eventStream.once('g:event.progress', function () {
+                    that.getMinervaDatasetId(userId, layerName).then(function (datasetId) {
+                        that.promotoToGeojsonDataset(datasetId);
+                    }).then(function () {
+                        that.$el.modal('hide');
+                    });
+                });
             });
         }
     },
