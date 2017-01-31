@@ -62,7 +62,7 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
         });
     },
     promotoToGeojsonDataset: function (datasetId) {
-        girder.restRequest({
+        return girder.restRequest({
             path: '/minerva_dataset_geojson',
             type: 'POST',
             'data': {itemId: datasetId},
@@ -84,9 +84,10 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
                 that.importGeojson(assetstoreId, parentId);
                 girder.eventStream.once('g:event.progress', function () {
                     that.getMinervaDatasetId(userId, layerName).then(function (datasetId) {
-                        that.promotoToGeojsonDataset(datasetId);
+                        return that.promotoToGeojsonDataset(datasetId);
                     }).then(function () {
                         that.$el.modal('hide');
+                        minerva.events.trigger('m:updateDatasets');
                     });
                 });
             });
