@@ -17,8 +17,11 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
         }
     },
     addPostgresAssetstore: function (e, error, params) {
+        var that = this;
         e.preventDefault();
-        var assetstore = new girder.views.NewAssetstoreWidget();
+        var assetstore = new girder.views.NewAssetstoreWidget({
+            parentView: that
+        });
         // construct the uri here
         var uri = 'postgresql://' + params.username +
                 ':' + params.password + '@' + params.server +
@@ -40,15 +43,16 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
                         prop['f_table_name'] + ':' +
                         prop['type'];
                 });
+                that.$el.girderModal('close');
                 var listPostgresLayersWidget = new minerva.views.ListPostgresLayersWidget({
-                    el: $('#g-dialog-container')
+                    el: $('#g-dialog-container'),
+                    parentView: that
                 });
 
                 listPostgresLayersWidget.render(geoList);
             });
         });
 
-        this.$el.modal('hide');
     },
     render: function () {
         var modal = this.$el.html(minerva.templates.addPostgresWidget({})).girderModal(this);
