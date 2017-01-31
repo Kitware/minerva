@@ -48,11 +48,9 @@ minerva.views.AddPostgresWidget = minerva.View.extend({
                     el: $('#g-dialog-container'),
                     parentView: that
                 });
-
                 listPostgresLayersWidget.render(geoList);
             });
         });
-
     },
     render: function () {
         var modal = this.$el.html(minerva.templates.addPostgresWidget({})).girderModal(this);

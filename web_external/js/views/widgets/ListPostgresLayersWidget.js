@@ -7,12 +7,9 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             data: {limit: 50, offset: 0, sort: 'name', sortdir: 1},
             error: null
         }).then(function (resp) {
-            var dbAssetstore = _.filter(resp, function (assetstore) {
-                return assetstore['name'] === name;
-            });
+            var dbAssetstore = _.where(resp, {name: name});
             return dbAssetstore[0]['_id'];
         });
-
     },
     getMinervaDatasetFolderId: function (userId) {
         return girder.restRequest({
@@ -31,9 +28,7 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             data: {userId: userId},
             error: null
         }).then(function (resp) {
-            var datasetId = _.filter(resp, function (dataset) {
-                return dataset['name'] === name;
-            });
+            var datasetId = _.where(resp, {name: name});
             return datasetId[0]['_id'];
         });
     },
@@ -56,7 +51,7 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
                 format: 'geojson',
                 parentType: 'folder',
                 parentId: parentId,
-                progress:true
+                progress: true
             },
             error: null
         });
