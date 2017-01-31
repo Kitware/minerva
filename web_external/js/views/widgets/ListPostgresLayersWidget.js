@@ -10,7 +10,6 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             var dbAssetstore = _.filter(resp, function (assetstore) {
                 return assetstore['name'] === name;
             });
-            console.log(dbAssetstore[0]['_id'])
             return dbAssetstore[0]['_id'];
         });
 
@@ -22,7 +21,6 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
             data: {userId: userId},
             error: null
         }).then(function (resp) {
-            console.log(resp['folder']['_id'])
             return resp['folder']['_id'];
         });
     },
@@ -30,14 +28,16 @@ minerva.views.ListPostgresLayersWidget = minerva.View.extend({
         var limit = this.$('#m-num-features').val();
         var layer = this.$('#g-postgres-layer-list').val().split(':');
         var layerName = layer[1];
+        var databaseName = layer[0];
         var path = '/database_assetstore/' + assetstoreId + '/import';
+        var tableTemplate = _.template('[{"name":"<%= name %>", "database":"<%= dbName %>"}]');
         girder.restRequest({
             path: path,
             type: 'PUT',
             data: {
-                table: layerName,
+                table: tableTemplate({name: layerName, dbName: databaseName}),
                 sort: '',
-                fields: "[{'func': 'ST_AsGeoJSON', 'param': [{'func': 'st_transform', 'param': [{'field': 'geom'}, 4326]}]}]",
+                fields: '[{"func": "ST_AsGeoJSON", "param": [{"func": "st_transform", "param": [{"field": "geom"}, 4326]}]}]',
                 filters: '',
                 limit: limit,
                 format: 'geojson',
