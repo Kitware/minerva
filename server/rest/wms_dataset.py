@@ -29,6 +29,7 @@ from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.minerva_utility import encryptCredentials
 
 import requests
+import json
 
 
 class WmsDataset(Dataset):
@@ -65,6 +66,17 @@ class WmsDataset(Dataset):
         else:
             return category[0].split(":")[1]
 
+    @staticmethod
+    def _get_metadata(layer_information):
+        """Get the layer metadata if exist"""
+
+        metadata = [k for k in layer_information.keywords
+                    if k.startswith('layer_info:')]
+        if not metadata:
+            return ""
+        else:
+            return json.loads(metadata[0].split("layer_info:")[1])
+
     @access.user
     def createWmsSource(self, params):
 
@@ -88,7 +100,8 @@ class WmsDataset(Dataset):
                                                 'typeName': layerType,
                                                 'name': wms[layerType].title,
                                                 'abstract': wms[layerType].abstract,
-                                                'category': self._get_category(wms[layerType])})
+                                                'category': self._get_category(wms[layerType]),
+                                                'metadata': self._get_metadata(wms[layerType])})
 
             layers.append(dataset)
 
@@ -100,9 +113,11 @@ class WmsDataset(Dataset):
         baseURL = wmsSource['wms_params']['base_url']
         parsedUrl = getUrlParts(baseURL)
         typeName = params['typeName']
-
         try:
-            layer_info = WmsStyle(typeName, baseURL).get_layer_info()
+            if params['metadata']:
+                layer_info = params['metadata']
+            else:
+                layer_info = WmsStyle(typeName, baseURL).get_layer_info()
         except TypeError:
             layer_info = ""
 
