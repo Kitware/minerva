@@ -165,32 +165,51 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
             return _createFeature.call(this, name, arg);
         };
 
-        this._injectStyle(data, visProperties, data.summary || {});
         try {
             var reader = geo.createFileReader(this.readerType, {layer: this.geoJsLayer});
-            var points, allData;
-            reader.read(data, _.bind(function (features) {
-                if (visProperties.point && visProperties.point.cluster) {
-                    points = features[0];
-                    allData = points.data();
-                    this._injectClusterStyle(points, 'radius', visProperties.point.clusterRadius);
-                    this._injectClusterStyle(points, 'stroke', true);
-                    this._injectClusterStyle(points, 'fill', true);
-                    this._injectClusterStyle(points, 'strokeColor', visProperties.point.clusterStrokeColor);
-                    this._injectClusterStyle(points, 'fillColor', visProperties.point.clusterFillColor);
-                    this._injectClusterStyle(points, 'strokeOpacity', 1);
-                    this._injectClusterStyle(points, 'strokeWidth', 1);
-                    this._injectClusterStyle(points, 'fillOpacity', 1);
-                    points.clustering({
-                        radius: visProperties.point.clusterDistance // need to fix geojs for this to work
-                    }).data(allData);
-                }
-                this.trigger('m:map_layer_renderable', this);
-            }, this));
+            if (!data.series) {  // not a timeseries
+                this._injectStyle(data, visProperties, data.summary || {});
+                reader.read(data, _.bind(function (features) {
+                    this._processFeatures(visProperties, features);
+                }, this));
+            } else {    // a timeseries
+                var lastFeature = 0, featureIdx;
+                var curframe = 0;
+                _.each(data.series, function (entry, index) {
+                    this._injectStyle(entry.geojson, visProperties, data.summary || {});
+                    reader.read(entry.geojson, _.bind(function (features) {
+                        this._processFeatures(visProperties, features);
+                    }, this));
+                    entry.features = this.geoJsLayer.features().slice(lastFeature);
+                    lastFeature = this.geoJsLayer.features().length;
+                    _.each(entry.features, function (feature) {
+                        feature.visible(index == curframe);
+                    });
+                }, this);
+            }
+            this.trigger('m:map_layer_renderable', this);
         } catch (err) {
             console.error('This layer cannot be rendered to the map');
             console.error(err);
             this.trigger('m:map_layer_error', this);
+        }
+    };
+
+    this._processFeatures = function (visProperties, features) {
+        if (visProperties.point && visProperties.point.cluster) {
+            var points = features[0];
+            var allData = points.data();
+            this._injectClusterStyle(points, 'radius', visProperties.point.clusterRadius);
+            this._injectClusterStyle(points, 'stroke', true);
+            this._injectClusterStyle(points, 'fill', true);
+            this._injectClusterStyle(points, 'strokeColor', visProperties.point.clusterStrokeColor);
+            this._injectClusterStyle(points, 'fillColor', visProperties.point.clusterFillColor);
+            this._injectClusterStyle(points, 'strokeOpacity', 1);
+            this._injectClusterStyle(points, 'strokeWidth', 1);
+            this._injectClusterStyle(points, 'fillOpacity', 1);
+            points.clustering({
+                radius: visProperties.point.clusterDistance // need to fix geojs for this to work
+            }).data(allData);
         }
     };
 

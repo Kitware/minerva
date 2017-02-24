@@ -129,8 +129,12 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>/bootstrap-select.min.js'
                     },
                     {
-                        src: ['<%= plugin.minerva.root %>/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js'],
+                        src: ['<%= plugin.minerva.root %>/node_modules/bootstrap-slider/dist/bootstrap-slider.js'],
                         dest: '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
+                    },
+                    {
+                        src: ['<%= plugin.minerva.root %>/node_modules/moment/moment.js'],
+                        dest: '<%= plugin.minerva.static %>/moment.min.js'
                     }
                 ]
             }
@@ -232,7 +236,8 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/datatables.min.js',
                         '<%= plugin.minerva.static %>/bootstrap-select.min.js',
-                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
+                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js',
+                        '<%= plugin.minerva.static %>/moment.min.js',
                     ]
                 }
             }
