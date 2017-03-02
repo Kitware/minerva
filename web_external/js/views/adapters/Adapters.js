@@ -173,7 +173,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
                     this._processFeatures(visProperties, features);
                 }, this));
             } else {    // a timeseries
-                var lastFeature = 0, featureIdx;
+                var lastFeature = 0;
                 var curframe = 0;
                 _.each(data.series, function (entry, index) {
                     this._injectStyle(entry.geojson, visProperties, data.summary || {});
@@ -183,7 +183,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
                     entry.features = this.geoJsLayer.features().slice(lastFeature);
                     lastFeature = this.geoJsLayer.features().length;
                     _.each(entry.features, function (feature) {
-                        feature.visible(index == curframe);
+                        feature.visible(index === curframe);
                     });
                 }, this);
             }

@@ -164,7 +164,7 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         if (!data.series || data.series.length <= 1) {
             return;
         }
-        var frame = Math.min(Math.max(dataset.get('animationFrame') || 0, 0), data.series.length - 1)
+        var frame = Math.min(Math.max(dataset.get('animationFrame') || 0, 0), data.series.length - 1);
         _.each(layer.features(), function (feature) {
             feature.visible(false);
         });

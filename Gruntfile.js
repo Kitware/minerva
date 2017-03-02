@@ -237,7 +237,7 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/datatables.min.js',
                         '<%= plugin.minerva.static %>/bootstrap-select.min.js',
                         '<%= plugin.minerva.static %>/bootstrap-slider.min.js',
-                        '<%= plugin.minerva.static %>/moment.min.js',
+                        '<%= plugin.minerva.static %>/moment.min.js'
                     ]
                 }
             }
