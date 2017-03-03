@@ -7,7 +7,7 @@ include ../widgets/legendWidget.jade
   .layersList
     ul.datasets
       each dataset, index in datasets
-        li.dataset= dataset.get('name')
+        li.dataset&attributes({'m-dataset-id': dataset.get('_id')})= dataset.get('name')
           if dataset.get('geoError')
             i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           else

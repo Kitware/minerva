@@ -172,8 +172,9 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
             feature.visible(true);
         });
         layer.draw();
-        this.$('.m-anim-frame').val(frame);
-        this.$('.m-animation-display-value').text(data.series[frame].label);
+        var container = this.$('li.dataset[m-dataset-id="' + dataset.get('_id') + '"]');
+        $('.m-anim-frame', container).val(frame);
+        $('.m-animation-display-value', container).text(data.series[frame].label);
     },
 
     updateSeriesState: function (dataset) {
@@ -192,8 +193,9 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         if (state === 'stop') {
             this.setSeriesFrame(dataset, 0);
         }
-        this.$('.m-anim-play .canplay').toggleClass('hidden', state === 'play');
-        this.$('.m-anim-play .canpause').toggleClass('hidden', state !== 'play');
+        var container = this.$('li.dataset[m-dataset-id="' + dataset.get('_id') + '"]');
+        $('.m-anim-play .canplay', container).toggleClass('hidden', state === 'play');
+        $('.m-anim-play .canpause', container).toggleClass('hidden', state !== 'play');
     },
 
     seriesCycleDuration: function (event) {
