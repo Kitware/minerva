@@ -235,7 +235,7 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
 
         if (vis.fillColorKey) {
             vis.fillColor = _.compose(
-                minerva.geojson.colorScale(vis.fillRamp, summary[vis.fillColorKey]),
+                minerva.geojson.colorScale(vis.fillRamp, summary[vis.fillColorKey], vis.logFlag),
                 function (props) { return props[vis.fillColorKey]; }
             );
         }
