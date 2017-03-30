@@ -206,9 +206,21 @@ minerva.geojson.style = function style(geojson, visProperties) {
  *
  * @param {string} ramp
  * @param {object} summary
+ * @param {Boolean} logFlag
  * @returns {function}
  */
-minerva.geojson.colorScale = function colorScale(ramp, summary) {
+minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
+    function logarithmicScale(min, max, numBins) {
+        var logMin = Math.log(min);
+        var logMax = Math.log(max);
+        var step = (logMax - logMin) / (numBins - 1);
+        var domain = [];
+        for (var n = 0; n <= numBins - 1; n++) {
+            domain.push(Math.exp(logMin + n * step));
+        }
+        return domain;
+    }
+
     var scale, colors, n, indices;
 
     colors = colorbrewer[ramp];
@@ -235,9 +247,16 @@ minerva.geojson.colorScale = function colorScale(ramp, summary) {
         if (summary.min >= summary.max) {
             summary.max = summary.min + 1;
         }
-        scale = d3.scale.quantize()
-            .domain([summary.min, summary.max])
-            .range(colors[indices[n]]);
+        if (logFlag) {
+            var logScale = logarithmicScale(summary.min, summary.max, n);
+            scale = d3.scale.linear()
+                .domain(logScale)
+                .range(colors[indices[n]]);
+        } else {
+            scale = d3.scale.quantize()
+                .domain([summary.min, summary.max])
+                .range(colors[indices[n]]);
+        }
     }
     return scale;
 };
