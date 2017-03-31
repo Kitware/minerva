@@ -317,7 +317,7 @@ describe('geojson', function () {
                 minerva.geojson.colorScale('invalid color ramp', {})()
             ).toBe('#ffffff');
         });
-        describe('string values', function () {
+        describe('numeric values', function () {
             it('one value', function () {
                 var scale = minerva.geojson.colorScale('Reds', {
                     min: 0,
@@ -336,7 +336,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
         });
-        describe('numeric values', function () {
+        describe('string values', function () {
             it('two categories', function () {
                 var scale = minerva.geojson.colorScale('Reds', {
                     values: {
