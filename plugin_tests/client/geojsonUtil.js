@@ -386,5 +386,20 @@ describe('geojson', function () {
             }, 'Point')).toEqual([{geometry: {type: 'Point'}}]);
         });
     });
+    describe('logScale', function () {
+        it('logScale', function () {
+            var domain = minerva.geojson.logScale(1, 100, 3);
+            expect(domain.length).toBe(3);
+            expect(domain[0]).toBeCloseTo(1, 6);
+            expect(domain[1]).toBeCloseTo(10, 6);
+            expect(domain[2]).toBeCloseTo(100, 6);
+        });
+        it('nonZeroLog', function () {
+            var domain = minerva.geojson.logScale(0, 100, 3);
+            expect(domain[0]).toBeCloseTo(1, 6);
+            expect(domain[1]).toBeCloseTo(10, 6);
+            expect(domain[2]).toBeCloseTo(100, 6);
+        });
+    });
 });
 
