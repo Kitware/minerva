@@ -135,3 +135,7 @@ ul.nav.nav-tabs
         .panel-body
           +color('Color', polygon, 'polygon', 'fillColor', polygon.fill, 'fillColorKey', 'fillRamp')
           +range('Opacity', 0, 1, 0.01, polygon, 'polygon', 'fillOpacity', polygon.fill)
+          .checkbox(style='display:inline')
+            label
+              input#m-enable-log-scale(type='checkbox' checked=polygon.logFlag, data-feature='polygon', data-property='logFlag')
+              | Logarithmic Scale

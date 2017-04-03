@@ -17,7 +17,8 @@
             strokeRamp: 'Blues',
             strokeColorKey: null,
             fillRamp: 'Reds',
-            fillColorKey: null
+            fillColorKey: null,
+            logFlag: false
         },
         ramps: _.map(colorbrewer, _.bind(function (ramp, name) {
             var n = "<ul class='m-color-ramp'>";

@@ -317,7 +317,7 @@ describe('geojson', function () {
                 minerva.geojson.colorScale('invalid color ramp', {})()
             ).toBe('#ffffff');
         });
-        describe('string values', function () {
+        describe('numeric values', function () {
             it('one value', function () {
                 var scale = minerva.geojson.colorScale('Reds', {
                     min: 0,
@@ -336,7 +336,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
         });
-        describe('numeric values', function () {
+        describe('string values', function () {
             it('two categories', function () {
                 var scale = minerva.geojson.colorScale('Reds', {
                     values: {
@@ -384,6 +384,21 @@ describe('geojson', function () {
                         }
                     }]
             }, 'Point')).toEqual([{geometry: {type: 'Point'}}]);
+        });
+    });
+    describe('logScale', function () {
+        it('logScale', function () {
+            var domain = minerva.geojson.logScale(1, 100, 3);
+            expect(domain.length).toBe(3);
+            expect(domain[0]).toBeCloseTo(1, 6);
+            expect(domain[1]).toBeCloseTo(10, 6);
+            expect(domain[2]).toBeCloseTo(100, 6);
+        });
+        it('nonZeroLog', function () {
+            var domain = minerva.geojson.logScale(0, 100, 3);
+            expect(domain[0]).toBeCloseTo(1, 6);
+            expect(domain[1]).toBeCloseTo(10, 6);
+            expect(domain[2]).toBeCloseTo(100, 6);
         });
     });
 });
