@@ -201,6 +201,28 @@ minerva.geojson.style = function style(geojson, visProperties) {
 };
 
 /**
+ * Generate an array between minimum and maximum
+ * after taking the log of the values.
+ * The length of the array will be equal to numBins.
+ * Array values will be equally spaced.
+ *
+ * @param {number} min
+ * @param {number} max
+ * @param {int} numBins
+ * @returns {array}
+ */
+minerva.geojson.logScale = function logScale(min, max, numBins) {
+    var logMin = Math.log(min);
+    var logMax = Math.log(max);
+    var step = (logMax - logMin) / (numBins - 1);
+    var domain = [];
+    for (var n = 0; n <= numBins - 1; n++) {
+        domain.push(Math.exp(logMin + n * step));
+    }
+    return domain;
+};
+
+/**
  * Generate a d3-like scale function out of a colorbrewer
  * ramp name and a geojson summary object.
  *
@@ -210,17 +232,6 @@ minerva.geojson.style = function style(geojson, visProperties) {
  * @returns {function}
  */
 minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
-    function logarithmicScale(min, max, numBins) {
-        var logMin = Math.log(min);
-        var logMax = Math.log(max);
-        var step = (logMax - logMin) / (numBins - 1);
-        var domain = [];
-        for (var n = 0; n <= numBins - 1; n++) {
-            domain.push(Math.exp(logMin + n * step));
-        }
-        return domain;
-    }
-
     var scale, colors, n, indices;
 
     colors = colorbrewer[ramp];
@@ -248,7 +259,7 @@ minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
             summary.max = summary.min + 1;
         }
         if (logFlag) {
-            var logScale = logarithmicScale(summary.min, summary.max, n);
+            var logScale = minerva.geojson.logScale(summary.min, summary.max, n);
             scale = d3.scale.linear()
                 .domain(logScale)
                 .range(colors[indices[n]]);
