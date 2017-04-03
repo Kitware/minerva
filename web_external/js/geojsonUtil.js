@@ -212,9 +212,8 @@ minerva.geojson.style = function style(geojson, visProperties) {
  * @returns {array}
  */
 minerva.geojson.logScale = function logScale(min, max, numBins) {
-    // TODO: Figure out what to do when all values are negative
     var logMin = 0;
-    if (min !== 0) {
+    if (min > 0) {
         logMin = Math.log(min);
     }
 
