@@ -212,7 +212,12 @@ minerva.geojson.style = function style(geojson, visProperties) {
  * @returns {array}
  */
 minerva.geojson.logScale = function logScale(min, max, numBins) {
-    var logMin = Math.log(min);
+    // TODO: Figure out what to do when all values are negative
+    var logMin = 0;
+    if (min !== 0) {
+        logMin = Math.log(min);
+    }
+
     var logMax = Math.log(max);
     var step = (logMax - logMin) / (numBins - 1);
     var domain = [];
