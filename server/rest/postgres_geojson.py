@@ -63,6 +63,22 @@ class View(object):
 
         return resp
 
+    def getGeojson(self):
+        base = """SELECT "geom", "NAME", "PRODUCTION_CATEGORY", "VALUE" from gryphonstates"""
+        filters = self.generateQuery()
+        query = base + " where " + filters
+        cur = self._conn.cursor()
+        cur.execute("""SELECT row_to_json(fc)
+FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
+   FROM (SELECT 'Feature' As type
+    , ST_AsGeoJSON(lg."geom")::json As geometry
+    , row_to_json((SELECT l FROM (SELECT lg."NAME") As l
+      )) As properties
+        FROM (%s) As lg ) As f ) As fc;""" % query)
+
+        return cur.fetchall()[0][0]
+
+
 class PostgresGeojson(Resource):
 
     def __init__(self):
