@@ -69,7 +69,7 @@ class View(object):
             for v in ast.literal_eval(filters[k]):
                 _.append(""" "{}" = '{}' """.format(k, v))
             q.append("(" + "or".join(_) + ")")
-        return "and".join(q)q
+        return "and".join(q)
 
     def getDistinctValues(self, table, filters={}):
         cur = self._conn.cursor()
