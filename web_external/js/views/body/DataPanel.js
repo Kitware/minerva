@@ -4,6 +4,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .m-upload-local': 'uploadDialog',
         'click .m-add-wms': 'addWmsDataset',
+        'click .m-postgres': 'connectToPostgres',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
@@ -55,6 +56,15 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             parentView: this
         });
         addWmsWidget.render();
+    },
+
+    connectToPostgres: function (event) {
+        var postgresWidget = new minerva.views.PostgresWidget({
+            el: $('#g-dialog-container'),
+            collection: this.collection,
+            parentView: this
+        });
+        postgresWidget.render({});
     },
 
     // Ability to style a wms layer
