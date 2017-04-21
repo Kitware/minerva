@@ -1,0 +1,41 @@
+.modal-dialog
+  .modal-content
+    form#m-postgres.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Postgres geojson
+      .modal-body
+        .form-group
+          label.control-label(for="m-state-name") Name
+            select.form-control#m-state-name.input-lg()
+              each val in NAME
+                option(value=val)= val
+        .form-group
+          label.control-label(for="m-production-category") Production Category
+            select.form-control#m-production-category.input-lg()
+              each val in PRODUCTION_CATEGORY
+                option(value=val)= val
+        .form-group
+          label.control-label(for="m-category") Category
+            select.form-control#m-category.input-lg()
+              each val in CATEGORY
+                option(value=val)= val
+        .form-group
+          label.control-label(for="m-sub-category") Sub Category
+            select.form-control#m-sub-category.input-lg()
+              each val in SUB_CATEGORY
+                option(value=val)= val
+        .form-group
+          label.control-label(for="m-data-derivation") Data Derivation
+            select.form-control#m-data-derivation.input-lg()
+              each val in DATA_DERIVATION
+                option(value=val)= val
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button#m-refresh-dropdowns.btn.btn-small.btn-warning
+            | Refresh Dropdowns
+        button#m-get-geojson.btn.btn-small.btn-primary
+            i.icon-plus-squared
+            | Get Geojson
+
