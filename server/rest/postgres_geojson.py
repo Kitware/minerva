@@ -72,35 +72,9 @@ class View(object):
 FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
    FROM (SELECT 'Feature' As type
     , ST_AsGeoJSON(lg."geom")::json As geometry
-    , row_to_json((SELECT l FROM (SELECT lg."NAME") As l
+        , row_to_json((SELECT l FROM (SELECT lg."NAME", lg."VALUE",
+        lg."PRODUCTION_CATEGORY", lg."CATEGORY", lg."SUB_CATEGORY", lg."DATA_DERIVATION") As l
       )) As properties
         FROM (%s) As lg ) As f ) As fc;""" % query)
 
         return cur.fetchall()[0][0]
-
-
-class PostgresGeojson(Resource):
-
-    def __init__(self):
-        self.resourceName = 'minerva_postgres_geojson'
-        self.route('GET',(), self.postgresGeojson)
-
-    @access.user
-    def postgresGeojson(self, params):
-        conn = connect_to_gryphon()
-        view = View(conn)
-        return view.filter(params)
-
-    postgresGeojson.description = (
-        Description('Get geojson from postgres database')
-        .param('NAME', 'state name or all states', required=False,
-               dataType='list')
-        .param('PRODUCTION_CATEGORY', 'production category', required=False,
-               dataType='list')
-        .param('CATEGORY', 'category', required=False,
-               dataType='list')
-        .param('SUB_CATEGORY', 'category', required=False,
-               dataType='list')
-        .param('DATA_DERIVATION', 'data_derivation', required=False,
-               dataType='list')
-    ) 
