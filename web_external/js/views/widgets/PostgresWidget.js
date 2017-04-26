@@ -60,7 +60,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 error: null,
                 data: that.filters
             }).done(function (data) {
-                console.log(data);
+                girder.events.trigger('m:dataset_promoted', that);
+                that.$el.modal('hide');
             });
         } else {
             alert('Bad Selection');
