@@ -66,7 +66,7 @@ mixin animationControls(dataset, options)
             select.m-cycle-framerate.form-control.input-sm(id="m-cycle-framerate-"+id, title="Maximum framerate.  Stepped shows each time group discretely.")
               each entry in options
                 option(value=entry.value, selected=entry.value === curval ? 'selected' : undefined)= entry.text
-      .form-group
+      .form-group.btn-group
         button.btn.btn-default.btn-sm.m-anim-play(value="stop")
           span.canplay
             i.icon-play
