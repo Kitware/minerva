@@ -1,8 +1,13 @@
 import ast
+import collections
+import json
+import StringIO
 
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource
+from girder_client import GirderClient
+from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 
 import psycopg2
 
@@ -39,7 +44,23 @@ class PostgresGeojson(Resource):
     def getGeojson(self, params):
         conn = connect_to_gryphon()
         view = View(conn, params)
-        return view.getGeojson()
+        resp = view.getGeojson()
+        output = StringIO.StringIO(json.dumps(resp))
+        client = GirderClient(host="localhost", port="8080")
+        client.authenticate('girder', 'girder')
+        user = self.getCurrentUser()
+        minervaFolder = client.listFolder(user['_id'],
+                                          parentFolderType='user',
+                                          name='minerva')
+        datasetFolder = client.listFolder(minervaFolder[0]['_id'],
+                               name='dataset')
+        parentId = datasetFolder[0]['_id']
+        name = "_".join(params.values()) + ".geojson"
+        client.uploadFile(parentId, output, name,
+                          output.len, parentType='folder')
+        geojsonId = client.listItem(parentId, text=name)[0]['_id']
+        GeojsonDataset().createGeojsonDataset(itemId=geojsonId, params={})
+        return geojsonId
 
     postgresGeojson.description = (
         Description('Get geojson from postgres database')
