@@ -1,5 +1,4 @@
 import ast
-import collections
 import json
 import StringIO
 
@@ -15,15 +14,13 @@ import psycopg2
 # TODO: This will be changed with girder_db_items
 def connect_to_gryphon(host="localhost",
                        port="5432",
-                       user="username",
-                       password="password",
+                       user="postgres",
                        dbname="gryphon"):
 
-    conn = psycopg2.connect("dbname={} user={} host={} password={} port={}".format(dbname,
-                                                                                   user,
-                                                                                   host,
-                                                                                   password,
-                                                                                   port))
+    conn = psycopg2.connect("dbname={} user={} host={} port={}".format(dbname,
+                                                                       user,
+                                                                       host,
+                                                                       port))
     return conn
 
 
@@ -53,7 +50,7 @@ class PostgresGeojson(Resource):
                                           parentFolderType='user',
                                           name='minerva')
         datasetFolder = client.listFolder(minervaFolder[0]['_id'],
-                               name='dataset')
+                                          name='dataset')
         parentId = datasetFolder[0]['_id']
         name = "_".join(params.values()) + ".geojson"
         client.uploadFile(parentId, output, name,
