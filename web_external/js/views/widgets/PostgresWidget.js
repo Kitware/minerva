@@ -59,10 +59,10 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 type: 'GET',
                 error: null,
                 data: that.filters
-            }).done(function (data) {
-                girder.events.trigger('m:dataset_promoted', that);
+            }).done(function (datasetId) {
+                this.trigger('m:dataset_created',datasetId);
                 that.$el.modal('hide');
-            });
+            }.bind(this));
         } else {
             alert('Bad Selection');
         }
@@ -74,10 +74,13 @@ minerva.views.PostgresWidget = minerva.View.extend({
             type: 'GET',
             error: null,
             data: that.filters
-        }).done(function (data) {
-            var modal = that.$el.html(minerva.templates.postgresWidget(data)).girderModal(that);
-            modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
-            return that;
-        });
+        }).done(_.bind(function (data) {
+            var el = that.$el.html(minerva.templates.postgresWidget(data));
+            if (!this.modalOpenned) {
+                this.modalOpenned = true;
+                var modal = el.girderModal(this);
+                modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+            }
+        }, this));
     }
 });

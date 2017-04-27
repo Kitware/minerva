@@ -63,6 +63,11 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
             el: $('#g-dialog-container'),
             collection: this.collection,
             parentView: this
+        }).on('m:dataset_created', function (datasetId) {
+            var dataset = new minerva.models.DatasetModel({ _id: datasetId });
+            dataset.on('g:fetched', function () {
+                this.collection.add(dataset);
+            }, this).fetch();
         });
         postgresWidget.render({});
     },
