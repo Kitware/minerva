@@ -5,23 +5,11 @@ import StringIO
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource
-from girder_client import GirderClient
+from girder.utility.model_importer import ModelImporter
+from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
-
-import psycopg2
-
-
-# TODO: This will be changed with girder_db_items
-def connect_to_gryphon(host="localhost",
-                       port="5432",
-                       user="postgres",
-                       dbname="gryphon"):
-
-    conn = psycopg2.connect("dbname={} user={} host={} port={}".format(dbname,
-                                                                       user,
-                                                                       host,
-                                                                       port))
-    return conn
+from girder.plugins.minerva.utility.minerva_utility import findPublicFolder
+from girder.plugins.database_assetstore.rest import DatabaseAssetstoreResource
 
 
 class PostgresGeojson(Resource):
@@ -30,6 +18,40 @@ class PostgresGeojson(Resource):
         self.resourceName = 'minerva_postgres_geojson'
         self.route('GET', (), self.postgresGeojson)
         self.route('GET', ('geojson', ), self.getGeojson)
+        self.route('GET', ('tables', ), self.getTables)
+
+    @access.user
+    def getTables(self, params):
+        currentUser = self.getCurrentUser()
+        publicFolder = findPublicFolder(currentUser, currentUser)
+        assetstores =  ModelImporter.model('assetstore').list(limit=10)
+        astore = [a for a in assetstores if a['name'] == 'dbAssetstore']
+        dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
+        adapter = assetstore_utilities.getAssetstoreAdapter(astore[0])
+        table = 'information_schema.tables'
+        params = {
+            'tables': [{'name':'{}'.format(table),
+                        'database':'{}'.format(dbName),
+                        'table': 'tables',
+                        'schema': 'information_schema'}],
+            'fields': ['table_name'],
+            'filters': [['table_schema', 'public']],
+            'limit': 100,
+            'format': 'json'
+        }
+        # Create the item
+        adapter.importData(publicFolder, 'folder', params,
+                           progress.noProgress, currentUser)
+        resItem = list(ModelImporter.model("item").textSearch(table))[0]
+        resFile = list(self.model('item').childFiles(item=resItem))[0]
+        func = adapter.downloadFile(resFile, headers=False,
+                                    extraParameters=params)
+
+        return json.loads(list(func())[0])
+
+    getTables.description = (
+        Description('Get a list of tables')
+    )
 
     @access.user
     def postgresGeojson(self, params):
