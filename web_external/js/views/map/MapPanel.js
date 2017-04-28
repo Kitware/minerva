@@ -160,7 +160,7 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                 visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
             }
 
-            minerva.core.AdapterRegistry.once('m:map_adapter_layerCreated', function (repr) {
+            dataset.once('m:map_adapter_layerCreated', function (repr) {
                 this.datasetLayerReprs[datasetId] = repr;
                 repr.render(this);
             }, this).once('m:map_adapter_error', function (dataset, layerType) {
@@ -170,7 +170,8 @@ minerva.views.MapPanel = minerva.views.Panel.extend({
                     repr.delete(this);
                     dataset.set('geoError', true);
                 }
-            }, this)._createRepresentation(this, dataset, layerType, visProperties);
+            }, this);
+            minerva.core.AdapterRegistry._createRepresentation(this, dataset, layerType, visProperties);
         }
     },
 

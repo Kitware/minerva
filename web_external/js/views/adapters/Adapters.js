@@ -55,16 +55,16 @@ function generate_sequence(start, stop, count) {
         this._createRepresentation = function (container, dataset, layerType, visProperties) {
             if (layerType === null || !_.has(this.registry, layerType)) {
                 console.error('This dataset cannot be adapted to a map layer of type [' + layerType + '].');
-                this.trigger('m:map_adapter_error', dataset, layerType);
+                dataset.trigger('m:map_adapter_error', dataset, layerType);
                 return;
             } else {
                 var Adapter = this.registry[layerType];
                 var layerRepr = _.extend(new Adapter(), Backbone.Events);
                 dataset.once('m:dataset_geo_dataLoaded', function () {
                     layerRepr.once('m:map_layer_renderable', function (layer) {
-                        this.trigger('m:map_adapter_layerCreated', layer);
+                        dataset.trigger('m:map_adapter_layerCreated', layer);
                     }, this).once('m:map_layer_error', function (layer) {
-                        this.trigger('m:map_adapter_layerError', layer);
+                        dataset.trigger('m:map_adapter_layerError', layer);
                     }, this).init(container, dataset, visProperties, dataset.get('geoData'));
                 }, this).loadGeoData();
                 //
