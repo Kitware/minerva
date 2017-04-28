@@ -57,6 +57,7 @@ module.exports = function (grunt) {
                 'bootstrapSelect': '<%= plugin.minerva.root %>/node_modules/bootstrap-select/dist',
                 extra: '<%= plugin.minerva.external %>/extra',
                 jqueryui: '<%= plugin.minerva.root %>/node_modules/jquery-ui-bundle',
+                queryBuilder: '<%= plugin.minerva.root %>/node_modules/jQuery-QueryBuilder/dist',
                 fontello: '<%= plugin.minerva.external %>/fontello'
             }
         },
@@ -78,7 +79,8 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.external %>/stylesheets/**/*.styl',
                         '<%= plugin.minerva.root %>/node_modules/colorbrewer/colorbrewer.css',
                         '<%= plugin.minerva.bootstrapSelect %>/css/bootstrap-select.css',
-                        '<%= plugin.minerva.extra %>/bootstrap-slider.css'
+                        '<%= plugin.minerva.extra %>/bootstrap-slider.css',
+                        '<%= plugin.minerva.queryBuilder %>/css/query-builder.default.css'
                     ],
                     dest: '<%= plugin.minerva.static %>/plugin.min.css'
                 }]
@@ -218,6 +220,16 @@ module.exports = function (grunt) {
                         dest: '<%= plugin.minerva.static %>'
                     }
                 ]
+            },
+            'queryBuilder': {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= plugin.minerva.queryBuilder %>/css',
+                        src: ['query-builder.default.min.css'],
+                        dest: '<%= plugin.minerva.static %>'
+                    }
+                ]
             }
         },
         concat: {
@@ -232,7 +244,9 @@ module.exports = function (grunt) {
                         '<%= plugin.minerva.static %>/jquery-ui.min.js',
                         '<%= plugin.minerva.static %>/datatables.min.js',
                         '<%= plugin.minerva.static %>/bootstrap-select.min.js',
-                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js'
+                        '<%= plugin.minerva.static %>/bootstrap-slider.min.js',
+                        // The normal uglify then concat won't yield any result, so had to include minified directly
+                        '<%= plugin.minerva.queryBuilder %>/js/query-builder.standalone.min.js'
                     ]
                 }
             }
@@ -261,6 +275,9 @@ module.exports = function (grunt) {
             },
             'concat:minerva-ext': {
                 dependencies: ['copy:papaparse', 'copy:jquery-ui', 'copy:dataTables', 'uglify:minerva-ext']
+            },
+            'copy:queryBuilder': {
+                dependencies: ['shell:plugin-minerva']
             },
             'copy:sinon': {
                 dependencies: ['shell:plugin-minerva']

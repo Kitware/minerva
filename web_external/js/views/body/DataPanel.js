@@ -59,7 +59,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
     },
 
     connectToPostgres: function (event) {
-        var postgresWidget = new minerva.views.PostgresWidget({
+        var postgresWidget = new minerva.views.PostgresWidget2({
             el: $('#g-dialog-container'),
             collection: this.collection,
             parentView: this

@@ -19,6 +19,8 @@
     <link rel="stylesheet"
           href="${staticRoot}/built/plugins/minerva/datatables.min.css">
     <link rel="stylesheet"
+          href="${staticRoot}/built/plugins/minerva/query-builder.default.min.css">
+    <link rel="stylesheet"
           href="${staticRoot}/built/girder.app.min.css">
     % for plugin in pluginCss:
         <link rel="stylesheet" href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">

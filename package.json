@@ -10,6 +10,7 @@
     "bootstrap-slider": "^7.1.0",
     "colorbrewer": "1.0.0",
     "geojs": "0.10.4",
+    "jQuery-QueryBuilder": "^2.4.3",
     "jade": "~1.11.0",
     "jquery-ui-bundle": "^1.11.4",
     "underscore": "~1.5"
