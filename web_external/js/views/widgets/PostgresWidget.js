@@ -1,55 +1,24 @@
 minerva.views.PostgresWidget = minerva.View.extend({
     events: {
-        'change #m-state-name': 'saveDropdownState',
-        'change #m-production-category': 'saveDropdownState',
-        'change #m-category': 'saveDropdownState',
-        'change #m-sub-category': 'saveDropdownState',
-        'change #m-data-derivation': 'saveDropdownState',
-        'click #m-refresh-dropdowns': 'refreshDropdowns',
-        'click #m-get-geojson': 'getGeojson'
+        'click #m-get-geojson': 'getGeojson',
+        'change #m-postgres-source': 'sourceChanged'
     },
     formToTable: {
-        'm-state-name': 'NAME',
-        'm-production-category': 'PRODUCTION_CATEGORY',
-        'm-category': 'CATEGORY',
-        'm-sub-category': 'SUB_CATEGORY',
-        'm-data-derivation': 'DATA_DERIVATION'
     },
     initialize: function () {
+        this.$queryBuilder = null;
+
+        this.filter = null;
+
         var Query = Backbone.Model.extend({
             defaults: this._getDefaults
         });
         this.queryParams = new Query();
-    },
-    getDefaults: function () {
-        return _.object(_.values(this.formToTable),
-                        new Array(_.size(this.formToTable) + 1).join(''));
-    },
-    refreshDropdowns: function () {
-        this.initialize();
-        this.filters = {};
-        this.render();
-    },
-    saveDropdownState: function (event) {
-        var that = this;
-        var id = event.currentTarget.id;
-        this.queryParams.set(this.formToTable[id], this.$('#' + id).val());
-        var filters = {};
-        _.each(_.values(this.formToTable), function (value) {
-            that._checkFilter(filters, value, that.queryParams.get(value));
-        });
-        this.filters = filters;
-        this.render();
-    },
-    _configureFilter: function (value) {
-        // Passing a str representation of a list
-        // Like '["foo", "bar"]'
-        return '[' + '"' + value + '"' + ']';
-    },
-    _checkFilter: function (filters, key, value) {
-        if (value) {
-            filters[key] = this._configureFilter(value);
-        }
+
+        this.sources = [];
+        this.selectedSource = null;
+
+        this.getSources();
     },
     getGeojson: function () {
         var that = this;
@@ -60,7 +29,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 error: null,
                 data: that.filters
             }).done(function (datasetId) {
-                this.trigger('m:dataset_created',datasetId);
+                this.trigger('m:dataset_created', datasetId);
                 that.$el.modal('hide');
             }.bind(this));
         } else {
@@ -68,19 +37,73 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }
     },
     render: function () {
-        var that = this;
-        girder.restRequest({
-            path: '/minerva_postgres_geojson',
-            type: 'GET',
-            error: null,
-            data: that.filters
-        }).done(_.bind(function (data) {
-            var el = that.$el.html(minerva.templates.postgresWidget(data));
-            if (!this.modalOpenned) {
-                this.modalOpenned = true;
-                var modal = el.girderModal(this);
-                modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+        if (!this.modalOpenned) {
+            var el = this.$el.html(minerva.templates.postgresWidget(this));
+            this.modalOpenned = true;
+            var modal = el.girderModal(this);
+
+            this.$queryBuilder = this.$('.m-query-builder').queryBuilder({
+                filters: [{id:'a',type:'string'}],
+                operators: ['equal', 'not_equal', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'between', 'not_between', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                icons: {
+                    add_group: 'icon-plus-squared',
+                    add_rule: 'icon-plus',
+                    remove_group: 'icon-cancel',
+                    remove_rule: 'icon-cancel',
+                    error: 'icon-cancel-circled2'
+                }
+            });
+            this.$queryBuilder.hide();
+
+            modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+        }
+        else {
+            this.$queryBuilder.detach();
+            this.$el.html(minerva.templates.postgresWidget2(this));
+            this.$('.m-query-builder').replaceWith(this.$queryBuilder);
+            if (this.filter) {
+                this.$queryBuilder.show();
             }
-        }, this));
+            else {
+                this.$queryBuilder.hide();
+            }
+        }
+    },
+    getSources: function () {
+        new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                resolve();
+            }, 1000);
+        })
+            .then(function () {
+                this.sources = minerva.views.PostgresMockData.sources;
+                this.render();
+            }.bind(this));
+    },
+    sourceChanged: function (e) {
+        var source = $(e.target).val();
+        this.selectedSource = source;
+        this.getFilter(source);
+    },
+    getFilter: function (sourceName) {
+        new Promise(function (resolve, reject) {
+            if (sourceName) {
+                setTimeout(function () {
+                    resolve(minerva.views.PostgresMockData.filters[sourceName]);
+                })
+            }
+            else {
+                resolve(null);
+            }
+        })
+            .then(function (filter) {
+                console.log(filter);
+                this.filter = filter;
+                this.$queryBuilder[0].queryBuilder.reset();
+                if (filter) {
+                    this.$queryBuilder[0].queryBuilder.setFilters(filter);
+                }
+                this.render();
+            }.bind(this))
     }
 });
