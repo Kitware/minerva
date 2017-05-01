@@ -97,8 +97,8 @@ Table of Contents
    :maxdepth: 2
 
    installation
-   creating-a-source
    deploy-data-services
    developer-documentation
+   user-documentation
    api-documentation
 

@@ -1,3 +1,5 @@
+/* globals moment */
+
 minerva.geojson = {};
 
 /**
@@ -92,7 +94,7 @@ minerva.geojson.accumulate = function accumulate(features) {
  * property statistics that can be used to generate numeric/color
  * scales for visualization.
  */
-minerva.geojson.normalize = function normalize(geojson) {
+minerva.geojson.normalize = function normalize(geojson) {  // eslint-disable-line complexity
     var normalized;
 
     if (_.isString(geojson)) {
@@ -100,6 +102,25 @@ minerva.geojson.normalize = function normalize(geojson) {
             geojson = JSON.parse(geojson);
         } catch (e) {
         }
+    }
+    /* Check if this is a geojson-timeseries.  If so, normalize each each
+     * entry.  The root contains the first geojson entry and a summary that
+     * combines all of the entries summaries. */
+    if (_.isArray(geojson) && geojson[0].geojson && geojson[0].time) {
+        _.each(geojson, function (entry) {
+            var norm = minerva.geojson.normalize(entry.geojson);
+            if (norm) {
+                if (!normalized) {
+                    normalized = $.extend({series: []}, norm);
+                    normalized.summary = {};
+                }
+                var label = '' + (entry.label || entry.time || ('Frame ' + (normalized.series.length + 1)));
+                var time = moment.utc(entry.time);
+                normalized.series.push({time: time, geojson: norm, label: label});
+                $.extend(normalized.summary, norm.summary);
+            }
+        });
+        return normalized;
     }
 
     switch (geojson.type) {
