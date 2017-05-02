@@ -1,6 +1,6 @@
 minerva.views.PostgresWidget = minerva.View.extend({
     events: {
-        'click #m-get-geojson': 'getGeojson',
+        'submit #m-postgres': 'getGeojson',
         'change #m-postgres-source': 'sourceChanged'
     },
     formToTable: {
@@ -8,7 +8,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
     initialize: function () {
         this.$queryBuilder = null;
 
-        this.filter = null;
+        this.filters = null;
 
         var Query = Backbone.Model.extend({
             defaults: this._getDefaults
@@ -20,21 +20,71 @@ minerva.views.PostgresWidget = minerva.View.extend({
 
         this.getSources();
     },
-    getGeojson: function () {
-        var that = this;
-        if (this.filters) {
-            girder.restRequest({
-                path: '/minerva_postgres_geojson/geojson',
-                type: 'GET',
-                error: null,
-                data: that.filters
-            }).done(function (datasetId) {
-                this.trigger('m:dataset_created', datasetId);
-                that.$el.modal('hide');
-            }.bind(this));
-        } else {
-            alert('Bad Selection');
+    getGeojson: function (e) {
+        e.preventDefault();
+        var operatorConverter = function (operator) {
+            switch (operator) {
+                case 'equal':
+                    return 'eq';
+                case 'not_equal':
+                    return 'ne';
+                case 'less':
+                    return 'lt';
+                case 'less_or_equal':
+                    return 'lte';
+                case 'greater':
+                    return 'gt';
+                case 'greater_or_equal':
+                    return 'gte';
+                case 'is_empty':
+                    return 'eq';
+                case 'is_not_empty':
+                    return 'ne';
+                case 'is_null':
+                    return 'is';
+                case 'is_not_null':
+                    return 'notis';
+                default:
+                    throw 'unsupported operator';
+            }
         }
+        var valueConverter = function (operator, value) {
+            switch (operator) {
+                case 'is_empty':
+                    return '';
+                case 'is_not_empty':
+                    return '';
+                case 'is_null':
+                    return 'null';
+                case 'is_not_null':
+                    return 'null';
+                default:
+                    return value;
+            }
+        }
+        var filters = [];
+        var rules = this.$queryBuilder[0].queryBuilder.getRules().rules;
+        for (var i = 0; i < rules.length; i++) {
+            filters.push({
+                field: rules[i].field,
+                operator: operatorConverter(rules[i].operator),
+                value: valueConverter(rules[i].operator, rules[i].value)
+            });
+        }
+
+        girder.restRequest({
+            path: '/minerva_postgres_geojson/geojson',
+            type: 'GET',
+            error: null,
+            data: {
+                table: this.selectedSource,
+                filter: JSON.stringify(filters)
+            }
+        })
+        // .done(function (datasetId) {
+        //     this.trigger('m:dataset_created', datasetId);
+        //     that.$el.modal('hide');
+        // }.bind(this));
     },
     render: function () {
         if (!this.modalOpenned) {
@@ -43,15 +93,17 @@ minerva.views.PostgresWidget = minerva.View.extend({
             var modal = el.girderModal(this);
 
             this.$queryBuilder = this.$('.m-query-builder').queryBuilder({
-                filters: [{id:'a',type:'string'}],
-                operators: ['equal', 'not_equal', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'between', 'not_between', 'begins_with', 'not_begins_with', 'contains', 'not_contains', 'ends_with', 'not_ends_with', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                filters: [{ id: 'a', type: 'string' }],
+                operators: ['equal', 'not_equal', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
                 icons: {
                     add_group: 'icon-plus-squared',
                     add_rule: 'icon-plus',
                     remove_group: 'icon-cancel',
                     remove_rule: 'icon-cancel',
                     error: 'icon-cancel-circled2'
-                }
+                },
+                allow_groups: false,
+                conditions: ['AND']
             });
             this.$queryBuilder.hide();
 
@@ -59,9 +111,9 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }
         else {
             this.$queryBuilder.detach();
-            this.$el.html(minerva.templates.postgresWidget2(this));
+            this.$el.html(minerva.templates.postgresWidget(this));
             this.$('.m-query-builder').replaceWith(this.$queryBuilder);
-            if (this.filter) {
+            if (this.filters) {
                 this.$queryBuilder.show();
             }
             else {
@@ -70,40 +122,76 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }
     },
     getSources: function () {
-        new Promise(function (resolve, reject) {
-            setTimeout(function () {
-                resolve();
-            }, 1000);
-        })
-            .then(function () {
-                this.sources = minerva.views.PostgresMockData.sources;
-                this.render();
-            }.bind(this));
+        Promise.resolve(girder.restRequest({
+            path: '/minerva_postgres_geojson/tables',
+            type: 'GET'
+        })).then(function (tables) {
+            this.sources = tables;
+            this.render();
+        }.bind(this));
     },
     sourceChanged: function (e) {
         var source = $(e.target).val();
         this.selectedSource = source;
-        this.getFilter(source);
+        this._getFilter(source).then(function (filters) {
+            this.filters = filters;
+            this.$queryBuilder[0].queryBuilder.reset();
+            if (filters) {
+                this.$queryBuilder[0].queryBuilder.setFilters(filters);
+            }
+            this.render();
+        }.bind(this));
     },
-    getFilter: function (sourceName) {
-        new Promise(function (resolve, reject) {
-            if (sourceName) {
-                setTimeout(function () {
-                    resolve(minerva.views.PostgresMockData.filters[sourceName]);
-                })
-            }
-            else {
-                resolve(null);
-            }
-        })
-            .then(function (filter) {
-                console.log(filter);
-                this.filter = filter;
-                this.$queryBuilder[0].queryBuilder.reset();
-                if (filter) {
-                    this.$queryBuilder[0].queryBuilder.setFilters(filter);
+    _getFilter: function (sourceName) {
+        return Promise.all([
+            Promise.resolve(girder.restRequest({
+                path: '/minerva_postgres_geojson/columns',
+                type: 'GET',
+                data: {
+                    table: sourceName
                 }
-                this.render();
-            }.bind(this))
-    }
+            })),
+            Promise.resolve(girder.restRequest({
+                path: '/minerva_postgres_geojson/all_values',
+                type: 'GET',
+                data: {
+                    table: sourceName
+                }
+            }))
+        ]).then(function (data) {
+            var columns = data[0];
+            var values = data[1];
+            var filters = [];
+            var convertFilterType = function (dataType) {
+                switch (dataType) {
+                    case 'integer':
+                        return 'integer';
+                    case 'numeric':
+                        return 'double';
+                    case 'character varying':
+                    case 'character':
+                        return 'string';
+                    case 'date':
+                        return 'datetime';
+                    default:
+                        return undefined;
+                }
+            }
+            for (var i = 0; i < columns.length; i++) {
+                var filter = {};
+                var filterType = convertFilterType(columns[i].data_type);
+                if (!filterType) {
+                    continue;
+                }
+                filter['id'] = columns[i].column_name;
+                filter['type'] = filterType;
+                if (filterType == 'string') {
+                    filter['values'] = values[columns[i].column_name];
+                    filter['input'] = 'select';
+                }
+                filters.push(filter);
+            }
+            return filters;
+        }.bind(this))
+    },
 });
