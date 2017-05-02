@@ -25,7 +25,7 @@ class PostgresGeojson(Resource):
     def _getDbName(self):
         currentUser = self.getCurrentUser()
         assetstores = ModelImporter.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['name'] == 'dbAssetstore']
+        astore = [a for a in assetstores if a['type'] == 'database']
         dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
 
         return dbName
@@ -35,7 +35,7 @@ class PostgresGeojson(Resource):
         currentUser = self.getCurrentUser()
         publicFolder = findPublicFolder(currentUser, currentUser)
         assetstores =  ModelImporter.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['name'] == 'dbAssetstore']
+        astore = [a for a in assetstores if a['type'] == 'database']
         adapter = assetstore_utilities.getAssetstoreAdapter(astore[0])
         # Create the item
         adapter.importData(publicFolder, 'folder', params,
@@ -94,7 +94,7 @@ class PostgresGeojson(Resource):
         table = 'tables'
         fields = ['table_name']
         filters = [['table_schema', 'public']]
-        return self._getJsonResponse(schema, table, fields, filters)
+        return [a['table_name'] for a in self._getJsonResponse(schema, table, fields, filters)]
 
     @access.user
     @describeRoute(
@@ -119,7 +119,7 @@ class PostgresGeojson(Resource):
         table = params['table']
         fields = [{'func': 'distinct', 'param': [{'field': params['column']}]}]
         filters = ""
-        return self._getJsonResponse(schema, table, fields, filters)
+        return [a['column_0'] for a in self._getJsonResponse(schema, table, fields, filters)]
 
     @access.user
     @describeRoute(
