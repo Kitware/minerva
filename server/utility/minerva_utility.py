@@ -47,6 +47,7 @@ def findMinervaFolder(currentUser, user, create=False):
     return findNamedFolder(currentUser, user, user, 'user',
                            PluginSettings.MINERVA_FOLDER, create)
 
+
 def findPublicFolder(currentUser, user, create=False):
     return findNamedFolder(currentUser, user, user, 'user',
                            'Public', create)
