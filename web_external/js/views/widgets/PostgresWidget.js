@@ -30,6 +30,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     return 'ne';
                 case 'less':
                     return 'lt';
+                case 'in':
+                    return 'in';
                 case 'less_or_equal':
                     return 'lte';
                 case 'greater':
@@ -58,12 +60,25 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     return 'null';
                 case 'is_not_null':
                     return 'null';
+                case 'equal':
+                case 'not_equal':
+                case 'less':
+                case 'less_or_equal':
+                case 'greater':
+                case 'greater_or_equal':
+                    if (Array.isArray(value)) {
+                        return value[0];
+                    }
                 default:
                     return value;
             }
         }
         var filters = [];
-        var rules = this.$queryBuilder[0].queryBuilder.getRules().rules;
+        var result = this.$queryBuilder[0].queryBuilder.getRules();
+        if (!result) {
+            return;
+        }
+        var rules = result.rules;
         for (var i = 0; i < rules.length; i++) {
             filters.push({
                 field: rules[i].field,
@@ -81,10 +96,10 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 filter: JSON.stringify(filters)
             }
         })
-        // .done(function (datasetId) {
-        //     this.trigger('m:dataset_created', datasetId);
-        //     that.$el.modal('hide');
-        // }.bind(this));
+            .done(function (datasetId) {
+                this.trigger('m:dataset_created', datasetId);
+                this.$el.modal('hide');
+            }.bind(this));
     },
     render: function () {
         if (!this.modalOpenned) {
@@ -94,7 +109,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
 
             this.$queryBuilder = this.$('.m-query-builder').queryBuilder({
                 filters: [{ id: 'a', type: 'string' }],
-                operators: ['equal', 'not_equal', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                operators: ['equal', 'not_equal', 'in', 'not_in', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
                 icons: {
                     add_group: 'icon-plus-squared',
                     add_rule: 'icon-plus',
@@ -102,10 +117,21 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     remove_rule: 'icon-cancel',
                     error: 'icon-cancel-circled2'
                 },
+                allow_empty: true,
                 allow_groups: false,
                 conditions: ['AND']
-            });
-            this.$queryBuilder.hide();
+            })
+                .hide()
+                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder', function (e, rule) {
+                    if (rule.filter.input == 'select') {
+                        if (rule.operator.multiple) {
+                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', true).attr('size', 5);
+                        }
+                        else {
+                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', false).removeAttr('size');
+                        }
+                    }
+                });
 
             modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         }
@@ -186,7 +212,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 filter['id'] = columns[i].column_name;
                 filter['type'] = filterType;
                 if (filterType == 'string') {
-                    filter['values'] = values[columns[i].column_name];
+                    filter['multiple'] = true;
+                    filter['values'] = values[columns[i].column_name].sort();
                     filter['input'] = 'select';
                 }
                 filters.push(filter);

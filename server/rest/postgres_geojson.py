@@ -154,7 +154,7 @@ class PostgresGeojson(Resource):
 
         filters = params['filter']
         table = params['table']
-        limit = params['limit']
+        limit = self.boolParam('limit', params, default=100)
         schema = 'public'
         output_format = 'GeoJSON'
         output_name = 'output.geojson'

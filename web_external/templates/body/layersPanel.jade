@@ -7,11 +7,12 @@ include ../widgets/legendWidget.jade
   .layersList
     ul.datasets
       each dataset, index in datasets
-        li.dataset= dataset.get('name')
+        li.dataset
           if dataset.get('geoError')
             i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           else
             i.icon-eye.m-toggle-dataset&attributes({'m-dataset-id': dataset.get('_id')})
+            span= dataset.get('name')
             .m-push-right
               if dataset.getDatasetType() === 'geojson'
                 i.icon-download.m-download-geojson&attributes({'m-dataset-id': dataset.get('_id')})
