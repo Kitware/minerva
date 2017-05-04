@@ -36,7 +36,7 @@ class GeojsonDataset(Dataset):
     @access.user
     @loadmodel(map={'itemId': 'item'}, model='item',
                level=AccessType.WRITE)
-    def createGeojsonDataset(self, item, params):
+    def createGeojsonDataset(self, item, params, fillColorKey=None):
         user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
@@ -64,6 +64,12 @@ class GeojsonDataset(Dataset):
                 minerva_metadata['source'] = {
                     'layer_source': 'GeoJSON'}
                 minerva_metadata['source_type'] = 'item'
+                if fillColorKey is not None:
+                    minerva_metadata['visProperties'] = {
+                        'line': {"fillColorKey": fillColorKey},
+                        'polygon': {"fillColorKey": fillColorKey},
+                        'point': {"fillColorKey": fillColorKey}
+                    }
                 break
         if 'geojson_file' not in minerva_metadata:
             raise RestException('Item contains no geojson file.')

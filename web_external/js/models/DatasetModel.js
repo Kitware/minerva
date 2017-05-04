@@ -35,6 +35,19 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * For now, this is only done for GeoJSON datasets.
      */
     _preprocess: function () {
+        // Merge default style into existing style
+        var meta = this.get('meta');
+        var prop = new minerva.models.GeoJSONStyle().attributes
+        var defaultVisProperties = {
+            point: prop,
+            line: prop,
+            polygon: prop
+        };
+        if (!meta.minerva.visProperties) {
+            meta.minerva.visProperties = {};
+        }
+        $.extend(true, defaultVisProperties, meta.minerva.visProperties);
+        $.extend(true, meta.minerva.visProperties, defaultVisProperties);
         if (this.getDatasetType().match(/(geo)?json/)) {
             this.set('geoData', minerva.geojson.normalize(this.get('geoData')));
         }

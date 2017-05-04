@@ -1,7 +1,8 @@
 minerva.views.PostgresWidget = minerva.View.extend({
     events: {
         'submit #m-postgres': 'getGeojson',
-        'change #m-postgres-source': 'sourceChanged'
+        'change #m-postgres-source': '_sourceChanged',
+        'change #m-postgres-field': '_fieldChanged'
     },
     formToTable: {
     },
@@ -17,8 +18,10 @@ minerva.views.PostgresWidget = minerva.View.extend({
 
         this.sources = [];
         this.selectedSource = null;
+        this.columns = [];
+        this.selectedField = null;
 
-        this.getSources();
+        this._getSources();
     },
     getGeojson: function (e) {
         e.preventDefault();
@@ -93,6 +96,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
             error: null,
             data: {
                 table: this.selectedSource,
+                field: this.selectedField,
                 filter: JSON.stringify(filters)
             }
         })
@@ -147,28 +151,21 @@ minerva.views.PostgresWidget = minerva.View.extend({
             }
         }
     },
-    getSources: function () {
+    _getSources: function () {
         Promise.resolve(girder.restRequest({
             path: '/minerva_postgres_geojson/tables',
             type: 'GET'
-        })).then(function (tables) {
-            this.sources = tables;
+        })).then(function (sources) {
+            this.sources = sources;
             this.render();
         }.bind(this));
     },
-    sourceChanged: function (e) {
+    _sourceChanged: function (e) {
         var source = $(e.target).val();
         this.selectedSource = source;
-        this._getFilter(source).then(function (filters) {
-            this.filters = filters;
-            this.$queryBuilder[0].queryBuilder.reset();
-            if (filters) {
-                this.$queryBuilder[0].queryBuilder.setFilters(filters);
-            }
-            this.render();
-        }.bind(this));
+        this._loadFilter(source);
     },
-    _getFilter: function (sourceName) {
+    _loadFilter: function (sourceName) {
         return Promise.all([
             Promise.resolve(girder.restRequest({
                 path: '/minerva_postgres_geojson/columns',
@@ -186,6 +183,13 @@ minerva.views.PostgresWidget = minerva.View.extend({
             }))
         ]).then(function (data) {
             var columns = data[0];
+            this.columns = columns;
+            for (var i = 0; i < columns.length; i++) {
+                if (['interger', 'numeric'].indexOf(columns[i].data_type) != -1) {
+                    this.selectedField = columns[i].column_name;
+                    break;
+                }
+            }
             var values = data[1];
             var filters = [];
             var convertFilterType = function (dataType) {
@@ -218,7 +222,16 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 }
                 filters.push(filter);
             }
-            return filters;
+            this.filters = filters;
+            this.$queryBuilder[0].queryBuilder.reset();
+            if (this.filters) {
+                this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
+            }
+            this.render();
         }.bind(this))
     },
+    _fieldChanged: function (e) {
+        var field = $(e.target).val();
+        this.selectedField = field;
+    }
 });
