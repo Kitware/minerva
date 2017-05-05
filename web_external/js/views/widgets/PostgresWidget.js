@@ -52,7 +52,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 default:
                     throw 'unsupported operator';
             }
-        }
+        };
         var valueConverter = function (operator, value) {
             switch (operator) {
                 case 'is_empty':
@@ -75,21 +75,37 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 default:
                     return value;
             }
-        }
+        };
+        var groupRelationConverter = function (relation) {
+            switch (relation) {
+                case 'AND':
+                    return 'and';
+                case 'OR':
+                    return 'or';
+            }
+        };
+        var buildQueryFilter = function (element) {
+            var expression = {};
+            if (element.condition) {
+                var group = [];
+                expression[groupRelationConverter(element.condition)] = group;
+                for (var i = 0; i < element.rules.length; i++) {
+                    group.push(buildQueryFilter(element.rules[i]));
+                }
+            }
+            else {
+                expression['field'] = element.field;
+                expression['operator'] = operatorConverter(element.operator);
+                expression['value'] = valueConverter(element.operator, element.value);
+            }
+            return expression;
+        };
         var filters = [];
         var result = this.$queryBuilder[0].queryBuilder.getRules();
         if (!result) {
             return;
         }
-        var rules = result.rules;
-        for (var i = 0; i < rules.length; i++) {
-            filters.push({
-                field: rules[i].field,
-                operator: operatorConverter(rules[i].operator),
-                value: valueConverter(rules[i].operator, rules[i].value)
-            });
-        }
-
+        queryFilter = buildQueryFilter(result);
         girder.restRequest({
             path: '/minerva_postgres_geojson/geojson',
             type: 'GET',
@@ -97,7 +113,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
             data: {
                 table: this.selectedSource,
                 field: this.selectedField,
-                filter: JSON.stringify(filters)
+                filter: JSON.stringify(queryFilter)
             }
         })
             .done(function (datasetId) {
@@ -121,9 +137,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     remove_rule: 'icon-cancel',
                     error: 'icon-cancel-circled2'
                 },
-                allow_empty: true,
-                allow_groups: false,
-                conditions: ['AND']
+                allow_empty: true
             })
                 .hide()
                 .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder', function (e, rule) {
@@ -163,9 +177,9 @@ minerva.views.PostgresWidget = minerva.View.extend({
     _sourceChanged: function (e) {
         var source = $(e.target).val();
         this.selectedSource = source;
-        this._loadFilter(source);
+        this._loadFilterConfiguration(source);
     },
-    _loadFilter: function (sourceName) {
+    _loadFilterConfiguration: function (sourceName) {
         return Promise.all([
             Promise.resolve(girder.restRequest({
                 path: '/minerva_postgres_geojson/columns',
