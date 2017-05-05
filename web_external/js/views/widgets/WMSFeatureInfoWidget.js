@@ -5,7 +5,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
         function getActiveWmsLayers() {
             return _.chain(that.parentView.collection.models)
-                .filter(function (set) { return set.get('displayed') && set.getDatasetType() !== 'geojson'; })
+                .filter(function (set) { return set.get('displayed') && set.get('visible') && set.getDatasetType() !== 'geojson' && set.getDatasetType() !== 'geojson-timeseries' })
                 .map(function (dataset) { return dataset.get('_id'); })
                 .value();
         }
@@ -25,24 +25,26 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         function getActiveGeojsonLayers() {
             var geojsonLayers = [];
             _.chain(that.parentView.collection.models)
-                .filter(function (set) { return set.get('displayed') && set.getDatasetType() === 'geojson'; })
+                .filter(function (set) { return set.get('displayed') && set.get('visible') && (set.getDatasetType() !== 'geojson' || set.getDatasetType() !== 'geojson-timeseries') })
                 .map(function (dataset) {
                     var i;
                     var name = dataset.get('name');
                     var features = dataset.geoJsLayer.features();
-                    _.each(features, function (feature) {
-                        var hits = feature.pointSearch(event.geo);
-                        if (hits && hits.found) {
-                            for (i = hits.found.length - 1; i >= 0; i -= 1) {
-                                if (hits.found[i].properties) {
-                                    geojsonLayers.push({
-                                        properties: filterStyleProperties(hits.found[i].properties),
-                                        id: name
-                                    });
+                    _.chain(features)
+                        .filter(function (feature) { return feature.visible() })
+                        .each(function (feature) {
+                            var hits = feature.pointSearch(event.geo);
+                            if (hits && hits.found) {
+                                for (i = hits.found.length - 1; i >= 0; i -= 1) {
+                                    if (hits.found[i].properties) {
+                                        geojsonLayers.push({
+                                            properties: filterStyleProperties(hits.found[i].properties),
+                                            id: name
+                                        });
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
                     return geojsonLayers;
                 });
 
@@ -82,7 +84,8 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
                     'x': mapParams.x,
                     'y': mapParams.y,
                     'width': mapParams.width,
-                    'height': mapParams.height}
+                    'height': mapParams.height
+                }
             }).done(function (data) {
                 var obj = JSON.parse(data);
                 var activeGeojsonLayers = getActiveGeojsonLayers();
