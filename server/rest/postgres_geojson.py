@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
@@ -160,7 +161,9 @@ class PostgresGeojson(Resource):
         limit = None
         schema = 'public'
         output_format = 'GeoJSON'
-        output_name = 'output.geojson'
+        hash = hashlib.md5(filters).hexdigest()
+        output_name = '{0}.{1}.{2}.geojson'.format(
+            table, field, hash[-6:])
         currentUser = self.getCurrentUser()
         datasetFolder = findDatasetFolder(currentUser, currentUser)
         assetstores = ModelImporter.model('assetstore').list(limit=10)
