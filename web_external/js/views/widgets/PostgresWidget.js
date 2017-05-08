@@ -199,8 +199,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
             var columns = data[0];
             this.columns = columns;
             for (var i = 0; i < columns.length; i++) {
-                if (['interger', 'numeric'].indexOf(columns[i].data_type) != -1) {
-                    this.selectedField = columns[i].column_name;
+                if (['number'].indexOf(columns[i].datatype) != -1) {
+                    this.selectedField = columns[i].name;
                     break;
                 }
             }
@@ -208,12 +208,9 @@ minerva.views.PostgresWidget = minerva.View.extend({
             var filters = [];
             var convertFilterType = function (dataType) {
                 switch (dataType) {
-                    case 'integer':
-                        return 'integer';
-                    case 'numeric':
+                    case 'number':
                         return 'double';
-                    case 'character varying':
-                    case 'character':
+                    case 'string':
                         return 'string';
                     case 'date':
                         return 'datetime';
@@ -223,15 +220,15 @@ minerva.views.PostgresWidget = minerva.View.extend({
             }
             for (var i = 0; i < columns.length; i++) {
                 var filter = {};
-                var filterType = convertFilterType(columns[i].data_type);
+                var filterType = convertFilterType(columns[i].datatype);
                 if (!filterType) {
                     continue;
                 }
-                filter['id'] = columns[i].column_name;
+                filter['id'] = columns[i].name;
                 filter['type'] = filterType;
                 if (filterType == 'string') {
                     filter['multiple'] = true;
-                    filter['values'] = values[columns[i].column_name].sort();
+                    filter['values'] = values[columns[i].name].sort();
                     filter['input'] = 'select';
                 }
                 filters.push(filter);
