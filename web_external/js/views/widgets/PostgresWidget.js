@@ -1,6 +1,7 @@
 minerva.views.PostgresWidget = minerva.View.extend({
     events: {
         'submit #m-postgres': 'getGeojson',
+        'change #m-postgres-dataset-name': '_datasetNameChanged',
         'change #m-postgres-source': '_sourceChanged',
         'change #m-postgres-field': '_fieldChanged'
     },
@@ -16,6 +17,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
         });
         this.queryParams = new Query();
 
+        this.datasetName = '';
+        this.invalidDatasetName = false;
         this.sources = [];
         this.selectedSource = null;
         this.columns = [];
@@ -105,12 +108,18 @@ minerva.views.PostgresWidget = minerva.View.extend({
         if (!result) {
             return;
         }
+        if (!this.datasetName) {
+            this.invalidDatasetName = true;
+            this.render();
+            return;
+        }
         queryFilter = buildQueryFilter(result);
         girder.restRequest({
             path: '/minerva_postgres_geojson/geojson',
             type: 'GET',
             error: null,
             data: {
+                datasetName: this.datasetName,
                 table: this.selectedSource,
                 field: this.selectedField,
                 filter: JSON.stringify(queryFilter)
@@ -173,6 +182,12 @@ minerva.views.PostgresWidget = minerva.View.extend({
             this.sources = sources;
             this.render();
         }.bind(this));
+    },
+    _datasetNameChanged: function (e) {
+        var datasetName = $(e.target).val();
+        this.datasetName = datasetName;
+        this.invalidDatasetName = !datasetName;
+        this.render();
     },
     _sourceChanged: function (e) {
         var source = $(e.target).val();
