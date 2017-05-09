@@ -1,4 +1,3 @@
-import json
 import hashlib
 
 from girder.api import access
@@ -7,7 +6,7 @@ from girder.api.rest import Resource
 from girder.utility.model_importer import ModelImporter
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
-from girder.plugins.minerva.utility.minerva_utility import findPublicFolder, findDatasetFolder
+from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 
 
 class PostgresGeojson(Resource):
@@ -20,28 +19,23 @@ class PostgresGeojson(Resource):
         self.route('GET', ('all_values', ), self.getAllValues)
         self.route('GET', ('geojson', ), self.getGeojson)
 
-    def _getDbName(self):
-        assetstores = ModelImporter.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['type'] == 'database']
-        dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
-
-        return dbName
-
-    def _queryDatabase(self, params, explicitTable):
-        currentUser = self.getCurrentUser()
-        publicFolder = findPublicFolder(currentUser, currentUser)
-        assetstores = ModelImporter.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['type'] == 'database']
+    def _getAssetstoreAdapter(self):
+        # TODO: This assumes that there is exactly one assetstore that has
+        # appropriate qualifications; we need to handle zero and more than one
+        assetstores = ModelImporter.model('assetstore').list()
+        astore = [a for a in assetstores if a['type'] == 'database' and
+                  a['database']['dbtype'] == 'sqlalchemy_postgres']
         adapter = assetstore_utilities.getAssetstoreAdapter(astore[0])
-        # Create the item
-        adapter.importData(publicFolder, 'folder', params,
-                           progress.noProgress, currentUser)
-        resItem = list(ModelImporter.model("item").textSearch(explicitTable))[0]
-        resFile = list(self.model('item').childFiles(item=resItem))[0]
-        func = adapter.downloadFile(resFile, headers=False,
-                                    extraParameters=params)
+        return adapter
 
-        return func
+    def _getDbName(self):
+        # TODO: This assumes that there is exactly one assetstore that has
+        # appropriate qualifications; we need to handle zero and more than one
+        assetstores = ModelImporter.model('assetstore').list(limit=10)
+        astore = [a for a in assetstores if a['type'] == 'database' and
+                  a['database']['dbtype'] == 'sqlalchemy_postgres']
+        dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
+        return dbName
 
     def _getQueryParams(self, schema, table, fields, filters,
                         limit, output_format):
@@ -56,18 +50,10 @@ class PostgresGeojson(Resource):
             'format': output_format
         }
 
-    def _getJsonResponse(self, schema, table, fields, filters,
-                         limit=100, output_format='json'):
-        explicitTable = '{}.{}'.format(schema, table)
-        queryParams = self._getQueryParams(schema, table, fields,
-                                           filters, limit, output_format)
-        func = self._queryDatabase(queryParams, explicitTable)
-        return func
-
     def _getProperties(self, params):
         colDict = self.getColumns({'table': params['table']})
-        columns = [i['column_name'] for i in colDict
-                   if not i['column_name'] == 'geom']
+        columns = [i['name'] for i in colDict
+                   if not i['name'] == 'geom']
         fields = []
         for c in columns:
             fields.append(c)
@@ -80,12 +66,11 @@ class PostgresGeojson(Resource):
         Description('Returns list of tables from a database assetstore')
     )
     def getTables(self, params):
-        schema = 'information_schema'
-        table = 'tables'
-        fields = ['table_name']
-        filters = [['table_schema', 'public']]
-        func = self._getJsonResponse(schema, table, fields, filters)
-        return [a['table_name'] for a in json.loads(list(func())[0])]
+        adapter = self._getAssetstoreAdapter()
+        tables = adapter.getTableList()
+        # tables is an array of databases, each of which has tables.  We
+        # probably want to change this to not just use the first database.
+        return [table['name'] for table in tables[0]['tables']]
 
     @access.user
     @describeRoute(
@@ -93,13 +78,10 @@ class PostgresGeojson(Resource):
         .param('table', 'Table name from the database')
     )
     def getColumns(self, params):
-        schema = 'information_schema'
-        table = 'columns'
-        fields = ['column_name', 'data_type']
-        filters = [['table_name', params['table']]]
-        func = self._getJsonResponse(schema, table, fields, filters)
-
-        return json.loads(list(func())[0])
+        adapter = self._getAssetstoreAdapter()
+        conn = adapter.getDBConnectorForTable(params['table'])
+        fields = conn.getFieldInfo()
+        return fields
 
     @access.user
     @describeRoute(
@@ -108,13 +90,19 @@ class PostgresGeojson(Resource):
         .param('column', 'Column name from a table')
     )
     def getValues(self, params):
-        schema = 'public'
-        table = params['table']
-        fields = [{'func': 'distinct', 'param': [{'field': params['column']}]}]
-        filters = ""
-        func = self._getJsonResponse(schema, table, fields, filters)
-
-        return [a['column_0'] for a in json.loads(list(func())[0])]
+        adapter = self._getAssetstoreAdapter()
+        conn = adapter.getDBConnectorForTable(params['table'])
+        queryParams = {
+            'fields': [{
+                'func': 'distinct',
+                'param': [{'field': params['column']}],
+                'reference': 'value',
+            }],
+            'limit': 100,
+            'format': 'rawdict'}
+        result = list(adapter.queryDatabase(conn, queryParams)[0]())
+        print result
+        return [row['value'] for row in result]
 
     @access.user
     @describeRoute(
@@ -124,9 +112,9 @@ class PostgresGeojson(Resource):
     def getAllValues(self, params):
         resp = {}
         for i in self.getColumns(params):
-            if i['column_name'] != 'geom' and i['data_type'] != 'numeric':
-                resp[i['column_name']] = self.getValues({
-                    'column': i['column_name'],
+            if i['name'] != 'geom' and i['datatype'] != 'number':
+                resp[i['name']] = self.getValues({
+                    'column': i['name'],
                     'table': params['table']})
         return resp
 
@@ -160,6 +148,7 @@ class PostgresGeojson(Resource):
         field = params['field']
         datasetName = params['datasetName']
         limit = None
+        # TODO: schema should be read from the listed table, not set explicitly
         schema = 'public'
         output_format = 'GeoJSON'
         hash = hashlib.md5(filters).hexdigest()
@@ -170,19 +159,16 @@ class PostgresGeojson(Resource):
                 table, field, hash[-6:])
         currentUser = self.getCurrentUser()
         datasetFolder = findDatasetFolder(currentUser, currentUser)
-        assetstores = ModelImporter.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['type'] == 'database']
-        adapter = assetstore_utilities.getAssetstoreAdapter(astore[0])
+        adapter = self._getAssetstoreAdapter()
         # Create the item
         dbParams = self._getQueryParams(schema, table, fields, filters,
                                         limit, output_format)
         # TODO: Make the name dynamic
         dbParams['tables'][0]['name'] = output_name
         del dbParams['tables'][0]['database']
-        adapter.importData(datasetFolder, 'folder', dbParams,
-                           progress.noProgress, currentUser)
-        resItem = list(ModelImporter.model("item").textSearch(output_name,
-                                                              user=currentUser))[0]
+        result = adapter.importData(datasetFolder, 'folder', dbParams,
+                                    progress.noProgress, currentUser)
+        resItem = result[0]['item']
         GeojsonDataset().createGeojsonDataset(
             itemId=resItem['_id'], fillColorKey=field, params={})
         return resItem['_id']

@@ -23,7 +23,7 @@
               select.form-control#m-postgres-field
                 option
                 each column in columns
-                  option(value=column.column_name,selected=column.column_name==selectedField)= column.column_name
+                  option(value=column.name,selected=column.name==selectedField)= column.name
         .m-query-builder
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
