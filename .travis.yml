@@ -25,7 +25,7 @@ addons:
     - libnetcdf-dev
 
 before_install:
-    - DATABASE_ASSETSTORE_VERSION="nested-filters"
+    - DATABASE_ASSETSTORE_VERSION="master"
     # update pip for binary wheel caching
     - pip install -U pip virtualenv
 
