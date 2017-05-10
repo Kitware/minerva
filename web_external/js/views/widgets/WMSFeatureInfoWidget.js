@@ -25,7 +25,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         function getActiveGeojsonLayers() {
             var geojsonLayers = [];
             _.chain(that.parentView.collection.models)
-                .filter(function (set) { return set.get('displayed') && set.get('visible') && (set.getDatasetType() !== 'geojson' || set.getDatasetType() !== 'geojson-timeseries') })
+                .filter(function (set) { return set.get('displayed') && set.get('visible') && (set.getDatasetType() === 'geojson' || set.getDatasetType() === 'geojson-timeseries') })
                 .map(function (dataset) {
                     var i;
                     var name = dataset.get('name');
