@@ -14,7 +14,7 @@ minerva.geojson = {};
  *            encountered
  */
 minerva.geojson.merge = function merge(value, accumulated) {
-    accumulated = accumulated || {count: 0};
+    accumulated = accumulated || { count: 0 };
     accumulated.count += 1;
     switch (typeof value) {
         case 'string':
@@ -111,12 +111,12 @@ minerva.geojson.normalize = function normalize(geojson) {  // eslint-disable-lin
             var norm = minerva.geojson.normalize(entry.geojson);
             if (norm) {
                 if (!normalized) {
-                    normalized = $.extend({series: []}, norm);
+                    normalized = $.extend({ series: [] }, norm);
                     normalized.summary = {};
                 }
-                var label = '' + (entry.label || entry.time || ('Frame ' + (normalized.series.length + 1)));
+                var label = '' + (entry.label || (entry.time ? moment(entry.time).format('L LTS') : null) || ('Frame ' + (normalized.series.length + 1)));
                 var time = moment.utc(entry.time);
-                normalized.series.push({time: time, geojson: norm, label: label});
+                normalized.series.push({ time: time, geojson: norm, label: label });
                 $.extend(normalized.summary, norm.summary);
             }
         });
