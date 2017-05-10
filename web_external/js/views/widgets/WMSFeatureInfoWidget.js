@@ -5,7 +5,7 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
 
         function getActiveWmsLayers() {
             return _.chain(that.parentView.collection.models)
-                .filter(function (set) { return set.get('displayed') && set.get('visible') && set.getDatasetType() !== 'geojson' && set.getDatasetType() !== 'geojson-timeseries' })
+                .filter(function (set) { return set.get('displayed') && set.get('visible') && set.getDatasetType() !== 'geojson' && set.getDatasetType() !== 'geojson-timeseries'; })
                 .map(function (dataset) { return dataset.get('_id'); })
                 .value();
         }
@@ -25,13 +25,13 @@ minerva.views.WmsFeatureInfoWidget = minerva.View.extend({
         function getActiveGeojsonLayers() {
             var geojsonLayers = [];
             _.chain(that.parentView.collection.models)
-                .filter(function (set) { return set.get('displayed') && set.get('visible') && (set.getDatasetType() === 'geojson' || set.getDatasetType() === 'geojson-timeseries') })
+                .filter(function (set) { return set.get('displayed') && set.get('visible') && (set.getDatasetType() === 'geojson' || set.getDatasetType() === 'geojson-timeseries'); })
                 .map(function (dataset) {
                     var i;
                     var name = dataset.get('name');
                     var features = dataset.geoJsLayer.features();
                     _.chain(features)
-                        .filter(function (feature) { return feature.visible() })
+                        .filter(function (feature) { return feature.visible(); })
                         .each(function (feature) {
                             var hits = feature.pointSearch(event.geo);
                             if (hits && hits.found) {
