@@ -201,32 +201,6 @@ minerva.geojson.style = function style(geojson, visProperties) {
 };
 
 /**
- * Generate an array between minimum and maximum
- * after taking the log of the values.
- * The length of the array will be equal to numBins.
- * Array values will be equally spaced.
- *
- * @param {number} min
- * @param {number} max
- * @param {int} numBins
- * @returns {array}
- */
-minerva.geojson.logScale = function logScale(min, max, numBins) {
-    var logMin = 0;
-    if (min > 0) {
-        logMin = Math.log(min);
-    }
-
-    var logMax = Math.log(max);
-    var step = (logMax - logMin) / (numBins - 1);
-    var domain = [];
-    for (var n = 0; n <= numBins - 1; n++) {
-        domain.push(Math.exp(logMin + n * step));
-    }
-    return domain;
-};
-
-/**
  * Generate a d3-like scale function out of a colorbrewer
  * ramp name and a geojson summary object.
  *
@@ -235,8 +209,11 @@ minerva.geojson.logScale = function logScale(min, max, numBins) {
  * @param {Boolean} logFlag
  * @returns {function}
  */
-minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
-    var scale, colors, n, indices;
+minerva.geojson.colorScale = function colorScale(
+    ramp, summary,
+    logFlag, quantileFlag, clampingFlag, minClamp, maxClamp,
+    data) {
+    var scale, s, colors, n, indices;
 
     colors = colorbrewer[ramp];
     // for an invalid ramp, just return black
@@ -262,15 +239,28 @@ minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
         if (summary.min >= summary.max) {
             summary.max = summary.min + 1;
         }
-        if (logFlag) {
-            var logScale = minerva.geojson.logScale(summary.min, summary.max, n);
-            scale = d3.scale.linear()
-                .domain(logScale)
+        if (logFlag && summary.min > 0) {
+            s = d3.scale.quantize()
+                .domain([Math.log(summary.min), Math.log(summary.max)])
+                .range(colors[indices[n]]);
+            scale = function (val) {
+                return s(Math.log(val));
+            };
+        } else if (quantileFlag) {
+            scale = d3.scale.quantile()
+                .domain(data)
                 .range(colors[indices[n]]);
         } else {
-            scale = d3.scale.quantize()
-                .domain([summary.min, summary.max])
-                .range(colors[indices[n]]);
+            // linear scaling
+            if (clampingFlag) {
+                scale = d3.scale.quantize()
+                    .domain([minClamp, maxClamp])
+                    .range(colors[indices[n]]);
+            } else {
+                scale = d3.scale.quantize()
+                    .domain([summary.min, summary.max])
+                    .range(colors[indices[n]]);
+            }
         }
     }
     return scale;

@@ -18,7 +18,12 @@
             strokeColorKey: null,
             fillRamp: 'Reds',
             fillColorKey: null,
-            logFlag: false
+            logFlag: false,
+            linearFlag: true,
+            clampingFlag: false,
+            quantileFlag: false,
+            minClamp: 0,
+            maxClamp: 100000
         },
         ramps: _.map(colorbrewer, _.bind(function (ramp, name) {
             var n = "<ul class='m-color-ramp'>";
@@ -34,6 +39,38 @@
         }, {}))[0]
     });
 })();
+
+function _updateClampingPanel(radio) {
+    var radioChecked = radio.is(':checked');
+    var panel = $('#m-clamping-panel');
+    var controls = panel.find('.panel-body input');
+    var check = $('#m-enable-linear-scale-clamping');
+    if (radioChecked) {
+        if (radio.is('#m-enable-linear-scale') && check.is(':checked')) {
+            panel.removeClass('panel-default')
+                .addClass('panel-primary');
+            controls.prop('disabled', false);
+        } else {
+            panel.addClass('panel-default')
+                .removeClass('panel-primary');
+            controls.prop('disabled', true);
+        }
+    }
+}
+
+function _setScaleFlags(feature, prop, val) {
+    if (prop === 'linearFlag') {
+        feature.set('logFlag', false);
+        feature.set('quantileFlag', false);
+    } else if (prop === 'logFlag') {
+        feature.set('linearFlag', false);
+        feature.set('quantileFlag', false);
+    } else if (prop === 'quantileFlag') {
+        feature.set('linearFlag', false);
+        feature.set('logFlag', false);
+    }
+    feature.set(prop, val);
+}
 
 minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     events: {
@@ -147,6 +184,18 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
             this.$(target).collapse('toggle');
         }
     },
+    _getFeature: function (featureString) {
+        switch (featureString) {
+            case 'point':
+                return this._pointStyle;
+            case 'line':
+                return this._lineStyle;
+            case 'polygon':
+                return this._polygonStyle;
+            default:
+                throw new Error('Invalid feature type in UI');
+        }
+    },
     _updateValue: function (evt) {
         var $el = $(evt.target);
         var prop = $el.data('property');
@@ -158,29 +207,21 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
                 val = parseFloat(val);
                 break;
             case 'checkbox':
+            case 'radio':
                 val = $el.is(':checked');
                 break;
         }
-        switch ($el.data('feature')) {
-            case 'point':
-                feature = this._pointStyle;
-                break;
-            case 'line':
-                feature = this._lineStyle;
-                break;
-            case 'polygon':
-                feature = this._polygonStyle;
-                break;
-            default:
-                throw new Error('Invalid feature type in UI');
-        }
-
+        feature = this._getFeature($el.data('feature'));
         if (prop === 'strokeColorKey' || prop === 'fillColorKey') {
             if (val === 'Constant') {
                 val = null;
             }
             feature.set(prop, val);
             this.render();
+        } else if (prop === 'linearFlag' ||
+                   prop === 'logFlag' || prop === 'quantileFlag') {
+            _setScaleFlags(feature, prop, val);
+            _updateClampingPanel($el);
         } else {
             feature.set(prop, val);
         }
