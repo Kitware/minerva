@@ -1,3 +1,29 @@
 @media (min-width: 1300px)
     .m-postgres-modal.modal-lg
         width 1200px
+
+.m-postgres-modal
+    div.indent
+        margin-left 7px
+
+        label
+            font-weight normal
+
+        .form-group
+            margin-bottom 5px
+
+        .link-container
+            select, input
+                display inline-block
+                width auto
+            
+            select:not(:first-child), input:not(:first-child)
+                margin-left 3px
+        
+        .link-container:not(:first-child)
+            margin-top 3px
+
+        button
+            padding 2px
+            line-height 1.2
+            margin-left 10px

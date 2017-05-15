@@ -18,25 +18,29 @@
 ###############################################################################
 
 from girder.api import access
-from girder.api.describe import Description
+from girder.api.describe import Description, describeRoute
 from girder.api.rest import loadmodel, RestException
 from girder.constants import AccessType
-
-from girder.plugins.minerva.rest.dataset import Dataset
+from girder.api.rest import Resource
+from girder.utility import assetstore_utilities
+import json
+import os
 
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata
 
 
-class GeojsonDataset(Dataset):
+class GeojsonDataset(Resource):
+
     def __init__(self):
         self.resourceName = 'minerva_dataset_geojson'
         self.route('POST', (), self.createGeojsonDataset)
+        self.route('GET', (':id',), self.getLinkedGeojsonData)
 
     @access.user
     @loadmodel(map={'itemId': 'item'}, model='item',
                level=AccessType.WRITE)
-    def createGeojsonDataset(self, item, params, fillColorKey=None):
+    def createGeojsonDataset(self, item, params, fillColorKey=None, geometryField=None):
         user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
@@ -53,7 +57,7 @@ class GeojsonDataset(Dataset):
             if ('geojson' in file['exts'] or 'json' in file['exts'] or
                     file.get('mimeType') in (
                         'application/json', 'application/vnd.geo+json',
-                    )):
+            )):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 minerva_metadata['geojson_file'] = {
@@ -70,6 +74,8 @@ class GeojsonDataset(Dataset):
                         'polygon': {"fillColorKey": fillColorKey},
                         'point': {"fillColorKey": fillColorKey}
                     }
+                if geometryField is not None:
+                    minerva_metadata['geometryField'] = geometryField
                 break
         if 'geojson_file' not in minerva_metadata:
             raise RestException('Item contains no geojson file.')
@@ -78,6 +84,72 @@ class GeojsonDataset(Dataset):
     createGeojsonDataset.description = (
         Description('Create a Geojson Dataset from an Item.')
         .responseClass('Item')
-        .param('itemId', 'Item ID of the existing Geojson Item', required=True)
+        .param('id', 'The ID of the file.', paramType='path', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
+
+    @access.user
+    @loadmodel(model='file', level=AccessType.READ)
+    @describeRoute(
+        Description("abc.")
+        .notes("abc.")
+        .param('id', 'The ID of the file.', paramType='path')
+        .param('geometryField', '', paramType='query')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied on the parent folder.', 403)
+    )
+    def getLinkedGeojsonData(self, file, params):
+        user = self.getCurrentUser()
+
+        # if not file.get('assetstoreId'):
+        #     raise Exception()
+
+        assetstore = self.model('assetstore').load(file['assetstoreId'])
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+        something = adapter.downloadFile(
+            file, offset=0, headers=True, endByte=None,
+            contentDisposition=None, extraParameters=None)
+        something2 = list(something())
+        data = json.loads(something2[0])
+
+        geometryField = json.loads(params['geometryField'])
+
+        geometryFeatures = None
+        if geometryField['type'] == 'link':
+            if geometryField['target'] == 'state':
+                with open(os.path.join(os.path.dirname
+                                       (os.path.realpath(__file__)), 'us_states.json'), 'r') as fh:
+                    geometryFeatures = json.loads(fh.read())
+
+            valueLinks = sorted([x for x in geometryField['links']
+                                 if x['operator'] == '='])
+            constantLinks = [x for x in geometryField['links']
+                             if x['operator'] == 'constant']
+            mappedGeometries = {}
+            for feature in geometryFeatures['features']:
+                skip = False
+                for constantLink in constantLinks:
+                    if feature['properties'][constantLink['field']] != constantLink:
+                        skip = True
+                        break
+                if skip:
+                    continue
+                key = ''.join([feature['properties'][x['field']] for x in valueLinks])
+                if key in mappedGeometries:
+                    print 1
+                mappedGeometries[key] = feature['geometry']
+
+            assembled = []
+            for record in data:
+                key = ''.join([record[x['value']] for x in valueLinks])
+                if key in mappedGeometries:
+                    assembled.append({
+                        'type': 'Feature',
+                        'geometry': mappedGeometries[key],
+                        'properties': record
+                    })
+
+            return {
+                'type': 'FeatureCollection',
+                'features': assembled
+            }

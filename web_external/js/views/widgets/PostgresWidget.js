@@ -3,11 +3,21 @@ minerva.views.PostgresWidget = minerva.View.extend({
         'submit #m-postgres': 'getGeojson',
         'change #m-postgres-dataset-name': '_datasetNameChanged',
         'change #m-postgres-source': '_sourceChanged',
-        'change #m-postgres-field': '_fieldChanged'
+        'change #m-postgres-field': '_fieldChanged',
+        'change select#geometry-built-in-field': '_geometryBuiltInFieldChange',
+        'change .geometry-field-type': '_geometryFieldTypeChange',
+        'change select#link-target': '_linkTargetChange',
+        'change select.link-field': '_linkFieldChange',
+        'change select.link-operator': '_linkOperatorChange',
+        'change select.link-value,input.link-value': '_linkValueChange',
+        'click button.add-link': '_addLinkClick',
+        'click button.remove-link': '_removeLinkClick',
     },
     formToTable: {
     },
     initialize: function () {
+        this.linkFields = this.linkFields.bind(this);
+
         this.$queryBuilder = null;
 
         this.filters = null;
@@ -23,6 +33,14 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.selectedSource = null;
         this.columns = [];
         this.selectedField = null;
+
+        this.geometryFieldType = 'link';
+        this.geometryBuiltInField = null;
+        this.geometryLinks = [{}];
+        this.geometryLinkTargets = ['state'];
+        this.geometryLinkTarget = null;
+        this.linkOperators = ['=', 'constant'];
+
 
         this._getSources();
     },
@@ -63,9 +81,9 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 case 'is_not_empty':
                     return '';
                 case 'is_null':
-                    return 'null';
+                    return null;
                 case 'is_not_null':
-                    return 'null';
+                    return null;
                 case 'equal':
                 case 'not_equal':
                 case 'less':
@@ -114,15 +132,32 @@ minerva.views.PostgresWidget = minerva.View.extend({
             return;
         }
         queryFilter = buildQueryFilter(result);
+
+        var geometryFieldGenerator = function () {
+            var geometryField = {
+                type: this.geometryFieldType
+            };
+            if (this.geometryFieldType == 'built-in') {
+                geometryField['field'] = this.geometryBuiltInField
+            }
+            else if (this.geometryFieldType = 'link') {
+                geometryField['target'] = this.geometryLinkTarget;
+                geometryField['links'] = this.geometryLinks;
+            }
+            return geometryField;
+        }.bind(this);
+        link = this.geometryFieldType == 'link';
+
         girder.restRequest({
-            path: '/minerva_postgres_geojson/geojson',
+            path: link ? '/minerva_postgres_geojson/json' : '/minerva_postgres_geojson/geojson',
             type: 'GET',
             error: null,
             data: {
                 datasetName: this.datasetName,
                 table: this.selectedSource,
                 field: this.selectedField,
-                filter: JSON.stringify(queryFilter)
+                filter: JSON.stringify(queryFilter),
+                geometryField: JSON.stringify(geometryFieldGenerator())
             }
         })
             .done(function (datasetId) {
@@ -192,7 +227,16 @@ minerva.views.PostgresWidget = minerva.View.extend({
     _sourceChanged: function (e) {
         var source = $(e.target).val();
         this.selectedSource = source;
-        this._loadFilterConfiguration(source);
+        this.filters = [];
+        this.columns = [];
+        this.geometryLinkTarget = '';
+        this.geometryLinks = [];
+        if (source) {
+            this._loadFilterConfiguration(source);
+        }
+        else {
+            this.render();
+        }
     },
     _loadFilterConfiguration: function (sourceName) {
         return Promise.all([
@@ -257,7 +301,54 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }.bind(this))
     },
     _fieldChanged: function (e) {
-        var field = $(e.target).val();
-        this.selectedField = field;
+        this.selectedField = $(e.target).val();
+    },
+    _geometryBuiltInFieldChange: function (e) {
+        this.geometryBuiltInField = $(e.target).val();
+    },
+    _geometryFieldTypeChange: function (e) {
+        this.geometryFieldType = $(e.target).val();
+        this.geometryLinkTarget = '';
+        this.geometryLinks = [];
+        this.render();
+    },
+    linkFields: function () {
+        switch (this.geometryLinkTarget) {
+            case 'state':
+                return ['name', 'abbr'];
+            case 'zipcode':
+                return [];
+            default:
+                return [];
+        }
+    },
+    _linkTargetChange: function (e) {
+        this.geometryLinkTarget = $(e.target).val();
+        this.geometryLinks = [];
+        this.render();
+    },
+    _linkFieldChange: function (e) {
+        var linkIndex = $(e.target).data('link-index');
+        this.geometryLinks[linkIndex].field = $(e.target).val();
+        this.render();
+    },
+    _linkOperatorChange: function (e) {
+        var linkIndex = $(e.target).data('link-index');
+        this.geometryLinks[linkIndex].operator = $(e.target).val();
+        this.geometryLinks[linkIndex].value = '';
+        this.render();
+    },
+    _linkValueChange: function (e) {
+        var linkIndex = $(e.target).data('link-index');
+        this.geometryLinks[linkIndex].value = $(e.target).val();
+    },
+    _addLinkClick: function (e) {
+        this.geometryLinks.push({});
+        this.render();
+    },
+    _removeLinkClick: function (e) {
+        var linkIndex = $(e.currentTarget).data('link-index');
+        this.geometryLinks.splice(linkIndex, 1);
+        this.render();
     }
 });

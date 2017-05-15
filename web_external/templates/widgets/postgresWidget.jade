@@ -6,24 +6,71 @@
         h4.modal-title
           | Postgres
       .modal-body
-        .form-group(class=invalidDatasetName?"has-error":'')
+        .form-group.form-group-sm(class=invalidDatasetName?"has-error":'')
           label.control-label(for="m-postgres-dataset-name") Dataset name
             input.form-control#m-postgres-dataset-name(type='text', value=datasetName)
             if invalidDatasetName
               span.help-block required
-        .form-group
+        .form-group.form-group-sm
           label.control-label(for="m-postgres-source") Geospatial source
             select.form-control#m-postgres-source
               option
               each source in sources
-                option(value=source,selected=source==selectedSource)= source
+                option(value=source, selected=source==selectedSource)= source
         if columns.length
-          .form-group
-            label.control-label(for="m-postgres-field") Field
+          .form-group.form-group-sm
+            label.control-label(for="m-postgres-field") Value
               select.form-control#m-postgres-field
                 option
                 each column in columns
-                  option(value=column.name,selected=column.name==selectedField)= column.name
+                  option(value=column.name, selected=column.name==selectedField)= column.name
+          label Geometry
+          .indent
+            label.radio-inline.geometry-field-type
+              input(type="radio", value="link", checked=geometryFieldType=='link') 
+              | Link
+            label.radio-inline.geometry-field-type
+              input(type="radio", value="built-in", checked=geometryFieldType=='built-in')
+              | Built-in
+            if geometryFieldType=='built-in'
+              .form-group.form-group-sm
+                label.control-label(for="m-postgres-field") Field
+                  select.form-control.input-sm#geometry-built-in-field
+                    option
+                    each column in columns
+                      option(value=column.name, selected=column.name==geometryBuiltInField)= column.name
+            if geometryFieldType=='link'
+              .form-group.form-group-sm
+                label.control-label(for="m-postgres-field") Target
+                  select.form-control.input-sm#link-target
+                    option
+                    each target in geometryLinkTargets
+                      option(value=target, selected=geometryLinkTarget==target)= target
+              if geometryLinkTarget
+                label Links
+                button.btn.btn-xs.btn-success.add-link(type="button")
+                  i.icon-plus
+                each link, index in geometryLinks
+                  .link-container
+                    select.form-control.input-sm.link-field(data-link-index=index)
+                      option
+                      each linkField in linkFields()
+                        option(value=linkField, selected=link.field==linkField)= linkField
+                    if link.field
+                      select.form-control.input-sm.link-operator(data-link-index=index)
+                        option
+                        each operator in linkOperators
+                          option(value=operator, selected=link.operator==operator)= operator
+                      if link.operator=='='
+                        select.form-control.input-sm.link-value(data-link-index=index)
+                          option
+                          each column in columns
+                            option(value=column.name, selected=link.value==column.name)= column.name
+                      if link.operator=='constant'
+                        input.form-control.input-sm.link-value(type="text", value=link.value, data-link-index=index)
+                    button.btn.btn-xs.btn-danger.remove-link(type="button", data-link-index=index)
+                      i.icon-cancel
+
         .m-query-builder
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
