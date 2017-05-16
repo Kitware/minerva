@@ -101,16 +101,12 @@ class GeojsonDataset(Resource):
     def getLinkedGeojsonData(self, file, params):
         user = self.getCurrentUser()
 
-        # if not file.get('assetstoreId'):
-        #     raise Exception()
-
         assetstore = self.model('assetstore').load(file['assetstoreId'])
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-        something = adapter.downloadFile(
+        func = adapter.downloadFile(
             file, offset=0, headers=True, endByte=None,
             contentDisposition=None, extraParameters=None)
-        something2 = list(something())
-        data = json.loads(something2[0])
+        data = json.loads(''.join(list(func())))
 
         geometryField = json.loads(params['geometryField'])
 
@@ -129,7 +125,7 @@ class GeojsonDataset(Resource):
             for feature in geometryFeatures['features']:
                 skip = False
                 for constantLink in constantLinks:
-                    if feature['properties'][constantLink['field']] != constantLink:
+                    if feature['properties'][constantLink['field']] != constantLink['value']:
                         skip = True
                         break
                 if skip:
