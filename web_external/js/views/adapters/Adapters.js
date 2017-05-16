@@ -231,9 +231,9 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      */
     this._injectStyle = function (data, visProperties, summary) {
         var props = {
-            point: this._configureProperties(visProperties.point, summary),
-            line: this._configureProperties(visProperties.line, summary),
-            polygon: this._configureProperties(visProperties.polygon, summary)
+            point: this._configureProperties(data, visProperties.point, summary),
+            line: this._configureProperties(data, visProperties.line, summary),
+            polygon: this._configureProperties(data, visProperties.polygon, summary)
         };
         minerva.geojson.style(data, props);
     };
@@ -243,8 +243,8 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
      * passed into geojs's json reader.  For now, this handles generating
      * color scale functions for fill and stroke styles.
      */
-    this._configureProperties = function (style, summary) {
-        var vis = _.extend({}, style);
+    this._configureProperties = function (data, style, summary) {
+        var vis = _.extend({}, style), d, key;
         if (vis.strokeColorKey) {
             vis.strokeColor = _.compose(
                 minerva.geojson.colorScale(vis.strokeRamp, summary[vis.strokeColorKey]),
@@ -253,8 +253,15 @@ minerva.rendering.geo.GeometryRepresentation = minerva.rendering.geo.defineMapLa
         }
 
         if (vis.fillColorKey) {
+            d = [];
+            key = vis.fillColorKey;
+            data.features.forEach(function (item, index, array) {
+                d.push(item.properties[key]);
+            });
             vis.fillColor = _.compose(
-                minerva.geojson.colorScale(vis.fillRamp, summary[vis.fillColorKey], vis.logFlag),
+                minerva.geojson.colorScale(vis.fillRamp, summary[vis.fillColorKey],
+                                           vis.logFlag, vis.quantileFlag,
+                                           vis.clampingFlag, vis.minClamp, vis.maxClamp, d),
                 function (props) { return props[vis.fillColorKey]; }
             );
         }
