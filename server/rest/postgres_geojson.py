@@ -2,7 +2,7 @@ import hashlib
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
-from girder.api.rest import Resource
+from girder.api.rest import Resource, ValidationException
 from girder.utility.model_importer import ModelImporter
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
@@ -20,6 +20,8 @@ class PostgresGeojson(Resource):
         self.route('GET', ('all_values', ), self.getAllValues)
         self.route('GET', ('geojson', ), self.getGeojson)
         self.route('GET', ('json', ), self.getJSON)
+        self.route('GET', ('geometrylink', ), self.getLinkGeometryDataset)
+        self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
 
     def _getAssetstoreAdapter(self):
         # TODO: This assumes that there is exactly one assetstore that has
@@ -215,3 +217,41 @@ class PostgresGeojson(Resource):
         GeojsonDataset().createGeojsonDataset(
             itemId=resItem['_id'], fillColorKey=field, geometryField=geometryField, params={})
         return resItem['_id']
+
+    @access.user
+    @describeRoute(
+        Description("dummy")
+    )
+    def getLinkGeometryDataset(self, params):
+        currentUser = self.getCurrentUser()
+        folder = findDatasetFolder(currentUser, currentUser)
+        items = list(self.model('item').find(
+            query={'folderId': folder['_id'],
+                   'meta.minerva.dataset_type': 'geojson'},
+            fields=['name']))
+        return items
+
+    @access.user
+    @describeRoute(
+        Description("dummy2")
+        .param('itemId', 'Item id', required=True)
+    )
+    def geometryLinkField(self, params):
+        currentUser = self.getCurrentUser()
+        itemId = params['itemId']
+        item = self.model('item').load(itemId, user=currentUser)
+        files = list(self.model('item').childFiles(item))
+        if len(files) != 1:
+            raise ValidationException('the item has multiple files')
+        file = files[0]
+        assetstore = self.model('assetstore').load(file['assetstoreId'])
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+        func = adapter.downloadFile(
+            file, offset=0, headers=False, endByte=None,
+            contentDisposition=None, extraParameters=None)
+        featureCollections = json.loads(''.join(list(func())))
+        if 'features' not in featureCollections or \
+            len(featureCollections['features']) == 0 or \
+            'properties' not in featureCollections['features'][0]:
+            raise ValidationException('invalid geojson file')
+        return featureCollections['features'][0]['properties'].keys()

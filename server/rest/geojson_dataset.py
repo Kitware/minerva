@@ -104,25 +104,30 @@ class GeojsonDataset(Resource):
         assetstore = self.model('assetstore').load(file['assetstoreId'])
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         func = adapter.downloadFile(
-            file, offset=0, headers=True, endByte=None,
+            file, offset=0, headers=False, endByte=None,
             contentDisposition=None, extraParameters=None)
         data = json.loads(''.join(list(func())))
 
         geometryField = json.loads(params['geometryField'])
 
-        geometryFeatures = None
+        featureCollections = None
         if geometryField['type'] == 'link':
             if geometryField['target'] == 'state':
-                with open(os.path.join(os.path.dirname
-                                       (os.path.realpath(__file__)), 'us_states.json'), 'r') as fh:
-                    geometryFeatures = json.loads(fh.read())
+                file = list(self.model('file').find(
+                    query={'name': 'us_states.geojson'}))[0]
+                assetstore = self.model('assetstore').load(file['assetstoreId'])
+                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+                func = adapter.downloadFile(
+                    file, offset=0, headers=False, endByte=None,
+                    contentDisposition=None, extraParameters=None)
+                featureCollections = json.loads(''.join(list(func())))
 
             valueLinks = sorted([x for x in geometryField['links']
                                  if x['operator'] == '='])
             constantLinks = [x for x in geometryField['links']
                              if x['operator'] == 'constant']
             mappedGeometries = {}
-            for feature in geometryFeatures['features']:
+            for feature in featureCollections['features']:
                 skip = False
                 for constantLink in constantLinks:
                     if feature['properties'][constantLink['field']] != constantLink['value']:
