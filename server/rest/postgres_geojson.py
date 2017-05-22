@@ -105,7 +105,6 @@ class PostgresGeojson(Resource):
             'limit': 100,
             'format': 'rawdict'}
         result = list(adapter.queryDatabase(conn, queryParams)[0]())
-        print result
         return [row['value'] for row in result]
 
     @access.user
@@ -151,7 +150,6 @@ class PostgresGeojson(Resource):
         table = params['table']
         field = params['field']
         datasetName = params['datasetName']
-        limit = None
         # TODO: schema should be read from the listed table, not set explicitly
         schema = 'public'
         output_format = 'GeoJSON'
@@ -166,7 +164,7 @@ class PostgresGeojson(Resource):
         adapter = self._getAssetstoreAdapter()
         # Create the item
         dbParams = self._getQueryParams(schema, table, fields, filters,
-                                        limit, output_format)
+                                        'none', output_format)
         dbParams['tables'][0]['name'] = output_name
         del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,
@@ -195,7 +193,6 @@ class PostgresGeojson(Resource):
         field = params['field']
         geometryField = json.loads(params['geometryField'])
         datasetName = params['datasetName']
-        limit = None
         # TODO: schema should be read from the listed table, not set explicitly
         schema = 'public'
         hash = hashlib.md5(filters).hexdigest()
@@ -209,7 +206,7 @@ class PostgresGeojson(Resource):
         adapter = self._getAssetstoreAdapter()
         # Create the item
         dbParams = self._getQueryParams('public', table, fields, filters,
-                                        limit, 'json')
+                                        'none', 'json')
         dbParams['tables'][0]['name'] = output_name
         del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,

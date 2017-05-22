@@ -238,9 +238,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         if (source) {
             this._loadFilterConfiguration(source);
         }
-        else {
-            this.render();
-        }
+        this.render();
     },
     _loadFilterConfiguration: function (sourceName) {
         return Promise.all([
