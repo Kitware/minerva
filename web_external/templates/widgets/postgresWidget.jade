@@ -4,30 +4,94 @@
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
-          | Postgres
+          | Create Dataset from Database
       .modal-body
-        .form-group(class=invalidDatasetName?"has-error":'')
-          label.control-label(for="m-postgres-dataset-name") Dataset name
-            input.form-control#m-postgres-dataset-name(type='text', value=datasetName)
-            if invalidDatasetName
-              span.help-block required
-        .form-group
-          label.control-label(for="m-postgres-source") Geospatial source
+        .form-group.form-group-sm
+          label.control-label(for="m-postgres-source") Source
             select.form-control#m-postgres-source
               option
               each source in sources
-                option(value=source,selected=source==selectedSource)= source
+                option(value=source, selected=source==selectedSource)= source
         if columns.length
-          .form-group
-            label.control-label(for="m-postgres-field") Field
-              select.form-control#m-postgres-field
-                option
-                each column in columns
-                  option(value=column.name,selected=column.name==selectedField)= column.name
+          .row
+            .col-md-6
+              .form-group.form-group-sm(class=validation.datasetNameRequired?"has-error":'')
+                label.control-label(for="m-postgres-dataset-name") Dataset name
+                  input.form-control#m-postgres-dataset-name(type='text', value=datasetName)
+                  if validation.datasetNameRequired
+                    span.help-block Required
+              .form-group.form-group-sm(class=validation.valueFieldRequired?"has-error":'')
+                label.control-label(for="m-postgres-field") Value
+                  select.form-control.has-min-width#m-postgres-field
+                    option
+                    each column in columns
+                      option(value=column.name, selected=column.name==valueField)= column.name
+                  if validation.valueFieldRequired
+                    span.help-block Required
+            .col-md-6
+              label.no-margin-bottom Geometry
+              .geometry-field-container
+                label
+                  label.radio-inline.geometry-field-type
+                    input(type="radio", value="link", checked=geometryFieldType=='link') 
+                    | Link
+                  label.radio-inline.geometry-field-type
+                    input(type="radio", value="built-in", checked=geometryFieldType=='built-in')
+                    | Built-in
+                if geometryFieldType=='built-in'
+                  .form-group.form-group-sm(class=validation.geometryBuiltInFieldRequired?"has-error":'')
+                    label.control-label(for="m-postgres-field") Field
+                      select.form-control.input-sm.has-min-width#geometry-built-in-field
+                        option
+                        each column in columns
+                          option(value=column.name, selected=column.name==geometryBuiltInField)= column.name
+                      if validation.geometryBuiltInFieldRequired
+                        span.help-block Required
+                if geometryFieldType=='link'
+                  .form-group.form-group-sm(class=validation.geometryLinkTargetRequired?"has-error":'')
+                    label.control-label(for="m-postgres-field") Target
+                      select.form-control.input-sm.has-min-width.link-target
+                        option
+                        each target in geometryLink.targets
+                          option(value=target._id, selected=geometryLink.target==target)= target.name
+                      if validation.geometryLinkTargetRequired
+                        span.help-block Required
+                  if geometryLink.target
+                    label Links
+                    button.btn.btn-xs.btn-success.add-link(type="button")
+                      i.icon-plus
+                    .links
+                      each link, index in geometryLink.links
+                        .link-container
+                          select.form-control.input-sm.link-field(data-link-index=index)
+                            option
+                            each field in geometryLink.fields
+                              option(value=field, selected=link.field==field)= field
+                          if link.field
+                            select.form-control.input-sm.link-operator(data-link-index=index)
+                              option
+                              each operator in geometryLink.operators
+                                option(value=operator, selected=link.operator==operator)= operator
+                            if link.operator=='='
+                              select.form-control.input-sm.link-value(data-link-index=index)
+                                option
+                                each column in columns
+                                  option(value=column.name, selected=link.value==column.name)= column.name
+                            if link.operator=='constant'
+                              input.form-control.input-sm.link-value(type="text", value=link.value, data-link-index=index)
+                          button.btn.btn-xs.btn-danger.remove-link(type="button", data-link-index=index)
+                            i.icon-cancel
+                      if validation.geometryLinksRequired
+                        .has-error
+                          .span.help-block Required
+                      if validation.geometryLinksInvalid
+                        .has-error
+                          .span.help-block Invalid
+
         .m-query-builder
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-        button#m-get-geojson.btn.btn-small.btn-primary
+        button#m-get-geojson.btn.btn-small.btn-primary(disabled=!columns.length)
             i.icon-plus-squared
             | Get geometry
 

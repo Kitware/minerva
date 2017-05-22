@@ -185,7 +185,19 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 this.set('geoData', mm.geojson.data);
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
-        } else {
+        } else if (mm.geometryField) {
+            var path = '/minerva_dataset_geojson/' + this.get('_id');
+            girder.restRequest({
+                path: path,
+                contentType: 'application/json',
+                dataType: null
+            })
+            .done(_.bind(function (data) {
+                this.set('geoData', data);
+                this.trigger('m:dataset_geo_dataLoaded', this);
+            }, this))
+        }
+        else {
             var path = '/file/' + mm.geo_render.file_id + '/download';
             girder.restRequest({
                 path: path,
