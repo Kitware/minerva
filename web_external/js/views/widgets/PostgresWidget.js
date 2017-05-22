@@ -6,7 +6,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         'change #m-postgres-field': '_valueFieldChanged',
         'change select#geometry-built-in-field': '_geometryBuiltInFieldChange',
         'change .geometry-field-type': '_geometryFieldTypeChange',
-        'change select#link-target': '_linkTargetChange',
+        'change select.link-target': '_linkTargetChange',
         'change select.link-field': '_linkFieldChange',
         'change select.link-operator': '_linkOperatorChange',
         'change select.link-value,input.link-value': '_linkValueChange',
@@ -16,7 +16,6 @@ minerva.views.PostgresWidget = minerva.View.extend({
     formToTable: {
     },
     initialize: function () {
-        this.linkFields = this.linkFields.bind(this);
 
         this.$queryBuilder = null;
 
@@ -35,10 +34,13 @@ minerva.views.PostgresWidget = minerva.View.extend({
 
         this.geometryFieldType = 'link';
         this.geometryBuiltInField = null;
-        this.geometryLinks = [{}];
-        this.geometryLinkTargets = ['state'];
-        this.geometryLinkTarget = null;
-        this.linkOperators = ['=', 'constant'];
+        this.geometryLink = {
+            targets: [],
+            target: null,
+            fields: [],
+            links: [{}],
+            operators: ['=', 'constant']
+        };
 
         this.validation = {
             datasetNameRequired: false,
@@ -47,9 +49,10 @@ minerva.views.PostgresWidget = minerva.View.extend({
             geometryLinkTargetRequired: false,
             geometryLinksRequired: false,
             geometryLinksInvalid: false
-        }
+        };
 
         this._getSources();
+        this._loadGeometryLinks();
     },
     getGeojson: function (e) {
         e.preventDefault();
@@ -144,17 +147,15 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 geometryField['field'] = this.geometryBuiltInField
             }
             else if (this.geometryFieldType = 'link') {
-                geometryField['target'] = this.geometryLinkTarget;
-                geometryField['links'] = this.geometryLinks;
+                geometryField['itemId'] = this.geometryLink.target._id;
+                geometryField['links'] = this.geometryLink.links;
             }
             return geometryField;
         }.bind(this);
-        link = this.geometryFieldType == 'link';
 
         girder.restRequest({
-            path: link ? '/minerva_postgres_geojson/json' : '/minerva_postgres_geojson/geojson',
+            path: this.geometryFieldType == 'link' ? '/minerva_postgres_geojson/linkedgeojson' : '/minerva_postgres_geojson/geojson',
             type: 'GET',
-            error: null,
             data: {
                 datasetName: this.datasetName,
                 table: this.selectedSource,
@@ -232,8 +233,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.selectedSource = source;
         this.filters = [];
         this.columns = [];
-        this.geometryLinkTarget = '';
-        this.geometryLinks = [];
+        this.geometryLink.target = '';
+        this.geometryLink.links = [];
         if (source) {
             this._loadFilterConfiguration(source);
         }
@@ -315,68 +316,85 @@ minerva.views.PostgresWidget = minerva.View.extend({
     },
     _geometryFieldTypeChange: function (e) {
         this.geometryFieldType = $(e.target).val();
-        this.geometryLinkTarget = '';
-        this.geometryLinks = [];
+        this.geometryLink.target = '';
+        this.geometryLink.links = [];
         this.render();
     },
-    linkFields: function () {
-        switch (this.geometryLinkTarget) {
-            case 'state':
-                return ['name', 'abbr'];
-            case 'zipcode':
-                return [];
-            default:
-                return [];
-        }
-    },
     _linkTargetChange: function (e) {
-        this.geometryLinkTarget = $(e.target).val();
-        this.validation.geometryLinkTargetRequired = !this.geometryLinkTarget;
-        this.geometryLinks = [];
+        var id = $(e.target).val();
+        this.geometryLink.target = _.find(this.geometryLink.targets, function (target) {
+            return target._id == id;
+        });
+        this.validation.geometryLinkTargetRequired = !this.geometryLink.target;
+        this.geometryLink.links = [];
+        this._loadGeometryLinkField();
         this.render();
     },
     _linkFieldChange: function (e) {
         var linkIndex = $(e.target).data('link-index');
-        this.geometryLinks[linkIndex].field = $(e.target).val();
+        this.geometryLink.links[linkIndex].field = $(e.target).val();
         this.render();
     },
     _linkOperatorChange: function (e) {
         var linkIndex = $(e.target).data('link-index');
-        this.geometryLinks[linkIndex].operator = $(e.target).val();
-        this.geometryLinks[linkIndex].value = '';
+        this.geometryLink.links[linkIndex].operator = $(e.target).val();
+        this.geometryLink.links[linkIndex].value = '';
         this.render();
     },
     _linkValueChange: function (e) {
         var linkIndex = $(e.target).data('link-index');
-        this.geometryLinks[linkIndex].value = $(e.target).val();
+        this.geometryLink.links[linkIndex].value = $(e.target).val();
         this.render();
     },
     _addLinkClick: function (e) {
-        this.geometryLinks.push({});
+        this.geometryLink.links.push({});
         this.validation.geometryLinksRequired = false;
         this.render();
     },
     _removeLinkClick: function (e) {
         var linkIndex = $(e.currentTarget).data('link-index');
-        this.geometryLinks.splice(linkIndex, 1);
-        if (this.geometryLinks.length == 0) {
+        this.geometryLink.links.splice(linkIndex, 1);
+        if (this.geometryLink.links.length == 0) {
             this.validation.geometryLinksRequired = true;
         }
         this.render();
     },
+    _loadGeometryLinks: function () {
+        return Promise.resolve(girder.restRequest({
+            path: '/minerva_postgres_geojson/geometrylink',
+            type: 'GET'
+        })).then(function (links) {
+            this.geometryLink.targets = links;
+            this.render();
+        }.bind(this))
+    },
+    _loadGeometryLinkField: function () {
+        return Promise.resolve(girder.restRequest({
+            path: '/minerva_postgres_geojson/geometrylinkfields',
+            type: 'GET',
+            data: {
+                itemId: this.geometryLink.target._id
+            },
+            error: null
+        })).then(function (fields) {
+            this.geometryLink.fields = fields;
+            this.render();
+        }.bind(this)).catch(function () {
+        })
+    },
     validate: function () {
         this.validation.datasetNameRequired = !this.datasetName;
         this.validation.valueFieldRequired = !this.valueField;
-        this.validation.geometryLinkTargetRequired = (!this.geometryLinkTarget && this.geometryFieldType == 'link');
+        this.validation.geometryLinkTargetRequired = (!this.geometryLink.target && this.geometryFieldType == 'link');
         this.validation.geometryBuiltInFieldRequired = (!this.geometryBuiltInField && this.geometryFieldType == 'built-in');
-        this.validation.geometryLinksRequired = (!this.geometryLinks.length && this.geometryLinkTarget && this.geometryFieldType == 'link');
+        this.validation.geometryLinksRequired = (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType == 'link');
         this.validation.geometryLinksInvalid = false;
-        if (this.geometryFieldType == 'link' && this.geometryLinkTarget && this.geometryLinks) {
+        if (this.geometryFieldType == 'link' && this.geometryLink.target && this.geometryLink.links) {
             this.validation.geometryLinksInvalid =
-                !_.some(this.geometryLinks, function (link) {
+                !_.some(this.geometryLink.links, function (link) {
                     return link.operator == '=';
                 })
-                || _.some(this.geometryLinks, function (link) {
+                || _.some(this.geometryLink.links, function (link) {
                     return !link.field || !link.operator || !link.value;
                 })
         }

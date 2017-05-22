@@ -50,27 +50,27 @@
                 if geometryFieldType=='link'
                   .form-group.form-group-sm(class=validation.geometryLinkTargetRequired?"has-error":'')
                     label.control-label(for="m-postgres-field") Target
-                      select.form-control.input-sm.has-min-width#link-target
+                      select.form-control.input-sm.has-min-width.link-target
                         option
-                        each target in geometryLinkTargets
-                          option(value=target, selected=geometryLinkTarget==target)= target
+                        each target in geometryLink.targets
+                          option(value=target._id, selected=geometryLink.target==target)= target.name
                       if validation.geometryLinkTargetRequired
                         span.help-block Required
-                  if geometryLinkTarget
+                  if geometryLink.target
                     label Links
                     button.btn.btn-xs.btn-success.add-link(type="button")
                       i.icon-plus
                     .links
-                      each link, index in geometryLinks
+                      each link, index in geometryLink.links
                         .link-container
                           select.form-control.input-sm.link-field(data-link-index=index)
                             option
-                            each linkField in linkFields()
-                              option(value=linkField, selected=link.field==linkField)= linkField
+                            each field in geometryLink.fields
+                              option(value=field, selected=link.field==field)= field
                           if link.field
                             select.form-control.input-sm.link-operator(data-link-index=index)
                               option
-                              each operator in linkOperators
+                              each operator in geometryLink.operators
                                 option(value=operator, selected=link.operator==operator)= operator
                             if link.operator=='='
                               select.form-control.input-sm.link-value(data-link-index=index)

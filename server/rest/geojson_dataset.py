@@ -16,21 +16,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
+import json
 
 from girder.api import access
 from girder.api.describe import Description, describeRoute
-from girder.api.rest import loadmodel, RestException
+from girder.api.rest import loadmodel, RestException, GirderException
 from girder.constants import AccessType
 from girder.api.rest import Resource
 from girder.utility import assetstore_utilities
-import json
-import os
+from girder.plugins.minerva.rest.dataset import Dataset
 
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata
 
 
-class GeojsonDataset(Resource):
+class GeojsonDataset(Dataset):
 
     def __init__(self):
         self.resourceName = 'minerva_dataset_geojson'
@@ -84,23 +84,23 @@ class GeojsonDataset(Resource):
     createGeojsonDataset.description = (
         Description('Create a Geojson Dataset from an Item.')
         .responseClass('Item')
-        .param('id', 'The ID of the file.', paramType='path', required=True)
+        .param('itemId', 'Item ID of the existing Geojson Item', required=True)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
 
     @access.user
-    @loadmodel(model='file', level=AccessType.READ)
+    @loadmodel(model='item', level=AccessType.READ)
     @describeRoute(
-        Description("abc.")
-        .notes("abc.")
-        .param('id', 'The ID of the file.', paramType='path')
-        .param('geometryField', '', paramType='query')
+        Description("Get linked geojson dataset.")
+        .param('id', 'The ID of the item.', paramType='path')
         .errorResponse('ID was invalid.')
-        .errorResponse('Read access was denied on the parent folder.', 403)
+        .errorResponse('Dataset linking failed', 500)
+        .errorResponse('Dataset is empty', 500)
     )
-    def getLinkedGeojsonData(self, file, params):
+    def getLinkedGeojsonData(self, item, params):
         user = self.getCurrentUser()
-
+        file = self.model('file').load(item['meta']['minerva'][
+            'original_files'][0]['_id'], user=user)
         assetstore = self.model('assetstore').load(file['assetstoreId'])
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         func = adapter.downloadFile(
@@ -108,13 +108,13 @@ class GeojsonDataset(Resource):
             contentDisposition=None, extraParameters=None)
         data = json.loads(''.join(list(func())))
 
-        geometryField = json.loads(params['geometryField'])
+        geometryField = item['meta']['minerva']['geometryField']
 
         featureCollections = None
         if geometryField['type'] == 'link':
-            if geometryField['target'] == 'state':
-                file = list(self.model('file').find(
-                    query={'name': 'us_states.geojson'}))[0]
+            try:
+                item = self.model('item').load(geometryField['itemId'], force=True)
+                file = list(self.model('item').childFiles(item=item, limit=1))[0]
                 assetstore = self.model('assetstore').load(file['assetstoreId'])
                 adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
                 func = adapter.downloadFile(
@@ -122,23 +122,29 @@ class GeojsonDataset(Resource):
                     contentDisposition=None, extraParameters=None)
                 featureCollections = json.loads(''.join(list(func())))
 
-            valueLinks = sorted([x for x in geometryField['links']
-                                 if x['operator'] == '='])
-            constantLinks = [x for x in geometryField['links']
-                             if x['operator'] == 'constant']
-            mappedGeometries = {}
-            for feature in featureCollections['features']:
-                skip = False
-                for constantLink in constantLinks:
-                    if feature['properties'][constantLink['field']] != constantLink['value']:
-                        skip = True
-                        break
-                if skip:
-                    continue
-                key = ''.join([feature['properties'][x['field']] for x in valueLinks])
-                if key in mappedGeometries:
-                    print 1
-                mappedGeometries[key] = feature['geometry']
+                valueLinks = sorted([x for x in geometryField['links']
+                                     if x['operator'] == '='])
+                constantLinks = [x for x in geometryField['links']
+                                 if x['operator'] == 'constant']
+                mappedGeometries = {}
+                for feature in featureCollections['features']:
+                    skip = False
+                    for constantLink in constantLinks:
+                        if feature['properties'][constantLink['field']] != constantLink['value']:
+                            skip = True
+                            break
+                    if skip:
+                        continue
+                    try:
+                        key = ''.join([feature['properties'][x['field']] for x in valueLinks])
+                    except KeyError:
+                        raise GirderException('missing property for key ' +
+                                              x['field'] + ' in geometry link target geojson')
+                    mappedGeometries[key] = feature['geometry']
+            except Exception as ex:
+                if isinstance(ex, GirderException):
+                    raise ex
+                raise GirderException('Dataset linking failed.')
 
             assembled = []
             for record in data:
@@ -149,6 +155,9 @@ class GeojsonDataset(Resource):
                         'geometry': mappedGeometries[key],
                         'properties': record
                     })
+
+            if len(assembled) == 0:
+                raise GirderException('Dataset is empty')
 
             return {
                 'type': 'FeatureCollection',
