@@ -197,7 +197,25 @@ minerva.views.PostgresWidget = minerva.View.extend({
                             rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', false).removeAttr('size');
                         }
                     }
-                });
+                })
+                .on('afterUpdateRuleFilter.queryBuilder', function (e, rule) {
+                    if (!rule.filter || rule.filter.valuePopulated) {
+                        return;
+                    }
+                    Promise.resolve(girder.restRequest({
+                        path: '/minerva_postgres_geojson/values',
+                        type: 'GET',
+                        data: {
+                            table: this.selectedSource,
+                            column: rule.filter.id
+                        }
+                    })).then(function (values) {
+                        rule.filter.values = values.sort();
+                        rule.filter.valuePopulated = true;
+                        this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
+                        this.$queryBuilder[0].queryBuilder.createRuleInput(rule);
+                    }.bind(this))
+                }.bind(this));
 
             modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         }
@@ -205,7 +223,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
             this.$queryBuilder.detach();
             this.$el.html(minerva.templates.postgresWidget(this));
             this.$('.m-query-builder').replaceWith(this.$queryBuilder);
-            if (this.filters && this.filters.length) {
+            if (this.columns && this.columns.length) {
                 this.$queryBuilder.show();
             }
             else {
@@ -235,29 +253,19 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.columns = [];
         this.geometryLink.target = '';
         this.geometryLink.links = [];
-        if (source) {
-            this._loadFilterConfiguration(source);
+        if (this.selectedSource) {
+            this._loadFilterConfiguration(this.selectedSource);
         }
         this.render();
     },
     _loadFilterConfiguration: function (sourceName) {
-        return Promise.all([
-            Promise.resolve(girder.restRequest({
-                path: '/minerva_postgres_geojson/columns',
-                type: 'GET',
-                data: {
-                    table: sourceName
-                }
-            })),
-            Promise.resolve(girder.restRequest({
-                path: '/minerva_postgres_geojson/all_values',
-                type: 'GET',
-                data: {
-                    table: sourceName
-                }
-            }))
-        ]).then(function (data) {
-            var columns = data[0];
+        Promise.resolve(girder.restRequest({
+            path: '/minerva_postgres_geojson/columns',
+            type: 'GET',
+            data: {
+                table: sourceName
+            }
+        })).then(function (columns) {
             this.columns = columns;
             for (var i = 0; i < columns.length; i++) {
                 if (['number'].indexOf(columns[i].datatype) != -1) {
@@ -265,7 +273,6 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     break;
                 }
             }
-            var values = data[1];
             var filters = [];
             var convertFilterType = function (dataType) {
                 switch (dataType) {
@@ -289,7 +296,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 filter['type'] = filterType;
                 if (filterType == 'string') {
                     filter['multiple'] = true;
-                    filter['values'] = values[columns[i].name].sort();
+                    filter['values'] = ['loading...'];
                     filter['input'] = 'select';
                 }
                 filters.push(filter);

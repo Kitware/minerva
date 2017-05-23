@@ -164,7 +164,7 @@ class PostgresGeojson(Resource):
         adapter = self._getAssetstoreAdapter()
         # Create the item
         dbParams = self._getQueryParams(schema, table, fields, filters,
-                                        'none', output_format)
+                                        50000, output_format)
         dbParams['tables'][0]['name'] = output_name
         del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,
@@ -206,7 +206,7 @@ class PostgresGeojson(Resource):
         adapter = self._getAssetstoreAdapter()
         # Create the item
         dbParams = self._getQueryParams('public', table, fields, filters,
-                                        'none', 'json')
+                                        50000, 'json')
         dbParams['tables'][0]['name'] = output_name
         del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,
