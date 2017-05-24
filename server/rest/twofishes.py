@@ -1,4 +1,6 @@
 import requests
+from shapely.wkt import loads
+from shapely.geometry import mapping
 
 from girder.api import access
 from girder.api.describe import Description
@@ -16,7 +18,8 @@ class TwoFishes(Resource):
         r = requests.get(params['twofishes'],
                          params={'query': params['location'],
                                  'responseIncludes': 'WKT_GEOMETRY'})
-        return r.json()
+        wkt = r.json()['interpretations'][0]['feature']['geometry']['wktGeometry']
+        return mapping(loads(wkt))
 
     geocode.description = (
         Description('Get geojson for a given location name')
