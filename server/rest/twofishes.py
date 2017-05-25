@@ -17,11 +17,11 @@ class TwoFishes(Resource):
     def __init__(self):
         self.resourceName = 'minerva_geocoder'
         self.route('GET', (), self.geocode)
-        self.route('POST', (), self.createGeoJsonItem)
+        self.route('POST', (), self.createGeojsonItem)
         self.route('GET', ('autocomplete',), self.autocomplete)
 
     @staticmethod
-    def getGeoJsonFromTwoFishes(params):
+    def getGeojsonFromTwoFishes(params):
         r = requests.get(params['twofishes'],
                          params={'query': params['location'],
                                  'responseIncludes': 'WKT_GEOMETRY'})
@@ -30,7 +30,7 @@ class TwoFishes(Resource):
 
     @access.public
     def geocode(self, params):
-        geojson = TwoFishes.getGeoJsonFromTwoFishes(params)
+        geojson = TwoFishes.getGeojsonFromTwoFishes(params)
         return geojson
 
     geocode.description = (
@@ -40,8 +40,8 @@ class TwoFishes(Resource):
     )
 
     @access.public
-    def createGeoJsonItem(self, params):
-        geojson = TwoFishes.getGeoJsonFromTwoFishes(params)
+    def createGeojsonItem(self, params):
+        geojson = TwoFishes.getGeojsonFromTwoFishes(params)
         output = StringIO.StringIO(json.dumps(geojson))
         outputSize = output.len
         user = self.getCurrentUser()
@@ -56,7 +56,7 @@ class TwoFishes(Resource):
                                               params={})
         return geojsonFile
 
-    createGeoJsonItem.description = (
+    createGeojsonItem.description = (
         Description('Create a minerva dataset from the search result')
         .param('twofishes', 'Twofishes url')
         .param('location', 'Location name to get a geojson')
