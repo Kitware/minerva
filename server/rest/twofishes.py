@@ -3,7 +3,7 @@ import StringIO
 
 import requests
 from shapely.wkt import loads
-from shapely.geometry import mapping
+from shapely.geometry import mapping, MultiPolygon
 
 from girder.api import access
 from girder.api.describe import Description
@@ -16,51 +16,62 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 class TwoFishes(Resource):
     def __init__(self):
         self.resourceName = 'minerva_geocoder'
-        self.route('GET', (), self.geocode)
-        self.route('POST', (), self.createGeojsonItem)
         self.route('GET', ('autocomplete',), self.autocomplete)
+        self.route('GET', ('geojson',), self.getGeojson)
+        self.route('GET', ('multi_geojson',), self.getMultiGeojson)
+        self.route('POST', ('geojson',), self.postGeojson)
 
     @staticmethod
-    def getGeojsonFromTwoFishes(params):
-        r = requests.get(params['twofishes'],
-                         params={'query': params['location'],
+    def getWktFromTwoFishes(twofishes, location):
+        """Gets wkt from twofishes for a given location"""
+        r = requests.get(twofishes,
+                         params={'query': location,
                                  'responseIncludes': 'WKT_GEOMETRY'})
         wkt = r.json()['interpretations'][0]['feature']['geometry']['wktGeometry']
-        return mapping(loads(wkt))
 
-    @access.public
-    def geocode(self, params):
-        geojson = TwoFishes.getGeojsonFromTwoFishes(params)
-        return geojson
+        return wkt
 
-    geocode.description = (
-        Description('Get geojson for a given location name')
-        .param('twofishes', 'Twofishes url')
-        .param('location', 'Location name to get a geojson')
-    )
+    @staticmethod
+    def createGeometryFromWkt(wkt):
+        """Creates a shapely geometry from wkt"""
+        return loads(wkt)
 
-    @access.public
-    def createGeojsonItem(self, params):
-        geojson = TwoFishes.getGeojsonFromTwoFishes(params)
-        output = StringIO.StringIO(json.dumps(geojson))
+    @staticmethod
+    def createGeojson(twofishes, location):
+        """Create geojson for a given location and twofishes url"""
+        wkt = TwoFishes.getWktFromTwoFishes(twofishes, location)
+        geometry = TwoFishes.createGeometryFromWkt(wkt)
+        return mapping(geometry)
+
+    @staticmethod
+    def createMultiGeojson(twofishes, locations):
+        """Create geojson for given locations and twofishes url"""
+        geoms = []
+
+        for i in locations:
+            wkt = TwoFishes.getWktFromTwoFishes(twofishes, i)
+            geom = TwoFishes.createGeometryFromWkt(wkt)
+            for g in geom:
+                geoms.append(g)
+
+        multiPoly = MultiPolygon(geoms)
+
+        return mapping(multiPoly)
+
+    def createMinervaDataset(self, geojsonString, name):
+        """Creates a dataset from a geojson string"""
+        output = StringIO.StringIO(json.dumps(geojsonString))
         outputSize = output.len
         user = self.getCurrentUser()
         datasetFolder = findDatasetFolder(user, user)
         itemModel = ModelImporter.model('item')
         uploadModel = ModelImporter.model('upload')
-        fileName = '{}.geojson'.format(params['location'])
-        item = itemModel.createItem(fileName, user, datasetFolder)
-        geojsonFile = uploadModel.uploadFromFile(output, outputSize, fileName,
+        item = itemModel.createItem(name, user, datasetFolder)
+        geojsonFile = uploadModel.uploadFromFile(output, outputSize, name,
                                                  'item', item, user)
         GeojsonDataset().createGeojsonDataset(itemId=geojsonFile['itemId'],
                                               params={})
         return geojsonFile
-
-    createGeojsonItem.description = (
-        Description('Create a minerva dataset from the search result')
-        .param('twofishes', 'Twofishes url')
-        .param('location', 'Location name to get a geojson')
-    )
 
     @access.public
     def autocomplete(self, params):
@@ -76,4 +87,49 @@ class TwoFishes(Resource):
         Description('Autocomplete result for a given location name')
         .param('twofishes', 'Twofishes url')
         .param('location', 'Location name to autocomplete')
+    )
+
+    @access.public
+    def getGeojson(self, params):
+        geojson = TwoFishes.createGeojson(params['twofishes'],
+                                          params['location'])
+
+        return geojson
+
+    getGeojson.description = (
+        Description('Get a geojson string for a given location')
+        .param('twofishes', 'Twofishes url')
+        .param('location', 'Location name')
+    )
+
+    @access.public
+    def getMultiGeojson(self, params):
+        locations = json.loads(params['locations'])
+        geojson = TwoFishes.createMultiGeojson(params['twofishes'], locations)
+        return geojson
+
+    getMultiGeojson.description = (
+        Description('Create a geojson string from multiple locations')
+        .param('twofishes', 'Twofishes url')
+        .param('locations', 'List of locations', dataType='list')
+    )
+
+    @access.public
+    def postGeojson(self, params):
+        twofishes = params['twofishes']
+        try:
+            locationInfo = json.loads(params['locations'])
+            geojson = TwoFishes.createMultiGeojson(twofishes, locationInfo)
+        except ValueError:
+            locationInfo = params['locations']
+            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
+
+        minervaDataset = self.createMinervaDataset(geojson, params['name'])
+        return minervaDataset
+
+    postGeojson.description = (
+        Description('Create a minerva dataset from the search result/results')
+        .param('twofishes', 'Twofishes url')
+        .param('locations', 'Location name or list of locations to get a geojson')
+        .param('name', 'Name for the geojson dataset')
     )
