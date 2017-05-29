@@ -157,7 +157,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }.bind(this);
 
         girder.restRequest({
-            path: this.geometryFieldType == 'link' ? '/minerva_postgres_geojson/linkedgeojson' : '/minerva_postgres_geojson/geojson',
+            path: '/minerva_postgres_geojson/geojson',
             type: 'POST',
             data: {
                 datasetName: this.datasetName,
@@ -239,7 +239,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         var datatype = this.columns.find(function (c) { return c.name === this.valueField }.bind(this)).datatype;
         var funcs = [];
         if (datatype == 'number') {
-            funcs = funcs.concat(['sum', 'avg']);
+            funcs = funcs.concat(['sum', 'avg', 'stddev', 'variance']);
         }
         if (datatype === 'string' || datatype == 'number') {
             funcs = funcs.concat(['count', 'max', 'min']);
@@ -405,7 +405,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
             this.geometryLink.fields = fields;
             this.render();
         }.bind(this)).catch(function () {
-        })
+            this.geometryLink.fields = [];
+        }.bind(this));
     },
     validate: function () {
         this.validation.datasetNameRequired = !this.datasetName;

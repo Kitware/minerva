@@ -35,15 +35,16 @@
                       each func in getAvailableAggregateFunctions()
                         option(value=func, selected=aggregateFunction==func)= func
             .col-md-6
-              label.no-margin-bottom Geometry
-              .geometry-field-container
-                label
-                  label.radio-inline.geometry-field-type
-                    input(type="radio", value="link", checked=geometryFieldType=='link') 
-                    | Link
-                  label.radio-inline.geometry-field-type
-                    input(type="radio", value="built-in", checked=geometryFieldType=='built-in')
-                    | Built-in
+              .m-geometry-field-container
+                .form-group
+                  label Geometry
+                    div.m-link-checkbox-container
+                      label.radio-inline.geometry-field-type
+                        input(type="radio", value="link", checked=geometryFieldType=='link') 
+                        | Link
+                      label.radio-inline.geometry-field-type
+                        input(type="radio", value="built-in", checked=geometryFieldType=='built-in')
+                        | Built-in
                 if geometryFieldType=='built-in'
                   .form-group.form-group-sm(class=validation.geometryBuiltInFieldRequired?"has-error":'')
                     label.control-label(for="m-postgres-field") Field
@@ -68,9 +69,9 @@
                       i.icon-plus
                     .links
                       each link, index in geometryLink.links
-                        .link-container
+                        .m-link-container
                           select.form-control.input-sm.link-field(data-link-index=index)
-                            option
+                            option(value='')= '--Source--'
                             each field in geometryLink.fields
                               option(value=field, selected=link.field==field)= field
                           if link.field
@@ -80,7 +81,7 @@
                                 option(value=operator, selected=link.operator==operator)= operator
                             if link.operator=='='
                               select.form-control.input-sm.link-value(data-link-index=index)
-                                option
+                                option(value='')= '--Target--'
                                 each column in columns
                                   option(value=column.name, selected=link.value==column.name)= column.name
                             if link.operator=='constant'
