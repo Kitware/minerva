@@ -28,6 +28,12 @@
                       option(value=column.name, selected=column.name==valueField)= column.name
                   if validation.valueFieldRequired
                     span.help-block Required
+              if valueField
+                .form-group.form-group-sm
+                  label.control-label(for="m-postgres-aggregation") Aggregate method
+                    select.form-control.has-min-width#m-postgres-aggregation
+                      each func in getAvailableAggregateFunctions()
+                        option(value=func, selected=aggregateFunction==func)= func
             .col-md-6
               label.no-margin-bottom Geometry
               .geometry-field-container

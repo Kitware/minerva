@@ -4,6 +4,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         'change #m-postgres-source': '_sourceChanged',
         'change #m-postgres-dataset-name': '_datasetNameChanged',
         'change #m-postgres-field': '_valueFieldChanged',
+        'change select#m-postgres-aggregation': '_aggregationFunctionChanged',
         'change select#geometry-built-in-field': '_geometryBuiltInFieldChange',
         'change .geometry-field-type': '_geometryFieldTypeChange',
         'change select.link-target': '_linkTargetChange',
@@ -16,6 +17,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
     formToTable: {
     },
     initialize: function () {
+        this.getAvailableAggregateFunctions = this.getAvailableAggregateFunctions.bind(this);
 
         this.$queryBuilder = null;
 
@@ -31,6 +33,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.selectedSource = null;
         this.columns = [];
         this.valueField = null;
+        this.aggregateFunction = null;
 
         this.geometryFieldType = 'link';
         this.geometryBuiltInField = null;
@@ -155,11 +158,12 @@ minerva.views.PostgresWidget = minerva.View.extend({
 
         girder.restRequest({
             path: this.geometryFieldType == 'link' ? '/minerva_postgres_geojson/linkedgeojson' : '/minerva_postgres_geojson/geojson',
-            type: 'GET',
+            type: 'POST',
             data: {
                 datasetName: this.datasetName,
                 table: this.selectedSource,
                 field: this.valueField,
+                aggregateFunction: this.aggregateFunction,
                 filter: JSON.stringify(queryFilter),
                 geometryField: JSON.stringify(geometryFieldGenerator())
             }
@@ -231,6 +235,17 @@ minerva.views.PostgresWidget = minerva.View.extend({
             }
         }
     },
+    getAvailableAggregateFunctions: function () {
+        var datatype = this.columns.find(function (c) { return c.name === this.valueField }.bind(this)).datatype;
+        var funcs = [];
+        if (datatype == 'number') {
+            funcs = funcs.concat(['sum', 'avg']);
+        }
+        if (datatype === 'string' || datatype == 'number') {
+            funcs = funcs.concat(['count', 'max', 'min']);
+        }
+        return funcs;
+    },
     _getSources: function () {
         Promise.resolve(girder.restRequest({
             path: '/minerva_postgres_geojson/tables',
@@ -273,6 +288,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     break;
                 }
             }
+            this.aggregateFunction = this.getAvailableAggregateFunctions()[0];
             var filters = [];
             var convertFilterType = function (dataType) {
                 switch (dataType) {
@@ -312,7 +328,11 @@ minerva.views.PostgresWidget = minerva.View.extend({
     _valueFieldChanged: function (e) {
         this.valueField = $(e.target).val();
         this.validation.valueFieldRequired = !this.valueField;
+        this.aggregateFunction = this.getAvailableAggregateFunctions()[0];
         this.render();
+    },
+    _aggregationFunctionChanged: function (e) {
+        this.aggregateFunction = $(e.target).val();
     },
     _geometryBuiltInFieldChange: function (e) {
         this.geometryBuiltInField = $(e.target).val();
