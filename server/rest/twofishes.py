@@ -1,9 +1,9 @@
 import json
 import StringIO
 
+import geojson
 import requests
 from shapely.wkt import loads
-from shapely.geometry import mapping, MultiPolygon
 
 from girder.api import access
 from girder.api.describe import Description
@@ -44,11 +44,12 @@ class TwoFishes(Resource):
             wkt = TwoFishes.getWktFromTwoFishes(twofishes, i)
             geom = TwoFishes.createGeometryFromWkt(wkt)
             for g in geom:
-                geoms.append(g)
+                geoms.append(geojson.Feature(geometry=g,
+                                             properties={'location': i}))
 
-        multiPoly = MultiPolygon(geoms)
+        multiPoly = geojson.FeatureCollection(geoms)
 
-        return mapping(multiPoly)
+        return multiPoly
 
     def createMinervaDataset(self, geojsonString, name):
         """Creates a dataset from a geojson string"""
