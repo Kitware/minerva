@@ -18,7 +18,6 @@ class TwoFishes(Resource):
         self.resourceName = 'minerva_geocoder'
         self.route('GET', ('autocomplete',), self.autocomplete)
         self.route('GET', ('geojson',), self.getGeojson)
-        self.route('GET', ('multi_geojson',), self.getMultiGeojson)
         self.route('POST', ('geojson',), self.postGeojson)
 
     @staticmethod
@@ -37,14 +36,7 @@ class TwoFishes(Resource):
         return loads(wkt)
 
     @staticmethod
-    def createGeojson(twofishes, location):
-        """Create geojson for a given location and twofishes url"""
-        wkt = TwoFishes.getWktFromTwoFishes(twofishes, location)
-        geometry = TwoFishes.createGeometryFromWkt(wkt)
-        return mapping(geometry)
-
-    @staticmethod
-    def createMultiGeojson(twofishes, locations):
+    def createGeojson(twofishes, locations):
         """Create geojson for given locations and twofishes url"""
         geoms = []
 
@@ -91,24 +83,11 @@ class TwoFishes(Resource):
 
     @access.public
     def getGeojson(self, params):
-        geojson = TwoFishes.createGeojson(params['twofishes'],
-                                          params['location'])
-
+        locations = json.loads(params['locations'])
+        geojson = TwoFishes.createGeojson(params['twofishes'], locations)
         return geojson
 
     getGeojson.description = (
-        Description('Get a geojson string for a given location')
-        .param('twofishes', 'Twofishes url')
-        .param('location', 'Location name')
-    )
-
-    @access.public
-    def getMultiGeojson(self, params):
-        locations = json.loads(params['locations'])
-        geojson = TwoFishes.createMultiGeojson(params['twofishes'], locations)
-        return geojson
-
-    getMultiGeojson.description = (
         Description('Create a geojson string from multiple locations')
         .param('twofishes', 'Twofishes url')
         .param('locations', 'List of locations', dataType='list')
@@ -119,7 +98,7 @@ class TwoFishes(Resource):
         twofishes = params['twofishes']
         try:
             locationInfo = json.loads(params['locations'])
-            geojson = TwoFishes.createMultiGeojson(twofishes, locationInfo)
+            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
         except ValueError:
             locationInfo = params['locations']
             geojson = TwoFishes.createGeojson(twofishes, locationInfo)
