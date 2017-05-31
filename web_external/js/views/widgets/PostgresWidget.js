@@ -12,11 +12,13 @@ minerva.views.PostgresWidget = minerva.View.extend({
         'change select.link-operator': '_linkOperatorChange',
         'change select.link-value,input.link-value': '_linkValueChange',
         'click button.add-link': '_addLinkClick',
-        'click button.remove-link': '_removeLinkClick',
+        'click button.remove-link': '_removeLinkClick'
     },
     formToTable: {
     },
     initialize: function () {
+        this.primativeColumns = this.primativeColumns.bind(this);
+        this.geometryColumns = this.geometryColumns.bind(this);
         this.getAvailableAggregateFunctions = this.getAvailableAggregateFunctions.bind(this);
 
         this.$queryBuilder = null;
@@ -106,6 +108,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     if (Array.isArray(value)) {
                         return value[0];
                     }
+                    return value;
                 default:
                     return value;
             }
@@ -126,30 +129,27 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 for (var i = 0; i < element.rules.length; i++) {
                     group.push(buildQueryFilter(element.rules[i]));
                 }
-            }
-            else {
+            } else {
                 expression['field'] = element.field;
                 expression['operator'] = operatorConverter(element.operator);
                 expression['value'] = valueConverter(element.operator, element.value);
             }
             return expression;
         };
-        var filters = [];
         var result = this.$queryBuilder[0].queryBuilder.getRules();
         if (!result | !this.validate()) {
             return;
         }
 
-        queryFilter = buildQueryFilter(result);
+        var queryFilter = buildQueryFilter(result);
 
         var geometryFieldGenerator = function () {
             var geometryField = {
                 type: this.geometryFieldType
             };
-            if (this.geometryFieldType == 'built-in') {
-                geometryField['field'] = this.geometryBuiltInField
-            }
-            else if (this.geometryFieldType = 'link') {
+            if (this.geometryFieldType === 'built-in') {
+                geometryField['field'] = this.geometryBuiltInField;
+            } else if (this.geometryFieldType === 'link') {
                 geometryField['itemId'] = this.geometryLink.target._id;
                 geometryField['links'] = this.geometryLink.links;
             }
@@ -157,7 +157,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }.bind(this);
 
         girder.restRequest({
-            path: '/minerva_postgres_geojson/geojson',
+            path: '/minerva_postgres_geojson',
             type: 'POST',
             data: {
                 datasetName: this.datasetName,
@@ -193,11 +193,10 @@ minerva.views.PostgresWidget = minerva.View.extend({
             })
                 .hide()
                 .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder', function (e, rule) {
-                    if (rule.filter.input == 'select') {
+                    if (rule.filter.input === 'select') {
                         if (rule.operator.multiple) {
                             rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', true).attr('size', 5);
-                        }
-                        else {
+                        } else {
                             rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', false).removeAttr('size');
                         }
                     }
@@ -218,30 +217,34 @@ minerva.views.PostgresWidget = minerva.View.extend({
                         rule.filter.valuePopulated = true;
                         this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
                         this.$queryBuilder[0].queryBuilder.createRuleInput(rule);
-                    }.bind(this))
+                    }.bind(this));
                 }.bind(this));
 
             modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
-        }
-        else {
+        } else {
             this.$queryBuilder.detach();
             this.$el.html(minerva.templates.postgresWidget(this));
             this.$('.m-query-builder').replaceWith(this.$queryBuilder);
             if (this.columns && this.columns.length) {
                 this.$queryBuilder.show();
-            }
-            else {
+            } else {
                 this.$queryBuilder.hide();
             }
         }
     },
+    primativeColumns: function () {
+        return this.columns.filter(function (column) { return column.datatype !== 'geometry'; });
+    },
+    geometryColumns: function () {
+        return this.columns.filter(function (column) { return column.datatype === 'geometry'; });
+    },
     getAvailableAggregateFunctions: function () {
-        var datatype = this.columns.find(function (c) { return c.name === this.valueField }.bind(this)).datatype;
+        var datatype = this.columns.find(function (c) { return c.name === this.valueField; }.bind(this)).datatype;
         var funcs = [];
-        if (datatype == 'number') {
+        if (datatype === 'number' || datatype === 'date') {
             funcs = funcs.concat(['sum', 'avg', 'stddev', 'variance']);
         }
-        if (datatype === 'string' || datatype == 'number') {
+        if (datatype === 'string' || datatype === 'number') {
             funcs = funcs.concat(['count', 'max', 'min']);
         }
         return funcs;
@@ -283,7 +286,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         })).then(function (columns) {
             this.columns = columns;
             for (var i = 0; i < columns.length; i++) {
-                if (['number'].indexOf(columns[i].datatype) != -1) {
+                if (['number'].indexOf(columns[i].datatype) !== -1) {
                     this.valueField = columns[i].name;
                     break;
                 }
@@ -301,16 +304,16 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     default:
                         return undefined;
                 }
-            }
-            for (var i = 0; i < columns.length; i++) {
+            };
+            for (var j = 0; j < columns.length; j++) {
                 var filter = {};
-                var filterType = convertFilterType(columns[i].datatype);
+                var filterType = convertFilterType(columns[j].datatype);
                 if (!filterType) {
                     continue;
                 }
-                filter['id'] = columns[i].name;
+                filter['id'] = columns[j].name;
                 filter['type'] = filterType;
-                if (filterType == 'string') {
+                if (filterType === 'string') {
                     filter['multiple'] = true;
                     filter['values'] = ['loading...'];
                     filter['input'] = 'select';
@@ -323,7 +326,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                 this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
             }
             this.render();
-        }.bind(this))
+        }.bind(this));
     },
     _valueFieldChanged: function (e) {
         this.valueField = $(e.target).val();
@@ -347,8 +350,8 @@ minerva.views.PostgresWidget = minerva.View.extend({
     },
     _linkTargetChange: function (e) {
         var id = $(e.target).val();
-        this.geometryLink.target = _.find(this.geometryLink.targets, function (target) {
-            return target._id == id;
+        this.geometryLink.target = this.geometryLink.targets.find(function (target) {
+            return target._id === id;
         });
         this.validation.geometryLinkTargetRequired = !this.geometryLink.target;
         this.geometryLink.links = [];
@@ -379,7 +382,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
     _removeLinkClick: function (e) {
         var linkIndex = $(e.currentTarget).data('link-index');
         this.geometryLink.links.splice(linkIndex, 1);
-        if (this.geometryLink.links.length == 0) {
+        if (this.geometryLink.links.length === 0) {
             this.validation.geometryLinksRequired = true;
         }
         this.render();
@@ -391,7 +394,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         })).then(function (links) {
             this.geometryLink.targets = links;
             this.render();
-        }.bind(this))
+        }.bind(this));
     },
     _loadGeometryLinkField: function () {
         return Promise.resolve(girder.restRequest({
@@ -411,20 +414,21 @@ minerva.views.PostgresWidget = minerva.View.extend({
     validate: function () {
         this.validation.datasetNameRequired = !this.datasetName;
         this.validation.valueFieldRequired = !this.valueField;
-        this.validation.geometryLinkTargetRequired = (!this.geometryLink.target && this.geometryFieldType == 'link');
-        this.validation.geometryBuiltInFieldRequired = (!this.geometryBuiltInField && this.geometryFieldType == 'built-in');
-        this.validation.geometryLinksRequired = (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType == 'link');
+        this.validation.geometryLinkTargetRequired = (!this.geometryLink.target && this.geometryFieldType === 'link');
+        this.validation.geometryBuiltInFieldRequired = (!this.geometryBuiltInField && this.geometryFieldType === 'built-in');
+        this.validation.geometryLinksRequired = (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType === 'link');
         this.validation.geometryLinksInvalid = false;
-        if (this.geometryFieldType == 'link' && this.geometryLink.target && this.geometryLink.links) {
+        if (this.geometryFieldType === 'link' && this.geometryLink.target && this.geometryLink.links) {
             this.validation.geometryLinksInvalid =
-                !_.some(this.geometryLink.links, function (link) {
-                    return link.operator == '=';
-                })
-                || _.some(this.geometryLink.links, function (link) {
+                // needs to have at least on equal linking for joining
+                !this.geometryLink.links.find(function (link) {
+                    return link.operator === '=';
+                }) ||
+                _.some(this.geometryLink.links, function (link) {
                     return !link.field || !link.operator || !link.value;
-                })
+                });
         }
         this.render();
-        return !_.some(_.values(this.validation), function (value) { return value });
+        return !_.some(_.values(this.validation), function (value) { return value; });
     }
 });

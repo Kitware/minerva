@@ -24,7 +24,7 @@
                 label.control-label(for="m-postgres-field") Value
                   select.form-control.has-min-width#m-postgres-field
                     option
-                    each column in columns
+                    each column in primativeColumns()
                       option(value=column.name, selected=column.name==valueField)= column.name
                   if validation.valueFieldRequired
                     span.help-block Required
@@ -50,7 +50,7 @@
                     label.control-label(for="m-postgres-field") Field
                       select.form-control.input-sm.has-min-width#geometry-built-in-field
                         option
-                        each column in columns
+                        each column in geometryColumns()
                           option(value=column.name, selected=column.name==geometryBuiltInField)= column.name
                       if validation.geometryBuiltInFieldRequired
                         span.help-block Required
@@ -71,7 +71,7 @@
                       each link, index in geometryLink.links
                         .m-link-container
                           select.form-control.input-sm.link-field(data-link-index=index)
-                            option(value='')= '--Source--'
+                            option(value='')= '--Target--'
                             each field in geometryLink.fields
                               option(value=field, selected=link.field==field)= field
                           if link.field
@@ -81,7 +81,7 @@
                                 option(value=operator, selected=link.operator==operator)= operator
                             if link.operator=='='
                               select.form-control.input-sm.link-value(data-link-index=index)
-                                option(value='')= '--Target--'
+                                option(value='')= '--Source--'
                                 each column in columns
                                   option(value=column.name, selected=link.value==column.name)= column.name
                             if link.operator=='constant'
