@@ -326,7 +326,7 @@ describe('geojson', function () {
 
                 expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
             });
-            it('value range', function () {
+            it('linear scale', function () {
                 var scale = minerva.geojson.colorScale('Reds', {
                     min: 0,
                     max: 100
@@ -334,6 +334,37 @@ describe('geojson', function () {
 
                 expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
+            });
+            it('log scale', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    min: 1,
+                    max: 100
+                }, true, false, false);
+                expect(scale(1)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(10)).toBe(colorbrewer.Reds[9][4]);
+                expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
+            });
+            it('linear scale with clamping', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    min: 20,
+                    max: 80
+                }, false, false, true, 20, 80);
+                expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(20)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(80)).toBe(colorbrewer.Reds[9][8]);
+                expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
+            });
+            it('quantile scale', function () {
+                var scale = minerva.geojson.colorScale('Reds', {
+                    min: 1,
+                    max: 1001
+                }, false, true, false, null, null, [1,2, 3,4, 5,6, 6,8, 9,10, 11,12, 13,14, 15,16, 1000,1001]);
+                expect(scale(1)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(2)).toBe(colorbrewer.Reds[9][0]);
+                expect(scale(15)).toBe(colorbrewer.Reds[9][7]);
+                expect(scale(16)).toBe(colorbrewer.Reds[9][7]);
+                expect(scale(1000)).toBe(colorbrewer.Reds[9][8]);
+                expect(scale(1001)).toBe(colorbrewer.Reds[9][8]);
             });
         });
         describe('string values', function () {
@@ -384,21 +415,6 @@ describe('geojson', function () {
                         }
                     }]
             }, 'Point')).toEqual([{geometry: {type: 'Point'}}]);
-        });
-    });
-    describe('logScale', function () {
-        it('logScale', function () {
-            var domain = minerva.geojson.logScale(1, 100, 3);
-            expect(domain.length).toBe(3);
-            expect(domain[0]).toBeCloseTo(1, 6);
-            expect(domain[1]).toBeCloseTo(10, 6);
-            expect(domain[2]).toBeCloseTo(100, 6);
-        });
-        it('nonZeroLog', function () {
-            var domain = minerva.geojson.logScale(0, 100, 3);
-            expect(domain[0]).toBeCloseTo(1, 6);
-            expect(domain[1]).toBeCloseTo(10, 6);
-            expect(domain[2]).toBeCloseTo(100, 6);
         });
     });
 });

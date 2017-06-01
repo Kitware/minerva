@@ -135,7 +135,38 @@ ul.nav.nav-tabs
         .panel-body
           +color('Color', polygon, 'polygon', 'fillColor', polygon.fill, 'fillColorKey', 'fillRamp')
           +range('Opacity', 0, 1, 0.01, polygon, 'polygon', 'fillOpacity', polygon.fill)
-          .checkbox(style='display:inline')
-            label
-              input#m-enable-log-scale(type='checkbox' checked=polygon.logFlag, data-feature='polygon', data-property='logFlag')
-              | Logarithmic Scale
+          .form-group
+            label.control-label.col-md-3
+              | Scale
+            .col-md-9
+              .radio-inline
+                label
+                  input#m-enable-linear-scale(name='colormap-scale' type='radio' checked=polygon.linearFlag, data-feature='polygon', data-property='linearFlag')
+                  | Linear
+              .radio-inline
+                label
+                  input#m-enable-log-scale(name='colormap-scale' type='radio' checked=polygon.logFlag, data-feature='polygon', data-property='logFlag')
+                  | Logarithmic
+              .radio-inline
+                label
+                  input#m-enable-quantile-scale(name='colormap-scale' type='radio' checked=polygon.quantileFlag, data-feature='polygon', data-property='quantileFlag')
+                  | Quantile
+    - var clampingEnabled = polygon.clampingFlag && polygon.linearFlag
+    .panel#m-clamping-panel(class={'panel-default': !clampingEnabled, 'panel-primary': clampingEnabled})
+      .panel-heading(data-target='#m-polygon-clamping-control')
+        .checkbox(style='display:block')
+          label
+            input#m-enable-linear-scale-clamping.m-toggle-panel(type='checkbox' checked=polygon.clampingFlag, data-feature='polygon', data-property='clampingFlag')
+            | Clamping
+      #m-polygon-clamping-control.m-optional-panel.collapse(class={in: polygon.clampingFlag})
+        .panel-body
+          .form-group
+            label.control-label.col-md-3
+              | Minimum
+            .col-md-9
+              input#m-linear-scale-min-clamp.form-control.col-md-9(type='text' value=polygon.minClamp, data-feature='polygon' data-property='minClamp' disabled=!clampingEnabled)
+          .form-group
+            label.control-label.col-md-3
+              | Maximum
+            .col-md-9
+              input#m-linear-scale-max-clamp.form-control.col-md-9(type='text' value=polygon.maxClamp, data-feature='polygon' data-property='maxClamp' disabled=!clampingEnabled)

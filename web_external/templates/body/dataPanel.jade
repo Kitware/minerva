@@ -1,7 +1,6 @@
 include ../layout/panelMixins.jade
 
 +panel-title('Datasets', 'm-data-panel')
-  i.m-add-wms.m-icon-enabled.icon-upload(title="Add WMS dataset")
   i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
   i.m-postgres.m-icon-enabled.icon-database(title="Connect to postgres")
 
@@ -46,7 +45,7 @@ if sourceCategoryDataset
                     i(title='add to layers', class=classes)&attributes(attributes)
 
                   //- Cog icon for geo rendering configuration
-                  if geoRenderType === 'geojson'
+                  if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
                     - var classes = 'icon-cog m-configure-geo-render'
                     - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
                     - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');

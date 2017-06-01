@@ -109,7 +109,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         }
         if (!mm.geo_render || overrideGeoRenderType) {
             mm.geo_render = null;
-            if ((overrideGeoRenderType && overrideGeoRenderType === 'geojson') || mm.dataset_type === 'geojson' || mm.geojson) {
+            if ((overrideGeoRenderType && overrideGeoRenderType === 'geojson') || mm.dataset_type === 'geojson' || mm.dataset_type === 'geojson-timeseries' || mm.geojson) {
                 if (mm.source_type === 'mmwr_data_import') {
                     // Currently no other way to set a choropleth.
                     mm.geo_render = {
@@ -147,7 +147,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
     /**
      * Getter for the GeoJs rendering type of the dataset.
      *
-     * @returns {'choropleth'|'geojson'|'contour'|'wms'|null} GeoJs rendering type of this dataset, will
+     * @returns {'choropleth'|'geojson'|'geojson-timeseries'|'contour'|'wms'|null} GeoJs rendering type of this dataset, will
      * be null if no rendering type can be inferred.
      */
     getGeoRenderType: function () {
