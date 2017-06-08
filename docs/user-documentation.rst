@@ -5,4 +5,4 @@ User Documentation
    :maxdepth: 2
 
    timeseries
-   
+   geocoder
