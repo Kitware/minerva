@@ -17,7 +17,6 @@
 #  limitations under the License.
 ###############################################################################
 
-import ast
 import json
 import StringIO
 
@@ -59,11 +58,6 @@ class TwoFishes(Resource):
     @staticmethod
     def createGeojson(twofishes, locations):
         """Create geojson for given locations and twofishes url"""
-
-        try:
-            locations = ast.literal_eval(locations)
-        except ValueError:
-            pass
 
         geoms = []
 
