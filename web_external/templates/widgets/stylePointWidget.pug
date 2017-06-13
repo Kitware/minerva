@@ -1,0 +1,34 @@
+.modal-dialog
+  .modal-content
+    form#m-wms-point-style-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Style Wms Points
+      .modal-body
+        .row
+          .col-md-4
+            .form-group
+              label.control-label(for="m-attribute") Attribute
+              select.form-control#m-attribute
+                each attribute in attributes
+                  option(value= attribute)= attribute
+          .col-md-4
+            .form-group
+              label.control-label(for="m-color-ramp") Color Ramp
+              select.form-control#m-color-ramp.m-select-ramp(
+                data-feature=feature
+                data-property=rampKey)
+                each ramp, name in ramps
+                  option(data-content!=ramp.display data-ramp-name=name)= name
+          .col-md-4
+            .form-group
+              label.control-label(for="m-marker") Marker
+              select.form-control#m-marker
+                each marker in markers
+                  option(value= marker)= marker
+      .modal-footer
+         button.btn.btn-small.btn-primary#foobar
+           i.icon-plus-squared
+           | Save Style
+         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel

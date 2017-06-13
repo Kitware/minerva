@@ -28,7 +28,7 @@ minerva.views.ProvisionClusterWidget = minerva.View.extend({
                 }),
             }).done(_.bind(function (response) {
                 $('.modal-footer a[data-dismiss="modal"]').click();
-            })).error(console.error);
+            })).fail(console.error);
         }
     }, 500, true)
 });

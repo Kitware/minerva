@@ -1,0 +1,14 @@
+mixin panel-title(title, panelId)
+  .m-panel-title= title
+    span
+      block
+      i(class='icon-up-open',
+        data-toggle='collapse',
+        data-target=`#${panelId} > .m-panel-content`)
+      i(class='icon-cancel m-remove-panel')
+
+
+mixin panel-content(cls)
+  .m-panel-content(class=cls)
+    if block
+      block

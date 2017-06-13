@@ -58,7 +58,7 @@ minerva.views.SelectAWSProfile = minerva.View.extend({
                     return profile._id == button.attr('id');
                 });
                 this.render();
-            }, this)).error(function () {
+            }, this)).fail(function () {
                 console.error('There was an error deleting the profile.');
             });
         }

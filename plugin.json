@@ -6,7 +6,18 @@
         "gravatar",
         "jobs"
     ],
-    "grunt": {
-        "file": "Gruntfile.js"
+    "npm": {
+        "file": "package.json",
+        "fields": [
+            "devDependencies"
+        ],
+        "localNodeModules": false
+    },
+    "webpack": {
+        "main": {
+            "plugin": "web_client/main.js",
+            "minerva": "web_external/main.js"
+        },
+        "configHelper": "webpack.helper.js"
     }
 }
