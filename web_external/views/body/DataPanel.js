@@ -169,7 +169,8 @@ export default Panel.extend({
             this.uploadWidget.uploadNextFile();
         }, this).on('g:error', function (err) {
             console.error(err);
-        }).save();
+        });
+        this.newDataset.save();
     },
 
     /**
