@@ -7,13 +7,13 @@ include ../widgets/legendWidget.jade
   .layersList
     ul.datasets
       each dataset, index in datasets
-        li.dataset= dataset.get('name')
+        li.dataset&attributes({'m-dataset-id': dataset.get('_id')})= dataset.get('name')
           if dataset.get('geoError')
             i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           else
             i.icon-eye.m-toggle-dataset&attributes({'m-dataset-id': dataset.get('_id')})
             .m-push-right
-              if dataset.getDatasetType() === 'geojson'
+              if dataset.getDatasetType() === 'geojson' || dataset.getDatasetType() === 'geojson-timeseries'
                 i.icon-download.m-download-geojson&attributes({'m-dataset-id': dataset.get('_id')})
               i.icon-trash.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
           .m-layer-control-container
@@ -30,3 +30,8 @@ include ../widgets/legendWidget.jade
               if (renderType === 'wms')
                 - var legend = 'data:image/png;base64,' + dataset.metadata().legend
                 +legend(dataset.get('_id'), legend)
+            if dataset.getDatasetType() === 'geojson-timeseries'
+              .m-layer-control-container
+                include ../widgets/animationControls.jade
+                +animationControls(dataset, {id: dataset.get('_id')})
+

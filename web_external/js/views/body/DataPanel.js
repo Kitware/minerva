@@ -103,6 +103,7 @@ minerva.views.DataPanel = minerva.views.Panel.extend({
         var configureWidgets = {
             'choropleth': minerva.views.ChoroplethRenderWidget,
             'geojson': minerva.views.JsonConfigWidget,
+            'geojson-timeseries': minerva.views.JsonConfigWidget,
             'contour': minerva.views.JsonConfigWidget
         };
         if (!this.configureWidgets) {

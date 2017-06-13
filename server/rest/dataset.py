@@ -294,6 +294,32 @@ class Dataset(Resource):
             'source_type': 'item'
         }
         for file in self.model('item').childFiles(item=item, limit=0):
+            # Check the first few k of a file to see if this might be a
+            # geojson timeseries.  Crudely, we expect this to be a json array
+            # which contains objects, each of which has at least a geojson
+            # element.  This test will fail if there are other elements in the
+            # first object that push the geojson element beyond the tested
+            # header length.  It could give a false positive, too.  The correct
+            # way would be to download and parse the whole file, but that would
+            # be more expensive in memory and time.
+            headerLen = 2048
+            fileHeader = ''
+            for headerData in self.model('file').download(file, headers=False, endByte=headerLen)():
+                fileHeader = (fileHeader + headerData)[:headerLen]
+                if len(fileHeader) >= headerLen:
+                    break
+            if (fileHeader.lstrip()[:1] == '[' and
+                    fileHeader.lstrip()[1:].lstrip()[:1] == '{' and
+                    '"geojson"' in fileHeader):
+                minerva_metadata['original_type'] = 'geojson-timeseries'
+                minerva_metadata['dataset_type'] = 'geojson-timeseries'
+                minerva_metadata['original_files'] = [{
+                    'name': file['name'], '_id': file['_id']}]
+                minerva_metadata['geojson_file'] = {
+                    'name': file['name'], '_id': file['_id']}
+                minerva_metadata['source'] = {
+                    'layer_source': 'GeoJSON'}
+                break
             # TODO This switching based on which file is found first is
             # fairly brittle and should only be called after first upload.
             if 'geojson' in file['exts']:
