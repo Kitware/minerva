@@ -219,6 +219,17 @@ class DatasetTestCase(base.TestCase):
         self.assertEquals(minervaMetadata['original_type'], 'geojson', 'Expected geojson dataset original_type')
         self.assertEquals(minervaMetadata['geojson_file']['name'], 'states.geojson', 'Expected geojson file to be set')
 
+        # geojson-timeseries
+        files = [{
+            'name': 'geojson-timeseries_1.geojson',
+            'path': os.path.join(pluginTestDir, 'data', 'geojson-timeseries_1.geojson'),
+            'mimeType': 'application/vnd.geo+json'
+        }]
+        geojsonDatasetItem, itemId = createDataset('geojson-timeseries', files)
+        minervaMetadata = geojsonDatasetItem['meta']['minerva']
+        self.assertEquals(minervaMetadata['original_type'], 'geojson-timeseries')
+        self.assertEquals(minervaMetadata['geojson_file']['name'], 'geojson-timeseries_1.geojson')
+
         # json array
         files = [{
             'name': 'twopoints.json',

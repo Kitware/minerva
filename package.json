@@ -9,9 +9,10 @@
     "bootstrap-select": "^1.10.0",
     "bootstrap-slider": "^7.1.0",
     "colorbrewer": "1.0.0",
-    "geojs": "0.10.4",
+    "geojs": "0.12.1",
     "jade": "~1.11.0",
     "jquery-ui-bundle": "^1.11.4",
+    "moment": "^2.17.1",
     "underscore": "~1.5"
   },
   "devDependencies": {

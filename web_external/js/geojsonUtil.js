@@ -1,3 +1,5 @@
+/* globals moment */
+
 minerva.geojson = {};
 
 /**
@@ -12,7 +14,7 @@ minerva.geojson = {};
  *            encountered
  */
 minerva.geojson.merge = function merge(value, accumulated) {
-    accumulated = accumulated || {count: 0};
+    accumulated = accumulated || { count: 0 };
     accumulated.count += 1;
     switch (typeof value) {
         case 'string':
@@ -92,7 +94,7 @@ minerva.geojson.accumulate = function accumulate(features) {
  * property statistics that can be used to generate numeric/color
  * scales for visualization.
  */
-minerva.geojson.normalize = function normalize(geojson) {
+minerva.geojson.normalize = function normalize(geojson) {  // eslint-disable-line complexity
     var normalized;
 
     if (_.isString(geojson)) {
@@ -100,6 +102,25 @@ minerva.geojson.normalize = function normalize(geojson) {
             geojson = JSON.parse(geojson);
         } catch (e) {
         }
+    }
+    /* Check if this is a geojson-timeseries.  If so, normalize each each
+     * entry.  The root contains the first geojson entry and a summary that
+     * combines all of the entries summaries. */
+    if (_.isArray(geojson) && geojson[0].geojson && geojson[0].time) {
+        _.each(geojson, function (entry) {
+            var norm = minerva.geojson.normalize(entry.geojson);
+            if (norm) {
+                if (!normalized) {
+                    normalized = $.extend({ series: [] }, norm);
+                    normalized.summary = {};
+                }
+                var label = '' + (entry.label || (entry.time ? moment(entry.time).format('L LTS') : null) || ('Frame ' + (normalized.series.length + 1)));
+                var time = moment.utc(entry.time);
+                normalized.series.push({ time: time, geojson: norm, label: label });
+                $.extend(normalized.summary, norm.summary);
+            }
+        });
+        return normalized;
     }
 
     switch (geojson.type) {
@@ -201,32 +222,6 @@ minerva.geojson.style = function style(geojson, visProperties) {
 };
 
 /**
- * Generate an array between minimum and maximum
- * after taking the log of the values.
- * The length of the array will be equal to numBins.
- * Array values will be equally spaced.
- *
- * @param {number} min
- * @param {number} max
- * @param {int} numBins
- * @returns {array}
- */
-minerva.geojson.logScale = function logScale(min, max, numBins) {
-    var logMin = 0;
-    if (min > 0) {
-        logMin = Math.log(min);
-    }
-
-    var logMax = Math.log(max);
-    var step = (logMax - logMin) / (numBins - 1);
-    var domain = [];
-    for (var n = 0; n <= numBins - 1; n++) {
-        domain.push(Math.exp(logMin + n * step));
-    }
-    return domain;
-};
-
-/**
  * Generate a d3-like scale function out of a colorbrewer
  * ramp name and a geojson summary object.
  *
@@ -235,8 +230,11 @@ minerva.geojson.logScale = function logScale(min, max, numBins) {
  * @param {Boolean} logFlag
  * @returns {function}
  */
-minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
-    var scale, colors, n, indices;
+minerva.geojson.colorScale = function colorScale(
+    ramp, summary,
+    logFlag, quantileFlag, clampingFlag, minClamp, maxClamp,
+    data) {
+    var scale, s, colors, n, indices;
 
     colors = colorbrewer[ramp];
     // for an invalid ramp, just return black
@@ -262,15 +260,28 @@ minerva.geojson.colorScale = function colorScale(ramp, summary, logFlag) {
         if (summary.min >= summary.max) {
             summary.max = summary.min + 1;
         }
-        if (logFlag) {
-            var logScale = minerva.geojson.logScale(summary.min, summary.max, n);
-            scale = d3.scale.linear()
-                .domain(logScale)
+        if (logFlag && summary.min > 0) {
+            s = d3.scale.quantize()
+                .domain([Math.log(summary.min), Math.log(summary.max)])
+                .range(colors[indices[n]]);
+            scale = function (val) {
+                return s(Math.log(val));
+            };
+        } else if (quantileFlag) {
+            scale = d3.scale.quantile()
+                .domain(data)
                 .range(colors[indices[n]]);
         } else {
-            scale = d3.scale.quantize()
-                .domain([summary.min, summary.max])
-                .range(colors[indices[n]]);
+            // linear scaling
+            if (clampingFlag) {
+                scale = d3.scale.quantize()
+                    .domain([minClamp, maxClamp])
+                    .range(colors[indices[n]]);
+            } else {
+                scale = d3.scale.quantize()
+                    .domain([summary.min, summary.max])
+                    .range(colors[indices[n]]);
+            }
         }
     }
     return scale;

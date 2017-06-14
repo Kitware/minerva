@@ -5,7 +5,15 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
         'click .m-toggle-dataset': 'toggleDatasetEvent',
         'change .m-opacity-range': 'changeLayerOpacity',
-        'click .m-order-layer': 'reorderLayer'
+        'click .m-order-layer': 'reorderLayer',
+        'click .m-anim-play': 'seriesFramePlay',
+        'click .m-anim-step': 'seriesFrameStep',
+        'click .m-anim-step-back': 'seriesFrameStepBack',
+        'click .m-anim-stop': 'seriesFrameStop',
+        'change .m-cycle-duration': 'seriesCycleDuration',
+        'input .m-cycle-duration': 'seriesCycleDuration',
+        'change .m-anim-frame': 'seriesFrameChange',
+        'input .m-anim-frame': 'seriesFrameChange'
     },
 
     downloadGeojsonEvent: function (event) {
@@ -99,8 +107,128 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         }
     },
 
+    seriesFramePlay: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        dataset.set('animationState', dataset.get('animationState') !== 'play' ? 'play' : 'pause');
+    },
+
+    seriesFrameStop: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        dataset.set('animationState', 'stop');
+        this.setSeriesFrame(dataset, 0);
+    },
+
+    seriesFrameChange: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        var frame = parseInt(event.target.value, 10);
+        this.setSeriesFrame(dataset, frame);
+    },
+
+    seriesFrameStep: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        this.setSeriesFrame(dataset, 1, true);
+    },
+
+    seriesFrameStepBack: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        this.setSeriesFrame(dataset, -1, true);
+    },
+
+    setSeriesFrame: function (dataset, frame, delta) {
+        // we may want to debounce this at some point
+        var data = dataset.get('geoData');
+        if (!data.series || data.series.length <= 1) {
+            return;
+        }
+        frame = parseInt(frame, 10);
+        if (delta) {
+            frame += dataset.get('animationFrame') || 0;
+        }
+        frame = frame % data.series.length;
+        if (frame < 0) {
+            frame += data.series.length;
+        }
+        if (frame !== dataset.get('animationFrame')) {
+            dataset.set('animationFrame', frame);
+        }
+    },
+
+    updateSeriesFrame: function (dataset) {
+        var layer = dataset.geoJsLayer;
+        var data = dataset.get('geoData');
+        if (!data.series || data.series.length <= 1) {
+            return;
+        }
+        var frame = Math.min(Math.max(dataset.get('animationFrame') || 0, 0), data.series.length - 1);
+        _.each(layer.features(), function (feature) {
+            feature.visible(false);
+        });
+        _.each(data.series[frame].features, function (feature) {
+            feature.visible(true);
+        });
+        layer.draw();
+        var container = this.$('li.dataset[m-dataset-id="' + dataset.get('_id') + '"]');
+        $('.m-anim-frame', container).val(frame);
+        $('.m-animation-display-value', container).text(data.series[frame].label);
+    },
+
+    updateSeriesState: function (dataset) {
+        var data = dataset.get('geoData');
+        if (!data.series || data.series.length <= 1) {
+            return;
+        }
+        var state = dataset.get('animationState');
+        if (this.animationTimeout) {
+            window.clearTimeout(this.animationTimeout);
+            this.animationTimeout = null;
+        }
+        if (state === 'play') {
+            this.playNextFrame(dataset);
+        }
+        if (state === 'stop') {
+            this.setSeriesFrame(dataset, 0);
+        }
+        var container = this.$('li.dataset[m-dataset-id="' + dataset.get('_id') + '"]');
+        $('.m-anim-play .canplay', container).toggleClass('hidden', state === 'play');
+        $('.m-anim-play .canpause', container).toggleClass('hidden', state !== 'play');
+    },
+
+    seriesCycleDuration: function (event) {
+        var datasetId = $(event.currentTarget).closest('[m-dataset-id]').attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        var duration = parseFloat($(event.target).val());
+        dataset.set('animationDuration', parseFloat(duration));
+    },
+
+    playNextFrame: function (dataset) {
+        /* This is crude.  We should really know the time and frame we started
+         * playing, plus the desired frame rate.  Then, in a
+         * requestAnimationFrame loop, we should set the frame to the current
+         * frame.  That would properly skip frames when slow. */
+        if (this.animationTimeout) {
+            window.clearTimeout(this.animationTimeout);
+            this.animationTimeout = null;
+        }
+        var data = dataset.get('geoData');
+        if (!data.series || data.series.length <= 1) {
+            return;
+        }
+        var duration = parseFloat(dataset.get('animationDuration') || 30);
+        var delay = Math.max(duration * 1000 / data.series.length, 10);
+        this.animationTimeout = window.setTimeout(_.bind(function () {
+            this.playNextFrame(dataset);
+        }, this), delay);
+        this.setSeriesFrame(dataset, 1, true);
+    },
+
     initialize: function (settings) {
         settings = settings || {};
+        this.animationTimeout = null;
         this.collection = settings.session.datasetsCollection;
         this.layersOrderOptions = [
             {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
@@ -117,6 +245,21 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
         }, this);
 
         minerva.views.Panel.prototype.initialize.apply(this);
+        this.listenTo(this.collection, 'change:geoData', function (dataset) {
+            this.render();
+            this.updateSeriesState(dataset);
+        }, this);
+        this.listenTo(this.collection, 'change:animationFrame', function (dataset) {
+            this.updateSeriesFrame(dataset);
+        }, this);
+        this.listenTo(this.collection, 'change:animationState', function (dataset) {
+            this.updateSeriesState(dataset);
+        }, this);
+        this.listenTo(this.collection, 'change:animationDuration', function (dataset) {
+            if (dataset.get('animationState') === 'play') {
+                this.playNextFrame(dataset);
+            }
+        }, this);
     },
 
     render: function () {
