@@ -1,9 +1,10 @@
 import $ from 'jquery';
+import { registerPluginNamespace } from 'girder/pluginUtils';
 import App from './App.js';
 import events from './events';
 import router from './router';
-import { registerPluginNamespace } from 'girder/pluginUtils';
 import * as index from './index';
+import contourJsonReader from './contourJsonReader';
 
 $(function () {
     events.trigger('g:appload.before');

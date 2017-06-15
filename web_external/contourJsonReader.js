@@ -6,6 +6,9 @@
  * @extends geo.fileReader
  * @returns {geo.contourJsonReader}
  */
+import geo from 'geojs';
+window.geo = geo;
+
 geo.contourJsonReader = function (arg) {
     'use strict';
     if (!(this instanceof geo.contourJsonReader)) {

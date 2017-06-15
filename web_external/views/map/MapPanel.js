@@ -5,8 +5,6 @@ import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
 
-window.geo = geo;
-
 export default Panel.extend({
 
     events: {

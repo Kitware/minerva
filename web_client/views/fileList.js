@@ -5,6 +5,7 @@ import { restRequest } from 'girder/rest';
 import events from 'girder/events';
 import FileListWidget from 'girder/views/widgets/FileListWidget';
 import template from '../templates/minerva_fileAction.pug';
+import '../stylesheets/fileList.styl';
 
 wrap(FileListWidget, 'render', function (render) {
     render.call(this);
