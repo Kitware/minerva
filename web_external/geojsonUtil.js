@@ -1,6 +1,7 @@
 /* globals moment */
 import colorbrewer from 'colorbrewer';
 
+window.colorbrewer = colorbrewer;
 const geojsonUtil = {};
 export default geojsonUtil;
 

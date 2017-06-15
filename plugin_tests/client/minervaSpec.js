@@ -1,23 +1,25 @@
-girderTest.importStylesheet(
-    '/static/built/plugins/minerva/plugin.min.css'
-);
+girderTest.addCoveredScripts([
+    '/clients/web/static/built/plugins/jobs/plugin.min.js',
+    '/clients/web/static/built/plugins/gravatar/plugin.min.js',
+    '/clients/web/static/built/plugins/minerva/minerva.min.js'
+]);
+
+girderTest.importStylesheet('/static/built/plugins/minerva/minerva.min.css');
+girderTest.importStylesheet('/static/built/plugins/jobs/plugin.min.css');
 
 girderTest.addCoveredScripts([
     '/plugins/minerva/plugin_tests/client/mockVGL.js'
 ]);
 
 $(function () {
+    var setElement = Backbone.View.prototype.setElement;
+    Backbone.View.prototype.setElement = function (element) {
+        $(element).data('backboneView', this);
+        return setElement.apply(this, arguments);
+    };
 
-    girder.login('minerva-admin', 'minerva-password!').then(function () {
-        window.setTimeout(function () {
-            girderTest.shimBlobBuilder();
-            minerva.events.trigger('g:appload.before');
-            minerva.mainApp = new minerva.App({
-                el: 'body',
-                parentView: null
-            });
-            minerva.events.trigger('g:appload.after');
-        }, 1000);
+
+    girder.auth.login('admin', 'adminpassword!').then(function () {
     });
 });
 
@@ -94,7 +96,8 @@ describe('Session view', function () {
 
     layerPanelView = null;
     it('Upload a geojson and a geojson-timeseries files', function () {
-        layerPanelView = window.minerva.mainApp.bodyView._childViews[1]._childViews[2];
+        layerPanelView = $('#m-layer-panel').data("backboneView");
+
         var handle = false;
         runs(function () {
             $('.icon-upload').click();
@@ -139,11 +142,11 @@ describe('Session view', function () {
             $('.add-dataset-to-session').click();
         });
 
-        waitsFor(function(){
+        waitsFor(function () {
             return layerPanelView.$('.layersList ul.datasets').children().length == 2;
         }, 'layers to be created');
 
-        waitsFor(function(){
+        waitsFor(function () {
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
             return dataset;

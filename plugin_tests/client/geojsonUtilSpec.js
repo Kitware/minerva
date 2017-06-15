@@ -1,11 +1,16 @@
+girderTest.addCoveredScripts([
+    '/clients/web/static/built/plugins/jobs/plugin.min.js',
+    '/clients/web/static/built/plugins/gravatar/plugin.min.js',
+    '/clients/web/static/built/plugins/minerva/minerva.min.js'
+]);
 
 describe('geojson', function () {
     var merge, accumulate, normalize, style;
     beforeEach(function () {
-        merge = minerva.geojson.merge;
-        accumulate = minerva.geojson.accumulate;
-        normalize = minerva.geojson.normalize;
-        style = minerva.geojson.style;
+        merge = girder.plugins.minerva.geojsonUtil.merge;
+        accumulate = girder.plugins.minerva.geojsonUtil.accumulate;
+        normalize = girder.plugins.minerva.geojsonUtil.normalize;
+        style = girder.plugins.minerva.geojsonUtil.style;
     });
     describe('merge', function () {
         it('string type', function () {
@@ -88,10 +93,10 @@ describe('geojson', function () {
     describe('normalize', function () {
         it('parse string', function () {
             expect(
-                minerva.geojson.normalize(
+                girder.plugins.minerva.geojsonUtil.normalize(
                     '{"type":"FeatureCollection", "features":[]}'
                 )
-            ).toEqual({type: 'FeatureCollection', features: [], summary: {}});
+            ).toEqual({ type: 'FeatureCollection', features: [], summary: {} });
         });
 
         it('FeatureCollection', function () {
@@ -155,7 +160,7 @@ describe('geojson', function () {
                     type: 'Point',
                     coordinates: [0, 0]
                 },
-                properties: {a: 'red'}
+                properties: { a: 'red' }
             };
 
             expect(normalize(spec)).toEqual({
@@ -164,7 +169,7 @@ describe('geojson', function () {
                 summary: {
                     a: {
                         count: 1,
-                        values: {red: 1}
+                        values: { red: 1 }
                     }
                 }
             });
@@ -255,71 +260,54 @@ describe('geojson', function () {
 
         var vis = {
             point: {
-                fillColor: sinon.stub().returns('green'),
-                strokeWidth: sinon.stub().returns(4)
+                fillColor: jasmine.createSpy('fillColor').andReturn('green'),
+                strokeWidth: jasmine.createSpy('fillColor').andReturn(4)
             }
         };
 
+        var args = [
+            {
+                "a": 1,
+                "b": "red",
+                "fillColor": "green",
+                "strokeWidth": 4
+            },
+            {
+                "a": -1,
+                "b": "blue",
+                "fillColor": "green",
+                "strokeWidth": 4
+            },
+            {
+                "c": 0,
+                "fillColor": "green",
+                "strokeWidth": 4
+            }
+        ];
         expect(_.pluck(style(geojson, vis).features, 'properties'))
-            .toEqual([
-                {
-                    "a": 1,
-                    "b": "red",
-                    "fillColor": "green",
-                    "strokeWidth": 4
-                },
-                {
-                    "a": -1,
-                    "b": "blue",
-                    "fillColor": "green",
-                    "strokeWidth": 4
-                },
-                {
-                    "c": 0,
-                    "fillColor": "green",
-                    "strokeWidth": 4
-                }
-            ]);
+            .toEqual(args);
 
-        sinon.assert.callCount(vis.point.fillColor, 3);
-        sinon.assert.callCount(vis.point.strokeWidth, 3);
+        expect(vis.point.fillColor.calls.length).toBe(3);
+        expect(vis.point.strokeWidth.calls.length).toBe(3);
 
-        sinon.assert.calledWithMatch(
-            vis.point.fillColor.getCall(0),
-            {a: 1, b: 'red'}
-        );
-        sinon.assert.calledWithMatch(
-            vis.point.fillColor.getCall(1),
-            {a: -1, b: 'blue'}
-        );
-        sinon.assert.calledWithMatch(
-            vis.point.fillColor.getCall(2),
-            {c: 0}
-        );
+        expect(vis.point.fillColor.calls[0].args[0]).toEqual(args[0]);
+        expect(vis.point.fillColor.calls[1].args[0]).toEqual(args[1]);
+        expect(vis.point.fillColor.calls[2].args[0]).toEqual(args[2]);
 
-        sinon.assert.calledWithMatch(
-            vis.point.strokeWidth.getCall(0),
-            {a: 1, b: 'red'}
-        );
-        sinon.assert.calledWithMatch(
-            vis.point.strokeWidth.getCall(1),
-            {a: -1, b: 'blue'}
-        );
-        sinon.assert.calledWithMatch(
-            vis.point.strokeWidth.getCall(2),
-            {c: 0}
-        );
+        expect(vis.point.strokeWidth.calls[0].args[0]).toEqual(args[0]);
+        expect(vis.point.strokeWidth.calls[1].args[0]).toEqual(args[1]);
+        expect(vis.point.strokeWidth.calls[2].args[0]).toEqual(args[2]);
     });
 
     describe('colorScale', function () {
         it('invalid ramp', function () {
             expect(
-                minerva.geojson.colorScale('invalid color ramp', {})()
+                girder.plugins.minerva.geojsonUtil.colorScale('invalid color ramp', {})()
             ).toBe('#ffffff');
         });
         describe('numeric values', function () {
             it('one value', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     min: 0,
                     max: 0
                 });
@@ -327,7 +315,7 @@ describe('geojson', function () {
                 expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
             });
             it('linear scale', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     min: 0,
                     max: 100
                 });
@@ -336,7 +324,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('log scale', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     min: 1,
                     max: 100
                 }, true, false, false);
@@ -345,7 +333,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('linear scale with clamping', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     min: 20,
                     max: 80
                 }, false, false, true, 20, 80);
@@ -355,10 +343,10 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('quantile scale', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     min: 1,
                     max: 1001
-                }, false, true, false, null, null, [1,2, 3,4, 5,6, 6,8, 9,10, 11,12, 13,14, 15,16, 1000,1001]);
+                }, false, true, false, null, null, [1, 2, 3, 4, 5, 6, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1000, 1001]);
                 expect(scale(1)).toBe(colorbrewer.Reds[9][0]);
                 expect(scale(2)).toBe(colorbrewer.Reds[9][0]);
                 expect(scale(15)).toBe(colorbrewer.Reds[9][7]);
@@ -369,7 +357,7 @@ describe('geojson', function () {
         });
         describe('string values', function () {
             it('two categories', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     values: {
                         one: null,
                         two: null
@@ -380,7 +368,7 @@ describe('geojson', function () {
                 expect(scale('two')).toBe(colorbrewer.Reds[3][1]);
             });
             it('three categories', function () {
-                var scale = minerva.geojson.colorScale('Reds', {
+                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
                     values: {
                         one: null,
                         two: null,
@@ -397,12 +385,12 @@ describe('geojson', function () {
     describe('getFeatures', function () {
         it('all', function () {
             expect(
-                minerva.geojson.getFeatures({type: 'FeatureCollection', features: [{}, {}]})
+                girder.plugins.minerva.geojsonUtil.getFeatures({ type: 'FeatureCollection', features: [{}, {}] })
             ).toEqual([{}, {}]);
         });
         it('Point', function () {
             expect(
-                minerva.geojson.getFeatures({
+                girder.plugins.minerva.geojsonUtil.getFeatures({
                     type: 'FeatureCollection',
                     features: [{
                     }, {
@@ -414,7 +402,7 @@ describe('geojson', function () {
                             type: 'MultiPoint'
                         }
                     }]
-            }, 'Point')).toEqual([{geometry: {type: 'Point'}}]);
+                }, 'Point')).toEqual([{ geometry: { type: 'Point' } }]);
         });
     });
 });

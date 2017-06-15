@@ -1,7 +1,9 @@
 import $ from 'jquery';
-import App from './app.js';
+import App from './App.js';
 import events from './events';
 import router from './router';
+import { registerPluginNamespace } from 'girder/pluginUtils';
+import * as index from './index';
 
 $(function () {
     events.trigger('g:appload.before');
@@ -15,3 +17,5 @@ $(function () {
     });
     events.trigger('g:appload.after');
 });
+
+registerPluginNamespace('minerva', index);

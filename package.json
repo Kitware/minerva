@@ -17,7 +17,6 @@
     "underscore": "~1.5"
   },
   "devDependencies": {
-    "grunt-contrib-watch": "^1.0.0",
-    "sinon": "1.17.5"
+    "grunt-contrib-watch": "^1.0.0"
   }
 }

@@ -5,6 +5,8 @@ import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
 
+window.geo = geo;
+
 export default Panel.extend({
 
     events: {
@@ -112,10 +114,10 @@ export default Panel.extend({
                 })
             });
             this.map.createLayer(mapSettings.basemap,
-                                 _.has(mapSettings, 'basemap_args')
-                                 ? mapSettings.basemap_args : {});
+                _.has(mapSettings, 'basemap_args')
+                    ? mapSettings.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider', {position: {right: 40, top: 40}});
+            this.uiLayer.createWidget('slider', { position: { right: 40, top: 40 } });
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
