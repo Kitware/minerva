@@ -17,12 +17,9 @@
 #  limitations under the License.
 ###############################################################################
 
-import ast
 import json
 import os
-
 from httmock import urlmatch, HTTMock, response as httmockresponse
-import requests
 
 # Need to set the environment variable before importing girder
 os.environ['GIRDER_PORT'] = os.environ.get('GIRDER_TEST_PORT', '20200')  # noqa
@@ -39,11 +36,13 @@ def setUpModule():
     base.enabledPlugins.append('minerva')
     base.startServer(False)
 
+
 def tearDownModule():
     """
     Stop the server.
     """
     base.stopServer()
+
 
 @urlmatch(scheme='http', netloc='localhost:8087')
 def twofishes_mock(url, request):
@@ -59,7 +58,6 @@ def twofishes_mock(url, request):
 
 
 class TwoFishesTestCase(base.TestCase):
-
     """
     Tests of the minerva geocoder endpoints.
     """

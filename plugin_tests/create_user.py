@@ -1,8 +1,8 @@
 from girder.utility.model_importer import ModelImporter
 
+
 def createUser():
-    modelImporter = ModelImporter()
-    userModel = modelImporter.model('user').createUser(
+    ModelImporter().model('user').createUser(
         login='admin',
         password='adminpassword!',
         email='minerva@email.com',
@@ -10,5 +10,6 @@ def createUser():
         lastName='Admin',
         admin=True
     )
+
 
 createUser()

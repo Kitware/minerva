@@ -334,6 +334,7 @@ class AnalysisTestCase(base.TestCase):
                     time.sleep(2)
                     count += 1
 
+            print dataset.get('values')
             # ensure that the values were accumulated correctly
             self.assertTrue(
                 'babesiosis_cum_2014' in dataset.get('values', []),

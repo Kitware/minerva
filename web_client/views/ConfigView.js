@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import View from 'girder/views/View';
 import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
 import { restRequest } from 'girder/rest';
@@ -42,4 +43,3 @@ export default View.extend({
         }, this));
     }
 });
-

@@ -1,10 +1,10 @@
+import _ from 'underscore';
 import { wrap } from 'girder/utilities/PluginUtils';
 import { AccessType } from 'girder/constants';
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
 import FileListWidget from 'girder/views/widgets/FileListWidget';
 import template from '../templates/minerva_fileAction.pug';
-
 
 wrap(FileListWidget, 'render', function (render) {
     render.call(this);
@@ -38,11 +38,9 @@ wrap(FileListWidget, 'render', function (render) {
         this.parentItem.removeMetadata('minerva', _.bind(function () {
             this.parentItem.unset('meta');
             this.parentItem.fetch();
-        }, this),null, {});
+        }, this), null, {});
     }, this));
     $('.g-minerva-geojson-create', this.$el).on('click', _.bind(function (e) {
-        var cid = $(e.currentTarget).parent().attr('file-cid');
-        var fileId = this.collection.get(cid).id;
         restRequest({
             type: 'POST',
             path: 'minerva_dataset_geojson',

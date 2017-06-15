@@ -52,7 +52,6 @@ class SessionTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-
     def testSession(self):
         """
         Test the minerva session API enpdpoints.
@@ -109,14 +108,14 @@ class SessionTestCase(base.TestCase):
             'folderId': folder['_id']
         }
         response = self.request(path='/item', method='POST', params=params,
-                                            user=self._user)
+                                user=self._user)
         item1Id = response.json['_id']
         params = {
             'name': 'item2',
             'folderId': folder['_id']
         }
         response = self.request(path='/item', method='POST', params=params,
-                                            user=self._user)
+                                user=self._user)
         item2Id = response.json['_id']
 
         path = '/minerva_session'
