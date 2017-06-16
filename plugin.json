@@ -9,7 +9,7 @@
     "npm": {
         "file": "package.json",
         "fields": [
-            "devDependencies"
+            "dependencies"
         ],
         "localNodeModules": false
     },
