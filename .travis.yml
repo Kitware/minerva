@@ -25,7 +25,7 @@ addons:
     - libnetcdf-dev
 
 before_install:
-    # update pip for binary wheel caching
+    - export CXX=g++-4.8
     - nvm install v6
     - nvm use v6
     - pip install -U pip virtualenv

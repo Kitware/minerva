@@ -14,6 +14,9 @@ describe('geojson', function () {
     });
     describe('merge', function () {
         it('string type', function () {
+
+            _prepareTestUpload();
+
             var accum = merge('value1');
 
             accum = merge('value2', accum);

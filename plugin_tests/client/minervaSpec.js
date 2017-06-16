@@ -1,4 +1,4 @@
-girderTest.addCoveredScripts([
+girderTest.addScripts([
     '/clients/web/static/built/plugins/jobs/plugin.min.js',
     '/clients/web/static/built/plugins/gravatar/plugin.min.js',
     '/clients/web/static/built/plugins/minerva/minerva.min.js'
@@ -7,7 +7,7 @@ girderTest.addCoveredScripts([
 girderTest.importStylesheet('/static/built/plugins/minerva/minerva.min.css');
 girderTest.importStylesheet('/static/built/plugins/jobs/plugin.min.css');
 
-girderTest.addCoveredScripts([
+girderTest.addScripts([
     '/plugins/minerva/plugin_tests/client/mockVGL.js'
 ]);
 

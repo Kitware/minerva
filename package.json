@@ -13,8 +13,7 @@
     "hammerjs": "^2.0.8",
     "jade": "~1.11.0",
     "jquery-ui-bundle": "^1.11.4",
-    "moment": "^2.17.1",
-    "underscore": "~1.5"
+    "moment": "^2.17.1"
   },
   "devDependencies": {
     "grunt-contrib-watch": "^1.0.0"

@@ -6,7 +6,6 @@ set(CTEST_SITE "Travis")
 set(CTEST_BUILD_NAME "Linux-$ENV{TRAVIS_BRANCH}")
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 set(MINERVA_COVERAGE_CONFIG "${CTEST_SOURCE_DIRECTORY}/plugins/minerva/plugin_tests/minerva.coveragerc")
-set(test_group $ENV{MINERVA_TEST_GROUP})
 set(config_opts "")
 
 list(APPEND config_opts
@@ -16,6 +15,7 @@ list(APPEND config_opts
   "-DPYTHON_COVERAGE_CONFIG=${MINERVA_COVERAGE_CONFIG}"
   "-DCOVERAGE_MINIMUM_PASS=68"
   "-DJS_COVERAGE_MINIMUM_PASS=21"
+  "-DTEST_PLUGINS=minerva"
 )
 
 ctest_start("Continuous")
