@@ -5,7 +5,6 @@ from girder.api import access
 from girder.api.describe import describeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, ValidationException, loadmodel, GirderException
-from girder.utility.model_importer import ModelImporter
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
@@ -15,6 +14,7 @@ class PostgresGeojson(Resource):
 
     def __init__(self):
         self.resourceName = 'minerva_postgres_geojson'
+        self.route('GET', ('assetstores', ), self.getAssetstores)
         self.route('GET', ('tables', ), self.getTables)
         self.route('GET', ('columns', ), self.getColumns)
         self.route('GET', ('values', ), self.getValues)
@@ -24,19 +24,8 @@ class PostgresGeojson(Resource):
         self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
         self.route('GET', (':id',), self.getPostgresGeojsonData)
 
-    def _getAssetstoreAdapter(self):
-        # TODO: This assumes that there is exactly one assetstore that has
-        # appropriate qualifications; we need to handle zero and more than one
-        assetstores = ModelImporter.model('assetstore').list()
-        astore = [a for a in assetstores if a['type'] == 'database' and
-                  a['database']['dbtype'] == 'sqlalchemy_postgres']
-        adapter = assetstore_utilities.getAssetstoreAdapter(astore[0])
-        return adapter
-
     def _getDbName(self):
-        # TODO: This assumes that there is exactly one assetstore that has
-        # appropriate qualifications; we need to handle zero and more than one
-        assetstores = ModelImporter.model('assetstore').list(limit=10)
+        assetstores = self.model('assetstore').list(limit=10)
         astore = [a for a in assetstores if a['type'] == 'database' and
                   a['database']['dbtype'] == 'sqlalchemy_postgres']
         dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
@@ -56,47 +45,71 @@ class PostgresGeojson(Resource):
             'format': output_format
         }
 
-    def _getProperties(self, params):
-        colDict = self.getColumns({'table': params['table']})
-        columns = [i['name'] for i in colDict
-                   if not i['name'] == 'geom']
-        fields = []
-        for c in columns:
-            fields.append(c)
-            fields.append({'field': c})
+    # def _getProperties(self, params):
+    #     colDict = self.getColumns({'table': params['table']})
+    #     columns = [i['name'] for i in colDict
+    #                if not i['name'] == 'geom']
+    #     fields = []
+    #     for c in columns:
+    #         fields.append(c)
+    #         fields.append({'field': c})
 
-        return fields
+    #     return fields
 
     @access.user
     @describeRoute(
-        Description('Returns list of tables from a database assetstore')
+        Description('Returns list of eligible assetstores')
     )
-    def getTables(self, params):
-        adapter = self._getAssetstoreAdapter()
+    def getAssetstores(self, params):
+        return list(self.model('assetstore').find(
+            query={
+                'type': 'database',
+                'database.dbtype': 'sqlalchemy_postgres'
+            },
+            fields=['_id', 'name']))
+
+    @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
+    @describeRoute(
+        Description('Returns list of tables from a database assetstore')
+        .param('assetstoreId', 'assetstore ID of the target database')
+    )
+    def getTables(self, assetstore, params):
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         tables = adapter.getTableList()
         # tables is an array of databases, each of which has tables.  We
         # probably want to change this to not just use the first database.
         return [table['name'] for table in tables[0]['tables']]
 
     @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
         Description('Returns list of columns for a given table')
+        .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
     )
-    def getColumns(self, params):
-        adapter = self._getAssetstoreAdapter()
+    def getColumns(self, assetstore, params):
+        return self._getColumns(assetstore, params)
+
+    def _getColumns(self, assetstore, params):
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         conn = adapter.getDBConnectorForTable(params['table'])
         fields = conn.getFieldInfo()
         return fields
 
     @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
         Description('Returns distinct values for a column')
+        .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
         .param('column', 'Column name from a table')
     )
-    def getValues(self, params):
-        adapter = self._getAssetstoreAdapter()
+    def getValues(self, assetstore, params):
+        return self._getValues(assetstore, params)
+
+    def _getValues(self, assetstore, params):
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         conn = adapter.getDBConnectorForTable(params['table'])
         queryParams = {
             'fields': [{
@@ -110,22 +123,26 @@ class PostgresGeojson(Resource):
         return [row['value'] for row in result]
 
     @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
         Description('Returns all distinct values for all columns for a given table')
+        .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
     )
-    def getAllValues(self, params):
+    def getAllValues(self, assetstore, params):
         resp = {}
-        for i in self.getColumns(params):
+        for i in self._getColumns(assetstore, params):
             if i['name'] != 'geom' and i['datatype'] != 'number':
-                resp[i['name']] = self.getValues({
+                resp[i['name']] = self._getValues(assetstore, {
                     'column': i['name'],
                     'table': params['table']})
         return resp
 
     @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
         Description('Create json dataset for the given view/table filtering values')
+        .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
         .param('field', 'Field to which the aggregate function will be applied')
         .param('aggregationFunction', 'aggregate function used on the field')
@@ -133,7 +150,7 @@ class PostgresGeojson(Resource):
         .param('geometryField', 'Geometry data definition object')
         .param('datasetName', 'A custom name for the dataset', required=False)
     )
-    def createPostgresGeojsonData(self, params):
+    def createPostgresGeojsonData(self, assetstore, params):
         filter = params['filter']
         table = params['table']
         field = params['field']
@@ -156,7 +173,7 @@ class PostgresGeojson(Resource):
                 }, '|'],
                 'reference': i['name']
             })
-                    for i in self.getColumns({'table': params['table']})
+                    for i in self._getColumns(assetstore, {'table': params['table']})
                     if i['datatype'] == 'string'
                     if i['name'] != field]:
                 properties.extend(property)
@@ -183,7 +200,7 @@ class PostgresGeojson(Resource):
             }]
             group = [x['value'] for x in geometryField['links']]
             # add string fields with concat aggregate function
-            for i in [i for i in self.getColumns({'table': params['table']})
+            for i in [i for i in self._getColumns(assetstore, {'table': params['table']})
                       if i['datatype'] in ('string', 'number', 'date') if i['name'] != field]:
                 if i['datatype'] == 'string':
                     fields.append({
@@ -206,7 +223,7 @@ class PostgresGeojson(Resource):
                 table, field, hash[-6:])
         currentUser = self.getCurrentUser()
         datasetFolder = findDatasetFolder(currentUser, currentUser)
-        adapter = self._getAssetstoreAdapter()
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         # Create the item
         dbParams = self._getQueryParams(
             schema, table, fields, group, filter,
