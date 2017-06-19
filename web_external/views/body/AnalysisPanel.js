@@ -1,18 +1,8 @@
 import events from 'girder/events';
 import Panel from '../body/Panel';
-import analysisWidgetRegistry from './AnalysisWidgetRegistry';
+import analysisWidgetRegistry from './analysisWidgetRegistry';
 import template from '../../templates/body/analysisPanel.pug';
 import '../../stylesheets/body/analysisPanel.styl';
-
-var analysisTypeToWidgetName = function (type) {
-    var name = type.replace(/(\_\w)|(^\w)/g, function (m) {
-        var index = m[0] === '_' ? 1 : 0;
-
-        return m[index].toUpperCase();
-    });
-
-    return name + 'Widget';
-};
 
 export default Panel.extend({
 
@@ -30,15 +20,10 @@ export default Panel.extend({
         // might need its own param set for initialization
         var minervaMetadata = analysis.metadata();
 
-        var analysisWidgetName = analysisTypeToWidgetName(minervaMetadata.analysis_type);
-        if (!(analysisWidgetName in analysisWidgetRegistry)) {
-            var message = _.template('No widget defined for analysis of type ' +
-                '"<%= type %>". Expected widget name "<%= name %>".');
+        var analysis_type = minervaMetadata.analysis_type;
 
-            message = message({
-                type: minervaMetadata.analysis_type,
-                name: analysisWidgetName
-            });
+        if (!analysisWidgetRegistry.exists(analysis_type)) {
+            var message = `No widget registered for analysis of type ${analysis_type}`;
 
             events.trigger('g:alert', {
                 icon: 'cancel',
@@ -50,7 +35,7 @@ export default Panel.extend({
             throw message;
         }
 
-        var analysisWidget = new analysisWidgetRegistry[analysisWidgetName]({
+        var analysisWidget = new (analysisWidgetRegistry.get(analysis_type))({
             el: $('#g-dialog-container'),
             parentView: this,
             datasetCollection: this.datasetCollection,
