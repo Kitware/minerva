@@ -284,6 +284,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
     _assetstoreChanged: function (e) {
         var assetstoreId = $(e.target).val();
         this.selectedAssetstoreId = assetstoreId;
+        this.valueField = '';
         this.sources = [];
         this.filters = [];
         this.columns = [];
@@ -292,6 +293,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         if (this.selectedAssetstoreId) {
             this._getSources(this.selectedSource);
         }
+        this.render();
     },
     _sourceChanged: function (e) {
         var source = $(e.target).val();

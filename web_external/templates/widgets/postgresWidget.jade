@@ -35,7 +35,7 @@
                       option(value=column.name, selected=column.name==valueField)= column.name
                   if validation.valueFieldRequired
                     span.help-block Required
-            if valueField && selectedSource
+            if valueField && selectedSource && columns.length
               .form-group.form-group-sm
                 label.control-label(for="m-postgres-aggregation") Aggregate method
                   select.form-control.has-min-width#m-postgres-aggregation
