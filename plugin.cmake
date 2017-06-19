@@ -39,6 +39,7 @@ add_minerva_server_test(analysis)
 add_minerva_server_test(import_analyses)
 add_minerva_server_test(wms)
 add_minerva_server_test(geojson)
+add_minerva_server_test(twofishes)
 
 
 add_minerva_python_style_test(constants "server/constants.py")
