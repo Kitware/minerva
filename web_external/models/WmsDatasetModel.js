@@ -1,7 +1,7 @@
 import { restRequest } from 'girder/rest';
 import DatasetModel from './DatasetModel';
 
-export default DatasetModel.extend({
+const WmsDatasetModel = DatasetModel.extend({
 
     isRenderable: function () { // eslint-disable-line underscore/prefer-constant
         return true;
@@ -24,3 +24,4 @@ export default DatasetModel.extend({
     }
 
 });
+export default WmsDatasetModel;

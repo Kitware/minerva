@@ -2,7 +2,7 @@ import View from '../view';
 import Panel from '../body/Panel';
 import { confirm } from 'girder/dialog';
 
-export default View.extend({
+const MinervaPanel = View.extend({
     /**
      * The panel view isn't meant to be instantiated on its own.
      **/
@@ -62,3 +62,4 @@ export default View.extend({
         this.getSessionView()._enableSave();
     }
 });
+export default MinervaPanel;

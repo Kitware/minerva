@@ -2,7 +2,7 @@ import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
 import View from '../view';
 import template from '../../templates/widgets/jobDetailsWidgetModalWrapper.pug';
 
-export default View.extend({
+const JobDetailsWidgetModalWrapper = View.extend({
     initialize: function (settings) {
         this.job = settings.job;
     },
@@ -15,8 +15,9 @@ export default View.extend({
             job: this.job,
             renderImmediate: true
         });
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
 
         return this;
     }
 });
+export default JobDetailsWidgetModalWrapper;

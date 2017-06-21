@@ -1,4 +1,5 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
 
-export default _.clone(Backbone.Events);
+const events = _.clone(Backbone.Events);
+export default events;

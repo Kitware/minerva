@@ -3,7 +3,7 @@ import template from '../../templates/widgets/datasetInfoWidget.pug';
 /**
 * This widget is used to diplay minerva metadata for a dataset.
 */
-export default View.extend({
+const DatasetInfoWidget = View.extend({
     initialize: function (settings) {
         this.dataset = settings.dataset;
     },
@@ -24,3 +24,4 @@ export default View.extend({
         return this;
     }
 });
+export default DatasetInfoWidget;

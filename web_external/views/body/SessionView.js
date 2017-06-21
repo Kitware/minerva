@@ -18,7 +18,7 @@ import { AccessType } from 'girder/constants';
 import '../../stylesheets/body/sessionPage.styl';
 import '../../stylesheets/body/panelGroups.styl';
 
-export default View.extend({
+const SessionView = View.extend({
 
     events: {
         'click a.m-add-session': function () {
@@ -264,3 +264,4 @@ export default View.extend({
         return this;
     }
 });
+export default SessionView;

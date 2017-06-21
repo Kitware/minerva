@@ -4,7 +4,7 @@ import Panel from '../body/Panel';
 import JobDetailsWidgetModalWrapper from '../widgets/JobDetailsWidgetModalWrapper';
 import template from '../../templates/body/jobsPanel.pug';
 
-export default Panel.extend({
+const JobsPanel = Panel.extend({
 
     initialize: function () {
         var columnEnum = JobListWidget.prototype.columnEnum;
@@ -44,3 +44,4 @@ export default Panel.extend({
         return this;
     }
 });
+export default JobsPanel;

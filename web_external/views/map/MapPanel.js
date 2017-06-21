@@ -5,7 +5,7 @@ import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
 
-export default Panel.extend({
+const MapPanel = Panel.extend({
 
     events: {
         'click .m-save-current-baselayer': function () {
@@ -274,3 +274,4 @@ export default Panel.extend({
         return this;
     }
 });
+export default MapPanel;

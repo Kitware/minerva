@@ -4,7 +4,7 @@ import LayoutHeaderView from './views/layout/HeaderView';
 import template from './templates/layout.pug';
 import './stylesheets/layout.styl';
 
-export default App.extend({
+const MinervaApp = App.extend({
 
     render: function () {
         this.$el.html(template());
@@ -18,3 +18,4 @@ export default App.extend({
     }
 
 });
+export default MinervaApp;

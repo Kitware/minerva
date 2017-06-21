@@ -5,7 +5,7 @@ import { handleClose, handleOpen } from 'girder/dialog';
 /**
 * This widget is used to create a new session or edit an existing one.
 */
-export default View.extend({
+const EditSessionWidget = View.extend({
     events: {
         'submit #m-session-edit-form': function (e) {
             e.preventDefault();
@@ -97,3 +97,4 @@ export default View.extend({
         }, this).save();
     }
 });
+export default EditSessionWidget;

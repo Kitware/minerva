@@ -1,6 +1,6 @@
 import { restRequest } from 'girder/rest';
 import SourceModel from './SourceModel';
-export default SourceModel.extend({
+const WmsSourceModel = SourceModel.extend({
 
     createSource: function (params) {
         restRequest({
@@ -19,3 +19,5 @@ export default SourceModel.extend({
     }
 
 });
+
+export default WmsSourceModel;

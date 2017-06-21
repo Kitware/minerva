@@ -4,7 +4,7 @@ import analysisWidgetRegistry from './analysisWidgetRegistry';
 import template from '../../templates/body/analysisPanel.pug';
 import '../../stylesheets/body/analysisPanel.styl';
 
-export default Panel.extend({
+const AnalysisPanel = Panel.extend({
 
     events: {
         'click .m-attempt-analysis': 'attemptAnalysis'
@@ -78,3 +78,4 @@ export default Panel.extend({
         return this;
     }
 });
+export default AnalysisPanel;

@@ -10,7 +10,7 @@ import styleWmsDatasetWidgetTemplate from '../../templates/widgets/styleWmsDatas
   This widget displays a styling modal for WMS layers.
 */
 
-export default View.extend({
+ const StyleWmsDatasetWidget = View.extend({
 
     events: {
         'submit #m-wms-multiband-style-form': function (e) {
@@ -217,3 +217,4 @@ export default View.extend({
         return this;
     }
 });
+export default StyleWmsDatasetWidget;

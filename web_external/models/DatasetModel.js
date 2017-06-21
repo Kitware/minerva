@@ -3,7 +3,7 @@ import events from 'girder/events';
 import MinervaModel from '../MinervaModel';
 import geojsonUtil from '../geojsonUtil';
 
-export default MinervaModel.extend({
+const DatasetModel = MinervaModel.extend({
 
     defaults: {
         // TODO revise and rename these.
@@ -255,3 +255,4 @@ export default MinervaModel.extend({
         }
     }
 });
+export default DatasetModel;

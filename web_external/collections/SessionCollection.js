@@ -2,7 +2,7 @@ import { getCurrentUser } from 'girder/auth';
 import MinervaCollection from '../MinervaCollection';
 import SessionModel from '../models/SessionModel';
 
-export default MinervaCollection.extend({
+const SessionCollection = MinervaCollection.extend({
     model: SessionModel,
     path: 'minerva_session',
     getInitData: function () {
@@ -11,3 +11,4 @@ export default MinervaCollection.extend({
     }
 
 });
+export default SessionCollection;

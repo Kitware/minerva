@@ -5,7 +5,7 @@ import LayoutHeaderUserView from './HeaderUserView';
 import '../../stylesheets/layout.styl';
 import logoImage from '../../assets/Minerva_Logo.png';
 
-export default View.extend({
+const HeaderView = View.extend({
     events: {
     },
     render: function () {
@@ -19,3 +19,4 @@ export default View.extend({
         }).render();
     }
 });
+export default HeaderView;

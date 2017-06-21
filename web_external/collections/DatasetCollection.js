@@ -3,7 +3,7 @@ import DatasetModel from '../models/DatasetModel';
 import WmsDatasetModel from '../models/WmsDatasetModel';
 import { getCurrentUser } from 'girder/auth';
 
-export default MinervaCollection.extend({
+const DatasetCollection = MinervaCollection.extend({
 
     model: function (attrs, options) {
         // TODO dataset/source refactor
@@ -26,3 +26,4 @@ export default MinervaCollection.extend({
     }
 
 });
+export default DatasetCollection;

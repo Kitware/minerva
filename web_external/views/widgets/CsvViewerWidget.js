@@ -3,7 +3,7 @@ import template from '../../templates/widgets/csvViewerWidget.pug';
 /**
  * This widget displays csv content as a table
  */
-export default View.extend({
+const CsvViewerWidget = View.extend({
 
     events: {
         'click .m-update-dataset': function (e) {
@@ -94,13 +94,14 @@ export default View.extend({
             });
             // HACK to fix headers misalignment
             $('table').css('table-layout', 'fixed');
-            $('.dataTables_scrollHeadInner').css({'width': '100%'});
+            $('.dataTables_scrollHeadInner').css({ 'width': '100%' });
             $('table.dataTable').addClass('dataTable-width');
         }, this));
 
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
 
         return this;
     }
 
 });
+export default CsvViewerWidget;

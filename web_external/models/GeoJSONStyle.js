@@ -1,7 +1,7 @@
 import Backbone from 'backbone';
 import colorbrewer from 'colorbrewer';
 
-export default Backbone.Model.extend({
+const GeoJSONStyle = Backbone.Model.extend({
     defaults: {
         cluster: false,
         clusterDistance: 0.25,
@@ -40,3 +40,4 @@ export default Backbone.Model.extend({
         return this;
     }, {}))[0]
 });
+export default GeoJSONStyle;

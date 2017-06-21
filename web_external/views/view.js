@@ -1,3 +1,4 @@
 import View from 'girder/views/View';
 
-export default View.extend({});
+const MinervaView = View.extend({});
+export default MinervaView;

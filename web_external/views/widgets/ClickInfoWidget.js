@@ -4,7 +4,7 @@ import '../../stylesheets/widgets/clickInfoWidget.styl';
 /**
  * Creates a widget that displays information on what was clicked on.
  */
-export default View.extend({
+const ClickInfoWidget = View.extend({
     initialize: function () {
         this.listenTo(this.model, 'change', this.render);
         this.$el.dialog({
@@ -25,3 +25,4 @@ export default View.extend({
     template: template,
     className: 'm-click-info-widget'
 });
+export default ClickInfoWidget;

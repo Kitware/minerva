@@ -9,7 +9,7 @@ import template from '../templates/config.pug';
 /**
  * Administrative configuration view for minerva.
  */
-export default View.extend({
+const ConfigView = View.extend({
     render: function () {
         this.$el.html(template());
         if (!this.breadcrumb) {
@@ -44,3 +44,4 @@ export default View.extend({
         }, this));
     }
 });
+export default ConfigView;

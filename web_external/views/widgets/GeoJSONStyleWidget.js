@@ -35,7 +35,7 @@ function _setScaleFlags(feature, prop, val) {
     feature.set(prop, val);
 }
 
-export default View.extend({
+const GeoJSONStyleWidget = View.extend({
     events: {
         'change .m-toggle-panel': '_updatePanel',
         'click .panel-heading': '_collapsePanel',
@@ -220,3 +220,4 @@ export default View.extend({
         return tabs;
     }
 });
+export default GeoJSONStyleWidget;

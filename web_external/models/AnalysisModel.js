@@ -1,3 +1,4 @@
 import MinervaModel from '../MinervaModel';
-export default MinervaModel.extend({
+const AnalysisModel = MinervaModel.extend({
 });
+export default AnalysisModel;

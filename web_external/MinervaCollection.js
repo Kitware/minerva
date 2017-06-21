@@ -2,7 +2,7 @@ import { restRequest } from 'girder/rest';
 import Collection from 'girder/collections/Collection';
 import MinervaModel from './MinervaModel';
 
-export default Collection.extend({
+const MinervaCollection = Collection.extend({
     // minerva collections are items in a specific folder
     resourceName: 'item',
     model: MinervaModel,
@@ -40,13 +40,14 @@ export default Collection.extend({
     fetch: function (params, reset) {
         if (!this.folderId) {
             this.on('m:fetchInitialized', _.bind(function () {
-                params = _.extend(params || {}, {folderId: this.folderId});
+                params = _.extend(params || {}, { folderId: this.folderId });
                 Collection.prototype.fetch.call(this, params, reset);
             }, this)).fetchInit();
         } else {
-            params = _.extend(params || {}, {folderId: this.folderId});
+            params = _.extend(params || {}, { folderId: this.folderId });
             Collection.prototype.fetch.call(this, params, reset);
         }
     }
 
 });
+export default MinervaCollection;

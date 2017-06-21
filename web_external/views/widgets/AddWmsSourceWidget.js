@@ -4,7 +4,7 @@ import template from '../../templates/widgets/addWmsSourceWidget.pug';
 /**
 * This widget displays a form for adding a WMS source.
 */
-export default View.extend({
+const AddWmsSourceWidget = View.extend({
 
     events: {
         'submit #m-add-wms-source-form': function (e) {
@@ -39,3 +39,4 @@ export default View.extend({
     }
 
 });
+export default AddWmsSourceWidget;

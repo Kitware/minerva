@@ -4,7 +4,7 @@ import '../../stylesheets/widgets/choroplethRenderWidget.styl';
 /**
  * This widget displays options for rendering choropleth layers
  */
-export default View.extend({
+const ChoroplethRenderWidget = View.extend({
     initialize: function (settings) {
         this.dataset = settings.dataset;
     },
@@ -46,3 +46,4 @@ export default View.extend({
         this.render();
     }
 });
+export default ChoroplethRenderWidget;

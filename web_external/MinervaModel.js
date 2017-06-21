@@ -2,7 +2,7 @@ import ItemModel from 'girder/models/ItemModel';
 import { restRequest } from 'girder/rest';
 import events from './events';
 
-export default ItemModel.extend({
+const MinervaModel = ItemModel.extend({
 
     defaults: {},
 
@@ -52,7 +52,7 @@ export default ItemModel.extend({
      * @param {minervaMetadata} the object to set as this model's minerva metadata.
      */
     setMinervaMetadata: function (minervaMetadata) {
-        this.set('meta', _.extend(this.get('meta') || {}, {minerva: minervaMetadata}));
+        this.set('meta', _.extend(this.get('meta') || {}, { minerva: minervaMetadata }));
         if (minervaMetadata.geojson && minervaMetadata.geojson.data) {
             this.geoJsonAvailable = true;
             this.fileData = minervaMetadata.geojson.data;
@@ -90,3 +90,4 @@ export default ItemModel.extend({
         }, this));
     }
 });
+export default MinervaModel;

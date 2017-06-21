@@ -9,7 +9,7 @@ import sessionListTemplate from '../../templates/body/sessionList.pug';
 import EditSessionWidget from '../widgets/EditSessionWidget';
 import '../../stylesheets/body/sessionList.styl';
 
-export default View.extend({
+const SessionsView = View.extend({
 
     events: {
         'click a.m-session-link': function (event) {
@@ -81,3 +81,4 @@ export default View.extend({
         router.navigate('session/' + session.id, {trigger: true});
     }
 });
+export default SessionsView;

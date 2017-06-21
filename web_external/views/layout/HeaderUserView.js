@@ -5,7 +5,7 @@ import router from '../../router';
 import { getCurrentUser, setCurrentUser } from 'girder/auth';
 import template from '../../templates/layout/layoutHeaderUser.pug'
 
-export default View.extend({
+const HeaderUserView = View.extend({
 
     events: {
         'click a.g-login': function () {
@@ -50,3 +50,4 @@ export default View.extend({
     }
 
 });
+export default HeaderUserView;

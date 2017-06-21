@@ -4,7 +4,7 @@ import template from '../../templates/widgets/editBaseLayerWidget.pug'
 /**
 * This widget is used to edit an existing Base Layer of a Map Session.
 */
-export default View.extend({
+const EditBaseLayerWidget = View.extend({
     events: {
         'submit #m-edit-baselayer-form': function (e) {
             e.preventDefault();
@@ -36,7 +36,7 @@ export default View.extend({
             view.$('#m-baselayer-centerx').val(view.model.sessionJsonContents.center.x);
             view.$('#m-baselayer-centery').val(view.model.sessionJsonContents.center.y);
         });
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         view.$('#m-baselayer-basemap').focus();
 
         return this;
@@ -55,3 +55,4 @@ export default View.extend({
         }, this).saveSession();
     }
 });
+export default EditBaseLayerWidget;

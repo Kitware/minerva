@@ -1,6 +1,6 @@
 import MinervaModel from '../MinervaModel';
 
-export default MinervaModel.extend({
+const SessionModel = MinervaModel.extend({
 
     _featureFromDataset: function (dataset) {
         var feature = {
@@ -89,3 +89,4 @@ export default MinervaModel.extend({
         }, this).saveMinervaMetadata();
     }
 });
+export default SessionModel;

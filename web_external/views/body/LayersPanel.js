@@ -3,7 +3,7 @@ import template from '../../templates/body/layersPanel.pug';
 import '../../stylesheets/body/layersPanel.styl';
 import '../../stylesheets/widgets/animationControls.styl';
 
-export default Panel.extend({
+const LayersPanel = Panel.extend({
 
     events: {
         'click .m-download-geojson': 'downloadGeojsonEvent',
@@ -285,3 +285,4 @@ export default Panel.extend({
         return this;
     }
 });
+export default LayersPanel;

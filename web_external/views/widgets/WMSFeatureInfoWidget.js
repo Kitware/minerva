@@ -8,7 +8,7 @@ import GeoJSONStyle from '../../models/GeoJSONStyle';
 import template from '../../templates/widgets/wmsFeatureInfoWidget.pug';
 import '../../stylesheets/widgets/featureInfoWidget.styl';
 
-export default View.extend({
+const WMSFeatureInfoWidget = View.extend({
 
     callInfo: function (event) {
         var that = this;
@@ -137,3 +137,4 @@ export default View.extend({
         this.$el.append(template);
     }
 });
+export default WMSFeatureInfoWidget;

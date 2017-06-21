@@ -6,7 +6,7 @@ import '../../stylesheets/widgets/geoJSONStyleWidget.styl';
 /**
  * This widget displays options for rendering json datasets.
  */
-export default View.extend({
+const JsonConfigWidget = View.extend({
     initialize: function (settings) {
         this.dataset = settings.dataset;
     },
@@ -46,3 +46,4 @@ export default View.extend({
         }).render();
     }
 });
+export default JsonConfigWidget;

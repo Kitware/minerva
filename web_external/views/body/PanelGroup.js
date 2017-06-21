@@ -1,6 +1,6 @@
 import View from '../view';
 
-export default View.extend({
+const PanelGroup = View.extend({
     initialize: function (settings) {
         this.id = settings.id;
         this.panelViews = settings.panelViews || [];
@@ -21,3 +21,4 @@ export default View.extend({
         return this;
     }
 });
+export default PanelGroup;
