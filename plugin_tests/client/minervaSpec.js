@@ -107,7 +107,7 @@ describe('Session view', function () {
 
         runs(function () {
             handle = false;
-            _prepareTestUpload();
+            girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/nys_counties.geojson');
             $('#g-files').parent().addClass('hide');
             $('.g-start-upload').click();
@@ -124,7 +124,7 @@ describe('Session view', function () {
 
         runs(function () {
             handle = false;
-            _prepareTestUpload();
+            girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/geojson-timeseries_1.geojson');
             $('#g-files').parent().addClass('hide');
             $('.g-start-upload').click();

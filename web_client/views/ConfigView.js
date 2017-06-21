@@ -3,6 +3,7 @@ import View from 'girder/views/View';
 import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
+
 import template from '../templates/config.pug';
 
 /**

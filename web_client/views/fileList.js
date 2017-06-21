@@ -4,6 +4,7 @@ import { AccessType } from 'girder/constants';
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
 import FileListWidget from 'girder/views/widgets/FileListWidget';
+
 import template from '../templates/minerva_fileAction.pug';
 import '../stylesheets/fileList.styl';
 
@@ -22,7 +23,7 @@ wrap(FileListWidget, 'render', function (render) {
         if (!minerva && $.inArray(file.get('mimeType'), ['application/json', 'application/vnd.geo+json']) < 0 && !file.get('name').match(/\.(geojson|json)(\.|$)/i)) {
             return;
         }
-        var actions = $('.g-file-list-link[cid="' + file.cid + '"]',
+        var actions = this.$('.g-file-list-link[cid="' + file.cid + '"]',
             this.$el).closest('.g-file-list-entry').children(
             '.g-file-actions-container');
         if (!actions.length) {
@@ -35,13 +36,13 @@ wrap(FileListWidget, 'render', function (render) {
             actions.prepend(fileAction);
         }
     });
-    $('.g-minerva-geojson-remove', this.$el).on('click', _.bind(function () {
+    this.$('.g-minerva-geojson-remove', this.$el).on('click', _.bind(function () {
         this.parentItem.removeMetadata('minerva', _.bind(function () {
             this.parentItem.unset('meta');
             this.parentItem.fetch();
         }, this), null, {});
     }, this));
-    $('.g-minerva-geojson-create', this.$el).on('click', _.bind(function (e) {
+    this.$('.g-minerva-geojson-create', this.$el).on('click', _.bind(function (e) {
         restRequest({
             type: 'POST',
             path: 'minerva_dataset_geojson',

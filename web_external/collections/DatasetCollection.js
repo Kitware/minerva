@@ -15,6 +15,10 @@ export default MinervaCollection.extend({
         return new DatasetModel(attrs, options);
     },
 
+    modelId: function (attrs) {
+        return attrs._id;
+    },
+
     path: 'minerva_dataset',
     getInitData: function () {
         var initData = { userId: getCurrentUser().get('_id') };
