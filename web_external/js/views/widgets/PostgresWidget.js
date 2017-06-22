@@ -15,8 +15,6 @@ minerva.views.PostgresWidget = minerva.View.extend({
         'click button.add-link': '_addLinkClick',
         'click button.remove-link': '_removeLinkClick'
     },
-    formToTable: {
-    },
     initialize: function () {
         this.primativeColumns = this.primativeColumns.bind(this);
         this.geometryColumns = this.geometryColumns.bind(this);
