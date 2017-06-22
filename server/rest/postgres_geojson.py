@@ -45,17 +45,6 @@ class PostgresGeojson(Resource):
             'format': output_format
         }
 
-    # def _getProperties(self, params):
-    #     colDict = self.getColumns({'table': params['table']})
-    #     columns = [i['name'] for i in colDict
-    #                if not i['name'] == 'geom']
-    #     fields = []
-    #     for c in columns:
-    #         fields.append(c)
-    #         fields.append({'field': c})
-
-    #     return fields
-
     @access.user
     @describeRoute(
         Description('Returns list of eligible assetstores')
@@ -165,18 +154,16 @@ class PostgresGeojson(Resource):
             }]
             # add string fields with concat aggregate function and in the format for
             # json_build_object
-            for property in [(i['name'], {
-                'func': 'string_agg',
-                'param': [{
-                    'func': 'distinct',
-                    'param': {'field': i['name']}
-                }, '|'],
-                'reference': i['name']
-            })
-                    for i in self._getColumns(assetstore, {'table': params['table']})
-                    if i['datatype'] == 'string'
-                    if i['name'] != field]:
-                properties.extend(property)
+            for i in self._getColumns(assetstore, {'table': params['table']}):
+                if i['datatype'] == 'string' and i['name'] != field:
+                    properties.extend((i['name'], {
+                        'func': 'string_agg',
+                        'param': [{
+                            'func': 'distinct',
+                            'param': {'field': i['name']}
+                        }, '|'],
+                        'reference': i['name']
+                    }))
             fields = [{
                 'func': 'json_build_object', 'param': [
                     'type', 'Feature',
@@ -200,17 +187,17 @@ class PostgresGeojson(Resource):
             }]
             group = [x['value'] for x in geometryField['links']]
             # add string fields with concat aggregate function
-            for i in [i for i in self._getColumns(assetstore, {'table': params['table']})
-                      if i['datatype'] in ('string', 'number', 'date') if i['name'] != field]:
-                if i['datatype'] == 'string':
-                    fields.append({
-                        'func': 'string_agg',
-                        'param': [{
-                            'func': 'distinct',
-                            'param': {'field': i['name']}
-                        }, '|'],
-                        'reference': i['name']
-                    })
+            for i in self._getColumns(assetstore, {'table': params['table']}):
+                if i['datatype'] in ('string', 'number', 'date') and i['name'] != field:
+                    if i['datatype'] == 'string':
+                        fields.append({
+                            'func': 'string_agg',
+                            'param': [{
+                                'func': 'distinct',
+                                'param': {'field': i['name']}
+                            }, '|'],
+                            'reference': i['name']
+                        })
 
         datasetName = params['datasetName']
         # TODO: schema should be read from the listed table, not set explicitly
