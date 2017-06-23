@@ -16,12 +16,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import loadmodel, RestException
 from girder.constants import AccessType
-
 from girder.plugins.minerva.rest.dataset import Dataset
 
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
@@ -36,7 +34,7 @@ class GeojsonDataset(Dataset):
     @access.user
     @loadmodel(map={'itemId': 'item'}, model='item',
                level=AccessType.WRITE)
-    def createGeojsonDataset(self, item, params):
+    def createGeojsonDataset(self, item, params, postgresGeojson=None):
         user = self.getCurrentUser()
         folder = findDatasetFolder(user, user, create=True)
         if folder is None:
@@ -64,6 +62,14 @@ class GeojsonDataset(Dataset):
                 minerva_metadata['source'] = {
                     'layer_source': 'GeoJSON'}
                 minerva_metadata['source_type'] = 'item'
+                if postgresGeojson is not None:
+                    if postgresGeojson['field'] is not None:
+                        minerva_metadata['visProperties'] = {
+                            'line': {"fillColorKey": postgresGeojson['field']},
+                            'polygon': {"fillColorKey": postgresGeojson['field']},
+                            'point': {"fillColorKey": postgresGeojson['field']}
+                        }
+                    minerva_metadata['postgresGeojson'] = postgresGeojson
                 break
         if 'geojson_file' not in minerva_metadata:
             raise RestException('Item contains no geojson file.')

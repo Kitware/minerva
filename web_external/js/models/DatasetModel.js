@@ -35,6 +35,19 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      * For now, this is only done for GeoJSON datasets.
      */
     _preprocess: function () {
+        // Merge default style into existing style
+        var meta = this.get('meta');
+        var prop = new minerva.models.GeoJSONStyle().attributes;
+        var defaultVisProperties = {
+            point: prop,
+            line: prop,
+            polygon: prop
+        };
+        if (!meta.minerva.visProperties) {
+            meta.minerva.visProperties = {};
+        }
+        $.extend(true, defaultVisProperties, meta.minerva.visProperties);
+        $.extend(true, meta.minerva.visProperties, defaultVisProperties);
         if (this.getDatasetType().match(/(geo)?json/)) {
             this.set('geoData', minerva.geojson.normalize(this.get('geoData')));
         }
@@ -172,6 +185,16 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
                 this.set('geoData', mm.geojson.data);
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
+        } else if (mm.postgresGeojson) {
+            girder.restRequest({
+                path: '/minerva_postgres_geojson/' + this.get('_id'),
+                contentType: 'application/json',
+                dataType: null
+            })
+                .done(_.bind(function (data) {
+                    this.set('geoData', data);
+                    this.trigger('m:dataset_geo_dataLoaded', this);
+                }, this));
         } else {
             var path = '/file/' + mm.geo_render.file_id + '/download';
             girder.restRequest({

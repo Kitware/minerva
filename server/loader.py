@@ -27,7 +27,7 @@ from girder.utility.model_importer import ModelImporter
 
 from girder.plugins.minerva.rest import \
         analysis, dataset, session, \
-        wms_dataset, geojson_dataset, wms_styles, feature, twofishes
+        wms_dataset, geojson_dataset, wms_styles, feature, twofishes, postgres_geojson
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.cookie import getExtraHeaders
 
@@ -84,6 +84,7 @@ def load(info):
     info['apiRoot'].minerva_dataset_geojson = geojson_dataset.GeojsonDataset()
     info['apiRoot'].minerva_get_feature_info = feature.FeatureInfo()
     info['apiRoot'].minerva_geocoder = twofishes.TwoFishes()
+    info['apiRoot'].minerva_postgres_geojson = postgres_geojson.PostgresGeojson()
 
     info['serverRoot'].wms_proxy = WmsProxy()
 

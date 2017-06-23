@@ -25,6 +25,7 @@ addons:
     - libnetcdf-dev
 
 before_install:
+    - DATABASE_ASSETSTORE_VERSION="master"
     # update pip for binary wheel caching
     - pip install -U pip virtualenv
 
@@ -41,6 +42,7 @@ before_install:
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
 
     - cd girder
+    - export GIRDER_SOURCE_DIR="$PWD"
     # copy the placeholder bsve credentials, needed even though we mock bsve api calls
     - cp plugins/minerva/server/jobs/bsve.json.in plugins/minerva/server/jobs/bsve.json
 
@@ -66,6 +68,11 @@ before_install:
     - $SPARK_HOME/sbin/start-master.sh
     - sleep 3
     - $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
+
+    # install database_assetstore plugin
+    - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
+    - git clone https://github.com/OpenGeoscience/girder_db_items.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
+    - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
 
 install:
     - cd $HOME/build/girder

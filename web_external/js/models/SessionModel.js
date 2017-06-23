@@ -64,8 +64,8 @@ minerva.models.SessionModel = minerva.models.MinervaModel.extend({
         var map = {};
         map.basemap = 'osm';
         map.basemap_args = {
-            url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            attribution: 'Tile data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+            attribution: 'Leaflet | © OpenStreetMap contributors, © CARTO'
         };
         map.center = {x: -100, y: 36.5};
         map.zoom = 4;
