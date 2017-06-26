@@ -55,6 +55,27 @@ Setup Girder admin user and assetstore
 - Navigate to the Admin console in Girder, when you are logged in as an admin user, then click on the Assetstores section.
 - Create a default Assetstore.
 
+Install database_assetstore as a Girder plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is needed because minerva depends on database_assetstore plugin.
+
+- Install girder_db_items plugin into the Girder plugins directory.
+
+::
+
+   cd GIRDER_DIR/plugins
+   git clone https://github.com/OpenGeoscience/girder_db_items database_assetstore
+
+::
+
+- Install the required python packages for the database_assetstore plugin.
+
+::
+
+   cd database_assetstore
+   pip install -r requirements.txt
+
 Install of Minerva as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

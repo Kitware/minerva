@@ -48,6 +48,11 @@ def findMinervaFolder(currentUser, user, create=False):
                            PluginSettings.MINERVA_FOLDER, create)
 
 
+def findPublicFolder(currentUser, user, create=False):
+    return findNamedFolder(currentUser, user, user, 'user',
+                           'Public', create)
+
+
 def findDatasetFolder(currentUser, user, create=False):
     minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
