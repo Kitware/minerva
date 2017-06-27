@@ -1,7 +1,9 @@
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
+
 import MinervaModel from '../MinervaModel';
 import geojsonUtil from '../geojsonUtil';
+import GeoJSONStyle from './GeoJSONStyle';
 
 const DatasetModel = MinervaModel.extend({
 
@@ -42,7 +44,7 @@ const DatasetModel = MinervaModel.extend({
     _preprocess: function () {
         // Merge default style into existing style
         var meta = this.get('meta');
-        var prop = new minerva.models.GeoJSONStyle().attributes;
+        var prop = new GeoJSONStyle().attributes;
         var defaultVisProperties = {
             point: prop,
             line: prop,
@@ -191,7 +193,7 @@ const DatasetModel = MinervaModel.extend({
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
         } else if (mm.postgresGeojson) {
-            girder.restRequest({
+            restRequest({
                 path: '/minerva_postgres_geojson/' + this.get('_id'),
                 contentType: 'application/json',
                 dataType: null

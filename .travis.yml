@@ -29,7 +29,7 @@ before_install:
     - nvm install v6
     - nvm use v6
     - pip install -U pip virtualenv
-    - DATABASE_ASSETSTORE_VERSION="master"
+    - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
 
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
@@ -66,7 +66,7 @@ before_install:
 
     # install database_assetstore plugin
     - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
-    - git clone https://github.com/OpenGeoscience/girder_db_items.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
+    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
     - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
 
 install:

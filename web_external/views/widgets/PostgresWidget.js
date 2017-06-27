@@ -1,4 +1,14 @@
-minerva.views.PostgresWidget = minerva.View.extend({
+import { restRequest } from 'girder/rest';
+
+import View from '../view';
+import template from '../../templates/widgets/postgresWidget.pug';
+import '../../stylesheets/widgets/postgresWidget.styl';
+import doT from 'dot/doT';
+import jQueryExtendext from 'jquery-extendext';
+import QueryBuilder from 'jQuery-QueryBuilder/dist/js/query-builder';
+import 'jQuery-QueryBuilder/dist/css/query-builder.default.min.css';
+
+const PostgresWidget = View.extend({
     events: {
         'submit #m-postgres': 'getGeojson',
         'change #m-postgres-assetstore': '_assetstoreChanged',
@@ -157,7 +167,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
             return geometryField;
         }.bind(this);
 
-        girder.restRequest({
+        restRequest({
             path: '/minerva_postgres_geojson',
             type: 'POST',
             data: {
@@ -177,7 +187,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
     },
     render: function () {
         if (!this.modalOpenned) {
-            var el = this.$el.html(minerva.templates.postgresWidget(this));
+            var el = this.$el.html(template(this));
             this.modalOpenned = true;
             var modal = el.girderModal(this);
 
@@ -207,7 +217,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
                     if (!rule.filter || rule.filter.valuePopulated) {
                         return;
                     }
-                    Promise.resolve(girder.restRequest({
+                    Promise.resolve(restRequest({
                         path: '/minerva_postgres_geojson/values',
                         type: 'GET',
                         data: {
@@ -226,7 +236,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
             modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         } else {
             this.$queryBuilder.detach();
-            this.$el.html(minerva.templates.postgresWidget(this));
+            this.$el.html(template(this));
             this.$('.m-query-builder').replaceWith(this.$queryBuilder);
             if (this.columns && this.columns.length) {
                 this.$queryBuilder.show();
@@ -253,7 +263,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         return funcs;
     },
     _getAssetstores: function () {
-        Promise.resolve(girder.restRequest({
+        Promise.resolve(restRequest({
             path: '/minerva_postgres_geojson/assetstores',
             type: 'GET'
         })).then(function (assetstores) {
@@ -262,7 +272,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }.bind(this));
     },
     _getSources: function () {
-        Promise.resolve(girder.restRequest({
+        Promise.resolve(restRequest({
             path: '/minerva_postgres_geojson/tables',
             type: 'GET',
             data: {
@@ -307,7 +317,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.render();
     },
     _loadFilterConfiguration: function () {
-        Promise.resolve(girder.restRequest({
+        Promise.resolve(restRequest({
             path: '/minerva_postgres_geojson/columns',
             type: 'GET',
             data: {
@@ -425,7 +435,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         this.render();
     },
     _loadGeometryLinks: function () {
-        return Promise.resolve(girder.restRequest({
+        return Promise.resolve(restRequest({
             path: '/minerva_postgres_geojson/geometrylink',
             type: 'GET'
         })).then(function (links) {
@@ -434,7 +444,7 @@ minerva.views.PostgresWidget = minerva.View.extend({
         }.bind(this));
     },
     _loadGeometryLinkField: function () {
-        return Promise.resolve(girder.restRequest({
+        return Promise.resolve(restRequest({
             path: '/minerva_postgres_geojson/geometrylinkfields',
             type: 'GET',
             data: {
@@ -469,3 +479,5 @@ minerva.views.PostgresWidget = minerva.View.extend({
         return !_.some(_.values(this.validation), function (value) { return value; });
     }
 });
+
+export default PostgresWidget;

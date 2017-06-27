@@ -10,6 +10,7 @@ import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
 import JsonConfigWidget from '../widgets/JsonConfigWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
+import PostgresWidget from '../widgets/PostgresWidget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 
@@ -74,12 +75,12 @@ export default Panel.extend({
     },
 
     connectToPostgres: function (event) {
-        var postgresWidget = new minerva.views.PostgresWidget({
+        var postgresWidget = new PostgresWidget({
             el: $('#g-dialog-container'),
             collection: this.collection,
             parentView: this
         }).on('m:dataset_created', function (datasetId) {
-            var dataset = new minerva.models.DatasetModel({ _id: datasetId });
+            var dataset = new DatasetModel({ _id: datasetId });
             dataset.on('g:fetched', function () {
                 this.collection.add(dataset);
             }, this).fetch();
