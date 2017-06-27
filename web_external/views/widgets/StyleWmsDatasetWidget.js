@@ -6,6 +6,9 @@ import styleSingleBandRasterWidgetTemplate from '../../templates/widgets/styleSi
 import stylePointWidgetTemplate from '../../templates/widgets/stylePointWidget.pug';
 import styleWmsDatasetWidgetTemplate from '../../templates/widgets/styleWmsDatasetWidget.pug';
 
+import 'bootstrap-select';
+import 'bootstrap-select/dist/css/bootstrap-select.css';
+
 /*
   This widget displays a styling modal for WMS layers.
 */

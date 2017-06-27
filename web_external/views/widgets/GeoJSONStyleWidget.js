@@ -1,7 +1,13 @@
+import 'bootstrap-slider';
+import 'bootstrap-slider/dist/css/bootstrap-slider.css';
+import 'bootstrap-select';
+import 'bootstrap-select/dist/css/bootstrap-select.css';
+
 import View from '../view';
 import GeoJSONStyle from '../../models/GeoJSONStyle';
 import geojsonUtil from '../../geojsonUtil';
 import template from '../../templates/widgets/geoJSONStyleWidget.pug';
+
 
 function _updateClampingPanel(radio) {
     var radioChecked = radio.is(':checked');
