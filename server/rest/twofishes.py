@@ -24,6 +24,7 @@ import geojson
 import requests
 from shapely.wkt import loads
 
+from girder import events
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource
@@ -89,11 +90,14 @@ class TwoFishes(Resource):
 
     @access.public
     def autocomplete(self, params):
-        r = requests.get(params['twofishes'],
-                         params={'autocomplete': True,
-                                 'query': params['location'],
-                                 'maxInterpretations': 10,
-                                 'autocompleteBias': None})
+        event = events.trigger('minerva.autocomplete', params)
+        r = event.responses
+        if not event.defaultPrevented:
+            r = requests.get(params['twofishes'],
+                             params={'autocomplete': True,
+                                     'query': params['location'],
+                                     'maxInterpretations': 10,
+                                     'autocompleteBias': None})
 
         return [i['feature']['matchedName'] for i in r.json()['interpretations']]
 
