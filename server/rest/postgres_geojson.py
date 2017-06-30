@@ -3,8 +3,7 @@ import json
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
-from girder.constants import AccessType
-from girder.api.rest import Resource, ValidationException, loadmodel, GirderException
+from girder.api.rest import Resource, ValidationException, loadmodel
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
@@ -22,7 +21,6 @@ class PostgresGeojson(Resource):
         self.route('POST', (), self.createPostgresGeojsonData)
         self.route('GET', ('geometrylink', ), self.getGeometryLinkTarget)
         self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
-        self.route('GET', (':id',), self.getPostgresGeojsonData)
 
     def _getDbName(self):
         assetstores = self.model('assetstore').list(limit=10)
@@ -277,79 +275,3 @@ class PostgresGeojson(Resource):
                 'properties' not in featureCollections['features'][0]:
             raise ValidationException('invalid geojson file')
         return featureCollections['features'][0]['properties'].keys()
-
-    @access.user
-    @loadmodel(model='item', level=AccessType.READ)
-    @describeRoute(
-        Description("Get linked geojson dataset.")
-        .param('id', 'The ID of the item.', paramType='path')
-        .errorResponse('ID was invalid.')
-        .errorResponse('Dataset linking failed', 500)
-        .errorResponse('Dataset is empty', 500)
-    )
-    def getPostgresGeojsonData(self, item, params):
-        user = self.getCurrentUser()
-        file = self.model('file').load(item['meta']['minerva'][
-            'original_files'][0]['_id'], user=user)
-        assetstore = self.model('assetstore').load(file['assetstoreId'])
-        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-        func = adapter.downloadFile(
-            file, offset=0, headers=False, endByte=None,
-            contentDisposition=None, extraParameters=None)
-
-        geometryField = item['meta']['minerva']['postgresGeojson']['geometryField']
-
-        if geometryField['type'] == 'built-in':
-            return func
-        elif geometryField['type'] == 'link':
-            featureCollections = None
-            records = json.loads(''.join(list(func())))
-            try:
-                item = self.model('item').load(geometryField['itemId'], force=True)
-                file = list(self.model('item').childFiles(item=item, limit=1))[0]
-                assetstore = self.model('assetstore').load(file['assetstoreId'])
-                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-                func = adapter.downloadFile(
-                    file, offset=0, headers=False, endByte=None,
-                    contentDisposition=None, extraParameters=None)
-            except Exception:
-                raise GirderException('Unable to load link target dataset.')
-            featureCollections = json.loads(''.join(list(func())))
-
-            valueLinks = sorted([x for x in geometryField['links']
-                                 if x['operator'] == '='])
-            constantLinks = [x for x in geometryField['links']
-                             if x['operator'] == 'constant']
-            mappedGeometries = {}
-            for feature in featureCollections['features']:
-                skip = False
-                for constantLink in constantLinks:
-                    if feature['properties'][constantLink['field']] != constantLink['value']:
-                        skip = True
-                        break
-                if skip:
-                    continue
-                try:
-                    key = ''.join([feature['properties'][x['field']] for x in valueLinks])
-                except KeyError:
-                    raise GirderException('missing property for key ' +
-                                          x['field'] + ' in geometry link target geojson')
-                mappedGeometries[key] = feature['geometry']
-
-            assembled = []
-            for record in records:
-                key = ''.join([record[x['value']] for x in valueLinks])
-                if key in mappedGeometries:
-                    assembled.append({
-                        'type': 'Feature',
-                        'geometry': mappedGeometries[key],
-                        'properties': record
-                    })
-
-            if len(assembled) == 0:
-                raise GirderException('Dataset is empty')
-
-            return {
-                'type': 'FeatureCollection',
-                'features': assembled
-            }
