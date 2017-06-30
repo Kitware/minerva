@@ -9,11 +9,11 @@
             radius: 8,
             stroke: true,
             strokeWidth: 2,
-            strokeColor: '#000000',
+            strokeColor: '#999999',
             strokeOpacity: 1,
             fill: true,
             fillOpacity: 0.75,
-            fillColor: '#ff0000',
+            fillColor: '#BEE37B',
             strokeRamp: 'Blues',
             strokeColorKey: null,
             fillRamp: 'Reds',
@@ -228,7 +228,7 @@ minerva.views.GeoJSONStyleWidget = minerva.View.extend({
     },
     _getTabs: function (data) {
         var points = !!minerva.geojson.getFeatures(data, 'Point', 'MultiPoint').length;
-        var lines = !!minerva.geojson.getFeatures(data, 'Line', 'MultiLine').length;
+        var lines = !!minerva.geojson.getFeatures(data, 'LineString', 'MultiLineString').length;
         var polygons = !!minerva.geojson.getFeatures(data, 'Polygon', 'MultiPolygon').length;
         var tabs = {};
 
