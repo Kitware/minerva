@@ -196,7 +196,7 @@ const GeoJSONStyleWidget = View.extend({
     },
     _getTabs: function (data) {
         var points = !!geojsonUtil.getFeatures(data, 'Point', 'MultiPoint').length;
-        var lines = !!geojsonUtil.getFeatures(data, 'Line', 'MultiLine').length;
+        var lines = !!geojsonUtil.getFeatures(data, 'LineString', 'MultiLineString').length;
         var polygons = !!geojsonUtil.getFeatures(data, 'Polygon', 'MultiPolygon').length;
         var tabs = {};
 

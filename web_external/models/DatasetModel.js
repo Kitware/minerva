@@ -31,6 +31,7 @@ const DatasetModel = MinervaModel.extend({
      */
     initialize: function () {
         MinervaModel.prototype.initialize.apply(this, arguments);
+        this.on('g:fetched', this._applyDefaultStyle, this);
         this.on('change:geoData', this._preprocess, this);
         return this;
     },
@@ -42,8 +43,16 @@ const DatasetModel = MinervaModel.extend({
      * For now, this is only done for GeoJSON datasets.
      */
     _preprocess: function () {
-        // Merge default style into existing style
+        if (this.getDatasetType().match(/(geo)?json/)) {
+            this.set('geoData', geojsonUtil.normalize(this.get('geoData')));
+        }
+    },
+
+    _applyDefaultStyle: function () {
         var meta = this.get('meta');
+        if (!meta) {
+            return;
+        }
         var prop = new GeoJSONStyle().attributes;
         var defaultVisProperties = {
             point: prop,
@@ -55,9 +64,6 @@ const DatasetModel = MinervaModel.extend({
         }
         $.extend(true, defaultVisProperties, meta.minerva.visProperties);
         $.extend(true, meta.minerva.visProperties, defaultVisProperties);
-        if (this.getDatasetType().match(/(geo)?json/)) {
-            this.set('geoData', geojsonUtil.normalize(this.get('geoData')));
-        }
     },
 
     /**
@@ -80,6 +86,7 @@ const DatasetModel = MinervaModel.extend({
             }
             this.metadata(resp.meta.minerva);
             this._initGeoRender();
+            this._applyDefaultStyle();
             this.trigger('m:dataset_promoted', this);
         }, this)).fail(_.bind(function (err) {
             console.error(err);
