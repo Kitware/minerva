@@ -42,11 +42,17 @@ class TwoFishes(Resource):
         self.route('POST', ('geojson',), self.postGeojson)
 
     @staticmethod
-    def getWktFromTwoFishes(twofishes, location):
+    def getWktFromTwoFishes(twofishes, location, headers=None):
         """Gets wkt from twofishes for a given location"""
-        r = requests.get(twofishes,
-                         params={'query': location,
-                                 'responseIncludes': 'WKT_GEOMETRY'})
+        if not headers:
+            r = requests.get(twofishes,
+                             params={'query': location,
+                                     'responseIncludes': 'WKT_GEOMETRY'})
+        else:
+            r = requests.get(twofishes,
+                             params={'query': location,
+                                     'responseIncludes': 'WKT_GEOMETRY'},
+                             headers=headers)
         wkt = r.json()['interpretations'][0]['feature']['geometry']['wktGeometry']
 
         return wkt
@@ -125,13 +131,16 @@ class TwoFishes(Resource):
 
     @access.public
     def postGeojson(self, params):
-        twofishes = params['twofishes']
-        try:
-            locationInfo = json.loads(params['locations'])
-            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
-        except ValueError:
-            locationInfo = params['locations']
-            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
+        event = events.trigger('minerva.post_geojson', params)
+        geojson = event.responses
+        if not event.defaultPrevented:
+            twofishes = params['twofishes']
+            try:
+                locationInfo = json.loads(params['locations'])
+                geojson = TwoFishes.createGeojson(twofishes, locationInfo)
+            except ValueError:
+                locationInfo = params['locations']
+                geojson = TwoFishes.createGeojson(twofishes, locationInfo)
 
         minervaDataset = self.createMinervaDataset(geojson, params['name'])
         return minervaDataset
