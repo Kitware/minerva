@@ -110,7 +110,11 @@ class TwoFishes(Resource):
     @access.public
     def getGeojson(self, params):
         locations = json.loads(params['locations'])
-        geojson = TwoFishes.createGeojson(params['twofishes'], locations)
+        event = events.trigger('minerva.get_geojson', params)
+        geojson = event.responses
+        if not event.defaultPrevented:
+            geojson = TwoFishes.createGeojson(params['twofishes'], locations)
+
         return geojson
 
     getGeojson.description = (
