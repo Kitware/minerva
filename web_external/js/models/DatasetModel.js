@@ -24,6 +24,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
      */
     initialize: function () {
         minerva.models.MinervaModel.prototype.initialize.apply(this, arguments);
+        this._applyDefaultStyle();
         this.on('g:fetched', this._applyDefaultStyle, this);
         this.on('change:geoData', this._preprocess, this);
         return this;
@@ -55,8 +56,7 @@ minerva.models.DatasetModel = minerva.models.MinervaModel.extend({
         if (!meta.minerva.visProperties) {
             meta.minerva.visProperties = {};
         }
-        $.extend(true, defaultVisProperties, meta.minerva.visProperties);
-        $.extend(true, meta.minerva.visProperties, defaultVisProperties);
+        meta.minerva.visProperties = $.extend(true, {}, defaultVisProperties, meta.minerva.visProperties);
     },
 
     /**
