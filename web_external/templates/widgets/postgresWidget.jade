@@ -7,21 +7,21 @@
           | Create Dataset from Database
       .modal-body
         .form-group.form-group-sm(class=validation.datasetNameRequired?"has-error":'')
-          label.control-label(for="m-postgres-dataset-name") Dataset name
+          label.control-label(for="m-postgres-dataset-name") Custom name
             input.form-control#m-postgres-dataset-name(type='text', value=datasetName)
             if validation.datasetNameRequired
               span.help-block Required
         .row
           .col-md-6
             .form-group.form-group-sm
-                label.control-label(for="m-postgres-source") Assetstore
+                label.control-label(for="m-postgres-source") Database
                   select.form-control#m-postgres-assetstore
                     option
                     each assetstore in assetstores
                       option(value=assetstore._id, selected=assetstore._id==selectedAssetstoreId)= assetstore.name
             if sources.length
               .form-group.form-group-sm
-                label.control-label(for="m-postgres-source") Source
+                label.control-label(for="m-postgres-source") Table/View
                   select.form-control#m-postgres-source
                     option
                     each source in sources
@@ -37,7 +37,7 @@
                     span.help-block Required
             if valueField && selectedSource && columns.length
               .form-group.form-group-sm
-                label.control-label(for="m-postgres-aggregation") Aggregate method
+                label.control-label(for="m-postgres-aggregation") Aggregation method
                   select.form-control.has-min-width#m-postgres-aggregation
                     each func in getAvailableAggregateFunctions()
                       option(value=func, selected=aggregateFunction==func)= func
@@ -64,7 +64,7 @@
                         span.help-block Required
                 if geometryFieldType=='link'
                   .form-group.form-group-sm(class=validation.geometryLinkTargetRequired?"has-error":'')
-                    label.control-label(for="m-postgres-field") Target
+                    label.control-label(for="m-postgres-field") Geometry Dataset
                       select.form-control.input-sm.has-min-width.link-target
                         option
                         each target in geometryLink.targets
@@ -79,7 +79,7 @@
                       each link, index in geometryLink.links
                         .m-link-container
                           select.form-control.input-sm.link-field(data-link-index=index)
-                            option(value='')= '--Target--'
+                            option(value='')= '--Geometry Dataset--'
                             each field in geometryLink.fields
                               option(value=field, selected=link.field==field)= field
                           if link.field
@@ -89,7 +89,7 @@
                                 option(value=operator, selected=link.operator==operator)= operator
                             if link.operator=='='
                               select.form-control.input-sm.link-value(data-link-index=index)
-                                option(value='')= '--Source--'
+                                option(value='')= '--Table/View--'
                                 each column in columns
                                   option(value=column.name, selected=link.value==column.name)= column.name
                             if link.operator=='constant'
