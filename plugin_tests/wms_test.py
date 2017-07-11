@@ -18,7 +18,6 @@
 ###############################################################################
 
 import gzip
-import httplib
 from httmock import urlmatch, HTTMock, response as httmockresponse
 import os
 
@@ -60,7 +59,6 @@ def wms_mock(url, request):
 
 
 class WmsTestCase(base.TestCase):
-
     """
     Tests of the minerva source API endpoints.
     """
@@ -93,7 +91,6 @@ class WmsTestCase(base.TestCase):
 
         cls._path = path
         cls._params = params
-        
 
     def testCreateWmsSourceAndDataset(self):
         """
@@ -101,26 +98,26 @@ class WmsTestCase(base.TestCase):
         """
 
         with HTTMock(wms_mock):
-            response = self.request(path=self._path, method='POST', params=self._params, user=self._user)
+            response = self.request(path=self._path, method='POST',
+                                    params=self._params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
 
         # Source generates multiple datasets now
         source_type = [d['meta']['minerva']['source']['source_type']
-                      for d in wmsSource]
+                       for d in wmsSource]
 
         base_url = [d['meta']['minerva']['source']['wms_params']['base_url']
                     for d in wmsSource]
 
         source_name = [d['meta']['minerva']['source']['layer_source'] for d in wmsSource]
-        
-        self.assertEquals(set(source_type), {'wms'},
-                        'incorrect wms dataset typeName')
-        self.assertEquals(set(base_url), {self._params['baseURL']},
-                        'incorrect wms dataset baseURL')
-        self.assertEquals(set(source_name), {self._params['name']},
-                        'incorrect wms source name')
 
+        self.assertEquals(set(source_type), {'wms'},
+                          'incorrect wms dataset typeName')
+        self.assertEquals(set(base_url), {self._params['baseURL']},
+                          'incorrect wms dataset baseURL')
+        self.assertEquals(set(source_name), {self._params['name']},
+                          'incorrect wms source name')
 
     def testCreateWmsSourceWithAuthentication(self):
         """
@@ -129,7 +126,8 @@ class WmsTestCase(base.TestCase):
         """
 
         with HTTMock(wms_mock):
-            response = self.request(path=self._path, method='POST', params=self._params, user=self._user)
+            response = self.request(path=self._path, method='POST',
+                                    params=self._params, user=self._user)
         self.assertStatusOk(response)
         wmsSource = response.json
 
@@ -144,7 +142,8 @@ class WmsTestCase(base.TestCase):
     def testCheckDatasetsExistInDatabase(self):
 
         with HTTMock(wms_mock):
-            response = self.request(path=self._path, method='POST', params=self._params, user=self._user)
+            response = self.request(path=self._path, method='POST',
+                                    params=self._params, user=self._user)
 
         self.assertStatusOk(response)
         from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder

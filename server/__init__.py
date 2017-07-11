@@ -27,7 +27,8 @@ _cfgs = ('minerva.dist.cfg', 'minerva.local.cfg')
 for f in _cfgs:
     configPath = os.path.join(PACKAGE_DIR, 'conf', f)
     if os.path.exists(configPath):
-	    _mergeConfig(configPath)
+        _mergeConfig(configPath)
+
 
 def load(info):
     loader.load(info)

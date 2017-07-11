@@ -1,28 +1,28 @@
-girderTest.importStylesheet(
-    '/static/built/plugins/minerva/plugin.min.css'
-);
+girderTest.addScripts([
+    '/clients/web/static/built/plugins/jobs/plugin.min.js',
+    '/clients/web/static/built/plugins/gravatar/plugin.min.js',
+    '/clients/web/static/built/plugins/minerva/minerva.min.js'
+]);
 
-girderTest.addCoveredScripts([
+girderTest.importStylesheet('/static/built/plugins/minerva/minerva.min.css');
+girderTest.importStylesheet('/static/built/plugins/jobs/plugin.min.css');
+
+girderTest.addScripts([
     '/plugins/minerva/plugin_tests/client/mockVGL.js'
 ]);
 
 $(function () {
+    var setElement = Backbone.View.prototype.setElement;
+    Backbone.View.prototype.setElement = function (element) {
+        $(element).data('backboneView', this);
+        return setElement.apply(this, arguments);
+    };
 
-    girder.login('minerva-admin', 'minerva-password!').then(function () {
-        window.setTimeout(function () {
-            girderTest.shimBlobBuilder();
-            minerva.events.trigger('g:appload.before');
-            minerva.mainApp = new minerva.App({
-                el: 'body',
-                parentView: null
-            });
-            minerva.events.trigger('g:appload.after');
-        }, 1000);
+    girder.auth.login('admin', 'adminpassword!').done(function () {
     });
 });
 
 describe('Main view', function () {
-
     var _map;
     beforeEach(function () {
         // disable the ui slider because it doesn't work on phantomjs
@@ -91,11 +91,10 @@ describe('Main view', function () {
 });
 
 describe('Session view', function () {
-
-    layerPanelView = null;
+    var layerPanelView = null;
     it('Upload a geojson and a geojson-timeseries files', function () {
-        layerPanelView = window.minerva.mainApp.bodyView._childViews[1]._childViews[2];
-        var handle = false;
+        layerPanelView = $('#m-layer-panel').data('backboneView');
+
         runs(function () {
             $('.icon-upload').click();
         });
@@ -103,8 +102,7 @@ describe('Session view', function () {
         girderTest.waitForDialog();
 
         runs(function () {
-            handle = false;
-            _prepareTestUpload();
+            girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/nys_counties.geojson');
             $('#g-files').parent().addClass('hide');
             $('.g-start-upload').click();
@@ -113,15 +111,13 @@ describe('Session view', function () {
         girderTest.waitForLoad();
 
         runs(function () {
-            handle = false;
             $('.icon-upload').click();
         });
 
         girderTest.waitForDialog();
 
         runs(function () {
-            handle = false;
-            _prepareTestUpload();
+            girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/geojson-timeseries_1.geojson');
             $('#g-files').parent().addClass('hide');
             $('.g-start-upload').click();
@@ -131,7 +127,6 @@ describe('Session view', function () {
     });
 
     it('Add two datasets to session layer', function () {
-        handle = false;
         runs(function () {
             window.mockVGLRenderer(true);
 
@@ -139,11 +134,11 @@ describe('Session view', function () {
             $('.add-dataset-to-session').click();
         });
 
-        waitsFor(function(){
-            return layerPanelView.$('.layersList ul.datasets').children().length == 2;
+        waitsFor(function () {
+            return layerPanelView.$('.layersList ul.datasets').children().length === 2;
         }, 'layers to be created');
 
-        waitsFor(function(){
+        waitsFor(function () {
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
             return dataset;
@@ -151,9 +146,7 @@ describe('Session view', function () {
     });
 
     it('Change animation frames', function () {
-        handle = false;
         runs(function () {
-
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
             var series = dataset.get('geoData').series;
@@ -161,7 +154,7 @@ describe('Session view', function () {
             // all features on the timeseries layer should be hidden except for the features of current frame
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 0);
+                    return feature.visible() === (i === 0);
                 });
             })).toBe(true);
 
@@ -169,11 +162,11 @@ describe('Session view', function () {
             spyOn(geoJsLayer, 'draw');
 
             layerPanelView.$('.m-anim-frame').val(30);
-            layerPanelView.$('.m-anim-frame').trigger("change");
+            layerPanelView.$('.m-anim-frame').trigger('change');
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 30);
+                    return feature.visible() === (i === 30);
                 });
             })).toBe(true);
 
@@ -185,7 +178,7 @@ describe('Session view', function () {
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 32);
+                    return feature.visible() === (i === 32);
                 });
             })).toBe(true);
 
@@ -193,7 +186,7 @@ describe('Session view', function () {
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 31);
+                    return feature.visible() === (i === 31);
                 });
             })).toBe(true);
 

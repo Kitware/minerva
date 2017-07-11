@@ -1,0 +1,93 @@
+mixin animationControls(dataset, options)
+  //- Add animation controls to a panel
+  //-
+  //- @param dataset: the dataset to add.  The number of frames is in ()
+  //- @param options: a dictionary of additional options:
+  //-   id: id base for controls (default 'anim').
+  //-   cycle: false (default) to not display cycle and group controls.
+  //-   duration: false to not display duration controls.
+  //-   framerate: false (default) to not display framerate controls.
+
+  - options = options || {}
+  - var id = options.id || 'anim'
+  - var series = (dataset.get('geoData') || {}).series || [];
+  if series.length > 1
+    - var curframe = Math.min(Math.max(dataset.get('anmimationFrame') || 0, 0), series.length - 1)
+    .m-animation-controls&attributes({id: "m-anim-ctl-"+id, 'm-dataset-id': dataset.get('_id')})
+      if options.cycle
+        .form-group
+          label(for="m-cycle-"+id) Cycle
+          - var curval = dataset.get('animationCycle') || 'none'
+          - var options = []
+          - options.push({value: 'none', text: 'Entire Range'})
+          - options.push({value: 'year', text: 'Year'})
+          //- options.push({value: 'month', text: 'Month'})
+          - options.push({value: 'week', text: 'Week'})
+          - options.push({value: 'day', text: 'Day'})
+          - options.push({value: 'hour', text: 'Hour'})
+          select.m-cycle.form-control.input-sm(id="m-cycle-"+id, title="Animation cycle (for example, selecting Day means that all days are combined together so you can see what happens on the average day)")
+            each entry in options
+              option(value=entry.value, selected=entry.value === curval ? 'selected' : undefined)= entry.text
+          label(for="m-cycle-group-"+id) Window
+          - var curval = dataset.get('animationGroup') || '3-hour'
+          - var options = []
+          - options.push({value: 'year', text: 'Year'})
+          - options.push({value: 'month', text: 'Month'})
+          - options.push({value: 'week', text: 'Week'})
+          - options.push({value: 'day', text: 'Day'})
+          - options.push({value: '3-hour', text: '3 Hours'})
+          - options.push({value: 'hour', text: 'Hour'})
+          select.m-cycle-group.form-control.input-sm(id="m-cycle-group-"+id, title="Show data for this time interval during each frame of the animation")
+            each entry in options
+              option(value=entry.value, selected=entry.value === curval ? 'selected' : undefined)= entry.text
+      if options.duration || options.duration === undefined || options.framerate
+        .form-group
+          if options.duration || options.duration === undefined
+            label(for="m-cycle-duration-"+id) Duration
+            - var curval = dataset.get('animationDuration') || '30'
+            - var options = []
+            - options.push({value: '5', text: '5 seconds'})
+            - options.push({value: '10', text: '10 seconds'})
+            - options.push({value: '20', text: '20 seconds'})
+            - options.push({value: '30', text: '30 seconds'})
+            - options.push({value: '60', text: '1 minute'})
+            - options.push({value: '120', text: '2 minutes'})
+            select.m-cycle-duration.form-control.input-sm(id="m-cycle-duration-"+id, title="Duration of complete animation cycle")
+              each entry in options
+                option(value=entry.value, selected=entry.value === curval ? 'selected' : undefined)= entry.text
+          if options.framerate
+            label(for="m-cycle-framerate-"+id) Rate
+            - var curval = dataset.get('animationFramerate') || 'stepped'
+            - var options = []
+            - options.push({value: 'stepped', text: 'Stepped'})
+            - options.push({value: '5', text: '5 fps'})
+            - options.push({value: '10', text: '10 fps'})
+            - options.push({value: '30', text: '30 fps'})
+            select.m-cycle-framerate.form-control.input-sm(id="m-cycle-framerate-"+id, title="Maximum framerate.  Stepped shows each time group discretely.")
+              each entry in options
+                option(value=entry.value, selected=entry.value === curval ? 'selected' : undefined)= entry.text
+      .form-group.btn-group
+        button.btn.btn-default.btn-sm.m-anim-play(value="stop")
+          span.canplay
+            i.icon-play
+            |  Play
+          span.canpause.hidden
+            i.icon-pause
+            |  Pause
+        button.btn.btn-default.btn-sm.m-anim-step-back(title="Step back")
+          i.icon-to-start
+        button.btn.btn-default.btn-sm.m-anim-step(title="Step forward")
+          i.icon-to-end
+        button.btn.btn-default.btn-sm.m-anim-stop
+          i.icon-stop
+          |  Stop
+      .form-group
+        input.m-anim-frame&attributes({
+            type: "range",
+            min: 0,
+            max: series.length - 1,
+            step: 1,
+            value: curframe})
+      .form-group
+        label.m-animation-display-label Current Display
+        span.m-animation-display-value.input-sm(id="m-cycle-anim-"+id) = series[curframe].label

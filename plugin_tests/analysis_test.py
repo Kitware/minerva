@@ -24,7 +24,7 @@ import os
 import sys
 import time
 
-# Need to set the environment variable before importing girder
+#  Need to set the environment variable before importing girder
 girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
 os.environ['GIRDER_PORT'] = girder_port  # noqa
 
@@ -334,6 +334,7 @@ class AnalysisTestCase(base.TestCase):
                     time.sleep(2)
                     count += 1
 
+            print dataset.get('values')
             # ensure that the values were accumulated correctly
             self.assertTrue(
                 'babesiosis_cum_2014' in dataset.get('values', []),

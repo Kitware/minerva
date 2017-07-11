@@ -60,7 +60,6 @@ class DatasetTestCase(base.TestCase):
             'minervauser', 'password', 'minerva', 'user',
             'minervauser@example.com')
 
-
     def testDataset(self):
         """
         Test the minerva dataset API enppoints.
@@ -117,14 +116,14 @@ class DatasetTestCase(base.TestCase):
             'folderId': folder['_id']
         }
         response = self.request(path='/item', method='POST', params=params,
-                                            user=self._user)
+                                user=self._user)
         item1Id = response.json['_id']
         params = {
             'name': 'item2',
             'folderId': folder['_id']
         }
         response = self.request(path='/item', method='POST', params=params,
-                                            user=self._user)
+                                user=self._user)
         item2Id = response.json['_id']
 
         path = '/minerva_dataset'
@@ -216,8 +215,10 @@ class DatasetTestCase(base.TestCase):
         }]
         geojsonDatasetItem, itemId = createDataset('geojson', files)
         minervaMetadata = geojsonDatasetItem['meta']['minerva']
-        self.assertEquals(minervaMetadata['original_type'], 'geojson', 'Expected geojson dataset original_type')
-        self.assertEquals(minervaMetadata['geojson_file']['name'], 'states.geojson', 'Expected geojson file to be set')
+        self.assertEquals(minervaMetadata['original_type'],
+                          'geojson', 'Expected geojson dataset original_type')
+        self.assertEquals(minervaMetadata['geojson_file']['name'],
+                          'states.geojson', 'Expected geojson file to be set')
 
         # geojson-timeseries
         files = [{
@@ -238,7 +239,8 @@ class DatasetTestCase(base.TestCase):
         }]
         jsonDatasetItem, jsonItemId = createDataset('twopoints', files)
         jsonMinervaMetadata = jsonDatasetItem['meta']['minerva']
-        self.assertEquals(jsonMinervaMetadata['original_type'], 'json', 'Expected json dataset original_type')
+        self.assertEquals(jsonMinervaMetadata['original_type'],
+                          'json', 'Expected json dataset original_type')
 
         # csv
         files = [{
@@ -248,7 +250,8 @@ class DatasetTestCase(base.TestCase):
         }]
         csvDatasetItem, csvItemId = createDataset('csv', files)
         csvMinervaMetadata = csvDatasetItem['meta']['minerva']
-        self.assertEquals(csvMinervaMetadata['original_type'], 'csv', 'Expected csv dataset original_type')
+        self.assertEquals(csvMinervaMetadata['original_type'],
+                          'csv', 'Expected csv dataset original_type')
 
         # other type exception
         files = [{
@@ -370,4 +373,4 @@ class DatasetTestCase(base.TestCase):
             method='POST',
             user=self._user,
         )
-        self.assertStatus(response, 400)        
+        self.assertStatus(response, 400)

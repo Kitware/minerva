@@ -1,0 +1,64 @@
+include ../layout/panelMixins.pug
+
++panel-title('Datasets', 'm-data-panel')
+  i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
+  i.m-postgres.m-icon-enabled.icon-database(title="Connect to postgres")
+
+if sourceCategoryDataset
+  +panel-content('collapse in')
+  each categories, source in sourceCategoryDataset
+    .source-title(id=source)= source
+      i.icon-folder(title='Collection')
+    if visibleMenus[source] !== undefined
+      - var sourceVal = "display: block;"
+    else
+      - var sourceVal = "display: none;"
+    div(class=source, style=sourceVal)
+      each datasets, category in categories
+        .category-title(id=category)= category
+          i.icon-folder(title='Collection')
+        if sourceVal === "display: block;"
+          if visibleMenus[source][category] === true
+            - var categoryVal = "display: block;"
+          else
+            - var categoryVal = "display: none;"
+        else
+          - var categoryVal = "display: none;"
+        div(class=category, style=categoryVal)
+          each dataset in datasets
+            if dataset.metadata()
+              .dataset
+                span(title=dataset.get('name'))= dataset.get('name').length > 13 ? dataset.get('name').slice(0,13) + "..." : dataset.get('name')
+                  - var attributes = {'m-dataset-id': dataset.get('_id')}
+
+                  //- Trash icon to delete dataset
+                  - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
+                  i(class=classes)&attributes(attributes)
+
+                  //- Info icon for minerva metadata display
+                  i.icon-info-circled.icon-enabled.dataset-info&attributes(attributes)
+                  - var geoRenderType = dataset.getGeoRenderType()
+
+                  //- Globe icon to move dataset into current session
+                  if dataset.isGeoRenderable()
+                    - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
+                    i(title='add to layers', class=classes)&attributes(attributes)
+
+                  //- Cog icon for geo rendering configuration
+                  if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
+                    - var classes = 'icon-cog m-configure-geo-render'
+                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                    - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+                    i(class=classes)&attributes(attributes)
+
+                  if geoRenderType === 'wms'
+                    - var classes = 'icon-cog m-configure-wms-styling'
+                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                    - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+                    i(class=classes)&attributes(attributes)
+
+                  //- Table icon for csv
+                  if dataset.getDatasetType() === 'csv'
+                    - var classes = 'icon-table m-display-dataset-table'
+                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                    i(class=classes)&attributes(attributes)

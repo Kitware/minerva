@@ -25,9 +25,11 @@ addons:
     - libnetcdf-dev
 
 before_install:
-    - DATABASE_ASSETSTORE_VERSION="master"
-    # update pip for binary wheel caching
+    - export CXX=g++-4.8
+    - nvm install v6
+    - nvm use v6
     - pip install -U pip virtualenv
+    - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
 
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
@@ -36,7 +38,7 @@ before_install:
     - rm -rf girder
     - git clone https://github.com/girder/girder.git
     - cd girder
-    - git checkout `cat $TRAVIS_BUILD_DIR/.girder-version`
+    # - git checkout `cat $TRAVIS_BUILD_DIR/.girder-version`
     - cd $HOME/build
     - mv Kitware/minerva girder/plugins
     - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
@@ -62,16 +64,9 @@ before_install:
     # cmake
     - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
 
-    # install spark
-    - CACHE=$HOME/.cache SCALA_VERSION=2.10.5 SPARK_VERSION=1.3.1 source $HOME/build/girder/plugins/minerva/.travis/install_spark.sh
-    - export SPARK_MASTER_IP=localhost
-    - $SPARK_HOME/sbin/start-master.sh
-    - sleep 3
-    - $SPARK_HOME/sbin/start-slave.sh worker1 spark://localhost:7077
-
     # install database_assetstore plugin
     - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
-    - git clone https://github.com/OpenGeoscience/girder_db_items.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
+    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
     - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
 
 install:
@@ -79,15 +74,20 @@ install:
     - mkdir _build
     - export GIRDER_SOURCE_DIR="$PWD"
     - export GIRDER_BUILD_DIR="$PWD/_build"
-    - pip install -r "${GIRDER_SOURCE_DIR}/plugins/minerva/cmake/travis-pip-freeze.txt" -U
+    # - pip install -r "${GIRDER_SOURCE_DIR}/plugins/minerva/cmake/travis-pip-freeze.txt" -U
 
     - cd /home/travis/build/girder
     # handle caching of npm modules
-    - mkdir -p $HOME/.cache/node_modules || true
-    - ln -sf $HOME/.cache/node_modules .
-    - npm prune
+    # - mkdir -p $HOME/.cache/node_modules || true
+    # - ln -sf $HOME/.cache/node_modules .
+    - npm install -g npm
+    # - npm prune
     # build and install girder
-    - npm install
+    - python setup.py develop
+    - pip install -r requirements-dev.txt
+    - pip install -r plugins/minerva/requirements.txt
+    - pip install -r plugins/minerva/requirements-dev.txt
+    - girder-install web --dev --plugins minerva
     # replace girder's ctest config with minerva's
     - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
 

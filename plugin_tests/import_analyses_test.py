@@ -19,16 +19,15 @@
 
 import os
 import sys
+from tests import base
 
 # Need to set the environment variable before importing girder
 girder_port = os.environ.get('GIRDER_TEST_PORT', '20200')
 os.environ['GIRDER_PORT'] = girder_port# noqa
 
-from tests import base
-from girder_client import GirderClient
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utility')))
-import import_analyses
+
 
 def setUpModule():
     """

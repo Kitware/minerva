@@ -43,7 +43,6 @@ def tearDownModule():
 
 
 class GeojsonTestCase(base.TestCase):
-
     """
     Tests of the minerva geojson API endpoints.
     """
@@ -93,8 +92,6 @@ class GeojsonTestCase(base.TestCase):
         response = self.request(path=path, method='POST', params=params, user=self._user)
         self.assertStatus(response, 400)
 
-
-
         # Helper function to create an item and upload a file on disk.
 
         def createItemFromFile(datasetFolderId, itemName, itemFile):
@@ -142,7 +139,6 @@ class GeojsonTestCase(base.TestCase):
 
             return itemId
 
-
         # Create an item in the dataset folder without a json or geojson ext.
 
         pluginTestDir = os.path.dirname(os.path.realpath(__file__))
@@ -179,7 +175,8 @@ class GeojsonTestCase(base.TestCase):
         # Ensure this is an item and not just minerva metadata.
         self.assertHasKeys(response.json, ['baseParentType'])
         # Ensure the minerva metadata is correct.
-        self.assertHasKeys(response.json['meta']['minerva'], ['geojson_file', 'dataset_type', 'original_type', 'original_files'])
+        self.assertHasKeys(response.json['meta']['minerva'],
+                           ['geojson_file', 'dataset_type', 'original_type', 'original_files'])
         self.assertEquals(response.json['meta']['minerva']['dataset_type'], 'geojson')
         self.assertEquals(response.json['meta']['minerva']['original_type'], 'geojson')
 
@@ -201,6 +198,7 @@ class GeojsonTestCase(base.TestCase):
         # Ensure this is an item and not just minerva metadata.
         self.assertHasKeys(response.json, ['baseParentType'])
         # Ensure the minerva metadata is correct.
-        self.assertHasKeys(response.json['meta']['minerva'], ['geojson_file', 'dataset_type', 'original_type', 'original_files'])
+        self.assertHasKeys(response.json['meta']['minerva'],
+                           ['geojson_file', 'dataset_type', 'original_type', 'original_files'])
         self.assertEquals(response.json['meta']['minerva']['dataset_type'], 'geojson')
         self.assertEquals(response.json['meta']['minerva']['original_type'], 'geojson')

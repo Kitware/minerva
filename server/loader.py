@@ -23,11 +23,10 @@ import cherrypy
 from base64 import b64encode
 from girder import events
 from girder.utility.webroot import Webroot
-from girder.utility.model_importer import ModelImporter
-
 from girder.plugins.minerva.rest import \
-        analysis, dataset, session, \
-        wms_dataset, geojson_dataset, wms_styles, feature, twofishes, postgres_geojson
+    analysis, dataset, session, \
+    wms_dataset, geojson_dataset, wms_styles, feature, twofishes, \
+    postgres_geojson
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.cookie import getExtraHeaders
 
@@ -50,8 +49,9 @@ class WmsProxy(object):
 
 def validate_settings(event):
     """Validate minerva specific settings."""
-    key = event.info['key']
-    val = event.info['value']
+    # key = event.info['key']
+    # val = event.info['value']
+
 
 def load(info):
     # Load the mako template for Minerva and serve it as the root document.
@@ -62,7 +62,7 @@ def load(info):
     minerva_webroot.updateHtmlVars(minerva_html_vars)
 
     def add_downstream_plugin_js_urls(downstream_plugin_js_urls):
-        """ Allow additional external JS resources to be loaded from downstream plugins. """
+        """Allow additional external JS resources to be loaded from downstream plugins."""
         minerva_html_vars.setdefault('externalJsUrls', []).extend(downstream_plugin_js_urls.info)
         minerva_webroot.updateHtmlVars(minerva_html_vars)
 
