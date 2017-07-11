@@ -3,55 +3,38 @@ mixin range(label, min, max, step, value, feature, property, enabled)
     label.control-label.col-md-3= label
     .col-md-9
       input.m-slider.form-control(
-        type='text'
-        data-slider-min=min
-        data-slider-max=max
-        data-slider-step=step
-        data-slider-value=value[property]
-        data-property=property
-        data-feature=feature
-        data-slider-enabled=enabled)
+        type='text', data-slider-min=min, data-slider-max=max, data-slider-step=step, data-slider-value=value[property], data-property=property, data-feature=feature, data-slider-enabled=enabled)
 
 mixin color(label, value, feature, property, enabled, colorby, rampKey)
   .form-group
     label.control-label.col-md-3= label
     .col-md-4
-      select.form-control(
-        data-feature=feature
-        data-property=colorby)
+      select.form-control(data-feature=feature, data-property=colorby)
         option(selected= !value[colorby]) Constant
         each obj, key in summary
           - var s = value[colorby] === key
-          option(selected=s)= `${key}`
+          option(selected=s)= key
     .col-md-5
       if value[colorby]
-        select.form-control.m-select-ramp(
-          disabled=!enabled
-          data-feature=feature
-          data-property=rampKey)
+        select.form-control.m-select-ramp(disabled=!enabled, data-feature=feature, data-property=rampKey)
           each ramp, name in ramps
             - s = value[rampKey] === name
-            option(data-content!=ramp.display data-ramp-name=name selected=s)= `${name}`
+            option(data-content!=ramp.display, data-ramp-name=name, selected=s)= name
       else
         input.form-control(
-          type='color'
-          value=value[property]
-          disabled=!enabled
-          data-feature=feature
-          data-property=property)
-
+          type='color', value=value[property], disabled=!enabled, data-feature=feature, data-property=property)
 ul.nav.nav-tabs
-  li(role='presentation' class={active: tabs.point.active, disabled: !tabs.point.enabled})
-    a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-point-style' data-tab='point') Points
-  li(role='presentation' class={active: tabs.line.active, disabled: !tabs.line.enabled})
-    a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-line-style' data-tab='line') Lines
-  li(role='presentation' class={active: tabs.polygon.active, disabled: !tabs.polygon.enabled})
-    a.m-style-tab(role='tab' data-toggle='tab' data-target='#m-polygon-style' data-tab='polygon') Polygons
+  li(role='presentation', class={active: tabs.point.active, disabled: !tabs.point.enabled})
+    a.m-style-tab(role='tab', data-toggle='tab', data-target='#m-point-style', data-tab='point') Points
+  li(role='presentation', class={active: tabs.line.active, disabled: !tabs.line.enabled})
+    a.m-style-tab(role='tab', data-toggle='tab', data-target='#m-line-style', data-tab='line') Lines
+  li(role='presentation', class={active: tabs.polygon.active, disabled: !tabs.polygon.enabled})
+    a.m-style-tab(role='tab', data-toggle='tab', data-target='#m-polygon-style', data-tab='polygon') Polygons
 #m-style-tab-content.tab-content.clearfix
   - var active = tabs.point.active;
-  #m-point-style.form-horizontal.tab-pane(role='tabpanel' class={active: active, in: active})
+  #m-point-style.form-horizontal.tab-pane(role='tabpanel', class={active: active, in: active})
     .panel.panel-primary
-      .panel-heading(data-toggle='collapse' data-target='#m-point-properties-control') Properties
+      .panel-heading(data-toggle='collapse', data-target='#m-point-properties-control') Properties
       #m-point-properties-control.collapse.in
         .panel-body
           .form-group
@@ -65,7 +48,7 @@ ul.nav.nav-tabs
       .panel-heading(data-target='#m-point-cluster-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-point-cluster.m-toggle-panel(type='checkbox' checked=point.cluster data-feature='point' data-property='cluster')
+            input#m-enable-point-cluster.m-toggle-panel(type='checkbox', checked=point.cluster, data-feature='point', data-property='cluster')
             | Cluster
       #m-point-cluster-control.m-optional-panel.collapse(class={in: point.cluster})
         .panel-body
@@ -78,7 +61,7 @@ ul.nav.nav-tabs
       .panel-heading(data-target='#m-point-stroke-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-point-stroke.m-toggle-panel(type='checkbox' checked=point.stroke data-feature='point' data-property='stroke')
+            input#m-enable-point-stroke.m-toggle-panel(type='checkbox', checked=point.stroke, data-feature='point', data-property='stroke')
             | Stroke
       #m-point-stroke-control.m-optional-panel.collapse(class={in: point.stroke})
         .panel-body
@@ -90,7 +73,7 @@ ul.nav.nav-tabs
       .panel-heading(data-target='#m-point-fill-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-point-fill.m-toggle-panel(type='checkbox' checked=point.fill data-feature='point' data-property='fill')
+            input#m-enable-point-fill.m-toggle-panel(type='checkbox', checked=point.fill, data-feature='point', data-property='fill')
             | Fill
       #m-point-fill-control.m-optional-panel.collapse(class={in: point.fill})
         .panel-body
@@ -98,12 +81,12 @@ ul.nav.nav-tabs
           +range('Opacity', 0, 1, 0.01, point, 'point', 'fillOpacity', point.fill)
 
   - active = tabs.line.active;
-  #m-line-style.form-horizontal.tab-pane(role='tabpanel' class={active: active, in: active})
+  #m-line-style.form-horizontal.tab-pane(role='tabpanel', class={active: active, in: active})
     .panel(class={'panel-default': !line.stroke, 'panel-primary': line.stroke})
       .panel-heading(data-target='#m-line-stroke-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-line-stroke.m-toggle-panel(type='checkbox' checked=line.stroke data-feature='line' data-property='stroke')
+            input#m-enable-line-stroke.m-toggle-panel(type='checkbox', checked=line.stroke, data-feature='line', data-property='stroke')
             | Stroke
       #m-line-stroke-control.m-optional-panel.collapse(class={in: line.stroke})
         .panel-body
@@ -112,12 +95,12 @@ ul.nav.nav-tabs
           +range('Opacity', 0, 1, 0.01, line, 'line', 'strokeOpacity', line.stroke)
 
   - active = tabs.polygon.active
-  #m-polygon-style.form-horizontal.tab-pane(role='tabpanel' class={active: active, in: active})
+  #m-polygon-style.form-horizontal.tab-pane(role='tabpanel', class={active: active, in: active})
     .panel(class={'panel-default': !polygon.stroke, 'panel-primary': polygon.stroke})
       .panel-heading(data-target='#m-polygon-stroke-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-polygon-stroke.m-toggle-panel(type='checkbox' checked=polygon.stroke data-feature='polygon' data-property='stroke')
+            input#m-enable-polygon-stroke.m-toggle-panel(type='checkbox', checked=polygon.stroke, data-feature='polygon', data-property='stroke')
             | Stroke
       #m-polygon-stroke-control.m-optional-panel.collapse(class={in: polygon.stroke})
         .panel-body
@@ -129,7 +112,7 @@ ul.nav.nav-tabs
       .panel-heading(data-target='#m-polygon-fill-control')
         .checkbox(style='display:inline')
           label
-            input#m-enable-polygon-fill.m-toggle-panel(type='checkbox' checked=polygon.fill data-feature='polygon' data-property='fill')
+            input#m-enable-polygon-fill.m-toggle-panel(type='checkbox', checked=polygon.fill, data-feature='polygon', data-property='fill')
             | Fill
       #m-polygon-fill-control.m-optional-panel.collapse(class={in: polygon.fill})
         .panel-body
@@ -141,22 +124,22 @@ ul.nav.nav-tabs
             .col-md-9
               .radio-inline
                 label
-                  input#m-enable-linear-scale(name='colormap-scale' type='radio' checked=polygon.linearFlag, data-feature='polygon', data-property='linearFlag')
+                  input#m-enable-linear-scale(name='colormap-scale', type='radio', checked=polygon.linearFlag, data-feature='polygon', data-property='linearFlag')
                   | Linear
               .radio-inline
                 label
-                  input#m-enable-log-scale(name='colormap-scale' type='radio' checked=polygon.logFlag, data-feature='polygon', data-property='logFlag')
+                  input#m-enable-log-scale(name='colormap-scale', type='radio', checked=polygon.logFlag, data-feature='polygon', data-property='logFlag')
                   | Logarithmic
               .radio-inline
                 label
-                  input#m-enable-quantile-scale(name='colormap-scale' type='radio' checked=polygon.quantileFlag, data-feature='polygon', data-property='quantileFlag')
+                  input#m-enable-quantile-scale(name='colormap-scale', type='radio', checked=polygon.quantileFlag, data-feature='polygon', data-property='quantileFlag')
                   | Quantile
     - var clampingEnabled = polygon.clampingFlag && polygon.linearFlag
     .panel#m-clamping-panel(class={'panel-default': !clampingEnabled, 'panel-primary': clampingEnabled})
       .panel-heading(data-target='#m-polygon-clamping-control')
         .checkbox(style='display:block')
           label
-            input#m-enable-linear-scale-clamping.m-toggle-panel(type='checkbox' checked=polygon.clampingFlag, data-feature='polygon', data-property='clampingFlag')
+            input#m-enable-linear-scale-clamping.m-toggle-panel(type='checkbox', checked=polygon.clampingFlag, data-feature='polygon', data-property='clampingFlag')
             | Clamping
       #m-polygon-clamping-control.m-optional-panel.collapse(class={in: polygon.clampingFlag})
         .panel-body
@@ -164,9 +147,9 @@ ul.nav.nav-tabs
             label.control-label.col-md-3
               | Minimum
             .col-md-9
-              input#m-linear-scale-min-clamp.form-control.col-md-9(type='text' value=polygon.minClamp, data-feature='polygon' data-property='minClamp' disabled=!clampingEnabled)
+              input#m-linear-scale-min-clamp.form-control.col-md-9(type='text', value=polygon.minClamp, data-feature='polygon', data-property='minClamp', disabled=!clampingEnabled)
           .form-group
             label.control-label.col-md-3
               | Maximum
             .col-md-9
-              input#m-linear-scale-max-clamp.form-control.col-md-9(type='text' value=polygon.maxClamp, data-feature='polygon' data-property='maxClamp' disabled=!clampingEnabled)
+              input#m-linear-scale-max-clamp.form-control.col-md-9(type='text', value=polygon.maxClamp, data-feature='polygon', data-property='maxClamp', disabled=!clampingEnabled)

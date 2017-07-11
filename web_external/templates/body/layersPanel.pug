@@ -23,7 +23,7 @@ include ../widgets/legendWidget.pug
                 - var disable = 'm-disable-text'
               else
                 - var disable = ''
-              i(title=option.title class=`icon-angle-${option.class} m-order-layer ${disable}`)&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
+              i(title=option.title, class=`icon-angle-${option.class} m-order-layer ${disable}`)&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
             .m-layer-control-container
               i.icon-ajust
               input.m-opacity-range&attributes({'m-dataset-id': dataset.get('_id')})(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))
@@ -35,4 +35,3 @@ include ../widgets/legendWidget.pug
               .m-layer-control-container
                 include ../widgets/animationControls.pug
                 +animationControls(dataset, {id: dataset.get('_id')})
-

@@ -7,7 +7,7 @@
     ul.m-sessions-list-menu.dropdown-menu
       each session in sessionsList
         li(role="presentation")
-          a.m-session-link(m-session-cid=`${session.cid}`)= session.get('name')
+          a.m-session-link(m-session-cid=session.cid)= session.get('name')
           .m-session-description= session.get('description')
   .m-session-description= session.get('description')
   .m-session-header-buttons

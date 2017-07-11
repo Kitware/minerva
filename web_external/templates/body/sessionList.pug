@@ -12,6 +12,6 @@ if (currentUser)
       .m-session-list-entry
         .m-session-right-column
         .m-session-title
-          a.m-session-link(m-session-cid=`${session.cid}`)= session.get('name')
+          a.m-session-link(m-session-cid=session.cid)= session.get('name')
         .m-session-description= session.get('description')
         .g-clear-right

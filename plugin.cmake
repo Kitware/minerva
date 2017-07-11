@@ -1,11 +1,11 @@
 add_standard_plugin_tests(NO_SERVER_TESTS NO_CLIENT_TESTS)
-add_python_test(analysis PLUGIN minerva)
-add_python_test(dataset PLUGIN minerva)
-add_python_test(geojson PLUGIN minerva)
-add_python_test(import_analyses PLUGIN minerva)
-add_python_test(session PLUGIN minerva)
-add_python_test(twofishes PLUGIN minerva)
-add_python_test(wms PLUGIN minerva)
+add_python_test(analysis PLUGIN minerva BIND_SERVER)
+add_python_test(dataset PLUGIN minerva BIND_SERVER)
+add_python_test(geojson PLUGIN minerva BIND_SERVER)
+add_python_test(import_analyses PLUGIN minerva BIND_SERVER)
+add_python_test(session PLUGIN minerva BIND_SERVER)
+add_python_test(twofishes PLUGIN minerva BIND_SERVER)
+add_python_test(wms PLUGIN minerva BIND_SERVER)
 
 set_property(TEST python_static_analysis_minerva PROPERTY LABELS minerva_server)
 set_property(TEST server_minerva.analysis PROPERTY LABELS minerva_server)
@@ -33,3 +33,12 @@ set_property(TEST web_client_minerva.geojson PROPERTY LABELS minerva_client)
 
 set_property(TEST puglint_minerva PROPERTY LABELS minerva_client)
 set_property(TEST eslint_minerva PROPERTY LABELS minerva_client)
+
+add_puglint_test(minerva_external "${CMAKE_CURRENT_LIST_DIR}/web_external/templates")
+set_property(TEST puglint_minerva_external PROPERTY LABELS minerva_client)
+
+add_eslint_test(minerva_tests "${CMAKE_CURRENT_LIST_DIR}/plugin_tests" ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/clients/web/test/.eslintrc.json")
+set_property(TEST eslint_minerva_tests PROPERTY LABELS minerva_client)
+# add_eslint_test(minerva_external "${CMAKE_CURRENT_LIST_DIR}/web_external")
+# set_property(TEST eslint_minerva_external PROPERTY LABELS minerva_client)
+

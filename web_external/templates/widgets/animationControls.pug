@@ -87,9 +87,7 @@ mixin animationControls(dataset, options)
             min: 0,
             max: series.length - 1,
             step: 1,
-            value: curframe
-          })
+            value: curframe})
       .form-group
         label.m-animation-display-label Current Display
-        span.m-animation-display-value.input-sm(id="m-cycle-anim-"+id)= series[curframe].label
-
+        span.m-animation-display-value.input-sm(id="m-cycle-anim-"+id) = series[curframe].label

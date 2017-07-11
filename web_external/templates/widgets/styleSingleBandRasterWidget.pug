@@ -23,10 +23,10 @@
               .form-group
                 label.control-label(for="m-color-ramp") Color Ramp
                 select.form-control#m-color-ramp.m-select-ramp(
-                  data-feature=feature
+                  data-feature=feature,
                   data-property=rampKey)
                   each ramp, name in ramps
-                    option(data-content!=ramp.display data-ramp-name=name)= name
+                    option(data-content!=ramp.display, data-ramp-name=name)= name
       .modal-footer
         button.btn.btn-small.btn-primary
               i.icon-plus-squared

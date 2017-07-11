@@ -46,14 +46,14 @@
               .m-geometry-field-container
                 .form-group
                   label Geometry
-                    div.m-link-checkbox-container
+                    .m-link-checkbox-container
                       label.radio-inline.geometry-field-type
                         input(type="radio", value="link", checked=geometryFieldType=='link') 
                         | Link
                       label.radio-inline.geometry-field-type
                         input(type="radio", value="built-in", checked=geometryFieldType=='built-in')
                         | Built-in
-                if geometryFieldType=='built-in'
+                if geometryFieldType==='built-in'
                   .form-group.form-group-sm(class=validation.geometryBuiltInFieldRequired?"has-error":'')
                     label.control-label(for="m-postgres-field") Field
                       select.form-control.input-sm.has-min-width#geometry-built-in-field
@@ -62,7 +62,7 @@
                           option(value=column.name, selected=column.name==geometryBuiltInField)= column.name
                       if validation.geometryBuiltInFieldRequired
                         span.help-block Required
-                if geometryFieldType=='link'
+                if geometryFieldType==='link'
                   .form-group.form-group-sm(class=validation.geometryLinkTargetRequired?"has-error":'')
                     label.control-label(for="m-postgres-field") Target
                       select.form-control.input-sm.has-min-width.link-target
@@ -87,12 +87,12 @@
                               option
                               each operator in geometryLink.operators
                                 option(value=operator, selected=link.operator==operator)= operator
-                            if link.operator=='='
+                            if link.operator==='='
                               select.form-control.input-sm.link-value(data-link-index=index)
                                 option(value='')= '--Source--'
                                 each column in columns
                                   option(value=column.name, selected=link.value==column.name)= column.name
-                            if link.operator=='constant'
+                            if link.operator==='constant'
                               input.form-control.input-sm.link-value(type="text", value=link.value, data-link-index=index)
                           button.btn.btn-xs.btn-danger.remove-link(type="button", data-link-index=index)
                             i.icon-cancel
@@ -108,4 +108,3 @@
         button#m-get-geojson.btn.btn-small.btn-primary(disabled=!columns.length)
             i.icon-plus-squared
             | Get geometry
-

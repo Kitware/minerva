@@ -18,13 +18,11 @@ $(function () {
         return setElement.apply(this, arguments);
     };
 
-
-    girder.auth.login('admin', 'adminpassword!').then(function () {
+    girder.auth.login('admin', 'adminpassword!').done(function () {
     });
 });
 
 describe('Main view', function () {
-
     var _map;
     beforeEach(function () {
         // disable the ui slider because it doesn't work on phantomjs
@@ -93,12 +91,10 @@ describe('Main view', function () {
 });
 
 describe('Session view', function () {
-
-    layerPanelView = null;
+    var layerPanelView = null;
     it('Upload a geojson and a geojson-timeseries files', function () {
-        layerPanelView = $('#m-layer-panel').data("backboneView");
+        layerPanelView = $('#m-layer-panel').data('backboneView');
 
-        var handle = false;
         runs(function () {
             $('.icon-upload').click();
         });
@@ -106,7 +102,6 @@ describe('Session view', function () {
         girderTest.waitForDialog();
 
         runs(function () {
-            handle = false;
             girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/nys_counties.geojson');
             $('#g-files').parent().addClass('hide');
@@ -116,14 +111,12 @@ describe('Session view', function () {
         girderTest.waitForLoad();
 
         runs(function () {
-            handle = false;
             $('.icon-upload').click();
         });
 
         girderTest.waitForDialog();
 
         runs(function () {
-            handle = false;
             girderTest._prepareTestUpload();
             girderTest.sendFile('plugins/minerva/plugin_tests/data/geojson-timeseries_1.geojson');
             $('#g-files').parent().addClass('hide');
@@ -134,7 +127,6 @@ describe('Session view', function () {
     });
 
     it('Add two datasets to session layer', function () {
-        handle = false;
         runs(function () {
             window.mockVGLRenderer(true);
 
@@ -143,7 +135,7 @@ describe('Session view', function () {
         });
 
         waitsFor(function () {
-            return layerPanelView.$('.layersList ul.datasets').children().length == 2;
+            return layerPanelView.$('.layersList ul.datasets').children().length === 2;
         }, 'layers to be created');
 
         waitsFor(function () {
@@ -154,9 +146,7 @@ describe('Session view', function () {
     });
 
     it('Change animation frames', function () {
-        handle = false;
         runs(function () {
-
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
             var series = dataset.get('geoData').series;
@@ -164,7 +154,7 @@ describe('Session view', function () {
             // all features on the timeseries layer should be hidden except for the features of current frame
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 0);
+                    return feature.visible() === (i === 0);
                 });
             })).toBe(true);
 
@@ -172,11 +162,11 @@ describe('Session view', function () {
             spyOn(geoJsLayer, 'draw');
 
             layerPanelView.$('.m-anim-frame').val(30);
-            layerPanelView.$('.m-anim-frame').trigger("change");
+            layerPanelView.$('.m-anim-frame').trigger('change');
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 30);
+                    return feature.visible() === (i === 30);
                 });
             })).toBe(true);
 
@@ -188,7 +178,7 @@ describe('Session view', function () {
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 32);
+                    return feature.visible() === (i === 32);
                 });
             })).toBe(true);
 
@@ -196,7 +186,7 @@ describe('Session view', function () {
 
             expect(_.every(series, function (series, i) {
                 return _.every(series.features, function (feature) {
-                    return feature.visible() == (i == 31);
+                    return feature.visible() === (i === 31);
                 });
             })).toBe(true);
 

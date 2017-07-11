@@ -239,7 +239,7 @@ describe('geojson', function () {
                     type: 'Feature',
                     geometry: {
                         type: 'Point',
-                        coordinates: [1, 1],
+                        coordinates: [1, 1]
                     },
                     properties: {
                         a: -1,
@@ -261,27 +261,27 @@ describe('geojson', function () {
         var vis = {
             point: {
                 fillColor: jasmine.createSpy('fillColor').andReturn('green'),
-                strokeWidth: jasmine.createSpy('fillColor').andReturn(4)
+                strokeWidth: jasmine.createSpy('strokeWidth').andReturn(4)
             }
         };
 
         var args = [
             {
-                "a": 1,
-                "b": "red",
-                "fillColor": "green",
-                "strokeWidth": 4
+                'a': 1,
+                'b': 'red',
+                'fillColor': 'green',
+                'strokeWidth': 4
             },
             {
-                "a": -1,
-                "b": "blue",
-                "fillColor": "green",
-                "strokeWidth": 4
+                'a': -1,
+                'b': 'blue',
+                'fillColor': 'green',
+                'strokeWidth': 4
             },
             {
-                "c": 0,
-                "fillColor": "green",
-                "strokeWidth": 4
+                'c': 0,
+                'fillColor': 'green',
+                'strokeWidth': 4
             }
         ];
         expect(_.pluck(style(geojson, vis).features, 'properties'))
@@ -406,4 +406,3 @@ describe('geojson', function () {
         });
     });
 });
-

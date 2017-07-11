@@ -17,10 +17,9 @@
             .form-group
               label.control-label(for="m-color-ramp") Color Ramp
               select.form-control#m-color-ramp.m-select-ramp(
-                data-feature=feature
-                data-property=rampKey)
+                data-feature=feature, data-property=rampKey)
                 each ramp, name in ramps
-                  option(data-content!=ramp.display data-ramp-name=name)= name
+                  option(data-content!=ramp.display, data-ramp-name=name)= name
           .col-md-4
             .form-group
               label.control-label(for="m-marker") Marker
