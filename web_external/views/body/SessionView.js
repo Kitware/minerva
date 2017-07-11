@@ -48,24 +48,24 @@ const SessionView = View.extend({
                 text: 'Are you sure you want to delete <b>' + session.escape('name') + '</b>?',
                 yestext: 'Delete',
                 escapedHtml: true,
-                confirmCallback: _.bind(function () {
+                confirmCallback: () => {
                     this.model.destroy({
                         progress: true
-                    }).on('g:deleted', function () {
+                    }).done(() => {
                         events.trigger('g:alert', {
                             icon: 'ok',
                             text: 'Session deleted.',
                             type: 'success',
                             timeout: 4000
                         });
-                        router.navigate('/', {trigger: true});
+                        router.navigate('/', { trigger: true });
                     });
-                }, this)
+                }
             });
         },
         'click a.m-session-link': function (event) {
             var cid = $(event.currentTarget).attr('m-session-cid');
-            router.navigate('session/' + this.collection.get(cid).get('_id'), {trigger: true});
+            router.navigate('session/' + this.collection.get(cid).get('_id'), { trigger: true });
         }
     },
 
