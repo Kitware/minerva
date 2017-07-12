@@ -65,45 +65,51 @@ minerva.views.LayersPanel = minerva.views.Panel.extend({
     },
 
     reorderLayer: function (event) {
-        var prevDataset, nextDataset;
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var option = $(event.currentTarget).attr('m-order-option');
-        var dataset = this.collection.get(datasetId);
+        var dataset = this.collection.get($(event.currentTarget).attr('m-dataset-id'));
 
         var displayedDatasets = _.filter(this.collection.models, function (set) {
             return set.get('displayed');
         });
-        var currentDatasetIndex = _.indexOf(displayedDatasets, dataset);
 
-        if (displayedDatasets[currentDatasetIndex - 1]) {
-            prevDataset = displayedDatasets[currentDatasetIndex - 1];
+        if (option === 'moveDown' || option === 'moveUp') {
+            var swapDataset;
+            if (option === 'moveDown') {
+                swapDataset = _.chain(displayedDatasets)
+                    .sortBy(function (d) { return d.get('stack'); })
+                    .reverse()
+                    .find(function (d) { return d.get('stack') < dataset.get('stack'); })
+                    .value();
+            }
+            else {
+                swapDataset = _.chain(displayedDatasets)
+                    .sortBy(function (d) { return d.get('stack'); })
+                    .find(function (d) { return d.get('stack') > dataset.get('stack'); })
+                    .value();
+            }
+            if (swapDataset) {
+                var currentStack = dataset.get('stack');
+                dataset.set('stack', swapDataset.get('stack'));
+                swapDataset.set('stack', currentStack);
+                this.reorderDisplayedLayers(option, dataset);
+            }
         }
-
-        if (displayedDatasets[currentDatasetIndex + 1]) {
-            nextDataset = displayedDatasets[currentDatasetIndex + 1];
+        else if (option === 'moveToBottom' && dataset.get('stack') !== 1) {
+            _.chain(displayedDatasets)
+                .filter(function (d) { return d.get('stack') < dataset.get('stack') })
+                .each(function (dataset) { dataset.set('stack', dataset.get('stack') + 1); });
+            dataset.set('stack', 1);
+            this.reorderDisplayedLayers(option, dataset);
         }
-
-        var stackValues = _.invoke(displayedDatasets, 'get', 'stack');
-
-        var currentStack = dataset.get('stack');
-        // Retrieve the first and last stack value in the collection
-        var lastValueInStack = _.max(stackValues);
-        var firstValueInStack = _.min(stackValues);
-
-        if (option === 'moveToTop' && currentStack !== lastValueInStack) {
-            dataset.set('stack', lastValueInStack + 1);
-            this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveToBottom' && currentStack !== firstValueInStack) {
-            dataset.set('stack', firstValueInStack - 1);
-            this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveUp' && currentStack !== lastValueInStack) {
-            dataset.set('stack', currentStack + 1);
-            (nextDataset || prevDataset).set('stack', currentStack);
-            this.reorderDisplayedLayers(option, dataset);
-        } else if (option === 'moveDown' && (currentStack !== firstValueInStack)) {
-            dataset.set('stack', currentStack - 1);
-            (prevDataset || nextDataset).set('stack', currentStack);
-            this.reorderDisplayedLayers(option, dataset);
+        else if (option === 'moveToTop') {
+            var topStack = _.max(displayedDatasets, function (dataset) { return dataset.get('stack') }).get('stack');
+            if (dataset.get('stack') != topStack) {
+                _.chain(displayedDatasets)
+                    .filter(function (d) { return d.get('stack') > dataset.get('stack') })
+                    .each(function (dataset) { dataset.set('stack', dataset.get('stack') - 1); });
+                dataset.set('stack', topStack);
+                this.reorderDisplayedLayers(option, dataset);
+            }
         }
     },
 
