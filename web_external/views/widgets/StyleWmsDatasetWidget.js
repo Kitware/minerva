@@ -182,7 +182,7 @@ import 'bootstrap-select/dist/css/bootstrap-select.css';
             });
         } else {
             attributes = this._get_attributes();
-            return styleWmsDatasetWidget({
+            return styleWmsDatasetWidgetTemplate({
                 attributes: attributes,
                 ramps: this.ramps
             });
