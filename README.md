@@ -2,11 +2,7 @@
 [![Build Status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
 
 Minerva is an application framework that provides client/server/services
-capabilities using [Girder](http://www.github.com/Girder/girder), [GeoJS]
-(http://www.github.com/OpenGeoscience/geojs) and other open source tools.
-Jointly developed by  [Kitware](http://www.kitware.com) and
-[Epidemico](http://epidemico.com), Minerva is designed for big data and cloud
-enabled data analysis and visualization.
+capabilities using [Girder](http://www.github.com/Girder/girder), [GeoJS](http://www.github.com/OpenGeoscience/geojs), [Gaia](http://www.github.com/OpenDataAnalytics/gaia), and many other open source tools. Developed and maintained by  [Kitware](http://www.kitware.com), Minerva is designed for big data and cloud enabled data analysis and visualization targeting geoscience domain.
 
 #### Documentation
 
@@ -14,7 +10,7 @@ Documentation for Minerva can be found at http://minervadocs.readthedocs.org.
 
 #### License
 
-Copyright 2015 Kitware Inc.
+Copyright 2017 Kitware Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
