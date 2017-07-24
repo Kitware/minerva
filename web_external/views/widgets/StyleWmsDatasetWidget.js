@@ -1,5 +1,7 @@
 import colorbrewer from 'colorbrewer';
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
+
 import View from '../view';
 import styleMultiBandRasterWidgetTemplate from '../../templates/widgets/styleMultiBandRasterWidget.pug';
 import styleSingleBandRasterWidgetTemplate from '../../templates/widgets/styleSingleBandRasterWidget.pug';
@@ -13,7 +15,7 @@ import 'bootstrap-select/dist/css/bootstrap-select.css';
   This widget displays a styling modal for WMS layers.
 */
 
- const StyleWmsDatasetWidget = View.extend({
+const StyleWmsDatasetWidget = View.extend({
 
     events: {
         'submit #m-wms-multiband-style-form': function (e) {
@@ -145,13 +147,13 @@ import 'bootstrap-select/dist/css/bootstrap-select.css';
 
     _get_attributes: function () {
         var attributes = this.dataset.get('meta').minerva.layer_info.attributes;
-        var num_attr = _.map(attributes, function (value, key) {
+        var numberAttri = _.map(attributes, function (value, key) {
             if (value.properties) {
                 return key;
             }
         });
 
-        return num_attr.filter(Boolean);
+        return numberAttri.filter(Boolean);
     },
 
     _get_template: function (subType) {
@@ -182,7 +184,7 @@ import 'bootstrap-select/dist/css/bootstrap-select.css';
             });
         } else {
             attributes = this._get_attributes();
-            return styleWmsDatasetWidget({
+            return styleWmsDatasetWidgetTemplate({
                 attributes: attributes,
                 ramps: this.ramps
             });

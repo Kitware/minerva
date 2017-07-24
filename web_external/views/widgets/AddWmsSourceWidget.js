@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import View from '../view';
 import WmsSourceModel from '../../models/WmsSourceModel';
 import template from '../../templates/widgets/addWmsSourceWidget.pug';
@@ -18,6 +20,7 @@ const AddWmsSourceWidget = View.extend({
             var wmsSource = new WmsSourceModel({});
             wmsSource.on('m:sourceReceived', function (datasets) {
                 _.each(datasets, _.bind(function (dataset) {
+                    // eslint-disable-next-line backbone/no-silent
                     this.collection.add(dataset, {silent: true});
                     this.collection.trigger('add');
                 }, this));

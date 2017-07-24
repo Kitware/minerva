@@ -7,10 +7,6 @@ import '../../stylesheets/widgets/geoJSONStyleWidget.styl';
  * This widget displays options for rendering json datasets.
  */
 const JsonConfigWidget = View.extend({
-    initialize: function (settings) {
-        this.dataset = settings.dataset;
-    },
-
     events: {
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
@@ -19,6 +15,10 @@ const JsonConfigWidget = View.extend({
             this.dataset._initGeoRender('geojson');
             this.$el.modal('hide');
         }
+    },
+
+    initialize: function (settings) {
+        this.dataset = settings.dataset;
     },
 
     render: function () {

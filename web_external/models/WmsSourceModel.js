@@ -1,5 +1,8 @@
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
+
 import SourceModel from './SourceModel';
+
 const WmsSourceModel = SourceModel.extend({
 
     createSource: function (params) {

@@ -1,5 +1,7 @@
+import _ from 'underscore';
 import ItemModel from 'girder/models/ItemModel';
 import { restRequest } from 'girder/rest';
+
 import events from './events';
 
 const MinervaModel = ItemModel.extend({

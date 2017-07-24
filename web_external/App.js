@@ -1,5 +1,5 @@
-import Backbone from 'backbone';
 import App from 'girder/views/App';
+
 import LayoutHeaderView from './views/layout/HeaderView';
 import template from './templates/layout.pug';
 import './stylesheets/layout.styl';

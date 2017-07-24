@@ -1,4 +1,5 @@
 import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
+
 import View from '../view';
 import template from '../../templates/widgets/jobDetailsWidgetModalWrapper.pug';
 

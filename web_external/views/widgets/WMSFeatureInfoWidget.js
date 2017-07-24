@@ -1,7 +1,9 @@
 import $ from 'jquery';
+import _ from 'underscore';
 import 'jquery-ui-bundle';
 import 'jquery-ui-bundle/jquery-ui.css';
 import { restRequest } from 'girder/rest';
+
 import View from '../view';
 import contentTemplate from '../../templates/widgets/wmsFeatureInfoContent.pug';
 import GeoJSONStyle from '../../models/GeoJSONStyle';
@@ -10,13 +12,27 @@ import '../../stylesheets/widgets/featureInfoWidget.styl';
 
 const WMSFeatureInfoWidget = View.extend({
 
+    initialize: function (settings) {
+        this.modal = {};
+        this.map = settings.map;
+        this.version = settings.version;
+        this.layers = settings.layers;
+        this.callback = settings.callback;
+        this.setElement($('#m-map-panel'));
+        this.content = '';
+        this.fixedParams = 'REQUEST=GetFeatureInfo&' +
+            'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +
+            'SERVICE=WMS&FEATURE_COUNT=50&styles=&' +
+            'srs=EPSG:3857&INFO_FORMAT=application/json&format=image%2Fpng';
+    },
+
     callInfo: function (event) {
         var that = this;
 
         function getActiveWmsLayers() {
             return _.chain(that.parentView.collection.models)
                 .filter(function (set) { return set.get('displayed') && set.get('visible') && set.getDatasetType() !== 'geojson' && set.getDatasetType() !== 'geojson-timeseries'; })
-                .map(function (dataset) { return dataset.get('_id'); })
+                .invoke('get', ['_id'])
                 .value();
         }
 
@@ -107,21 +123,6 @@ const WMSFeatureInfoWidget = View.extend({
             that.renderContents(activeGeojsonLayers);
         }
     },
-
-    initialize: function (settings) {
-        this.modal = {};
-        this.map = settings.map;
-        this.version = settings.version;
-        this.layers = settings.layers;
-        this.callback = settings.callback;
-        this.el = $('#m-map-panel');
-        this.content = '';
-        this.fixedParams = 'REQUEST=GetFeatureInfo&' +
-            'EXCEPTIONS=application%2Fvnd.ogc.se_xml&' +
-            'SERVICE=WMS&FEATURE_COUNT=50&styles=&' +
-            'srs=EPSG:3857&INFO_FORMAT=application/json&format=image%2Fpng';
-    },
-
     renderContents: function (inspectResp) {
         if (inspectResp.length !== 0) {
             $('#m-wms-info-dialog').html(

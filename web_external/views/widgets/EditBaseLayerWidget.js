@@ -1,5 +1,5 @@
 import View from '../view';
-import template from '../../templates/widgets/editBaseLayerWidget.pug'
+import template from '../../templates/widgets/editBaseLayerWidget.pug';
 
 /**
 * This widget is used to edit an existing Base Layer of a Map Session.

@@ -1,10 +1,11 @@
-import View from '../view';
-import router from '../../router';
-import SessionCollection from '../../collections/SessionCollection';
 import PaginateWidget from 'girder/views/widgets/PaginateWidget';
 import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
 import { cancelRestRequests } from 'girder/rest';
 import { getCurrentUser } from 'girder/auth';
+
+import View from '../view';
+import router from '../../router';
+import SessionCollection from '../../collections/SessionCollection';
 import sessionListTemplate from '../../templates/body/sessionList.pug';
 import EditSessionWidget from '../widgets/EditSessionWidget';
 import '../../stylesheets/body/sessionList.styl';
@@ -56,7 +57,7 @@ const SessionsView = View.extend({
 
     render: function () {
         this.$el.html(sessionListTemplate({
-            sessions: this.collection.models,
+            sessions: this.collection.toArray(),
             currentUser: !!getCurrentUser()
         }));
 

@@ -1,5 +1,6 @@
 import events from 'girder/events';
 import JobListWidget from 'girder_plugins/jobs/views/JobListWidget';
+
 import Panel from '../body/Panel';
 import JobDetailsWidgetModalWrapper from '../widgets/JobDetailsWidgetModalWrapper';
 import template from '../../templates/body/jobsPanel.pug';

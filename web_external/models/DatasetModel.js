@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
 

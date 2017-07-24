@@ -1,9 +1,12 @@
-import View from '../view';
-import router from '../../router';
+import _ from 'underscore';
+import events from 'girder/events';
 import { cancelRestRequests } from 'girder/rest';
 import { getCurrentUser } from 'girder/auth';
-import events from 'girder/events';
 import { confirm } from 'girder/dialog';
+import { AccessType } from 'girder/constants';
+
+import View from '../view';
+import router from '../../router';
 import EditBaseLayerWidget from '../widgets/EditBaseLayerWidget';
 import EditSessionWidget from '../widgets/EditSessionWidget';
 import SessionCollection from '../../collections/SessionCollection';
@@ -14,12 +17,10 @@ import DataPanel from './DataPanel';
 import LayersPanel from './LayersPanel';
 import JobsPanel from './JobsPanel';
 import template from '../../templates/body/sessionPage.pug';
-import { AccessType } from 'girder/constants';
 import '../../stylesheets/body/sessionPage.styl';
 import '../../stylesheets/body/panelGroups.styl';
 
 const SessionView = View.extend({
-
     events: {
         'click a.m-add-session': function () {
             this._createNewSession();
@@ -67,6 +68,81 @@ const SessionView = View.extend({
             var cid = $(event.currentTarget).attr('m-session-cid');
             router.navigate('session/' + this.collection.get(cid).get('_id'), { trigger: true });
         }
+    },
+
+    initialize: function (settings) {
+        cancelRestRequests('fetch');
+        this.collection = new SessionCollection();
+        if (getCurrentUser()) {
+            this.collection.fetch();
+        } else {
+            this.render();
+        }
+        this.collection.on('g:changed', function () {
+            this.render();
+        }, this);
+        this.model = settings.session;
+        this.datasetsCollection = settings.datasetsCollection;
+        this.analysisCollection = settings.analysisCollection;
+        _.each(this.datasetsCollection.models, function (dataset) {
+            if (this.model.datasetInFeatures(dataset)) {
+                dataset.set('displayed', true);
+            }
+        }, this);
+
+        // listen for a change on a dataset being displayed
+        // this should add or remove it from the current session
+        this.listenTo(this.datasetsCollection, 'change:displayed', function (dataset) {
+            this._enableSave();
+            if (dataset.get('displayed')) {
+                this.model.addDataset(dataset);
+            } else {
+                this.model.removeDataset(dataset);
+            }
+        });
+        this.listenTo(this.model, 'change', function () {
+            this._enableSave();
+        });
+        this.listenTo(this.model, 'm:session_saved', function () {
+            this._disableSave();
+        });
+
+        this.layout = {
+            panelGroups: [
+                {
+                    id: 'm-main-panel-group',
+                    view: PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'm-map-panel',
+                            view: MapPanel
+                        }
+                    ]
+                },
+                {
+                    id: 'm-left-panel-group',
+                    view: PanelGroup,
+                    panelViews: [
+                        {
+                            id: 'm-analysis-panel',
+                            view: AnalysisPanel
+                        },
+                        {
+                            id: 'm-data-panel',
+                            view: DataPanel
+                        },
+                        {
+                            id: 'm-layer-panel',
+                            view: LayersPanel
+                        },
+                        {
+                            id: 'm-jobs-panel',
+                            view: JobsPanel
+                        }
+                    ]
+                }
+            ]
+        };
     },
 
     _createNewSession: function () {
@@ -146,86 +222,11 @@ const SessionView = View.extend({
         });
     },
 
-    initialize: function (settings) {
-        cancelRestRequests('fetch');
-        this.collection = new SessionCollection();
-        if (getCurrentUser()) {
-            this.collection.fetch();
-        } else {
-            this.render();
-        }
-        this.collection.on('g:changed', function () {
-            this.render();
-        }, this);
-        this.model = settings.session;
-        this.datasetsCollection = settings.datasetsCollection;
-        this.analysisCollection = settings.analysisCollection;
-        _.each(this.datasetsCollection.models, function (dataset) {
-            if (this.model.datasetInFeatures(dataset)) {
-                dataset.set('displayed', true);
-            }
-        }, this);
-
-        // listen for a change on a dataset being displayed
-        // this should add or remove it from the current session
-        this.listenTo(this.datasetsCollection, 'change:displayed', function (dataset) {
-            this._enableSave();
-            if (dataset.get('displayed')) {
-                this.model.addDataset(dataset);
-            } else {
-                this.model.removeDataset(dataset);
-            }
-        });
-        this.listenTo(this.model, 'change', function () {
-            this._enableSave();
-        });
-        this.listenTo(this.model, 'm:session_saved', function () {
-            this._disableSave();
-        });
-
-        this.layout = {
-            panelGroups: [
-                {
-                    id: 'm-main-panel-group',
-                    view: PanelGroup,
-                    panelViews: [
-                        {
-                            id: 'm-map-panel',
-                            view: MapPanel
-                        }
-                    ]
-                },
-                {
-                    id: 'm-left-panel-group',
-                    view: PanelGroup,
-                    panelViews: [
-                        {
-                            id: 'm-analysis-panel',
-                            view: AnalysisPanel
-                        },
-                        {
-                            id: 'm-data-panel',
-                            view: DataPanel
-                        },
-                        {
-                            id: 'm-layer-panel',
-                            view: LayersPanel
-                        },
-                        {
-                            id: 'm-jobs-panel',
-                            view: JobsPanel
-                        }
-                    ]
-                }
-            ]
-        };
-    },
-
     render: function () {
         // TODO different approach could be load the page
         // and adjust whatever is needed after access is loaded
         // just set some minimum default and let the page render
-        var sessionsList = _.filter(this.collection.models, function (model) {
+        var sessionsList = this.collection.filter(function (model) {
             return this.model.get('_id') !== model.get('_id');
         }, this);
 

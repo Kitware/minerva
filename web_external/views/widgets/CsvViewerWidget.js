@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import View from '../view';
 import template from '../../templates/widgets/csvViewerWidget.pug';
 /**
@@ -12,6 +14,14 @@ const CsvViewerWidget = View.extend({
         }
     },
 
+    initialize: function (settings) {
+        this.source = settings.source;
+        this.dataset = settings.dataset;
+        this.collection = settings.collection;
+        this.csv = this._parseCsv(settings.data, true);
+        this.data = this._parseCsv(settings.data, false);
+    },
+
     _parseCsv: function (data, headers) {
         var parsedCSV = Papa.parse(data, { skipEmptyLines: true, headers: headers });
         if (!parsedCSV || !parsedCSV.data) {
@@ -23,14 +33,6 @@ const CsvViewerWidget = View.extend({
 
     _getTotalRows: function (dataTableSource) {
         return dataTableSource.length;
-    },
-
-    initialize: function (settings) {
-        this.source = settings.source;
-        this.dataset = settings.dataset;
-        this.collection = settings.collection;
-        this.csv = this._parseCsv(settings.data, true);
-        this.data = this._parseCsv(settings.data, false);
     },
 
     render: function () {
@@ -70,11 +72,11 @@ const CsvViewerWidget = View.extend({
                     for (i = data.start, ien = data.start + data.length; i < ien; i++) {
                         output.push(dataTableSource[i]);
                     }
-                    callback({
+                    callback(new Error({
                         'data': output,
                         'recordsTotal': tableScrollConfig.dataSize,
                         'recordsFiltered': tableScrollConfig.dataSize
-                    });
+                    }));
                 }),
                 'scroller': {
                     'loadingIndicator': true,

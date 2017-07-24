@@ -1,3 +1,5 @@
+import _ from 'underscore';
+import * as d3 from 'd3';
 /* globals moment */
 import colorbrewer from 'colorbrewer';
 

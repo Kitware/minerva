@@ -1,17 +1,27 @@
+import _ from 'underscore';
 import geo from 'geojs';
+import * as d3 from 'd3';
+import Backbone from 'backbone';
+import colorbrewer from 'colorbrewer';
+
+import ClickInfoWidget from '../widgets/ClickInfoWidget';
+import ClickInfoModel from '../../models/ClickInfoModel';
+
 import geojsonUtil from '../../geojsonUtil';
 
-var multiband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Style</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><RedChannel><SourceChannelName><%= redChannel %></SourceChannelName></RedChannel><GreenChannel><SourceChannelName><%= greenChannel %></SourceChannelName></GreenChannel><BlueChannel><SourceChannelName><%= blueChannel %></SourceChannelName></BlueChannel></ChannelSelection></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+window.geo = geo;
 
-var singleband_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>SLD Single Band</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><GrayChannel><SourceChannelName>1</SourceChannelName></GrayChannel></ChannelSelection><ColorMap extended="true"><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMin %>" label="0"/><%= colorMapEntry %><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMax %>" label="0"/></ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+var multibandTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Style</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><RedChannel><SourceChannelName><%= redChannel %></SourceChannelName></RedChannel><GreenChannel><SourceChannelName><%= greenChannel %></SourceChannelName></GreenChannel><BlueChannel><SourceChannelName><%= blueChannel %></SourceChannelName></BlueChannel></ChannelSelection></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
-var polygon_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Polygon</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PolygonSymbolizer><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+var singlebandTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>SLD Single Band</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><GrayChannel><SourceChannelName>1</SourceChannelName></GrayChannel></ChannelSelection><ColorMap extended="true"><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMin %>" label="0"/><%= colorMapEntry %><ColorMapEntry color="#000000" opacity="0" quantity="<%= nodataMax %>" label="0"/></ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
-var point_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Point</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName><%= marker %></WellKnownName><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></Mark></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+var polygonTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Polygon</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PolygonSymbolizer><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
-var line_template = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Line</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><LineSymbolizer><Stroke><CssParameter name="stroke"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Stroke></LineSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+var pointTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Point</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName><%= marker %></WellKnownName><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></Mark></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
-function generate_sequence(start, stop, count) {
+var lineTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Line</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><LineSymbolizer><Stroke><CssParameter name="stroke"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Stroke></LineSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
+
+function generateSequence(start, stop, count) {
     // Generates a sequence of numbers with the given
     // start, stop and count variables
 
@@ -56,7 +66,6 @@ function AdapterRegistry() {
         if (layerType === null || !_.has(this.registry, layerType)) {
             console.error('This dataset cannot be adapted to a map layer of type [' + layerType + '].');
             dataset.trigger('m:map_adapter_error', dataset, layerType);
-            return;
         } else {
             var Adapter = this.registry[layerType];
             var layerRepr = _.extend(new Adapter(), Backbone.Events);
@@ -85,8 +94,6 @@ function AdapterRegistry() {
 const adapterRegistry = _.extend(new AdapterRegistry(), Backbone.Events);
 
 export default adapterRegistry;
-
-
 
 const rendering = { geo: {} };
 
@@ -360,7 +367,7 @@ rendering.geo.ChoroplethRepresentation = rendering.geo.defineMapLayer('choroplet
             }
         }).data(data);
 
-        var clickInfo = new minerva.models.ClickInfoModel();
+        var clickInfo = new ClickInfoModel();
 
         polygon.geoOn(geo.event.feature.mouseclick, _.bind(function (d) {
             clickInfo.set({
@@ -371,7 +378,7 @@ rendering.geo.ChoroplethRepresentation = rendering.geo.defineMapLayer('choroplet
             });
 
             if (!this.clickInfoWidget) {
-                this.clickInfoWidget = new minerva.views.ClickInfoWidget({
+                this.clickInfoWidget = new ClickInfoWidget({
                     model: clickInfo,
                     parentView: container.getMapView()
                 });
@@ -407,14 +414,14 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
         this.geoJsLayer.url(
             _.bind(function (x, y, zoom) {
                 var bb = this.geoJsLayer.gcsTileBounds({ x: x, y: y, level: zoom }, projection);
-                var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
+                var bboxMercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
                 var params = {
                     SERVICE: 'WMS',
                     VERSION: '1.1.1',
                     REQUEST: 'GetMap',
                     LAYERS: minervaMetadata.type_name,
                     STYLES: '',
-                    BBOX: bbox_mercator,
+                    BBOX: bboxMercator,
                     WIDTH: 256,
                     HEIGHT: 256,
                     FORMAT: 'image/png',
@@ -425,7 +432,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                 // but expecting much more complex vis options so for now keep them
                 // separate
 
-                var sld_body = null;
+                var sldBody = null;
                 var min = null;
                 var max = null;
                 var nodata = null;
@@ -437,7 +444,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                 var attribute = null;
                 if (minervaMetadata.sld_params) {
                     if (minervaMetadata.sld_params.subType === 'multiband') {
-                        sld_body = multiband_template({
+                        sldBody = multibandTemplate({
                             typeName: minervaMetadata.sld_params.typeName,
                             redChannel: minervaMetadata.sld_params.redChannel.split(':')[0].toString(),
                             greenChannel: minervaMetadata.sld_params.greenChannel.split(':')[0].toString(),
@@ -459,7 +466,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                         }
                         ramp = minervaMetadata.sld_params['ramp[]'];
                         count = ramp.length;
-                        seq = generate_sequence(min, max, count);
+                        seq = generateSequence(min, max, count);
                         colorValuePairs = seq.map(function (num, i) {
                             return [num, ramp[i]];
                         });
@@ -470,7 +477,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                                 value: pair[0]
                             });
                         }).join('');
-                        sld_body = singleband_template({
+                        sldBody = singlebandTemplate({
                             typeName: minervaMetadata.sld_params.typeName,
                             colorMapEntry: colorMapEntry,
                             nodataMin: nodataMin,
@@ -482,7 +489,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                         ramp = minervaMetadata.sld_params['ramp[]'];
                         count = ramp.length;
                         attribute = minervaMetadata.sld_params.attribute;
-                        seq = generate_sequence(min, max, count);
+                        seq = generateSequence(min, max, count);
                         colorValuePairs = seq.map(function (num, i) {
                             return [num, ramp[i]];
                         });
@@ -496,27 +503,27 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
 
                         if (minervaMetadata.sld_params.subType === 'point') {
                             var marker = minervaMetadata.sld_params.marker;
-                            sld_body = point_template({
+                            sldBody = pointTemplate({
                                 typeName: minervaMetadata.sld_params.typeName,
                                 colorValueMapping: colorValueMapping,
                                 attribute: attribute,
                                 marker: marker
                             });
                         } else if (minervaMetadata.sld_params.subType === 'line') {
-                            sld_body = line_template({
+                            sldBody = lineTemplate({
                                 typeName: minervaMetadata.sld_params.typeName,
                                 colorValueMapping: colorValueMapping,
                                 attribute: attribute
                             });
                         } else {
-                            sld_body = polygon_template({
+                            sldBody = polygonTemplate({
                                 typeName: minervaMetadata.sld_params.typeName,
                                 colorValueMapping: colorValueMapping,
                                 attribute: attribute
                             });
                         }
                     }
-                    params.SLD_BODY = sld_body;
+                    params.SLDBODY = sldBody;
                 }
                 if (minervaMetadata.hasOwnProperty('credentials')) {
                     params.minerva_credentials = minervaMetadata.credentials;

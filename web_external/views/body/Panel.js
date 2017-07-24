@@ -1,6 +1,8 @@
+import _ from 'underscore';
+import { confirm } from 'girder/dialog';
+
 import View from '../view';
 import Panel from '../body/Panel';
-import { confirm } from 'girder/dialog';
 
 const MinervaPanel = View.extend({
     /**

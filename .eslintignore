@@ -1,0 +1,4 @@
+extra/*.js
+plugins/minerva/web_external/extra/*.js
+plugins/minerva/web_external/extra/
+web_external/extra/*.js

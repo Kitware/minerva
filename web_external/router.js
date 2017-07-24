@@ -1,6 +1,7 @@
+import Backbone from 'backbone';
 import girderRouter from 'girder/router';
-
 import events from 'girder/events';
+
 import SessionsView from './views/body/SessionsView';
 import SessionView from './views/body/SessionView';
 import SessionModel from './models/SessionModel';

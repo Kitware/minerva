@@ -1,4 +1,6 @@
+import _ from 'underscore';
 import geo from 'geojs';
+
 import Panel from '../body/Panel';
 import adapterRegistry from '../adapters/Adapters';
 import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';

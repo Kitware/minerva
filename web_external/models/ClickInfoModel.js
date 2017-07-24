@@ -1,4 +1,6 @@
-minerva.models.ClickInfoModel = Backbone.Model.extend({
+import Backbone from 'backbone';
+
+const ClickInfoModel = Backbone.Model.extend({
     defaults: {
         // geojs layer object
         layer: null,
@@ -13,3 +15,4 @@ minerva.models.ClickInfoModel = Backbone.Model.extend({
         datum: null
     }
 });
+export default ClickInfoModel;

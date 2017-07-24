@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import Panel from '../body/Panel';
 import template from '../../templates/body/layersPanel.pug';
 import '../../stylesheets/body/layersPanel.styl';
@@ -85,8 +87,7 @@ const LayersPanel = Panel.extend({
                     .reverse()
                     .find(function (d) { return d.get('stack') < dataset.get('stack'); })
                     .value();
-            }
-            else {
+            } else {
                 swapDataset = _.chain(displayedDatasets)
                     .sortBy(function (d) { return d.get('stack'); })
                     .find(function (d) { return d.get('stack') > dataset.get('stack'); })
@@ -98,19 +99,17 @@ const LayersPanel = Panel.extend({
                 swapDataset.set('stack', currentStack);
                 this.reorderDisplayedLayers(option, dataset);
             }
-        }
-        else if (option === 'moveToBottom' && dataset.get('stack') !== 1) {
+        } else if (option === 'moveToBottom' && dataset.get('stack') !== 1) {
             _.chain(displayedDatasets)
-                .filter(function (d) { return d.get('stack') < dataset.get('stack') })
+                .filter(function (d) { return d.get('stack') < dataset.get('stack'); })
                 .each(function (dataset) { dataset.set('stack', dataset.get('stack') + 1); });
             dataset.set('stack', 1);
             this.reorderDisplayedLayers(option, dataset);
-        }
-        else if (option === 'moveToTop') {
-            var topStack = _.max(displayedDatasets, function (dataset) { return dataset.get('stack') }).get('stack');
-            if (dataset.get('stack') != topStack) {
+        } else if (option === 'moveToTop') {
+            var topStack = _.max(displayedDatasets, function (dataset) { return dataset.get('stack'); }).get('stack');
+            if (dataset.get('stack') !== topStack) {
                 _.chain(displayedDatasets)
-                    .filter(function (d) { return d.get('stack') > dataset.get('stack') })
+                    .filter(function (d) { return d.get('stack') > dataset.get('stack'); })
                     .each(function (dataset) { dataset.set('stack', dataset.get('stack') - 1); });
                 dataset.set('stack', topStack);
                 this.reorderDisplayedLayers(option, dataset);
