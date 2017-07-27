@@ -214,7 +214,6 @@ const MapPanel = Panel.extend({
             }
         });
         this.datasetLayerReprs = {};
-        this.legendWidget = {};
 
         this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'change:displayed', function (dataset) {

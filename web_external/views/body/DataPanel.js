@@ -237,9 +237,7 @@ export default Panel.extend({
     },
 
     deleteDatasetEvent: function (event) {
-        if ($(event.currentTarget).hasClass('icon-disabled')) {
-
-        } else {
+        if (!$(event.currentTarget).hasClass('icon-disabled')) {
             var datasetId = $(event.currentTarget).attr('m-dataset-id');
             var dataset = this.collection.get(datasetId);
             dataset.destroy();
