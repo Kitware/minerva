@@ -10,13 +10,13 @@
           .col-md-4
             .form-group
               label.control-label(for="m-attribute") Attribute
-              select.form-control#m-attribute
+              select#m-attribute.form-control
                 each attribute in attributes
                   option(value= attribute)= attribute
           .col-md-8
             .form-group
               label.control-label(for="m-color-ramp") Color Ramp
-              select.form-control#m-color-ramp.m-select-ramp(
+              select#m-color-ramp.m-select-ramp.form-control(
                 data-feature=feature, data-property=rampKey)
                 each ramp, name in ramps
                   option(data-content!=ramp.display, data-ramp-name=name)= name
