@@ -1,4 +1,6 @@
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
+
 import DatasetModel from './DatasetModel';
 
 const WmsDatasetModel = DatasetModel.extend({

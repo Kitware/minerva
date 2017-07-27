@@ -1,4 +1,5 @@
 import events from 'girder/events';
+
 import Panel from '../body/Panel';
 import analysisWidgetRegistry from './analysisWidgetRegistry';
 import template from '../../templates/body/analysisPanel.pug';
@@ -20,10 +21,10 @@ const AnalysisPanel = Panel.extend({
         // might need its own param set for initialization
         var minervaMetadata = analysis.metadata();
 
-        var analysis_type = minervaMetadata.analysis_type;
+        var analysisType = minervaMetadata.analysis_type;
 
-        if (!analysisWidgetRegistry.exists(analysis_type)) {
-            var message = `No widget registered for analysis of type ${analysis_type}`;
+        if (!analysisWidgetRegistry.exists(analysisType)) {
+            var message = `No widget registered for analysis of type ${analysisType}`;
 
             events.trigger('g:alert', {
                 icon: 'cancel',
@@ -35,7 +36,7 @@ const AnalysisPanel = Panel.extend({
             throw message;
         }
 
-        var analysisWidget = new (analysisWidgetRegistry.get(analysis_type))({
+        var analysisWidget = new (analysisWidgetRegistry.get(analysisType))({
             el: $('#g-dialog-container'),
             parentView: this,
             datasetCollection: this.datasetCollection,

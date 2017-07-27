@@ -10,24 +10,24 @@
           .col-md-4
             .form-group
               label.control-label(for="m-attribute") Attribute
-              select.form-control#m-attribute
+              select#m-attribute.form-control
                 each attribute in attributes
                   option(value= attribute)= attribute
           .col-md-4
             .form-group
               label.control-label(for="m-color-ramp") Color Ramp
-              select.form-control#m-color-ramp.m-select-ramp(
+              select#m-color-ramp.form-control.m-select-ramp(
                 data-feature=feature, data-property=rampKey)
                 each ramp, name in ramps
                   option(data-content!=ramp.display, data-ramp-name=name)= name
           .col-md-4
             .form-group
               label.control-label(for="m-marker") Marker
-              select.form-control#m-marker
+              select#m-marker.form-control
                 each marker in markers
                   option(value= marker)= marker
       .modal-footer
-         button.btn.btn-small.btn-primary#foobar
-           i.icon-plus-squared
-           | Save Style
-         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button#foobar.btn.btn-small.btn-primary
+          i.icon-plus-squared
+          | Save Style
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel

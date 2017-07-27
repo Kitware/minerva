@@ -135,7 +135,7 @@ ul.nav.nav-tabs
                   input#m-enable-quantile-scale(name='colormap-scale', type='radio', checked=polygon.quantileFlag, data-feature='polygon', data-property='quantileFlag')
                   | Quantile
     - var clampingEnabled = polygon.clampingFlag && polygon.linearFlag
-    .panel#m-clamping-panel(class={'panel-default': !clampingEnabled, 'panel-primary': clampingEnabled})
+    #m-clamping-panel.panel(class={'panel-default': !clampingEnabled, 'panel-primary': clampingEnabled})
       .panel-heading(data-target='#m-polygon-clamping-control')
         .checkbox(style='display:block')
           label

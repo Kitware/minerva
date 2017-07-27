@@ -1,6 +1,8 @@
+import _ from 'underscore';
 import eventStream from 'girder/utilities/EventStream';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
+
 import events from '../../events';
 import Panel from '../body/Panel';
 import AddWmsSourceWidget from '../widgets/AddWmsSourceWidget';
@@ -235,9 +237,7 @@ export default Panel.extend({
     },
 
     deleteDatasetEvent: function (event) {
-        if ($(event.currentTarget).hasClass('icon-disabled')) {
-            return;
-        } else {
+        if (!$(event.currentTarget).hasClass('icon-disabled')) {
             var datasetId = $(event.currentTarget).attr('m-dataset-id');
             var dataset = this.collection.get(datasetId);
             dataset.destroy();

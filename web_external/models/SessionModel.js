@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import MinervaModel from '../MinervaModel';
 
 const SessionModel = MinervaModel.extend({

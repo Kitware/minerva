@@ -1,17 +1,17 @@
 if (currentUser)
-    .m-session-list-header
-      .m-session-pagination
-      form.m-session-search-form.form-inline(role="form")
-        .form-group.m-sessions-search-container
+  .m-session-list-header
+    .m-session-pagination
+    form.m-session-search-form.form-inline(role="form")
+      .form-group.m-sessions-search-container
 
-      button.m-session-create-button.btn.btn-sm.btn-default
-        i.icon-plus-squared
-        |  New session
+    button.m-session-create-button.btn.btn-sm.btn-default
+      i.icon-plus-squared
+      |  New session
 
-    each session in sessions
-      .m-session-list-entry
-        .m-session-right-column
-        .m-session-title
-          a.m-session-link(m-session-cid=session.cid)= session.get('name')
-        .m-session-description= session.get('description')
-        .g-clear-right
+  each session in sessions
+    .m-session-list-entry
+      .m-session-right-column
+      .m-session-title
+        a.m-session-link(m-session-cid=session.cid)= session.get('name')
+      .m-session-description= session.get('description')
+      .g-clear-right

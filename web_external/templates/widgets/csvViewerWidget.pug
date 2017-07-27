@@ -1,15 +1,15 @@
 .modal-dialog.m.table-main-container
-    .modal-content
-        form#m-add-csv-viewer-form.modal-form(role="form")
-            .modal-header
-                button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
-                h4.modal-title= dataset.get('name')
+  .modal-content
+    form#m-add-csv-viewer-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title= dataset.get('name')
 
-            table#data
-            
-            .modal-footer
-                if (!dataset.get('readOnly'))
-                    a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-                    button.m-update-dataset.btn.btn-small.btn-primary(type="submit")
-                        i.icon-check
-                        | Save
+      table#data
+
+      .modal-footer
+        if (!dataset.get('readOnly'))
+          a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+          button.m-update-dataset.btn.btn-small.btn-primary(type="submit")
+            i.icon-check
+            | Save

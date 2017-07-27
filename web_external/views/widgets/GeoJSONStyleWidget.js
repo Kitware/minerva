@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import 'bootstrap-slider';
 import 'bootstrap-slider/dist/css/bootstrap-slider.css';
 import 'bootstrap-select';
@@ -7,7 +8,6 @@ import View from '../view';
 import GeoJSONStyle from '../../models/GeoJSONStyle';
 import geojsonUtil from '../../geojsonUtil';
 import template from '../../templates/widgets/geoJSONStyleWidget.pug';
-
 
 function _updateClampingPanel(radio) {
     var radioChecked = radio.is(':checked');
@@ -67,13 +67,13 @@ const GeoJSONStyleWidget = View.extend({
         }
 
         this.$el.html(template({
-                point: this._pointStyle.attributes,
-                line: this._lineStyle.attributes,
-                polygon: this._polygonStyle.attributes,
-                tabs: tabs,
-                ramps: this._pointStyle.ramps,
-                summary: geoData.summary || {}
-            })
+            point: this._pointStyle.attributes,
+            line: this._lineStyle.attributes,
+            polygon: this._polygonStyle.attributes,
+            tabs: tabs,
+            ramps: this._pointStyle.ramps,
+            summary: geoData.summary || {}
+        })
         );
 
         this.$('.m-slider').bootstrapSlider({ enabled: false });

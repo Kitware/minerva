@@ -8,7 +8,7 @@
       .modal-body
         .form-group
           label.control-label(for="m-choropleth-value-source") Color by
-          select.form-control.input-sm#m-choropleth-value-source
+          select#m-choropleth-value-source.form-control.input-sm
             each value in values
               option(value=value)= value
         label(for="m-choropleth-color-config") Color scheme

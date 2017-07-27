@@ -1,4 +1,4 @@
-/*global File*/
+/* global File */
 /**
  * Create a new instance of class contourJsonReader
  *
@@ -7,6 +7,7 @@
  * @returns {geo.contourJsonReader}
  */
 import geo from 'geojs';
+import _ from 'underscore';
 window.geo = geo;
 
 geo.contourJsonReader = function (arg) {
@@ -15,14 +16,7 @@ geo.contourJsonReader = function (arg) {
         return new geo.contourJsonReader(arg); // eslint-disable-line new-cap
     }
 
-    var m_this = this, m_style = arg.style || {};
-    m_style = $.extend({
-        strokeWidth: 2,
-        strokeColor: {r: 0, g: 0, b: 0},
-        strokeOpacity: 1,
-        fillColor: {r: 1, g: 0, b: 0},
-        fillOpacity: 1
-    }, m_style);
+    var that = this;
 
     geo.fileReader.call(this, arg);
 
@@ -38,7 +32,7 @@ geo.contourJsonReader = function (arg) {
             return true;
         }
         try {
-            if (Array.isArray(m_this._featureArray(file))) {
+            if (Array.isArray(that._featureArray(file))) {
                 return true;
             }
         } catch (e) {}
@@ -75,7 +69,7 @@ geo.contourJsonReader = function (arg) {
         }
 
         if (file instanceof File) {
-            m_this._getString(file, onDone, progress);
+            that._getString(file, onDone, progress);
         } else if (_.isString(file)) {
             onDone(file);
         } else {
@@ -89,7 +83,7 @@ geo.contourJsonReader = function (arg) {
 
     this.read = function (file, done, progress) {
         function _done(data) {
-            var contour = m_this.layer().createFeature('contour')
+            var contour = that.layer().createFeature('contour')
                     .data(data.position || data.values)
                     .style({
                         opacity: 0.75
@@ -136,7 +130,7 @@ geo.contourJsonReader = function (arg) {
             }
         }
 
-        m_this._readObject(file, _done, progress);
+        that._readObject(file, _done, progress);
     };
 };
 

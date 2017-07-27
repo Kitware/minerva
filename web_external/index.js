@@ -12,4 +12,4 @@ export {
     MinervaCollection,
     MinervaModel,
     router
-}
+};

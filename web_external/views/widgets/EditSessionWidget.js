@@ -1,7 +1,10 @@
+import _ from 'underscore';
+import { handleClose, handleOpen } from 'girder/dialog';
+
 import View from '../view';
 import SessionModel from '../../models/SessionModel';
 import template from '../../templates/widgets/editSessionWidget.pug';
-import { handleClose, handleOpen } from 'girder/dialog';
+
 /**
 * This widget is used to create a new session or edit an existing one.
 */

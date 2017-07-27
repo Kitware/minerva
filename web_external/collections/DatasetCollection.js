@@ -1,7 +1,8 @@
+import { getCurrentUser } from 'girder/auth';
+
 import MinervaCollection from '../MinervaCollection';
 import DatasetModel from '../models/DatasetModel';
 import WmsDatasetModel from '../models/WmsDatasetModel';
-import { getCurrentUser } from 'girder/auth';
 
 const DatasetCollection = MinervaCollection.extend({
 

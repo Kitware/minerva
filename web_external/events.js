@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
 
-const events = _.clone(Backbone.Events);
-export default events;
+// use events and varaible name will cause eslint-plugin-backbone issue
+const evts = _.clone(Backbone.Events);
+export default evts;

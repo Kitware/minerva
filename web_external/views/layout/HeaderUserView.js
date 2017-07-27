@@ -1,9 +1,11 @@
-import View from '../view';
+import _ from 'underscore';
 import events from 'girder/events';
 import { restRequest } from 'girder/rest';
-import router from '../../router';
 import { getCurrentUser, setCurrentUser } from 'girder/auth';
-import template from '../../templates/layout/layoutHeaderUser.pug'
+
+import View from '../view';
+import router from '../../router';
+import template from '../../templates/layout/layoutHeaderUser.pug';
 
 const HeaderUserView = View.extend({
 

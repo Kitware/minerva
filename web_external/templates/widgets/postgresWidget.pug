@@ -8,28 +8,28 @@
       .modal-body
         .form-group.form-group-sm(class=validation.datasetNameRequired?"has-error":'')
           label.control-label(for="m-postgres-dataset-name") Dataset name
-            input.form-control#m-postgres-dataset-name(type='text', value=datasetName)
+            input#m-postgres-dataset-name.form-control(type='text', value=datasetName)
             if validation.datasetNameRequired
               span.help-block Required
         .row
           .col-md-6
             .form-group.form-group-sm
-                label.control-label(for="m-postgres-source") Assetstore
-                  select.form-control#m-postgres-assetstore
-                    option
-                    each assetstore in assetstores
-                      option(value=assetstore._id, selected=assetstore._id==selectedAssetstoreId)= assetstore.name
+              label.control-label(for="m-postgres-source") Assetstore
+                select#m-postgres-assetstore.form-control
+                  option
+                  each assetstore in assetstores
+                    option(value=assetstore._id, selected=assetstore._id==selectedAssetstoreId)= assetstore.name
             if sources.length
               .form-group.form-group-sm
                 label.control-label(for="m-postgres-source") Source
-                  select.form-control#m-postgres-source
+                  select#m-postgres-source.form-control
                     option
                     each source in sources
                       option(value=source, selected=source==selectedSource)= source
             if columns.length
               .form-group.form-group-sm(class=validation.valueFieldRequired?"has-error":'')
                 label.control-label(for="m-postgres-field") Value
-                  select.form-control.has-min-width#m-postgres-field
+                  select#m-postgres-field.form-control.has-min-width
                     option
                     each column in primativeColumns()
                       option(value=column.name, selected=column.name==valueField)= column.name
@@ -38,7 +38,7 @@
             if valueField && selectedSource && columns.length
               .form-group.form-group-sm
                 label.control-label(for="m-postgres-aggregation") Aggregate method
-                  select.form-control.has-min-width#m-postgres-aggregation
+                  select#m-postgres-aggregation.form-control.has-min-width
                     each func in getAvailableAggregateFunctions()
                       option(value=func, selected=aggregateFunction==func)= func
           if valueField
@@ -56,7 +56,7 @@
                 if geometryFieldType==='built-in'
                   .form-group.form-group-sm(class=validation.geometryBuiltInFieldRequired?"has-error":'')
                     label.control-label(for="m-postgres-field") Field
-                      select.form-control.input-sm.has-min-width#geometry-built-in-field
+                      select#geometry-built-in-field.form-control.input-sm.has-min-width
                         option
                         each column in geometryColumns()
                           option(value=column.name, selected=column.name==geometryBuiltInField)= column.name
@@ -106,5 +106,5 @@
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button#m-get-geojson.btn.btn-small.btn-primary(disabled=!columns.length)
-            i.icon-plus-squared
-            | Get geometry
+          i.icon-plus-squared
+          | Get geometry

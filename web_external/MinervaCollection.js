@@ -1,5 +1,7 @@
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 import Collection from 'girder/collections/Collection';
+
 import MinervaModel from './MinervaModel';
 
 const MinervaCollection = Collection.extend({

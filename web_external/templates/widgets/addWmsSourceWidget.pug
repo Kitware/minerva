@@ -4,24 +4,24 @@
       .modal-header
         button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
         h4.modal-title
-          | Enter WMS Service details
+        | Enter WMS Service details
 
       .modal-body
         .form-group
           label.control-label(for="m-wms-name") Name
-          input.input-sm#m-wms-name.form-control(type="text", placeholder="Enter WMS name")
+          input#m-wms-name.input-sm.form-control(type="text", placeholder="Enter WMS name")
         .form-group
           label.control-label(for="m-wms-uri") WMS baseURL
-          input.input-sm#m-wms-uri.form-control(type="text", placeholder="http://geodata.company.com/geoserver/wms")
+          input#m-wms-uri.input-sm.form-control(type="text", placeholder="http://geodata.company.com/geoserver/wms")
         .form-group
           label.control-label(for="m-wms-username") Username
-          input.input-sm#m-wms-username.form-control(type="text", placeholder="username")
+          input#m-wms-username.input-sm.form-control(type="text", placeholder="username")
         .form-group
           label.control-label(for="m-wms-password") Password
-          input.input-sm#m-wms-password.form-control(type="password", placeholder="password")
+          input#m-wms-password.input-sm.form-control(type="password", placeholder="password")
 
       .modal-footer
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-add-service-button.btn.btn-small.btn-primary
-            i.icon-plus-squared
-            | Add layers
+          i.icon-plus-squared
+          | Add layers

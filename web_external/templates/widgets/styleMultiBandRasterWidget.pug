@@ -6,27 +6,27 @@
         h4.modal-title
           | Style Multiband Raster
       .modal-body
-          .row
-            .col-md-4
-              .form-group
-                label.control-label(for="m-red-channel") Red Channel
-                select#m-red-channel
-                  each band, index in bands
-                    option(value= index + ":" +  band)= band
-            .col-md-4
-              .form-group
-                label.control-label(for="m-green-channel") Green Channel
-                select#m-green-channel
-                  each band, index in bands
-                    option(value= index + ":" + band)= band
-            .col-md-4  
-              .form-group
-                label.control-label(for="m-blue-channel") Blue Channel
-                select#m-blue-channel
-                  each band, index in bands
-                    option(value= index + ":" + band)= band
+        .row
+          .col-md-4
+            .form-group
+              label.control-label(for="m-red-channel") Red Channel
+              select#m-red-channel
+                each band, index in bands
+                  option(value= index + ":" +  band)= band
+          .col-md-4
+            .form-group
+              label.control-label(for="m-green-channel") Green Channel
+              select#m-green-channel
+                each band, index in bands
+                  option(value= index + ":" + band)= band
+          .col-md-4  
+            .form-group
+              label.control-label(for="m-blue-channel") Blue Channel
+              select#m-blue-channel
+                each band, index in bands
+                  option(value= index + ":" + band)= band
       .modal-footer
         button.btn.btn-small.btn-primary
-              i.icon-plus-squared
-              | Save Style
+          i.icon-plus-squared
+          | Save Style
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel

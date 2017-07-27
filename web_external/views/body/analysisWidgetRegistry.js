@@ -10,6 +10,6 @@ var registry = {
     get: function (key) {
         return window.__minerva_analysis_registry[key];
     }
-}
+};
 
 export default registry;

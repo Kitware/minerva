@@ -8,4 +8,3 @@ const AnalysisCollection = MinervaCollection.extend({
 
 });
 export default AnalysisCollection;
-

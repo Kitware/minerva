@@ -1,3 +1,5 @@
+import colorbrewer from 'colorbrewer';
+
 import View from '../view';
 import template from '../../templates/widgets/choroplethRenderWidget.pug';
 import '../../stylesheets/widgets/choroplethRenderWidget.styl';
@@ -5,10 +7,6 @@ import '../../stylesheets/widgets/choroplethRenderWidget.styl';
  * This widget displays options for rendering choropleth layers
  */
 const ChoroplethRenderWidget = View.extend({
-    initialize: function (settings) {
-        this.dataset = settings.dataset;
-    },
-
     events: {
         'submit #m-choropleth-render-form': function (e) {
             e.preventDefault();
@@ -20,6 +18,10 @@ const ChoroplethRenderWidget = View.extend({
             this.dataset.saveMinervaMetadata(minervaMetadata);
             this.$el.modal('hide');
         }
+    },
+
+    initialize: function (settings) {
+        this.dataset = settings.dataset;
     },
 
     render: function () {

@@ -1,11 +1,13 @@
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
+import Backbone from 'backbone';
+import 'dot/doT';
+import 'jquery-extendext';
+import 'jQuery-QueryBuilder/dist/js/query-builder';
 
 import View from '../view';
 import template from '../../templates/widgets/postgresWidget.pug';
 import '../../stylesheets/widgets/postgresWidget.styl';
-import doT from 'dot/doT';
-import jQueryExtendext from 'jquery-extendext';
-import QueryBuilder from 'jQuery-QueryBuilder/dist/js/query-builder';
 import 'jQuery-QueryBuilder/dist/css/query-builder.default.min.css';
 
 const PostgresWidget = View.extend({
@@ -476,7 +478,7 @@ const PostgresWidget = View.extend({
                 });
         }
         this.render();
-        return !_.some(_.values(this.validation), function (value) { return value; });
+        return !_.some(_.values(this.validation));
     }
 });
 

@@ -1,4 +1,6 @@
+import _ from 'underscore';
 import geo from 'geojs';
+
 import Panel from '../body/Panel';
 import adapterRegistry from '../adapters/Adapters';
 import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';
@@ -212,7 +214,6 @@ const MapPanel = Panel.extend({
             }
         });
         this.datasetLayerReprs = {};
-        this.legendWidget = {};
 
         this.collection = settings.session.datasetsCollection;
         this.listenTo(this.collection, 'change:displayed', function (dataset) {

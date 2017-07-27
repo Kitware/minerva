@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import View from '../view';
 
 const PanelGroup = View.extend({
