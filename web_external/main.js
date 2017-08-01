@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { registerPluginNamespace } from 'girder/pluginUtils';
 
 import App from './App.js';
-import events from './events';
+import events from 'girder/events';
 import * as index from './index';
 
 $(function () {
