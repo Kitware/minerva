@@ -21,12 +21,13 @@ import os
 import shutil
 import pymongo
 import tempfile
+import json
 
 from girder.api import access
-from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel, RestException
+from girder.api.describe import Description, autoDescribeRoute
+from girder.api.rest import Resource, loadmodel, RestException, GirderException
 from girder.constants import AccessType
-from girder.utility import config
+from girder.utility import config, assetstore_utilities
 
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
@@ -38,6 +39,7 @@ import girder_client
 
 
 class Dataset(Resource):
+
     def __init__(self):
         self.resourceName = 'minerva_dataset'
         self.route('GET', (), self.listDatasets)
@@ -47,6 +49,7 @@ class Dataset(Resource):
         self.route('GET', (':id', 'dataset'), self.getDataset)
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
+        self.route('GET', (':id', 'download'), self.download)
         self.client = None
 
     def _initClient(self):
@@ -222,7 +225,7 @@ class Dataset(Resource):
                                          defaultSortDir=pymongo.DESCENDING)
             items = [self.model('item').filter(item, self.getCurrentUser()) for
                      item in self.model('folder').childItems(folder,
-                     limit=limit, offset=offset, sort=sort)]
+                                                             limit=limit, offset=offset, sort=sort)]
             return items
     listDatasets.description = (
         Description('List minerva datasets owned by a user.')
@@ -400,3 +403,84 @@ class Dataset(Resource):
         .param('endTime', 'latest time to include result', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the Item.', 403))
+
+    @access.public
+    @autoDescribeRoute(
+        Description('Download a dataset.')
+        .modelParam('id', model='item', level=AccessType.READ)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied on the parent folder.', 403))
+    def download(self, item, params):
+        minervaMeta = item['meta']['minerva']
+        if not minervaMeta.get('postgresGeojson'):
+            file = self.model('file').load(minervaMeta['geo_render']['file_id'], force=True)
+            return self.model('file').download(file)
+        else:
+            return self._getPostgresGeojsonData(item)
+
+    def _getPostgresGeojsonData(self, item):
+        user = self.getCurrentUser()
+        minervaMeta = item['meta']['minerva']
+        file = self.model('file').load(minervaMeta['geo_render']['file_id'], user=user)
+        assetstore = self.model('assetstore').load(file['assetstoreId'])
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+        func = adapter.downloadFile(
+            file, offset=0, headers=False, endByte=None,
+            contentDisposition=None, extraParameters=None)
+
+        geometryField = item['meta']['minerva']['postgresGeojson']['geometryField']
+
+        if geometryField['type'] == 'built-in':
+            return func
+        elif geometryField['type'] == 'link':
+            featureCollections = None
+            records = json.loads(''.join(list(func())))
+            try:
+                item = self.model('item').load(geometryField['itemId'], force=True)
+                file = list(self.model('item').childFiles(item=item, limit=1))[0]
+                assetstore = self.model('assetstore').load(file['assetstoreId'])
+                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+                func = adapter.downloadFile(
+                    file, offset=0, headers=False, endByte=None,
+                    contentDisposition=None, extraParameters=None)
+            except Exception:
+                raise GirderException('Unable to load link target dataset.')
+            featureCollections = json.loads(''.join(list(func())))
+
+            valueLinks = sorted([x for x in geometryField['links']
+                                 if x['operator'] == '='])
+            constantLinks = [x for x in geometryField['links']
+                             if x['operator'] == 'constant']
+            mappedGeometries = {}
+            for feature in featureCollections['features']:
+                skip = False
+                for constantLink in constantLinks:
+                    if feature['properties'][constantLink['field']] != constantLink['value']:
+                        skip = True
+                        break
+                if skip:
+                    continue
+                try:
+                    key = ''.join([feature['properties'][x['field']] for x in valueLinks])
+                except KeyError:
+                    raise GirderException('missing property for key ' +
+                                          x['field'] + ' in geometry link target geojson')
+                mappedGeometries[key] = feature['geometry']
+
+            assembled = []
+            for record in records:
+                key = ''.join([record[x['value']] for x in valueLinks])
+                if key in mappedGeometries:
+                    assembled.append({
+                        'type': 'Feature',
+                        'geometry': mappedGeometries[key],
+                        'properties': record
+                    })
+
+            if len(assembled) == 0:
+                raise GirderException('Dataset is empty')
+
+            return {
+                'type': 'FeatureCollection',
+                'features': assembled
+            }

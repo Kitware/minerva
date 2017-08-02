@@ -200,18 +200,8 @@ const DatasetModel = MinervaModel.extend({
                 this.set('geoData', mm.geojson.data);
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
-        } else if (mm.postgresGeojson) {
-            restRequest({
-                path: '/minerva_postgres_geojson/' + this.get('_id'),
-                contentType: 'application/json',
-                dataType: null
-            })
-                .done(_.bind(function (data) {
-                    this.set('geoData', data);
-                    this.trigger('m:dataset_geo_dataLoaded', this);
-                }, this));
         } else {
-            var path = '/file/' + mm.geo_render.file_id + '/download';
+            var path = '/minerva_dataset/' + this.get('_id') + '/download';
             restRequest({
                 path: path,
                 contentType: 'application/json',
