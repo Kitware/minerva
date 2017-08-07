@@ -1,9 +1,11 @@
-import App from './App.js';
+import App from './App';
 import events from './events';
 import geojsonUtil from './geojsonUtil';
 import MinervaCollection from './MinervaCollection';
 import MinervaModel from './MinervaModel';
 import router from './router';
+import * as views from './views';
+import * as models from './models';
 
 export {
     App,
@@ -11,5 +13,7 @@ export {
     geojsonUtil,
     MinervaCollection,
     MinervaModel,
-    router
+    router,
+    views,
+    models
 };

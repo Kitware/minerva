@@ -11,10 +11,10 @@ girderTest.addCoveredScripts([
 describe('geojson', function () {
     var merge, accumulate, normalize, style;
     beforeEach(function () {
-        merge = girder.plugins.minerva.geojsonUtil.merge;
-        accumulate = girder.plugins.minerva.geojsonUtil.accumulate;
-        normalize = girder.plugins.minerva.geojsonUtil.normalize;
-        style = girder.plugins.minerva.geojsonUtil.style;
+        merge = minerva.geojsonUtil.merge;
+        accumulate = minerva.geojsonUtil.accumulate;
+        normalize = minerva.geojsonUtil.normalize;
+        style = minerva.geojsonUtil.style;
     });
     describe('merge', function () {
         it('string type', function () {
@@ -97,7 +97,7 @@ describe('geojson', function () {
     describe('normalize', function () {
         it('parse string', function () {
             expect(
-                girder.plugins.minerva.geojsonUtil.normalize(
+                minerva.geojsonUtil.normalize(
                     '{"type":"FeatureCollection", "features":[]}'
                 )
             ).toEqual({ type: 'FeatureCollection', features: [], summary: {} });
@@ -306,12 +306,12 @@ describe('geojson', function () {
     describe('colorScale', function () {
         it('invalid ramp', function () {
             expect(
-                girder.plugins.minerva.geojsonUtil.colorScale('invalid color ramp', {})()
+                minerva.geojsonUtil.colorScale('invalid color ramp', {})()
             ).toBe('#ffffff');
         });
         describe('numeric values', function () {
             it('one value', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     min: 0,
                     max: 0
                 });
@@ -319,7 +319,7 @@ describe('geojson', function () {
                 expect(scale(0)).toBe(colorbrewer.Reds[9][0]);
             });
             it('linear scale', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     min: 0,
                     max: 100
                 });
@@ -328,7 +328,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('log scale', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     min: 1,
                     max: 100
                 }, true, false, false);
@@ -337,7 +337,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('linear scale with clamping', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     min: 20,
                     max: 80
                 }, false, false, true, 20, 80);
@@ -347,7 +347,7 @@ describe('geojson', function () {
                 expect(scale(100)).toBe(colorbrewer.Reds[9][8]);
             });
             it('quantile scale', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     min: 1,
                     max: 1001
                 }, false, true, false, null, null, [1, 2, 3, 4, 5, 6, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1000, 1001]);
@@ -361,7 +361,7 @@ describe('geojson', function () {
         });
         describe('string values', function () {
             it('two categories', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     values: {
                         one: null,
                         two: null
@@ -372,7 +372,7 @@ describe('geojson', function () {
                 expect(scale('two')).toBe(colorbrewer.Reds[3][1]);
             });
             it('three categories', function () {
-                var scale = girder.plugins.minerva.geojsonUtil.colorScale('Reds', {
+                var scale = minerva.geojsonUtil.colorScale('Reds', {
                     values: {
                         one: null,
                         two: null,
@@ -389,12 +389,12 @@ describe('geojson', function () {
     describe('getFeatures', function () {
         it('all', function () {
             expect(
-                girder.plugins.minerva.geojsonUtil.getFeatures({ type: 'FeatureCollection', features: [{}, {}] })
+                minerva.geojsonUtil.getFeatures({ type: 'FeatureCollection', features: [{}, {}] })
             ).toEqual([{}, {}]);
         });
         it('Point', function () {
             expect(
-                girder.plugins.minerva.geojsonUtil.getFeatures({
+                minerva.geojsonUtil.getFeatures({
                     type: 'FeatureCollection',
                     features: [{
                     }, {
