@@ -10,7 +10,7 @@
     "bootstrap-slider": "^7.1.0",
     "colorbrewer": "1.0.0",
     "dot": "^1.1.2",
-    "geojs": "0.12.1",
+    "geojs": "git://github.com/OpenGeoscience/geojs.git#2d_legend",
     "hammerjs": "^2.0.8",
     "jQuery-QueryBuilder": "^2.4.3",
     "jade": "~1.11.0",

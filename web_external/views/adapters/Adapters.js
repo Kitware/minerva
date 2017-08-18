@@ -177,6 +177,7 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
 
         try {
             var reader = geo.createFileReader(this.readerType, { layer: this.geoJsLayer });
+            this._prepareLegendMeta(dataset, container, data, visProperties, data.summary);
             if (!data.series) {  // not a timeseries
                 this._injectStyle(data, visProperties, data.summary || {});
                 reader.read(data, _.bind(function (features) {
@@ -277,6 +278,27 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
         }
         return vis;
     };
+
+    this._prepareLegendMeta = function (dataset, container, data, visProperties, summary) {
+        var categories = [];
+        var style = visProperties.polygon;
+        var colorRamps = colorbrewer[visProperties.polygon.fillRamp];
+        var colors = colorRamps[_.keys(colorRamps).reverse()[0] - 1];
+        categories.push({
+            name: dataset.get('name') + ' - ' + visProperties.polygon.fillColorKey,
+            type: 'discrete',
+            scale: 'linear',
+            domain: [summary[visProperties.polygon.fillColorKey].min, summary[visProperties.polygon.fillColorKey].max],
+            colors: colors
+        })
+        container.addColorLegendCategories(categories);
+        this.colorLegendCategories = categories;
+    };
+
+    this.delete = function (container) {
+        this.__proto__.delete.call(this, container);
+        container.removeColorLegendCategories(this.colorLegendCategories);
+    }
 }, rendering.geo.MapRepresentation);
 
 /**
