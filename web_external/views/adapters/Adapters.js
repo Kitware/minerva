@@ -177,7 +177,7 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
 
         try {
             var reader = geo.createFileReader(this.readerType, { layer: this.geoJsLayer });
-            this._prepareLegendMeta(dataset, container, data, visProperties, data.summary);
+            this._prepareColorLegendMeta(dataset, container, data, visProperties, data.summary);
             if (!data.series) {  // not a timeseries
                 this._injectStyle(data, visProperties, data.summary || {});
                 reader.read(data, _.bind(function (features) {
@@ -279,18 +279,56 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
         return vis;
     };
 
-    this._prepareLegendMeta = function (dataset, container, data, visProperties, summary) {
+    this._prepareColorLegendMeta = function (dataset, container, data, visProperties, summary) {
         var categories = [];
-        var style = visProperties.polygon;
-        var colorRamps = colorbrewer[visProperties.polygon.fillRamp];
-        var colors = colorRamps[_.keys(colorRamps).reverse()[0] - 1];
-        categories.push({
-            name: dataset.get('name') + ' - ' + visProperties.polygon.fillColorKey,
-            type: 'discrete',
-            scale: 'linear',
-            domain: [summary[visProperties.polygon.fillColorKey].min, summary[visProperties.polygon.fillColorKey].max],
-            colors: colors
-        })
+
+        processOneCategory('polygon', 'fillColorKey', 'fillRamp');
+        processOneCategory('polygon', 'strokeColorKey', 'strokeRamp');
+        processOneCategory('line', 'strokeColorKey', 'strokeRamp');
+        processOneCategory('point', 'strokeColorKey', 'strokeRamp');
+
+        function processOneCategory(type, colorKey, rampKey) {
+            var vis = visProperties[type];
+            if (!vis[colorKey]) {
+                return;
+            }
+            var colorRamps = colorbrewer[vis[rampKey]];
+            var colors = colorRamps[_.keys(colorRamps).reverse()[0] - 1];
+            // Default category configuration
+            var category = {
+                name: dataset.get('name') + ' - ' + visProperties.polygon[colorKey],
+                type: 'discrete',
+                scale: 'linear',
+                colors: colors,
+                domain: [summary[vis[colorKey]].min, summary[vis[colorKey]].max]
+            };
+            // categorical
+            if (summary[vis[colorKey]].values) {
+                var domain = Object.keys(summary[vis[colorKey]].values);
+                // To many to fit the size
+                if (domain.length > 7) {
+                    return;
+                }
+                else {
+                    category.scale = 'ordinal';
+                    category.domain = domain;
+                }
+            }
+            if (vis.logFlag) {
+                category.scale = 'log';
+            }
+            if (vis.quantileFlag) {
+                category.scale = 'quantile';
+                category.domain = data.features.map(function (item, index, array) {
+                    return item.properties[vis[colorKey]];
+                });
+            }
+            if (vis.clampingFlag) {
+                category.scale = 'linear';
+                category.clamp = [vis.minClamp, vis.maxClamp];
+            }
+            categories.push(category);
+        }
         container.addColorLegendCategories(categories);
         this.colorLegendCategories = categories;
     };
