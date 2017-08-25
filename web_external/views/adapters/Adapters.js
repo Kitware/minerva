@@ -314,18 +314,21 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
                     category.domain = domain;
                 }
             }
-            if (vis.logFlag) {
-                category.scale = 'log';
-            }
-            if (vis.quantileFlag) {
-                category.scale = 'quantile';
-                category.domain = data.features.map(function (item, index, array) {
-                    return item.properties[vis[colorKey]];
-                });
-            }
-            if (vis.clampingFlag) {
-                category.scale = 'linear';
-                category.clamp = [vis.minClamp, vis.maxClamp];
+            // current UI styling is designed that the log, quantile, clamping option is only applicable to fill. so, when it's a stroke, skip the following options.
+            if (colorKey != 'strokeColorKey') {
+                if (vis.logFlag) {
+                    category.scale = 'log';
+                }
+                if (vis.quantileFlag) {
+                    category.scale = 'quantile';
+                    category.domain = data.features.map(function (item, index, array) {
+                        return item.properties[vis[colorKey]];
+                    });
+                }
+                if (vis.clampingFlag) {
+                    category.scale = 'linear';
+                    category.clamp = [vis.minClamp, vis.maxClamp];
+                }
             }
             categories.push(category);
         }
