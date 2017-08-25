@@ -21,6 +21,7 @@ const ClickInfoWidget = View.extend({
     render: function () {
         this.$el.html(this.template(this.model.toJSON()));
         this.$el.dialog('open');
+        return this;
     },
     template: template,
     className: 'm-click-info-widget'

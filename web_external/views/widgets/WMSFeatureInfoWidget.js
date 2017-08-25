@@ -136,6 +136,7 @@ const WMSFeatureInfoWidget = View.extend({
 
     render: function () {
         this.$el.append(template);
+        return this;
     }
 });
 export default WMSFeatureInfoWidget;

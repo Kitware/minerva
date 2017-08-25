@@ -246,6 +246,7 @@ const PostgresWidget = View.extend({
                 this.$queryBuilder.hide();
             }
         }
+        return this;
     },
     primativeColumns: function () {
         return this.columns.filter(function (column) { return column.datatype !== 'geometry'; });

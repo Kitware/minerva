@@ -25,6 +25,7 @@ const JsonConfigWidget = View.extend({
         var modal = this.$el.html(template()).girderModal(this);
         this._loadDataset();
         modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
+        return this;
     },
 
     setCurrentDataset: function (dataset) {
