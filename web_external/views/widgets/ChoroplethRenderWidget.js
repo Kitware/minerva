@@ -41,6 +41,7 @@ const ChoroplethRenderWidget = View.extend({
             $this.addClass('active');
         });
         modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
+        return this;
     },
 
     setCurrentDataset: function (dataset) {

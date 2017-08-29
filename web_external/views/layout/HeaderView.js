@@ -18,6 +18,7 @@ const HeaderView = View.extend({
             el: this.$('.m-current-user-wrapper'),
             parentView: this
         }).render();
+        return this;
     }
 });
 export default HeaderView;
