@@ -170,7 +170,7 @@ const PostgresWidget = View.extend({
         }.bind(this);
 
         restRequest({
-            path: '/minerva_postgres_geojson',
+            url: '/minerva_postgres_geojson',
             type: 'POST',
             data: {
                 datasetName: this.datasetName,
@@ -220,7 +220,7 @@ const PostgresWidget = View.extend({
                         return;
                     }
                     Promise.resolve(restRequest({
-                        path: '/minerva_postgres_geojson/values',
+                        url: '/minerva_postgres_geojson/values',
                         type: 'GET',
                         data: {
                             assetstoreId: this.selectedAssetstoreId,
@@ -267,7 +267,7 @@ const PostgresWidget = View.extend({
     },
     _getAssetstores: function () {
         Promise.resolve(restRequest({
-            path: '/minerva_postgres_geojson/assetstores',
+            url: '/minerva_postgres_geojson/assetstores',
             type: 'GET'
         })).then(function (assetstores) {
             this.assetstores = assetstores;
@@ -276,7 +276,7 @@ const PostgresWidget = View.extend({
     },
     _getSources: function () {
         Promise.resolve(restRequest({
-            path: '/minerva_postgres_geojson/tables',
+            url: '/minerva_postgres_geojson/tables',
             type: 'GET',
             data: {
                 assetstoreId: this.selectedAssetstoreId
@@ -321,7 +321,7 @@ const PostgresWidget = View.extend({
     },
     _loadFilterConfiguration: function () {
         Promise.resolve(restRequest({
-            path: '/minerva_postgres_geojson/columns',
+            url: '/minerva_postgres_geojson/columns',
             type: 'GET',
             data: {
                 table: this.selectedSource,
@@ -439,7 +439,7 @@ const PostgresWidget = View.extend({
     },
     _loadGeometryLinks: function () {
         return Promise.resolve(restRequest({
-            path: '/minerva_postgres_geojson/geometrylink',
+            url: '/minerva_postgres_geojson/geometrylink',
             type: 'GET'
         })).then(function (links) {
             this.geometryLink.targets = links;
@@ -448,7 +448,7 @@ const PostgresWidget = View.extend({
     },
     _loadGeometryLinkField: function () {
         return Promise.resolve(restRequest({
-            path: '/minerva_postgres_geojson/geometrylinkfields',
+            url: '/minerva_postgres_geojson/geometrylinkfields',
             type: 'GET',
             data: {
                 itemId: this.geometryLink.target._id

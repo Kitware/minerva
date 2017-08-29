@@ -102,7 +102,7 @@ const WMSFeatureInfoWidget = View.extend({
 
         if (activeWmsLayers.length > 0) {
             restRequest({
-                path: '/minerva_get_feature_info',
+                url: '/minerva_get_feature_info',
                 type: 'GET',
                 data: {
                     'activeLayers': activeWmsLayers,

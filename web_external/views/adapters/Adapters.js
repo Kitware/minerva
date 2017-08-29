@@ -3,6 +3,7 @@ import geo from 'geojs';
 import * as d3 from 'd3';
 import Backbone from 'backbone';
 import colorbrewer from 'colorbrewer';
+import { getApiRoot } from 'girder/rest';
 
 import ClickInfoWidget from '../widgets/ClickInfoWidget';
 import ClickInfoModel from '../../models/ClickInfoModel';
@@ -531,6 +532,34 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                 return this.geoJsLayer.baseUrl + '?' + $.param(params);
             }, this)
         );
+        this.trigger('m:map_layer_renderable', this);
+    };
+}, rendering.geo.MapRepresentation);
+
+
+
+rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('ktile', function () {
+
+    this.init = function (container, dataset) {
+        var layer = container.createLayer('osm', {
+            attribution: null,
+            keepLower: false
+        });
+        const fileId = dataset.get('meta').minerva.original_files[0]._id;
+        var url = getApiRoot() + '/ktile/' + fileId;
+        layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
+        this.geoJsLayer = layer;
+
+        // this.geoJsLayer = container.createLayer('osm', {
+        //     attribution: null,
+        //     keepLower: false
+        // });
+        // container.addFeatureInfoLayer(this.geoJsLayer);
+        // var minervaMetadata = dataset.metadata();
+        // this.geoJsLayer.layerName = minervaMetadata.type_name;
+        // this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
+        // var projection = 'EPSG:3857';
+
         this.trigger('m:map_layer_renderable', this);
     };
 }, rendering.geo.MapRepresentation);

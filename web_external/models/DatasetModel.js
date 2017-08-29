@@ -84,8 +84,8 @@ const DatasetModel = MinervaModel.extend({
      * @fires 'm:dataset_promoted' event upon successful Dataset promotion.
      */
     promoteToDataset: function (params) {
-        restRequest({
-            path: 'minerva_dataset/' + this.get('_id') + '/item',
+        return restRequest({
+            url: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
         }).done(_.bind(function (resp) {
             if (params && params.csvPreview) {
@@ -157,8 +157,13 @@ const DatasetModel = MinervaModel.extend({
                 mm.geo_render = {
                     type: 'wms'
                 };
-            } else {
-                // An unknown type.
+            } else if (mm.dataset_type === 'geotiff') {
+                mm.geo_render = {
+                    type: 'ktile'
+                }
+            }
+            else {
+                console.log('An unknown type');
             }
             this.saveMinervaMetadata(mm);
         }
@@ -207,9 +212,9 @@ const DatasetModel = MinervaModel.extend({
             }
             this.trigger('m:dataset_geo_dataLoaded', this);
         } else {
-            var path = '/minerva_dataset/' + this.get('_id') + '/download';
+            var url = '/minerva_dataset/' + this.get('_id') + '/download';
             restRequest({
-                path: path,
+                url: url,
                 contentType: 'application/json',
                 // Prevent json from getting parsed.
                 dataType: null
@@ -266,7 +271,7 @@ const DatasetModel = MinervaModel.extend({
             // TODO for now making the poorly supported assumption that tabular data exists.
             var fileId = mm.original_files[0]._id;
             restRequest({
-                path: '/file/' + fileId + '/download?contentDisposition=inline',
+                url: '/file/' + fileId + '/download?contentDisposition=inline',
                 type: 'GET',
                 dataType: 'text'
             }).done(_.bind(function (resp) {

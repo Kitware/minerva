@@ -20,7 +20,7 @@ const HeaderUserView = View.extend({
 
         'click a.g-logout': function () {
             restRequest({
-                path: 'user/authentication',
+                url: 'user/authentication',
                 type: 'DELETE'
             }).done(_.bind(function () {
                 setCurrentUser(null);

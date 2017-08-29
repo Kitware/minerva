@@ -19,13 +19,13 @@ const MinervaCollection = Collection.extend({
 
     fetchInit: function () {
         restRequest({
-            path: this.path + '/folder',
+            url: this.path + '/folder',
             type: 'GET',
             data: this.getInitData()
         }).done(_.bind(function (resp) {
             if (!resp.folder) {
                 restRequest({
-                    path: this.path + '/folder',
+                    url: this.path + '/folder',
                     type: 'POST',
                     data: this.getInitData()
                 }).done(_.bind(function (resp) {

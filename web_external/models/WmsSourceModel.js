@@ -7,7 +7,7 @@ const WmsSourceModel = SourceModel.extend({
 
     createSource: function (params) {
         restRequest({
-            path: '/minerva_datasets_wms',
+            url: '/minerva_datasets_wms',
             type: 'POST',
             data: params,
             error: null // ignore default error behavior (validation may fail)

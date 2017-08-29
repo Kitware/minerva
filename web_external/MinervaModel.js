@@ -75,7 +75,7 @@ const MinervaModel = ItemModel.extend({
             this.setMinervaMetadata(minervaMetadata);
         }
         restRequest({
-            path: 'item/' + this.get('_id') + '/metadata',
+            url: 'item/' + this.get('_id') + '/metadata',
             type: 'PUT',
             contentType: 'application/json',
             data: JSON.stringify(this.get('meta'))

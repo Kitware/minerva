@@ -45,7 +45,7 @@ wrap(FileListWidget, 'render', function (render) {
     this.$('.g-minerva-geojson-create', this.$el).on('click', _.bind(function (e) {
         restRequest({
             type: 'POST',
-            path: 'minerva_dataset_geojson',
+            url: 'minerva_dataset_geojson',
             data: { itemId: this.parentItem.id },
             error: function (error) {
                 if (error.status !== 0) {
