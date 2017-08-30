@@ -28,7 +28,7 @@ before_install:
     - export CXX=g++-4.8
     - nvm install v6
     - nvm use v6
-    - pip install -U pip virtualenv
+    - pip install -U pip virtualenv setuptools
     - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
 
     # minerva has been cloned to Kitware/minerva by travis
