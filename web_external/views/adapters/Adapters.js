@@ -308,14 +308,13 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
                 // To many to fit the size
                 if (domain.length > 7) {
                     return;
-                }
-                else {
+                } else {
                     category.scale = 'ordinal';
                     category.domain = domain;
                 }
             }
             // current UI styling is designed that the log, quantile, clamping option is only applicable to fill. so, when it's a stroke, skip the following options.
-            if (colorKey != 'strokeColorKey') {
+            if (colorKey !== 'strokeColorKey') {
                 if (vis.logFlag) {
                     category.scale = 'log';
                 }
@@ -336,10 +335,11 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
         this.colorLegendCategories = categories;
     };
 
+    var existingDelete = this.delete;
     this.delete = function (container) {
-        this.__proto__.delete.call(this, container);
+        existingDelete.call(this, container);
         container.removeColorLegendCategories(this.colorLegendCategories);
-    }
+    };
 }, rendering.geo.MapRepresentation);
 
 /**
