@@ -3,7 +3,7 @@ import geo from 'geojs';
 
 import Panel from '../body/Panel';
 import adapterRegistry from '../adapters/Adapters';
-import WMSFeatureInfoWidget from '../widgets/WMSFeatureInfoWidget';
+import FeatureInfoWidget from '../widgets/FeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
 
@@ -125,7 +125,7 @@ const MapPanel = Panel.extend({
                 }
             }, this);
             this.map.featureInfoWidget =
-                new WMSFeatureInfoWidget({
+                new FeatureInfoWidget({
                     map: this.map,
                     version: '1.1.1',
                     layers: [],

@@ -538,7 +538,7 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
 
 
 
-rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('ktile', function () {
+rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', function () {
 
     this.init = function (container, dataset) {
         var layer = container.createLayer('osm', {
@@ -549,16 +549,6 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('ktile', function
         var url = getApiRoot() + '/ktile/' + fileId;
         layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
         this.geoJsLayer = layer;
-
-        // this.geoJsLayer = container.createLayer('osm', {
-        //     attribution: null,
-        //     keepLower: false
-        // });
-        // container.addFeatureInfoLayer(this.geoJsLayer);
-        // var minervaMetadata = dataset.metadata();
-        // this.geoJsLayer.layerName = minervaMetadata.type_name;
-        // this.geoJsLayer.baseUrl = '/wms_proxy/' + encodeURIComponent(minervaMetadata.base_url);
-        // var projection = 'EPSG:3857';
 
         this.trigger('m:map_layer_renderable', this);
     };
