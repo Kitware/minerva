@@ -12,6 +12,7 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 class PostgresGeojson(Resource):
 
     def __init__(self):
+        super(PostgresGeojson, self).__init__()
         self.resourceName = 'minerva_postgres_geojson'
         self.route('GET', ('assetstores', ), self.getAssetstores)
         self.route('GET', ('tables', ), self.getTables)

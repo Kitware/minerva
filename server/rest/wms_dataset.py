@@ -35,6 +35,7 @@ import json
 class WmsDataset(Dataset):
 
     def __init__(self):
+        super(WmsDataset, self).__init__()
         self.resourceName = 'minerva_datasets_wms'
         self.route('POST', (), self.createWmsSource)
 

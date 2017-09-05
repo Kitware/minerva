@@ -31,6 +31,7 @@ from girder.plugins.minerva.rest.dataset import Dataset
 
 class Analysis(Resource):
     def __init__(self):
+        super(Analysis, self).__init__()
         self.resourceName = 'minerva_analysis'
         self.route('GET', ('folder',), self.getAnalysisFolder)
         self.route('POST', ('folder',), self.createAnalysisFolder)
