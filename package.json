@@ -16,7 +16,8 @@
     "jade": "~1.11.0",
     "jquery-extendext": "^0.1.2",
     "jquery-ui-bundle": "^1.11.4",
-    "moment": "^2.17.1"
+    "moment": "^2.17.1",
+    "reconcile.js": "github:matthewma7/reconcile.js"
   },
   "devDependencies": {
     "grunt-contrib-watch": "^1.0.0"

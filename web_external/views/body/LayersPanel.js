@@ -1,6 +1,9 @@
 import _ from 'underscore';
 
 import Panel from '../body/Panel';
+import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
+import JsonConfigWidget from '../widgets/JsonConfigWidget';
+
 import template from '../../templates/body/layersPanel.pug';
 import '../../stylesheets/body/layersPanel.styl';
 import '../../stylesheets/widgets/animationControls.styl';
@@ -11,6 +14,7 @@ const LayersPanel = Panel.extend({
         'click .m-download-geojson': 'downloadGeojsonEvent',
         'click .m-remove-dataset-from-layer': 'removeDatasetEvent',
         'click .m-toggle-dataset': 'toggleDatasetEvent',
+        'click .m-configure-geo-render': 'configureGeoRender',
         'change .m-opacity-range': 'changeLayerOpacity',
         'click .m-order-layer': 'reorderLayer',
         'click .m-anim-play': 'seriesFramePlay',
@@ -54,6 +58,32 @@ const LayersPanel = Panel.extend({
         var dataset = this.collection.get(datasetId);
 
         dataset.set('visible', !dataset.get('visible'));
+    },
+
+    /**
+     * Display a modal dialog allowing configuration of GeoJs rendering
+     * properties for the selected dataset.
+     */
+    configureGeoRender: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id');
+        var dataset = this.collection.get(datasetId);
+        var geoRenderType = dataset.getGeoRenderType();
+
+        console.log(dataset);
+
+        var configureWidget = {
+            'choropleth': ChoroplethRenderWidget,
+            'geojson': JsonConfigWidget,
+            'geojson-timeseries': JsonConfigWidget,
+            'contour': JsonConfigWidget
+        }[geoRenderType];
+
+        new configureWidget({
+            el: $('#g-dialog-container'),
+            dataset: dataset,
+            parentView: this
+        })
+        .render();
     },
 
     changeLayerOpacity: function (event) {

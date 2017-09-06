@@ -137,7 +137,7 @@ ul.nav.nav-tabs
     - var clampingEnabled = polygon.clampingFlag && polygon.linearFlag
     #m-clamping-panel.panel(class={'panel-default': !clampingEnabled, 'panel-primary': clampingEnabled})
       .panel-heading(data-target='#m-polygon-clamping-control')
-        .checkbox(style='display:block')
+        .checkbox(style='display:inline')
           label
             input#m-enable-linear-scale-clamping.m-toggle-panel(type='checkbox', checked=polygon.clampingFlag, data-feature='polygon', data-property='clampingFlag')
             | Clamping
