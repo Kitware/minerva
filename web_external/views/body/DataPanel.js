@@ -8,8 +8,6 @@ import Panel from '../body/Panel';
 import AddWmsSourceWidget from '../widgets/AddWmsSourceWidget';
 import StyleWmsDatasetWidget from '../widgets/StyleWmsDatasetWidget';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
-import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
-import JsonConfigWidget from '../widgets/JsonConfigWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';

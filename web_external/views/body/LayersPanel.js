@@ -71,14 +71,14 @@ const LayersPanel = Panel.extend({
 
         console.log(dataset);
 
-        var configureWidget = {
+        var ConfigureWidget = {
             'choropleth': ChoroplethRenderWidget,
             'geojson': JsonConfigWidget,
             'geojson-timeseries': JsonConfigWidget,
             'contour': JsonConfigWidget
         }[geoRenderType];
 
-        new configureWidget({
+        new ConfigureWidget({
             el: $('#g-dialog-container'),
             dataset: dataset,
             parentView: this

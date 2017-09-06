@@ -40,7 +40,6 @@ include ../widgets/legendWidget.pug
                 i.icon-download.icon-button.m-download-geojson&attributes(attributes)
               i.icon-trash.icon-button.m-remove-dataset-from-layer&attributes(attributes)
 
-            
           .m-layer-control-container
             each option in layersOrderOptions
               if ((index === 0 && option.class.indexOf('up') > -1) || (index === datasets.length - 1 && option.class.indexOf('down') > -1 ))

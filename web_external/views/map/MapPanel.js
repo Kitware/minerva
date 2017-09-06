@@ -170,7 +170,6 @@ const MapPanel = Panel.extend({
 
             this._renderDataset(dataset, layerType, visProperties);
 
-
             dataset.on('m:dataset_config_change', () => {
                 this.removeDataset(dataset);
                 let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
@@ -181,7 +180,6 @@ const MapPanel = Panel.extend({
 
     _renderDataset(dataset, layerType, visProperties) {
         dataset.once('m:map_adapter_layerCreated', function (repr) {
-            console.log("m:map_adapter_layerCreated");
             this.datasetLayerReprs[dataset.get('_id')] = repr;
             repr.render(this);
         }, this).once('m:map_adapter_error', function (dataset, layerType) {
@@ -192,7 +190,6 @@ const MapPanel = Panel.extend({
                 dataset.set('geoError', true);
             }
         }, this);
-        console.log("visProperties", visProperties);
         adapterRegistry._createRepresentation(this, dataset, layerType, visProperties);
     },
 
