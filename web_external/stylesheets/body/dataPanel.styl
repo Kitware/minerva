@@ -35,7 +35,10 @@
 
   .category-title:hover
     background-color #D3E9DC
-    cursor: pointer
+    cursor pointer
+
+  .m-sub-category
+    margin-left 5px
 
   .dataset
     padding-left 0px
@@ -52,18 +55,6 @@
     .icon-enabled:hover
       color #66a
       cursor pointer
-    .icon-info-circled
-      float right
-    .icon-right-circled
-      float left
-    .icon-trash
-      float right
-    .icon-globe
-      float left
-    .icon-cog
-      float right
-    .icon-table
-      float right
 
       &.m-geo-render-error
         color #ff751a
@@ -71,3 +62,18 @@
         &:hover
             color #d35400
             cursor pointer
+
+    .m-control-left
+      float left
+
+    .m-name
+      float left
+      width calc(100% - 60px)
+      white-space nowrap
+      overflow-x hidden
+      text-overflow ellipsis
+    
+    .m-control-right
+      float right
+
+    

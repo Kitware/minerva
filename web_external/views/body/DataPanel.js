@@ -37,7 +37,7 @@ export default Panel.extend({
     toggleCategories: function (event) {
         // Get the div belov the title which was clicked
         var subDiv = $(event.currentTarget).next();
-        var source = $(event.currentTarget).parent().attr('class');
+        var source = $(event.currentTarget).parent().attr('data-source');
         var category = $(event.currentTarget).text();
 
         if (subDiv.css('display') === 'none') {
