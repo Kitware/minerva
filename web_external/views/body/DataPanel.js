@@ -28,41 +28,17 @@ export default Panel.extend({
         'click .source-title': 'toggleSources',
         'click .category-title': 'toggleCategories'
     },
-    _addCategories: function (source, category) {
-        this.visibleMenus[source][category] = true;
-    },
-    _deleteCategories: function (source, category) {
-        this.visibleMenus[source] = _.omit(this.visibleMenus[source], category);
-    },
     toggleCategories: function (event) {
         // Get the div belov the title which was clicked
-        var subDiv = $(event.currentTarget).next();
         var source = $(event.currentTarget).parent().attr('data-source');
         var category = $(event.currentTarget).text();
-
-        if (subDiv.css('display') === 'none') {
-            subDiv.css('display', 'block');
-            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
-            this._addCategories(source, category);
-        } else {
-            subDiv.css('display', 'none');
-            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
-            this._deleteCategories(source, category);
-        }
+        this.visibleMenus[source][category] = !this.visibleMenus[source][category];
+        this.render();
     },
     toggleSources: function (event) {
-        var subDiv = $(event.currentTarget).next();
         var source = $(event.currentTarget).text();
-
-        if (subDiv.css('display') === 'none') {
-            subDiv.css('display', 'block');
-            $(event.currentTarget).find('i.icon-folder').attr('class', 'icon-folder-open');
-            this.visibleMenus[source] = {};
-        } else {
-            subDiv.css('display', 'none');
-            $(event.currentTarget).find('i.icon-folder-open').attr('class', 'icon-folder');
-            this.visibleMenus = _.omit(this.visibleMenus, source);
-        }
+        this.visibleMenus[source] = this.visibleMenus[source] ? null : {};
+        this.render();
     },
     addWmsDataset: function (event) {
         var addWmsWidget = new AddWmsSourceWidget({
@@ -266,10 +242,10 @@ export default Panel.extend({
             });
 
             // these datasets are temporary, so these are noops
-            dataset.sync = function () {};
-            dataset.fetch = function () {};
-            dataset.save = function () {};
-            dataset.destroy = function () {};
+            dataset.sync = function () { };
+            dataset.fetch = function () { };
+            dataset.save = function () { };
+            dataset.destroy = function () { };
 
             dataset.saveMinervaMetadata = function (mm) {
                 if (mm) {
@@ -285,8 +261,8 @@ export default Panel.extend({
             var status = window.parseInt(event.data.status);
             if (status === JobStatus.SUCCESS) {
                 if (event.data && event.data.meta && event.data.meta.minerva &&
-                   event.data.meta.minerva.outputs && event.data.meta.minerva.outputs.length > 0 &&
-                   event.data.meta.minerva.outputs[0].dataset_id) {
+                    event.data.meta.minerva.outputs && event.data.meta.minerva.outputs.length > 0 &&
+                    event.data.meta.minerva.outputs[0].dataset_id) {
                     var datasetId = event.data.meta.minerva.outputs[0].dataset_id;
                     var dataset = new DatasetModel({ _id: datasetId });
                     dataset.on('g:fetched', function () {
@@ -299,46 +275,28 @@ export default Panel.extend({
         Panel.prototype.initialize.apply(this);
     },
 
-    getSourceNameFromModel: function (model) {
-        return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
-    },
-
-    categorizeLayers: function (source) {
-        var datasetArray = this.sourceDataset[source];
-        this.sourceCategoryDataset[source] = _.groupBy(datasetArray, function (dataset) {
-            return dataset.get('meta').minerva.category || 'Other';
-        });
-    },
-
     getDatasetModel: function () {
         return this.parentView.parentView.model;
     },
 
-    render: function () {
-        var model = this.getDatasetModel();
+    render() {
+        var sourceName = (model) => {
+            return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
+        };
 
-        this.sourceDataset = _.groupBy(
-            _.filter(this.collection.models, this.getSourceNameFromModel),
-            this.getSourceNameFromModel
-        );
-        this.sourceCategoryDataset = {};
-        _.map(_.keys(this.sourceDataset), this.categorizeLayers, this);
+        this.sourceCategoryDataset = _.chain(this.collection.models)
+            .filter(sourceName)
+            .groupBy(sourceName)
+            .mapObject((datasets, key) => {
+                return _.groupBy(datasets, (dataset) => {
+                    return dataset.get('meta').minerva.category || 'Other';
+                });
+            }).value();
 
         this.$el.html(template({
             sourceCategoryDataset: this.sourceCategoryDataset,
             visibleMenus: this.visibleMenus
         }));
-
-        // Restore state of collapsed panels
-        if (_.has(model.metadata(), 'layout')) {
-            _.each(model.metadata().layout, function (sourceView, sourceViewId) {
-                if (_.has(sourceView, 'collapsed') &&
-                    sourceView.collapsed === false) {
-                    $('#' + sourceViewId).find('i.icon-folder')
-                        .toggleClass('icon-folder-open', 'icon-folder');
-                }
-            }, this);
-        }
 
         // TODO pagination and search?
         return this;

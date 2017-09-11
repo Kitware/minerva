@@ -10,23 +10,14 @@ if sourceCategoryDataset
   +panel-content('collapse in')
   each categories, source in sourceCategoryDataset
     .source-title(id=source)= source
-      i.icon-folder(title='Collection')
-    if visibleMenus[source] !== undefined
-      - var sourceVal = "display: block;"
-    else
-      - var sourceVal = "display: none;"
-    div.m-sub-category(data-source=source, style=sourceVal)
+      - var expand = visibleMenus[source]
+      i(title='Collection', class=expand?'icon-folder-open':'icon-folder')
+    .m-sub-category(data-source=source, style={display:expand?'block':'none'})
       each datasets, category in categories
+        - expand = visibleMenus[source] && visibleMenus[source][category]
         .category-title(id=category)= category
-          i.icon-folder(title='Collection')
-        if sourceVal === "display: block;"
-          if visibleMenus[source][category] === true
-            - var categoryVal = "display: block;"
-          else
-            - var categoryVal = "display: none;"
-        else
-          - var categoryVal = "display: none;"
-        div.m-datasets(data-category=category, style=categoryVal)
+          i(title='Collection', class=expand?'icon-folder-open':'icon-folder')
+        .m-datasets(data-category=category, style={display:expand?'block':'none'})
           each dataset in datasets
             if dataset.metadata()
               .dataset.clearfix
