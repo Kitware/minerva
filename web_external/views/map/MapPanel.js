@@ -170,7 +170,7 @@ const MapPanel = Panel.extend({
 
             this._renderDataset(dataset, layerType, visProperties);
 
-            dataset.on('m:dataset_config_change', () => {
+            this.listenTo(dataset, 'm:dataset_config_change', () => {
                 this.removeDataset(dataset);
                 let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
                 this._renderDataset(dataset, layerType, visProperties);
@@ -197,6 +197,7 @@ const MapPanel = Panel.extend({
      * Remove a rendered dataset from the current map.
      */
     removeDataset: function (dataset) {
+        this.stopListening(dataset);
         var datasetId = dataset.get('_id');
         var layerRepr = this.datasetLayerReprs[datasetId];
         if (layerRepr) {
