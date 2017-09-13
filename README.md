@@ -1,14 +1,10 @@
 [![Build Status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
 ![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
-Minerva is a sophisticated geospatial application and framework created to enable users to upload, visualize, and analyze small to large geospatial data from a web interface. Minerva uses advancements in web and database technologies such as WebGL and  NoSQL(MongoDB) database.
+Minerva is a sophisticated geospatial application and framework created to enable users to upload, visualize, and analyze small to large geospatial data from a web interface. Minerva uses advancements in web and database technologies such as WebGL and  NoSQL(MongoDB) database. It is designed for big data and cloud enabled data analysis and visualization.
 
 Some of the highlights of Minerva include using a web-enabled data management [Girder](http://www.github.com/Girder/girder) to manage data, metadata, sessions and employing high-performance geospatial data visualization library [GeoJS](http://www.github.com/OpenGeoscience/geojs)
-to provide fast interactive visualization of geospatial data on a map.
-developed by Kitware. Additionally, Minerva uses one or many open-source tools such as Gaia, GDAL, Shapely, and Fiona.
-
-Minerva is designed for big data and cloud enabled data analysis and visualization.
-
+to provide fast interactive visualization of geospatial data on a map. Minerva backend uses open-source tools such as Gaia, GDAL, Shapely, and Fiona for performing geospatial data I/O, filtering, and spatial analysis.
 
 #### Documentation
 Documentation for Minerva can be found at http://minervadocs.readthedocs.org.
