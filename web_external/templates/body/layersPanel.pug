@@ -24,6 +24,7 @@ include ../widgets/legendWidget.pug
                 - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                 i(class=classes)&attributes(attributes)
 
+              // uncomment this line to enable wms layer
               //- if geoRenderType === 'wms'
               //-   - var classes = 'icon-cog m-configure-wms-styling'
               //-   - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');

@@ -69,8 +69,6 @@ const LayersPanel = Panel.extend({
         var dataset = this.collection.get(datasetId);
         var geoRenderType = dataset.getGeoRenderType();
 
-        console.log(dataset);
-
         var ConfigureWidget = {
             'choropleth': ChoroplethRenderWidget,
             'geojson': JsonConfigWidget,
