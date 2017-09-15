@@ -41,6 +41,7 @@ import girder_client
 class Dataset(Resource):
 
     def __init__(self):
+        super(Dataset, self).__init__()
         self.resourceName = 'minerva_dataset'
         self.route('GET', (), self.listDatasets)
         self.route('GET', ('folder',), self.getDatasetFolder)

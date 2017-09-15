@@ -35,6 +35,7 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 class TwoFishes(Resource):
     """Resource that handles geocoding related operations"""
     def __init__(self):
+        super(TwoFishes, self).__init__()
         self.resourceName = 'minerva_geocoder'
         self.route('GET', ('autocomplete',), self.autocomplete)
         self.route('GET', ('geojson',), self.getGeojson)

@@ -45,22 +45,3 @@ if sourceCategoryDataset
                   if dataset.isGeoRenderable()
                     - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
                     i(title='add to layers', class=classes)&attributes(attributes)
-
-                  //- Cog icon for geo rendering configuration
-                  if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
-                    - var classes = 'icon-cog m-configure-geo-render'
-                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-                    - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
-                    i(class=classes)&attributes(attributes)
-
-                  if geoRenderType === 'wms'
-                    - var classes = 'icon-cog m-configure-wms-styling'
-                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-                    - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
-                    i(class=classes)&attributes(attributes)
-
-                  //- Table icon for csv
-                  if dataset.getDatasetType() === 'csv'
-                    - var classes = 'icon-table m-display-dataset-table'
-                    - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
-                    i(class=classes)&attributes(attributes)

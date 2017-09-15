@@ -7,16 +7,40 @@ include ../widgets/legendWidget.pug
   .layersList
     ul.datasets
       each dataset, index in datasets
-        li.dataset&attributes({'m-dataset-id': dataset.get('_id')})
+        - var attributes = {'m-dataset-id': dataset.get('_id')}
+        li.dataset&attributes(attributes)
           if dataset.get('geoError')
-            i.icon-attention.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+            i.icon-attention.m-remove-dataset-from-layer&attributes(attributes)
           else
-            i.icon-eye.m-toggle-dataset&attributes({'m-dataset-id': dataset.get('_id')})
+            i.icon-eye.icon-button.m-toggle-dataset&attributes(attributes)
+            - var geoRenderType = dataset.getGeoRenderType()
+
             span= dataset.get('name')
             .m-push-right
+              //- Cog icon for geo rendering configuration
+              if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
+                - var classes = 'icon-cog icon-button m-configure-geo-render'
+                - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+                i(class=classes)&attributes(attributes)
+
+              // uncomment this line to enable wms layer
+              //- if geoRenderType === 'wms'
+              //-   - var classes = 'icon-cog m-configure-wms-styling'
+              //-   - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+              //-   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
+              //-   i(class=classes)&attributes(attributes)
+
+              //- //- Table icon for csv
+              //- if dataset.getDatasetType() === 'csv'
+              //-   - var classes = 'icon-table m-display-dataset-table'
+              //-   - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+              //-   i(class=classes)&attributes(attributes)
+              
               if dataset.getDatasetType() === 'geojson' || dataset.getDatasetType() === 'geojson-timeseries'
-                i.icon-download.m-download-geojson&attributes({'m-dataset-id': dataset.get('_id')})
-              i.icon-trash.m-remove-dataset-from-layer&attributes({'m-dataset-id': dataset.get('_id')})
+                i.icon-download.icon-button.m-download-geojson&attributes(attributes)
+              i.icon-trash.icon-button.m-remove-dataset-from-layer&attributes(attributes)
+
           .m-layer-control-container
             each option in layersOrderOptions
               if ((index === 0 && option.class.indexOf('up') > -1) || (index === datasets.length - 1 && option.class.indexOf('down') > -1 ))
@@ -26,7 +50,7 @@ include ../widgets/legendWidget.pug
               i(title=option.title, class=`icon-angle-${option.class} m-order-layer ${disable}`)&attributes({'m-dataset-id': dataset.get('_id'), 'm-order-option': option.method})
             .m-layer-control-container
               i.icon-ajust
-              input.m-opacity-range&attributes({'m-dataset-id': dataset.get('_id')})(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))
+              input.m-opacity-range&attributes(attributes)(type='range', min=0, max=1, step=0.01, value=dataset.get('opacity'))
               - var renderType = dataset.getGeoRenderType()
               if (renderType === 'wms')
                 - var legend = 'data:image/png;base64,' + dataset.metadata().legend

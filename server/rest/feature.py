@@ -11,6 +11,7 @@ import requests
 class FeatureInfo(Resource):
 
     def __init__(self):
+        super(FeatureInfo, self).__init__()
         self.resourceName = 'minerva_get_feature_info'
         self.route('GET', (), self.getFeatureInfo)
 

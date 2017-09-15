@@ -265,6 +265,7 @@ class WmsStyle(object):
 class Sld(Resource):
 
     def __init__(self):
+        super(Sld, self).__init__()
         self.resourceName = 'minerva_style_wms'
         self.route('POST', (), self.sld_meta)
 

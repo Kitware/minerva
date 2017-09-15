@@ -30,6 +30,7 @@ from girder.plugins.minerva.utility.minerva_utility import findSessionFolder
 
 class Session(Resource):
     def __init__(self):
+        super(Session, self).__init__()
         self.resourceName = 'minerva_session'
         self.route('GET', (), self.listSessions)
         self.route('GET', ('folder',), self.getSessionFolder)

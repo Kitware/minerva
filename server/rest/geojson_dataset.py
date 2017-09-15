@@ -28,6 +28,7 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
 
 class GeojsonDataset(Dataset):
     def __init__(self):
+        super(GeojsonDataset, self).__init__()
         self.resourceName = 'minerva_dataset_geojson'
         self.route('POST', (), self.createGeojsonDataset)
 

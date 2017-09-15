@@ -156,9 +156,8 @@ const MapPanel = Panel.extend({
         if (!dataset.metadata()) {
             return;
         }
-        var datasetId = dataset.get('_id');
 
-        if (!_.contains(this.datasetLayerReprs, datasetId)) {
+        if (!_.contains(this.datasetLayerReprs, dataset.get('_id'))) {
             // For now, get the layerType directly from the dataset,
             // but we should really allow the user to specify the desired
             // layerType.
@@ -169,25 +168,36 @@ const MapPanel = Panel.extend({
                 visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
             }
 
-            dataset.once('m:map_adapter_layerCreated', function (repr) {
-                this.datasetLayerReprs[datasetId] = repr;
-                repr.render(this);
-            }, this).once('m:map_adapter_error', function (dataset, layerType) {
-                dataset.set('geoError', true);
-            }, this).once('m:map_adapter_layerError', function (repr) {
-                if (repr) {
-                    repr.delete(this);
-                    dataset.set('geoError', true);
-                }
-            }, this);
-            adapterRegistry._createRepresentation(this, dataset, layerType, visProperties);
+            this._renderDataset(dataset, layerType, visProperties);
+
+            this.listenTo(dataset, 'm:dataset_config_change', () => {
+                this.removeDataset(dataset);
+                let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
+                this._renderDataset(dataset, layerType, visProperties);
+            });
         }
+    },
+
+    _renderDataset(dataset, layerType, visProperties) {
+        dataset.once('m:map_adapter_layerCreated', function (repr) {
+            this.datasetLayerReprs[dataset.get('_id')] = repr;
+            repr.render(this);
+        }, this).once('m:map_adapter_error', function (dataset, layerType) {
+            dataset.set('geoError', true);
+        }, this).once('m:map_adapter_layerError', function (repr) {
+            if (repr) {
+                repr.delete(this);
+                dataset.set('geoError', true);
+            }
+        }, this);
+        adapterRegistry._createRepresentation(this, dataset, layerType, visProperties);
     },
 
     /**
      * Remove a rendered dataset from the current map.
      */
     removeDataset: function (dataset) {
+        this.stopListening(dataset);
         var datasetId = dataset.get('_id');
         var layerRepr = this.datasetLayerReprs[datasetId];
         if (layerRepr) {

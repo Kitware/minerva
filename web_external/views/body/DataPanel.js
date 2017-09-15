@@ -8,8 +8,6 @@ import Panel from '../body/Panel';
 import AddWmsSourceWidget from '../widgets/AddWmsSourceWidget';
 import StyleWmsDatasetWidget from '../widgets/StyleWmsDatasetWidget';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
-import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
-import JsonConfigWidget from '../widgets/JsonConfigWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
@@ -26,7 +24,6 @@ export default Panel.extend({
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .m-configure-geo-render': 'configureGeoRender',
         'click .m-configure-wms-styling': 'styleWmsDataset',
         'click .source-title': 'toggleSources',
         'click .category-title': 'toggleCategories'
@@ -118,40 +115,6 @@ export default Panel.extend({
                 data: dataset.get('tableData')
             }).render();
         }, this).loadTabularData();
-    },
-
-    /**
-     * Display a modal dialog allowing configuration of GeoJs rendering
-     * properties for the selected dataset.
-     */
-    configureGeoRender: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        var geoRenderType = dataset.getGeoRenderType();
-        if (dataset.get('displayed') || geoRenderType === null) {
-            // Don't pop up the modal when the dataset is active,
-            // or it can't be configured.
-            return;
-        }
-        var configureWidgets = {
-            'choropleth': ChoroplethRenderWidget,
-            'geojson': JsonConfigWidget,
-            'geojson-timeseries': JsonConfigWidget,
-            'contour': JsonConfigWidget
-        };
-        if (!this.configureWidgets) {
-            this.configureWidgets = {};
-        }
-        if (!this.configureWidgets[geoRenderType]) {
-            this.configureWidgets[geoRenderType] = new (configureWidgets[geoRenderType])({
-                el: $('#g-dialog-container'),
-                dataset: dataset,
-                parentView: this
-            });
-            this.configureWidgets[geoRenderType].render();
-        } else {
-            this.configureWidgets[geoRenderType].setCurrentDataset(dataset);
-        }
     },
 
     /**

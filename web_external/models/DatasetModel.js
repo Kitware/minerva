@@ -46,7 +46,13 @@ const DatasetModel = MinervaModel.extend({
      */
     _preprocess: function () {
         if (this.getDatasetType().match(/(geo)?json/)) {
-            this.set('geoData', geojsonUtil.normalize(this.get('geoData')));
+            var geoData = geojsonUtil.normalize(this.get('geoData'));
+            var visProperties = this.getMinervaMetadata().visProperties;
+            if (visProperties.polygon.fillColorKey && geoData.summary[visProperties.polygon.fillColorKey]) {
+                visProperties.polygon.maxClamp = geoData.summary[visProperties.polygon.fillColorKey].max;
+                visProperties.polygon.minClamp = geoData.summary[visProperties.polygon.fillColorKey].min;
+            }
+            this.set('geoData', geoData);
         }
     },
 

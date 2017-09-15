@@ -9,6 +9,8 @@ import GeoJSONStyle from '../../models/GeoJSONStyle';
 import geojsonUtil from '../../geojsonUtil';
 import template from '../../templates/widgets/geoJSONStyleWidget.pug';
 
+import '../../stylesheets/widgets/geoJSONStyleWidget.styl';
+
 function _updateClampingPanel(radio) {
     var radioChecked = radio.is(':checked');
     var panel = $('#m-clamping-panel');
@@ -103,7 +105,7 @@ const GeoJSONStyleWidget = View.extend({
     /**
      * Save the user selected values into the geojson object.
      */
-    save: function () {
+    updateDataset(save = false) {
         var props = {
             point: this._pointStyle.attributes,
             line: this._lineStyle.attributes,
@@ -111,7 +113,9 @@ const GeoJSONStyleWidget = View.extend({
         };
         var mm = this._dataset.getMinervaMetadata();
         mm.visProperties = props;
-        this._dataset.saveMinervaMetadata(mm);
+        if (save) {
+            this._dataset.saveMinervaMetadata(mm);
+        }
     },
 
     _fixTooltips: function () {

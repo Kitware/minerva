@@ -2,7 +2,6 @@ import View from '../view';
 import GeoJSONStyleWidget from './GeoJSONStyleWidget';
 import template from '../../templates/widgets/jsonConfigWidget.pug';
 import '../../stylesheets/widgets/jsonConfigWidget.styl';
-import '../../stylesheets/widgets/geoJSONStyleWidget.styl';
 /**
  * This widget displays options for rendering json datasets.
  */
@@ -11,26 +10,32 @@ const JsonConfigWidget = View.extend({
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
             this.$('.g-validation-failed-message').text('');
-            this.jsonStyleWidget.save();
-            this.dataset._initGeoRender('geojson');
+            this.jsonStyleWidget.updateDataset(this.saveToDataset);
+            this.dataset.trigger('m:dataset_config_change', this);
             this.$el.modal('hide');
+        },
+        'change .save-to-dataset': function (e) {
+            this.saveToDataset = e.currentTarget.checked;
+            this.render();
         }
     },
 
     initialize: function (settings) {
         this.dataset = settings.dataset;
+        this.saveToDataset = false;
+        this.modalOpened = false;
     },
 
     render: function () {
-        var modal = this.$el.html(template()).girderModal(this);
-        this._loadDataset();
-        modal.trigger($.Event('reader.girder.modal', {relatedTarget: modal}));
+        if (this.modalOpened) {
+            this.update(template(this));
+        } else {
+            this.modalOpened = true;
+            var modal = this.$el.html(template(this)).girderModal(this);
+            this._loadDataset();
+            modal.trigger($.Event('reader.girder.modal', { relatedTarget: modal }));
+        }
         return this;
-    },
-
-    setCurrentDataset: function (dataset) {
-        this.dataset = dataset;
-        this.render();
     },
 
     _loadDataset: function () {
