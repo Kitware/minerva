@@ -1,0 +1,33 @@
+.modal-dialog
+  .modal-content
+    form#m-json-geo-render-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Visual mapping
+      .modal-body
+        .radio
+          label
+            input(type='radio', name='ktile-style-mode', value='default', checked=!custom)
+            | Default
+        .radio
+          label
+            input(type='radio', name='ktile-style-mode', value='custom', checked=custom)
+            | Custom
+        .form-group
+          label Band
+          select.form-control.m-band(disabled=!custom)
+            each band in bands
+              option(value=band, selected=band==selectedBand) band #{band}
+        .form-group
+          label Colors
+          select.form-control.m-colorbrewer(disabled=!custom)
+            each color in colorbrewer
+              option(value=color, selected=color==selectedColorbrewer) #{color}
+      .modal-footer
+        .checkbox
+          label
+            input.save-to-dataset(type="checkbox", checked=saveToDataset)
+            | Save to dataset
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.m-geo-render-button.btn.btn-small.btn-primary(type="submit") OK

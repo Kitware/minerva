@@ -3,6 +3,7 @@ import _ from 'underscore';
 import Panel from '../body/Panel';
 import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
 import JsonConfigWidget from '../widgets/JsonConfigWidget';
+import KTileConfigWidget from '../widgets/KTileConfigWidget';
 
 import template from '../../templates/body/layersPanel.pug';
 import '../../stylesheets/body/layersPanel.styl';
@@ -73,7 +74,8 @@ const LayersPanel = Panel.extend({
             'choropleth': ChoroplethRenderWidget,
             'geojson': JsonConfigWidget,
             'geojson-timeseries': JsonConfigWidget,
-            'contour': JsonConfigWidget
+            'contour': JsonConfigWidget,
+            'ktile': KTileConfigWidget
         }[geoRenderType];
 
         new ConfigureWidget({

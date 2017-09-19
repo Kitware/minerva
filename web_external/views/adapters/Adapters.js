@@ -539,15 +539,19 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
 
 
 rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', function () {
-
     this.init = function (container, dataset) {
         var layer = container.createLayer('osm', {
             attribution: null,
             keepLower: false
         });
-        const fileId = dataset.get('meta').minerva.original_files[0]._id;
+        var fileId = dataset.get('meta').minerva.original_files[0]._id;
+        var visProperties = dataset.getMinervaMetadata().visProperties;
         var url = getApiRoot() + '/ktile/' + fileId;
-        layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
+        if (visProperties) {
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?palette=${visProperties.colorbrewer}&band=${visProperties.band}`);
+        } else {
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
+        }
         this.geoJsLayer = layer;
 
         this.trigger('m:map_layer_renderable', this);

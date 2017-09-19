@@ -61,16 +61,18 @@ const DatasetModel = MinervaModel.extend({
         if (!meta) {
             return;
         }
-        var prop = new GeoJSONStyle().attributes;
-        var defaultVisProperties = {
-            point: prop,
-            line: prop,
-            polygon: prop
-        };
-        if (!meta.minerva.visProperties) {
-            meta.minerva.visProperties = {};
+        if (this.getMinervaMetadata().dataset_type === 'geojson') {
+            var prop = new GeoJSONStyle().attributes;
+            var defaultVisProperties = {
+                point: prop,
+                line: prop,
+                polygon: prop
+            };
+            if (!meta.minerva.visProperties) {
+                meta.minerva.visProperties = {};
+            }
+            meta.minerva.visProperties = $.extend(true, {}, defaultVisProperties, meta.minerva.visProperties);
         }
-        meta.minerva.visProperties = $.extend(true, {}, defaultVisProperties, meta.minerva.visProperties);
     },
 
     /**

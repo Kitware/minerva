@@ -173,7 +173,7 @@ const MapPanel = Panel.extend({
             this.listenTo(dataset, 'm:dataset_config_change', () => {
                 this.removeDataset(dataset);
                 let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
-                this._renderDataset(dataset, layerType, visProperties);
+                this.addDataset(dataset, layerType, visProperties);
             });
         }
     },
