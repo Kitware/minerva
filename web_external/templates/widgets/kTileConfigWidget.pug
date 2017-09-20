@@ -14,16 +14,17 @@
           label
             input(type='radio', name='ktile-style-mode', value='custom', checked=custom)
             | Custom
-        .form-group
-          label Band
-          select.form-control.m-band(disabled=!custom)
-            each band in bands
-              option(value=band, selected=band==selectedBand) band #{band}
-        .form-group
-          label Colors
-          select.form-control.m-colorbrewer(disabled=!custom)
-            each color in colorbrewer
-              option(value=color, selected=color==selectedColorbrewer) #{color}
+        .row
+          .col-md-6
+            .form-group
+              label Band
+              select.form-control.m-band(disabled=!custom)
+                each band in bands
+                  option(value=band, selected=band==selectedBand) band #{band}
+          .col-md-6
+            .form-group
+              label Colors
+              .colorbrewPicker(assume-no-change)
       .modal-footer
         .checkbox
           label

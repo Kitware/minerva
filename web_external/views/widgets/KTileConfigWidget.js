@@ -1,9 +1,10 @@
 import View from '../view';
 import { restRequest } from 'girder/rest';
 
-import colorbrewer from './colorbrewer';
+import ColorbrewerPicker from './ColorbrewerPicker';
+import palettableColorbrewerMapper from './palettableColorbrewerMapper';
 import template from '../../templates/widgets/kTileConfigWidget.pug';
-import '../../stylesheets/widgets/KTileConfigWidget.styl';
+import '../../stylesheets/widgets/kTileConfigWidget.styl';
 /**
  * This widget displays options for rendering json datasets.
  */
@@ -11,15 +12,17 @@ const KTileConfigWidget = View.extend({
     events: {
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
-            // this.jsonStyleWidget.updateDataset(this.saveToDataset);
             var mm = this.dataset.getMinervaMetadata();
-            if (this.custom) {
+            if (this.custom && this.selectedBand && this.selectedColorbrewer) {
                 mm.visProperties = {
                     band: this.selectedBand,
                     colorbrewer: this.selectedColorbrewer
                 };
             } else {
                 mm.visProperties = null;
+            }
+            if(this.saveToDataset){
+                this.dataset.saveMinervaMetadata(mm);
             }
             this.dataset.trigger('m:dataset_config_change', this);
             this.$el.modal('hide');
@@ -30,24 +33,21 @@ const KTileConfigWidget = View.extend({
         },
         'change input[type=radio]': function (e) {
             this.custom = e.target.value === 'custom';
+            this.colorbrewerPicker.setProperties({ disabled: !this.custom })
             this.render();
         },
         'change select.m-band': function (e) {
             this.selectedBand = e.currentTarget.value;
         },
-        'change select.m-colorbrewer': function (e) {
-            this.selectedColorbrewer = e.currentTarget.value;
-        }
     },
 
     initialize(settings) {
-        this.colorbrewer = colorbrewer;
         this.dataset = settings.dataset;
         this.saveToDataset = false;
         this.modalOpened = false;
         this.bands = [];
         this.selectedBand = null;
-        this.selectedColorbrewer = colorbrewer[0];
+        this.selectedColorbrewer = null;
         this.custom = false;
         var minervaMeta = this.dataset.getMinervaMetadata();
         if (minervaMeta && minervaMeta.visProperties && minervaMeta.visProperties.band && minervaMeta.visProperties.colorbrewer) {
@@ -63,6 +63,15 @@ const KTileConfigWidget = View.extend({
         } else {
             this.modalOpened = true;
             var modal = this.$el.html(template(this)).girderModal(this);
+            this.colorbrewerPicker = new ColorbrewerPicker({
+                parentView: this,
+                el: this.$('.colorbrewPicker'),
+                disabled: !this.custom,
+                ramp: palettableColorbrewerMapper.toRamp(this.selectedColorbrewer),
+                onChange: (ramp) => {
+                    this.selectedColorbrewer = palettableColorbrewerMapper.toPalettable(ramp);
+                }
+            }).render();
             this._loadMeta();
             modal.trigger($.Event('reader.girder.modal', { relatedTarget: modal }));
         }
