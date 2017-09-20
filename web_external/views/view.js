@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import reconcile from 'reconcile.js';
+import * as reconcile from 'reconcile.js';
 import View from 'girder/views/View';
 
 const MinervaView = View.extend({
