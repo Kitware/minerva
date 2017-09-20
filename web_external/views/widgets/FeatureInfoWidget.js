@@ -29,31 +29,32 @@ const FeatureInfoWidget = View.extend({
     callInfo(event) {
         var that = this;
 
-        function getWMSLayersInfo() {
-            var wmsLayers = _.chain(this.parentView.collection.models)
-                .filter(function (set) {
-                    return set.get('displayed') && set.get('visible')
-                        && set.getDatasetType() !== 'geojson'
-                        && set.getDatasetType() !== 'geojson-timeseries'
-                        && set.getDatasetType() !== 'geotiff'
-                })
-                .invoke('get', ['_id'])
-                .value();
-            return restRequest({
-                url: '/minerva_get_feature_info',
-                type: 'GET',
-                data: {
-                    'activeLayers': wmsLayers,
-                    'bbox': mapParams.bbox,
-                    'x': mapParams.x,
-                    'y': mapParams.y,
-                    'width': mapParams.width,
-                    'height': mapParams.height
-                }
-            }).done((data) => {
-                return JSON.parse(data);
-            });
-        }
+        // function getWMSLayersInfo() {
+        //     var wmsLayers = _.chain(this.parentView.collection.models)
+        //         .filter(function (set) {
+        //             return set.get('displayed') &&
+        //                 set.get('visible') &&
+        //                 set.getDatasetType() !== 'geojson' &&
+        //                 set.getDatasetType() !== 'geojson-timeseries' &&
+        //                 set.getDatasetType() !== 'geotiff'
+        //         });
+        //         .invoke('get', ['_id'])
+        //         .value();
+        //     return restRequest({
+        //         url: '/minerva_get_feature_info',
+        //         type: 'GET',
+        //         data: {
+        //             'activeLayers': wmsLayers,
+        //             'bbox': mapParams.bbox,
+        //             'x': mapParams.x,
+        //             'y': mapParams.y,
+        //             'width': mapParams.width,
+        //             'height': mapParams.height
+        //         }
+        //     }).done((data) => {
+        //         return JSON.parse(data);
+        //     });
+        // }
 
         function getInspectMapParams(event) {
             var mapParams = {};
@@ -85,7 +86,6 @@ const FeatureInfoWidget = View.extend({
     },
     renderContents(inspectResp) {
         if (inspectResp.length !== 0) {
-            console.log(inspectResp);
             $('#m-wms-info-dialog').html(
                 contentTemplate({
                     layersInfo: inspectResp
@@ -103,10 +103,10 @@ const FeatureInfoWidget = View.extend({
     getWMSLayersInfo(mapParams) {
         var wmsLayers = _.chain(this.parentView.collection.models)
             .filter((set) => {
-                return set.get('displayed') && set.get('visible')
-                    && set.getDatasetType() !== 'geojson'
-                    && set.getDatasetType() !== 'geojson-timeseries'
-                    && set.getDatasetType() !== 'geotiff'
+                return set.get('displayed') && set.get('visible') &&
+                    set.getDatasetType() !== 'geojson' &&
+                    set.getDatasetType() !== 'geojson-timeseries' &&
+                    set.getDatasetType() !== 'geotiff';
             })
             .invoke('get', ['_id'])
             .value();
@@ -129,7 +129,6 @@ const FeatureInfoWidget = View.extend({
                 return obj;
             });
         }
-
     },
 
     /**
@@ -175,7 +174,7 @@ const FeatureInfoWidget = View.extend({
 
     getGeotiffLayersInfo(event) {
         var geotiffLayers = _.chain(this.parentView.collection.models)
-            .filter((set) => { return set.get('displayed') && set.get('visible') && set.getDatasetType() === 'geotiff' }).value();
+            .filter((set) => { return set.get('displayed') && set.get('visible') && set.getDatasetType() === 'geotiff'; }).value();
         if (geotiffLayers.length === 0) {
             return $.when([]);
         } else {
@@ -196,7 +195,7 @@ const FeatureInfoWidget = View.extend({
                     return {
                         id: dataset.get('name'),
                         properties: result
-                    }
+                    };
                 });
             });
             return $.when(...infoDeferreds).then((...results) => results.filter((result) => result));

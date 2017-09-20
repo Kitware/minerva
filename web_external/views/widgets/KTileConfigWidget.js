@@ -1,6 +1,7 @@
-import View from '../view';
+import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 
+import View from '../view';
 import ColorbrewerPicker from './ColorbrewerPicker';
 import palettableColorbrewerMapper from './palettableColorbrewerMapper';
 import template from '../../templates/widgets/kTileConfigWidget.pug';
@@ -21,7 +22,7 @@ const KTileConfigWidget = View.extend({
             } else {
                 mm.visProperties = null;
             }
-            if(this.saveToDataset){
+            if (this.saveToDataset) {
                 this.dataset.saveMinervaMetadata(mm);
             }
             this.dataset.trigger('m:dataset_config_change', this);
@@ -33,12 +34,12 @@ const KTileConfigWidget = View.extend({
         },
         'change input[type=radio]': function (e) {
             this.custom = e.target.value === 'custom';
-            this.colorbrewerPicker.setProperties({ disabled: !this.custom })
+            this.colorbrewerPicker.setProperties({ disabled: !this.custom });
             this.render();
         },
         'change select.m-band': function (e) {
             this.selectedBand = e.currentTarget.value;
-        },
+        }
     },
 
     initialize(settings) {

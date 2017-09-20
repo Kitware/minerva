@@ -162,9 +162,8 @@ const DatasetModel = MinervaModel.extend({
             } else if (mm.dataset_type === 'geotiff') {
                 mm.geo_render = {
                     type: 'ktile'
-                }
-            }
-            else {
+                };
+            } else {
                 console.log('An unknown type');
             }
             this.saveMinervaMetadata(mm);

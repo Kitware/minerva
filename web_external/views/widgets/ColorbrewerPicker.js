@@ -26,14 +26,13 @@ const ColorbrewerPicker = View.extend({
         this.categorizedRamps =
             _.mapObject(colorbrewerCategories, (val, key) => {
                 return val.map((ramp) => {
-                    console.log(colorbrewer, ramp);
                     var colors = colorbrewer[ramp]['6'];
                     var html = "<ul class='m-colorbrewer-ramp'>";
                     _.each(colors, function (color, i) {
                         html += "<li style='background-color: " + color + "'/>";
                     });
                     html += '</ul>';
-                    return { name: ramp, html: html }
+                    return { name: ramp, html: html };
                 });
             });
     },
@@ -41,8 +40,7 @@ const ColorbrewerPicker = View.extend({
         if (!this.initialized) {
             this.$el.html(template(this));
             this.$('select.m-select-ramp').selectpicker({ width: '100%', noneSelectedText: '' });
-        }
-        else {
+        } else {
 
         }
         return this;

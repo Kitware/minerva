@@ -536,8 +536,6 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
     };
 }, rendering.geo.MapRepresentation);
 
-
-
 rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', function () {
     this.init = function (container, dataset) {
         var layer = container.createLayer('osm', {
