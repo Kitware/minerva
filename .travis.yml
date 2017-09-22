@@ -65,9 +65,9 @@ before_install:
     - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
 
     # install database_assetstore plugin
-    - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
-    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
-    - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
+    - DATABASE_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
+    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DATABASE_ASSETSTORE_DIR}" && git -C "${DATABASE_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
+    - pip install -r "${DATABASE_ASSETSTORE_DIR}/requirements.txt" -U
 
     # install girder_ktile plugin
     - GIRDER_KTILE_DIR="${GIRDER_SOURCE_DIR}/plugins/girder_ktile"
