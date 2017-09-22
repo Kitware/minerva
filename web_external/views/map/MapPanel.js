@@ -124,6 +124,14 @@ const MapPanel = Panel.extend({
             this.map.createLayer(mapSettings.basemap,
                 _.has(mapSettings, 'basemap_args')
                     ? mapSettings.basemap_args : {});
+            this.uiLayer = this.map.createLayer('ui');
+            this.uiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.colorLegend = this.uiLayer.createWidget('colorLegend', {
+                position: {
+                    right: 10,
+                    top: 100
+                }
+            });
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
@@ -143,15 +151,6 @@ const MapPanel = Panel.extend({
             this.map.geoOn(geo.event.mouseclick, function (evt) {
                 this.featureInfoWidget.content = '';
                 this.featureInfoWidget.callInfo(evt);
-            });
-
-            this.uiLayer = this.map.createLayer('ui');
-            window.uiLayer = this.uiLayer;
-            this.colorLegend = this.uiLayer.createWidget('colorLegend', {
-                position: {
-                    right: 10,
-                    top: 100
-                }
             });
         }
         this.map.draw();
