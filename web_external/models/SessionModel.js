@@ -69,7 +69,7 @@ const SessionModel = MinervaModel.extend({
         map.basemap = 'osm';
         map.basemap_args = {
             url: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
-            attribution: 'Leaflet | © OpenStreetMap contributors, © CARTO'
+            attribution: '© OpenStreetMap contributors, © CARTO'
         };
         map.center = {x: -100, y: 36.5};
         map.zoom = 4;
