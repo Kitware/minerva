@@ -17,7 +17,9 @@ const KTileConfigWidget = View.extend({
             if (this.custom && this.selectedBand && this.selectedColorbrewer) {
                 mm.visProperties = {
                     band: this.selectedBand,
-                    colorbrewer: this.selectedColorbrewer
+                    colorbrewer: this.selectedColorbrewer,
+                    min: this.min,
+                    max: this.max
                 };
             } else {
                 mm.visProperties = null;
@@ -39,6 +41,14 @@ const KTileConfigWidget = View.extend({
         },
         'change select.m-band': function (e) {
             this.selectedBand = e.currentTarget.value;
+        },
+        'change input.min': function (e) {
+            this.min = e.target.value;
+            this.render();
+        },
+        'change input.max': function (e) {
+            this.max = e.target.value;
+            this.render();
         }
     },
 
@@ -49,12 +59,16 @@ const KTileConfigWidget = View.extend({
         this.bands = [];
         this.selectedBand = null;
         this.selectedColorbrewer = null;
+        this.max = 255;
+        this.min = 0;
         this.custom = false;
         var minervaMeta = this.dataset.getMinervaMetadata();
         if (minervaMeta && minervaMeta.visProperties && minervaMeta.visProperties.band && minervaMeta.visProperties.colorbrewer) {
             this.custom = true;
             this.selectedBand = minervaMeta.visProperties.band;
             this.selectedColorbrewer = minervaMeta.visProperties.colorbrewer;
+            this.min = minervaMeta.visProperties.min;
+            this.max = minervaMeta.visProperties.max;
         }
     },
 

@@ -546,7 +546,7 @@ rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', functi
         var visProperties = dataset.getMinervaMetadata().visProperties;
         var url = getApiRoot() + '/ktile/' + fileId;
         if (visProperties) {
-            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?palette=${visProperties.colorbrewer}&band=${visProperties.band}`);
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?palette=${visProperties.colorbrewer}&band=${visProperties.band}&minimum=${visProperties.min}&maximum=${visProperties.max}`);
         } else {
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
         }
