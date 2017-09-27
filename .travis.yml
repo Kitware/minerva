@@ -71,7 +71,7 @@ before_install:
 
     # install girder_ktile plugin
     - GIRDER_KTILE_DIR="${GIRDER_SOURCE_DIR}/plugins/girder_ktile"
-    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${GIRDER_KTILE_DIR}"
+    - git clone https://github.com/OpenGeoscience/girder_ktile.git "${GIRDER_KTILE_DIR}"
     - pip install -r "${GIRDER_KTILE_DIR}/requirements.txt" -U
 
 install:
