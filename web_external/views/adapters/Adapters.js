@@ -293,7 +293,7 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
                 return;
             }
             var colorRamps = colorbrewer[vis[rampKey]];
-            var colors = colorRamps[_.keys(colorRamps).reverse()[0] - 1];
+            var colors = colorRamps[_.keys(colorRamps).reverse()[0]];
             // Default category configuration
             var category = {
                 name: dataset.get('name') + ' - ' + visProperties.polygon[colorKey],
