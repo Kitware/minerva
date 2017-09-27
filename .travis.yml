@@ -33,6 +33,7 @@ before_install:
     - nvm install v6
     - nvm use v6
     - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
+    - gdal-config --version
 
     # minerva has been cloned to Kitware/minerva by travis
     # girder needs to be cloned and then minerva moved under girder
