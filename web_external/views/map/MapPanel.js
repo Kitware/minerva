@@ -171,9 +171,11 @@ const MapPanel = Panel.extend({
             this._renderDataset(dataset, layerType, visProperties);
 
             this.listenTo(dataset, 'm:dataset_config_change', () => {
+                var currentZIndex = this.datasetLayerReprs[dataset.id]['geoJsLayer'].zIndex();
                 this.removeDataset(dataset);
                 let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
                 this.addDataset(dataset, layerType, visProperties);
+                this.datasetLayerReprs[dataset.id]['geoJsLayer'].zIndex(currentZIndex);
             });
         }
     },
