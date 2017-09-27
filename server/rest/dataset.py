@@ -34,6 +34,7 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, GeoJsonMapper, jsonObjectReader
+from girder.plugins.girder_ktile.util import getInfo
 
 import girder_client
 
@@ -350,12 +351,14 @@ class Dataset(Resource):
                     'name': file['name'], '_id': file['_id']}]
                 break
             elif 'tif' in file['exts'] and file['mimeType'] == 'image/tiff':
-                minerva_metadata['original_type'] = 'tiff'
-                minerva_metadata['dataset_type'] = 'geotiff'
-                minerva_metadata['original_files'] = [{
-                    'name': file['name'], '_id': file['_id']}]
-                minerva_metadata['source'] = {
-                    'layer_source': 'Tiff'}
+                info = getInfo(file)
+                if 'srs' in info and info['srs']:
+                    minerva_metadata['original_type'] = 'tiff'
+                    minerva_metadata['dataset_type'] = 'geotiff'
+                    minerva_metadata['original_files'] = [{
+                        'name': file['name'], '_id': file['_id']}]
+                    minerva_metadata['source'] = {
+                        'layer_source': 'Tiff'}
                 break
         updateMinervaMetadata(item, minerva_metadata)
         return item
