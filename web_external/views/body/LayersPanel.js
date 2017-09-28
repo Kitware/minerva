@@ -52,13 +52,11 @@ const LayersPanel = Panel.extend({
     },
 
     toggleDatasetEvent: function (event) {
-        // Toggle behavior with JQuery
-        $(event.currentTarget).toggleClass('icon-eye icon-eye-off');
-
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-
         dataset.set('visible', !dataset.get('visible'));
+
+        this.render();
     },
 
     /**
@@ -312,7 +310,7 @@ const LayersPanel = Panel.extend({
             return set.get('stack');
         }).reverse();
 
-        this.$el.html(template({
+        this.update(template({
             datasets: sortedDisplayedDatasets,
             layersOrderOptions: this.layersOrderOptions
         }));
