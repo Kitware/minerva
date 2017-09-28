@@ -16,6 +16,10 @@ dist: trusty
 
 compiler:
     - gcc
+
+addons:
+  apt:
+    packages:
     - libpng12-dev
     - pkg-config
     - libnetcdf-dev
