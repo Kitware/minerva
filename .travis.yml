@@ -63,7 +63,9 @@ before_install:
     - vmstat
     - export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
     - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
-    - if [ -n "${PY3}" ]; then export MONGO_VERSION=3.0.2; export PY_COVG="OFF"; else export MONGO_VERSION=2.6.9; export PY_COVG="ON"; export DEPLOY=true; fi
+    - export MONGO_VERSION=3.0.7
+    - export PY_COVG="ON"
+    - export DEPLOY=true
 
     # mongo
     - CACHE=$HOME/.cache source $HOME/build/girder/scripts/install_mongo.sh
@@ -72,7 +74,7 @@ before_install:
     - mongod --version
 
     # cmake
-    - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
+    - CACHE=$HOME/.cache CMAKE_VERSION=3.4.3 CMAKE_SHORT_VERSION=3.4 source $HOME/build/girder/scripts/install_cmake.sh
 
     # install database_assetstore plugin
     - DATABASE_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
@@ -107,5 +109,6 @@ install:
     - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
 
 script:
-    - JASMINE_TIMEOUT=15000 PYTHONPATH="$PYTHONPATH:$GIRDER_SOURCE_DIR/plugins/minerva" ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
+    - cd "$GIRDER_SOURCE_DIR/plugins/minerva"
+    - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
     - if [ -f _build/test_failed ] ; then false ; fi
