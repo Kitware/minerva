@@ -91,14 +91,6 @@ const LayersPanel = Panel.extend({
         dataset.set('opacity', parseFloat(opacity));
     },
 
-    reorderDisplayedLayers: function (option, dataset) {
-        // Re-set the layer order on the map and then set the new order
-        if (dataset.get('order') === option) {
-            dataset.set('order', null);
-        }
-        dataset.set('order', option);
-    },
-
     reorderLayer: function (event) {
         var option = $(event.currentTarget).attr('m-order-option');
         var dataset = this.collection.get($(event.currentTarget).attr('m-dataset-id'));
@@ -125,14 +117,14 @@ const LayersPanel = Panel.extend({
                 var currentStack = dataset.get('stack');
                 dataset.set('stack', swapDataset.get('stack'));
                 swapDataset.set('stack', currentStack);
-                this.reorderDisplayedLayers(option, dataset);
+                dataset.trigger('reorder', dataset, option);
             }
         } else if (option === 'moveToBottom' && dataset.get('stack') !== 1) {
             _.chain(displayedDatasets)
                 .filter(function (d) { return d.get('stack') < dataset.get('stack'); })
                 .each(function (dataset) { dataset.set('stack', dataset.get('stack') + 1); });
             dataset.set('stack', 1);
-            this.reorderDisplayedLayers(option, dataset);
+            dataset.trigger('reorder', dataset, option);
         } else if (option === 'moveToTop') {
             var topStack = _.max(displayedDatasets, function (dataset) { return dataset.get('stack'); }).get('stack');
             if (dataset.get('stack') !== topStack) {
@@ -140,7 +132,7 @@ const LayersPanel = Panel.extend({
                     .filter(function (d) { return d.get('stack') > dataset.get('stack'); })
                     .each(function (dataset) { dataset.set('stack', dataset.get('stack') - 1); });
                 dataset.set('stack', topStack);
-                this.reorderDisplayedLayers(option, dataset);
+                dataset.trigger('reorder', dataset, option);
             }
         }
     },
@@ -275,7 +267,7 @@ const LayersPanel = Panel.extend({
             {'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down'}
         ];
 
-        this.listenTo(this.collection, 'change:displayed change:order', function () {
+        this.listenTo(this.collection, 'change:displayed reorder', function () {
             this.render();
         }, this);
         this.listenTo(this.collection, 'change:geoError', function () {

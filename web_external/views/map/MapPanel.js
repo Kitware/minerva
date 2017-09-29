@@ -29,14 +29,12 @@ const MapPanel = Panel.extend({
         }
     },
 
-    changeLayerZIndex: function (dataset) {
+    changeLayerZIndex: function (dataset, move) {
         var baseMapZIndex = 1;
-        if (dataset.get('order')) {
-            this.datasetLayerReprs[dataset.id]['geoJsLayer'][dataset.get('order')]();
-        }
+        this.datasetLayerReprs[dataset.id]['geoJsLayer'][move]();
         // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
-        if (dataset.get('order') === 'moveToBottom') {
+        if (move === 'moveToBottom') {
             this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveUp(baseMapZIndex);
         }
         this.map.draw();
@@ -279,9 +277,9 @@ const MapPanel = Panel.extend({
             }
         }, this);
 
-        this.listenTo(this.collection, 'change:order', function (dataset) {
+        this.listenTo(this.collection, 'reorder', function (dataset, move) {
             if (this.mapCreated) {
-                this.changeLayerZIndex(dataset);
+                this.changeLayerZIndex(dataset, move);
             }
         }, this);
 
