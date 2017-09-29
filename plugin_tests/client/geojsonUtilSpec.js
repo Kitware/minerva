@@ -1,6 +1,10 @@
+girderTest.importPlugin('jobs');
+girderTest.importPlugin('gravatar');
+girderTest.importPlugin('database_assetstore');
+girderTest.importPlugin('girder_ktile');
+girderTest.importPlugin('minerva');
+
 girderTest.addCoveredScripts([
-    '/clients/web/static/built/plugins/jobs/plugin.min.js',
-    '/clients/web/static/built/plugins/gravatar/plugin.min.js',
     '/clients/web/static/built/plugins/minerva/minerva.min.js'
 ]);
 

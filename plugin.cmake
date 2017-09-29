@@ -19,7 +19,7 @@ set_property(TEST server_minerva.wms PROPERTY LABELS minerva_server)
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
     PLUGIN minerva
-    ENABLEDPLUGINS "gravatar" "jobs"
+    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "girder_ktile"
     SETUP_MODULES "${_pluginDir}/plugin_tests/create_user.py"
 )
 set_property(TEST web_client_minerva.minerva PROPERTY LABELS minerva_client)
@@ -27,7 +27,7 @@ set_property(TEST web_client_minerva.minerva PROPERTY LABELS minerva_client)
 add_web_client_test(
     geojson "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/geojsonUtilSpec.js"
     PLUGIN minerva
-    ENABLEDPLUGINS "gravatar" "jobs"
+    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "girder_ktile"
 )
 set_property(TEST web_client_minerva.geojson PROPERTY LABELS minerva_client)
 
@@ -43,4 +43,3 @@ add_eslint_test(minerva_external "${CMAKE_CURRENT_LIST_DIR}/web_external" ESLINT
 ESLINT_IGNORE_FILE "${CMAKE_CURRENT_LIST_DIR}/.eslintignore"
 )
 set_property(TEST eslint_minerva_external PROPERTY LABELS minerva_client)
-

@@ -5,15 +5,13 @@ include(${CTEST_SOURCE_DIRECTORY}/CTestConfig.cmake)
 set(CTEST_SITE "Travis")
 set(CTEST_BUILD_NAME "Linux-$ENV{TRAVIS_BRANCH}")
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
-set(MINERVA_COVERAGE_CONFIG "${CTEST_SOURCE_DIRECTORY}/plugins/minerva/plugin_tests/minerva.coveragerc")
-set(test_group $ENV{MINERVA_TEST_GROUP})
 set(config_opts "")
 
 list(APPEND config_opts
   "-DPYTHON_COVERAGE=$ENV{PY_COVG}"
   "-DPYTHON_VERSION=$ENV{TRAVIS_PYTHON_VERSION}"
-  "-DSPARK_TEST_MASTER_URL=spark://localhost:7077"
-  "-DPYTHON_COVERAGE_CONFIG=${MINERVA_COVERAGE_CONFIG}"
+  "-DTEST_PLUGINS:STRING=minerva"
+  "-DRUN_CORE_TESTS:BOOL=OFF"
   "-DCOVERAGE_MINIMUM_PASS=68"
   "-DJS_COVERAGE_MINIMUM_PASS=21"
 )
@@ -26,14 +24,10 @@ ctest_build()
 
 ctest_test(
   PARALLEL_LEVEL 1
-  INCLUDE_LABEL "minerva_${test_group}"
   RETURN_VALUE res
 )
 
-if(test_group STREQUAL client)
-  file(RENAME "${CTEST_BINARY_DIRECTORY}/js_coverage.xml" "${CTEST_BINARY_DIRECTORY}/coverage.xml")
-endif()
-
+file(RENAME "${CTEST_BINARY_DIRECTORY}/coverage/js_coverage.xml" "${CTEST_BINARY_DIRECTORY}/coverage.xml")
 ctest_coverage()
 file(REMOVE "${CTEST_BINARY_DIRECTORY}/coverage.xml")
 ctest_submit()
