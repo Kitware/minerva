@@ -29,16 +29,20 @@ describe('Main view', function () {
         _map = geo.map;
         geo.map = function () {
             var m = _map.apply(this, arguments);
-            var c = m.createLayer;
+            var existingCreateLayer = m.createLayer;
             m.createLayer = function (type) {
+                var layer = existingCreateLayer.apply(this, arguments);
                 if (type === 'ui') {
-                    return {
-                        createWidget: function () {
+                    var existingCreateWidget = layer.createWidget;
+                    layer.createWidget = function (widgetName) {
+                        if (widgetName === 'slider') {
                             return {};
+                        } else {
+                            return existingCreateWidget.apply(this, arguments);
                         }
                     };
                 }
-                return c.apply(this, arguments);
+                return layer;
             };
             return m;
         };
