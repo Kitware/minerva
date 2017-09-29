@@ -290,7 +290,7 @@ rendering.geo.GeometryRepresentation = rendering.geo.defineMapLayer('geojson', f
 
         function processOneCategory(type, colorKey, rampKey) {
             var vis = visProperties[type];
-            if (!vis[colorKey]) {
+            if (!vis || !vis[colorKey]) {
                 return;
             }
             var colorRamps = colorbrewer[vis[rampKey]];
