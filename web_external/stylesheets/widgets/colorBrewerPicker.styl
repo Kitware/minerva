@@ -1,13 +1,17 @@
-ul.m-colorbrewer-ramp
-  list-style none
-  padding 0
-  margin 0
-  height 1.4em
-  width 100%
+.colorbrewer-picker
+  button.disabled
+    background-color #e4e4e4 !important
 
-  li
-    height 100%
-    width 16%
-    float left
-    margin 0
+  ul.m-colorbrewer-ramp
+    list-style none
     padding 0
+    margin 0
+    height 1.4em
+    width 100%
+    display flex
+
+    li
+      flex 1
+      height 100%
+      margin 0
+      padding 0
