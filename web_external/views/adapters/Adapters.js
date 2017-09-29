@@ -3,6 +3,7 @@ import geo from 'geojs';
 import * as d3 from 'd3';
 import Backbone from 'backbone';
 import colorbrewer from 'colorbrewer';
+import { getApiRoot } from 'girder/rest';
 
 import ClickInfoWidget from '../widgets/ClickInfoWidget';
 import ClickInfoModel from '../../models/ClickInfoModel';
@@ -594,6 +595,26 @@ rendering.geo.WmsRepresentation = rendering.geo.defineMapLayer('wms', function (
                 return this.geoJsLayer.baseUrl + '?' + $.param(params);
             }, this)
         );
+        this.trigger('m:map_layer_renderable', this);
+    };
+}, rendering.geo.MapRepresentation);
+
+rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', function () {
+    this.init = function (container, dataset) {
+        var layer = container.createLayer('osm', {
+            attribution: null,
+            keepLower: false
+        });
+        var fileId = dataset.get('meta').minerva.original_files[0]._id;
+        var visProperties = dataset.getMinervaMetadata().visProperties;
+        var url = getApiRoot() + '/ktile/' + fileId;
+        if (visProperties) {
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?palette=${visProperties.colorbrewer}&band=${visProperties.band}&minimum=${visProperties.min}&maximum=${visProperties.max}`);
+        } else {
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
+        }
+        this.geoJsLayer = layer;
+
         this.trigger('m:map_layer_renderable', this);
     };
 }, rendering.geo.MapRepresentation);

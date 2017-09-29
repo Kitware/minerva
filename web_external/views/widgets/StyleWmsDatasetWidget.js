@@ -30,7 +30,7 @@ const StyleWmsDatasetWidget = View.extend({
             };
 
             restRequest({
-                path: '/minerva_style_wms',
+                url: '/minerva_style_wms',
                 type: 'POST',
                 data: params,
                 error: null
@@ -53,7 +53,7 @@ const StyleWmsDatasetWidget = View.extend({
             };
 
             restRequest({
-                path: '/minerva_style_wms',
+                url: '/minerva_style_wms',
                 type: 'POST',
                 data: params,
                 error: null
@@ -80,7 +80,7 @@ const StyleWmsDatasetWidget = View.extend({
             };
 
             restRequest({
-                path: '/minerva_style_wms',
+                url: '/minerva_style_wms',
                 type: 'POST',
                 data: params,
                 error: null
@@ -106,7 +106,7 @@ const StyleWmsDatasetWidget = View.extend({
             };
 
             restRequest({
-                path: '/minerva_style_wms',
+                url: '/minerva_style_wms',
                 type: 'POST',
                 data: params,
                 error: null

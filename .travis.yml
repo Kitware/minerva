@@ -2,16 +2,12 @@ language: python
 python:
     - "2.7"
 
-env:
-  - MINERVA_TEST_GROUP=server
-  - MINERVA_TEST_GROUP=client
-
 cache:
   directories:
-  - $HOME/virtualenv/python2.7.9
-  - $HOME/.cache
+    - $HOME/.cache
 
-sudo: false
+sudo: required
+dist: trusty
 
 compiler:
     - gcc
@@ -19,78 +15,88 @@ compiler:
 addons:
   apt:
     packages:
-    - libpng12-dev
-    - libgdal1-dev
-    - pkg-config
-    - libnetcdf-dev
+      - libpng12-dev
+      - libgdal1-dev
+      - pkg-config
+      - libnetcdf-dev
 
 before_install:
-    - export CXX=g++-4.8
-    - nvm install v6
-    - nvm use v6
-    - pip install -U pip virtualenv setuptools
-    - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
+  # Fix a travis/boto issue.  See
+  # https://github.com/travis-ci/travis-ci/issues/7940
+  - sudo rm -f /etc/boto.cfg
 
-    # minerva has been cloned to Kitware/minerva by travis
-    # girder needs to be cloned and then minerva moved under girder
-    - cd $HOME/build
-    # remove existing girder dir, it remains from caching operations
-    - rm -rf girder
-    - git clone https://github.com/girder/girder.git
-    - cd girder
-    # - git checkout `cat $TRAVIS_BUILD_DIR/.girder-version`
-    - cd $HOME/build
-    - mv Kitware/minerva girder/plugins
-    - cp girder/plugins/minerva/server/conf/minerva.dist.cfg girder/plugins/minerva/server/conf/minerva.local.cfg
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
 
-    - cd girder
-    - export GIRDER_SOURCE_DIR="$PWD"
-    # copy the placeholder bsve credentials, needed even though we mock bsve api calls
-    - cp plugins/minerva/server/jobs/bsve.json.in plugins/minerva/server/jobs/bsve.json
+  - export DEPLOY=true
 
-    # Show the memory state; this lets us more quickly determine when the
-    # travis environment is bad
-    - vmstat
-    - export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
-    - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "3" ]; then export PY3="true"; else export PY2="true"; fi
-    - if [ -n "${PY3}" ]; then export MONGO_VERSION=3.0.2; export PY_COVG="OFF"; else export MONGO_VERSION=2.6.9; export PY_COVG="ON"; export DEPLOY=true; fi
+  - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
 
-    # mongo
-    - CACHE=$HOME/.cache source $HOME/build/girder/scripts/install_mongo.sh
-    - mkdir /tmp/db
-    - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
-    - mongod --version
+  # Install GDAL 2
+  - export CPLUS_INCLUDE_PATH=/usr/include/gdal
+  - export C_INCLUDE_PATH=/usr/include/gdal
+  - sudo add-apt-repository -y ppa:ubuntugis/ppa && sudo apt-get update
+  - sudo apt-get install -y gdal-bin libgdal-dev
+  - gdal-config --version
 
-    # cmake
-    - CACHE=$HOME/.cache CMAKE_VERSION=3.1.0 CMAKE_SHORT_VERSION=3.1 source $HOME/build/girder/scripts/install_cmake.sh
+  - MAIN_PATH=$PWD
+  - BUILD_PATH=$HOME/build
+  - mkdir -p $BUILD_PATH
 
-    # install database_assetstore plugin
-    - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
-    - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
-    - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
+  - nvm install v6
+  - nvm use v6
+  - npm install -g npm
+
+  - export GIRDER_SOURCE_DIR=$BUILD_PATH/girder
+  - rm -rf $GIRDER_SOURCE_DIR
+  - git clone https://github.com/girder/girder.git $GIRDER_SOURCE_DIR
+  # - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
+  - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
+  - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.dist.cfg $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.local.cfg
+  - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/jobs/bsve.json.in $GIRDER_SOURCE_DIR/plugins/minerva/server/jobs/bsve.json
+
+  - CACHE=$HOME/.cache CMAKE_VERSION=3.4.3 CMAKE_SHORT_VERSION=3.4 source $GIRDER_SOURCE_DIR/scripts/install_cmake.sh
+  - cmake --version
+
+  - export MONGO_VERSION=3.0.7
+  - export PY_COVG="ON"
+  - CACHE=$HOME/.cache source $GIRDER_SOURCE_DIR/scripts/install_mongo.sh
+  - mkdir /tmp/db
+  - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
+  - mongod --version
+
+  # install database_assetstore plugin
+  - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
+  - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
+  - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
+    
+  # install girder_ktile plugin
+  - GIRDER_KTILE_DIR="${GIRDER_SOURCE_DIR}/plugins/girder_ktile"
+  - git clone https://github.com/OpenGeoscience/girder_ktile.git "${GIRDER_KTILE_DIR}"
+  - pip install -r "${GIRDER_KTILE_DIR}/requirements.txt" -U
+
+  - npm install -g npm
+  - npm install -g npm-install-retry
+  - npm --version
+
+  - pip install --no-cache-dir -U pip virtualenv setuptools
 
 install:
-    - cd $HOME/build/girder
-    - mkdir _build
-    - export GIRDER_SOURCE_DIR="$PWD"
-    - export GIRDER_BUILD_DIR="$PWD/_build"
-    # - pip install -r "${GIRDER_SOURCE_DIR}/plugins/minerva/cmake/travis-pip-freeze.txt" -U
+  - cd $GIRDER_SOURCE_DIR
+  - pip install --no-cache-dir -U -r requirements-dev.txt -e .
+  - pip install -r $MAIN_PATH/requirements.txt
+  - pip install -r $MAIN_PATH/requirements-dev.txt
 
-    - cd /home/travis/build/girder
-    # handle caching of npm modules
-    # - mkdir -p $HOME/.cache/node_modules || true
-    # - ln -sf $HOME/.cache/node_modules .
-    - npm install -g npm
-    # - npm prune
-    # build and install girder
-    - python setup.py develop
-    - pip install -r requirements-dev.txt
-    - pip install -r plugins/minerva/requirements.txt
-    - pip install -r plugins/minerva/requirements-dev.txt
-    - girder-install web --dev --plugins minerva
-    # replace girder's ctest config with minerva's
-    - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" .
+  - npm-install-retry
+  - BABEL_ENV=cover NYC_CWD=$MAIN_PATH girder-install web --plugins=minerva,gravatar,jobs,database_assetstore --dev
+
+  # replace girder's ctest config with minerva's
+  - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" "$GIRDER_SOURCE_DIR/."
 
 script:
-    - JASMINE_TIMEOUT=15000 PYTHONPATH="$PYTHONPATH:$GIRDER_SOURCE_DIR/plugins/minerva" ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
-    - if [ -f _build/test_failed ] ; then false ; fi
+  - export GIRDER_SOURCE_DIR=$BUILD_PATH/girder
+  - export GIRDER_BUILD_DIR=$BUILD_PATH/_build
+  - mkdir -p $GIRDER_BUILD_DIR
+  - cd $GIRDER_BUILD_DIR
+  
+  - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
+  - if [ -f $GIRDER_BUILD_DIR/test_failed ] ; then false ; fi

@@ -5,7 +5,8 @@
     "dependencies": [
         "gravatar",
         "jobs",
-        "database_assetstore"
+        "database_assetstore",
+        "girder_ktile"
     ],
     "npm": {
         "file": "package.json",

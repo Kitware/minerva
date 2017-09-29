@@ -1,14 +1,11 @@
+girderTest.importPlugin('jobs');
+girderTest.importPlugin('gravatar');
+girderTest.importPlugin('database_assetstore');
+girderTest.importPlugin('girder_ktile');
+girderTest.importPlugin('minerva');
+
 girderTest.addScripts([
-    '/clients/web/static/built/plugins/jobs/plugin.min.js',
-    '/clients/web/static/built/plugins/gravatar/plugin.min.js',
     '/clients/web/static/built/plugins/minerva/minerva.min.js'
-]);
-
-girderTest.importStylesheet('/static/built/plugins/minerva/minerva.min.css');
-girderTest.importStylesheet('/static/built/plugins/jobs/plugin.min.css');
-
-girderTest.addScripts([
-    '/plugins/minerva/plugin_tests/client/mockVGL.js'
 ]);
 
 $(function () {
@@ -100,6 +97,8 @@ describe('Session view', function () {
         layerPanelView = $('#m-layer-panel').data('backboneView');
 
         runs(function () {
+            window.geo.util.mockVGLRenderer();
+
             $('.icon-upload').click();
         });
 
@@ -132,8 +131,6 @@ describe('Session view', function () {
 
     it('Add two datasets to session layer', function () {
         runs(function () {
-            window.mockVGLRenderer(true);
-
             $('.add-dataset-to-session').click();
             $('.add-dataset-to-session').click();
         });
