@@ -70,6 +70,14 @@ const MapPanel = Panel.extend({
         return this.map.createLayer(geoLayerType, properties || {});
     },
 
+    addColorLegendCategories: function (categories) {
+        this.colorLegend.addCategories(categories);
+    },
+
+    removeColorLegendCategories: function (categories) {
+        this.colorLegend.removeCategories(categories);
+    },
+
     /**
      * Accessor for the MapContainer's Backbone view.
      *
@@ -117,7 +125,13 @@ const MapPanel = Panel.extend({
                 _.has(mapSettings, 'basemap_args')
                     ? mapSettings.basemap_args : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider', { position: { right: 40, top: 40 } });
+            this.uiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.colorLegend = this.uiLayer.createWidget('colorLegend', {
+                position: {
+                    right: 10,
+                    top: 100
+                }
+            });
             this.mapCreated = true;
             _.each(this.collection.models, function (dataset) {
                 if (dataset.get('displayed')) {
