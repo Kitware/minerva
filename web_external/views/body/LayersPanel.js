@@ -301,14 +301,15 @@ const LayersPanel = Panel.extend({
     },
 
     render: function () {
-        var displayedDatasets = _.filter(this.collection.models, function (set) {
-            return set.get('displayed');
-        });
+        _.filter(this.collection.models, (dataset) => !dataset.get('displayed')).forEach((dataset) => dataset.set('stack', 0));
 
-        // Sort datasets by stack
-        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, function (set) {
-            return set.get('stack');
-        }).reverse();
+        var displayedDatasets = _.filter(this.collection.models, (dataset) => dataset.get('displayed'));
+        var lastValueInStack = _.max(displayedDatasets.map((dataset) => dataset.get('stack')));
+        displayedDatasets
+            .filter((dataset) => dataset.get('stack') === 0)
+            .forEach((dataset) => dataset.set('stack', ++lastValueInStack));
+
+        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, (dataset) => dataset.get('stack')).reverse();
 
         this.update(template({
             datasets: sortedDisplayedDatasets,

@@ -164,15 +164,9 @@ export default Panel.extend({
 
     addDatasetToSessionEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id'),
-            dataset = this.collection.get(datasetId),
-            stackValues = _.invoke(this.collection.models, 'get', 'stack'),
-            lastValueInStack = _.max(stackValues);
+            dataset = this.collection.get(datasetId);
 
-        if (!dataset.get('displayed')) {
-            dataset.set('stack', lastValueInStack + 1);
-            // TODO maybe this check is unnecessary, how can we get into this state?
-            dataset.set('displayed', true);
-        }
+        dataset.set('displayed', true);
     },
 
     deleteDatasetEvent: function (event) {
