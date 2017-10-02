@@ -48,11 +48,39 @@ const DatasetModel = MinervaModel.extend({
         if (this.getDatasetType().match(/(geo)?json/)) {
             var geoData = geojsonUtil.normalize(this.get('geoData'));
             var visProperties = this.getMinervaMetadata().visProperties;
+            // Apply max and min value as styling color clamp initial value
             if (visProperties && visProperties.polygon && visProperties.polygon.fillColorKey && geoData.summary[visProperties.polygon.fillColorKey]) {
                 visProperties.polygon.maxClamp = geoData.summary[visProperties.polygon.fillColorKey].max;
                 visProperties.polygon.minClamp = geoData.summary[visProperties.polygon.fillColorKey].min;
             }
+            if (visProperties && visProperties.polygon && !visProperties.polygon.fillColorKey) {
+                var fillColorProperties = this.tryGetDefaultFillColor(geoData.summary);
+                if (fillColorProperties) {
+                    this.getMinervaMetadata().visProperties.polygon = Object.assign(this.getMinervaMetadata().visProperties.polygon, fillColorProperties);
+                }
+            }
             this.set('geoData', geoData);
+        }
+    },
+
+    tryGetDefaultFillColor(summary) {
+        var numberFields = _.pairs(summary).filter((pair) => {
+            return !pair[1].values;
+        });
+        if (numberFields.length) {
+            return {
+                fillColorKey: _.sortBy(numberFields, (pair) => pair[1].max - pair[1].min).reverse()[0][0],
+                fillRamp: 'Reds'
+            };
+        }
+        var categoricalFields = _.pairs(summary).filter((pair) => {
+            return pair[1].values;
+        });
+        if (categoricalFields.length) {
+            return {
+                fillColorKey: _.sortBy(categoricalFields, (pair) => pair[1].values.length).reverse()[0][0],
+                fillRamp: 'Pastel1'
+            };
         }
     },
 
