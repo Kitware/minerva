@@ -1,32 +1,8 @@
-#m-feature-info-dialog
-  min-width 200px
+@import './infoTableMixin.styl'
 
-  .m-feature-info-popup
-    .m-layer:not(:first-child)
-      margin-top 20px
+.m-feature-info-popup
+  .m-layer:not(:first-child)
+    margin-top 20px
 
-    .m-feature-info-table
-      
-      .odd
-        background: #f3f3f3;
-
-      .m-table-wrapper
-        float left
-        border 1px solid #afafaf
-        white-space nowrap
-
-      .m-key-column, .m-value-column
-        display inline-block
-
-        div
-          line-height 25px
-          letter-spacing 0.25px
-
-      .m-key-column
-        div
-          border-right 1px solid #afafaf
-          padding 0 8px 0 12px
-
-      .m-value-column
-        div
-          padding 0 12px 0 8px
+  .m-feature-info-table
+    info-table()
