@@ -1,6 +1,7 @@
-select.form-control.m-select-ramp(disabled=disabled, data-feature=feature, data-property=rampKey)
-  option(data-content='<div>&nbsp;</div>')
-  each ramps, category in categorizedRamps
-    optgroup(label=category)
-      each ramp in ramps
-        option(data-content=ramp.html, data-ramp-name=ramp.name, selected=selectedRamp===ramp.name)= ramp.name
+.colorbrewer-picker
+  select.form-control.m-select-ramp(disabled=disabled, data-feature=feature, data-property=rampKey)
+    option(data-content='<div>&nbsp;</div>')
+    each ramps, category in categorizedRamps
+      optgroup(label=category)
+        each ramp in ramps
+          option(data-content=ramp.html, data-ramp-name=ramp.name, selected=selectedRamp===ramp.name)= ramp.name

@@ -80,7 +80,7 @@ const KTileConfigWidget = View.extend({
             var modal = this.$el.html(template(this)).girderModal(this);
             this.colorbrewerPicker = new ColorbrewerPicker({
                 parentView: this,
-                el: this.$('.colorbrewPicker'),
+                el: this.$('.colorbrewer-picker-container'),
                 disabled: !this.custom,
                 ramp: palettableColorbrewerMapper.toRamp(this.selectedColorbrewer),
                 onChange: (ramp) => {

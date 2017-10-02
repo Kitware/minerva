@@ -26,13 +26,14 @@ const ColorbrewerPicker = View.extend({
         this.categorizedRamps =
             _.mapObject(colorbrewerCategories, (val, key) => {
                 return val.map((ramp) => {
-                    var colors = colorbrewer[ramp]['6'];
+                    var [rampName, number] = ramp.split('_');
+                    var colors = colorbrewer[rampName][number];
                     var html = "<ul class='m-colorbrewer-ramp'>";
                     _.each(colors, function (color, i) {
                         html += "<li style='background-color: " + color + "'/>";
                     });
                     html += '</ul>';
-                    return { name: ramp, html: html };
+                    return { name: rampName, html: html };
                 });
             });
     },
