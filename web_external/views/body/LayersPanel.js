@@ -52,13 +52,11 @@ const LayersPanel = Panel.extend({
     },
 
     toggleDatasetEvent: function (event) {
-        // Toggle behavior with JQuery
-        $(event.currentTarget).toggleClass('icon-eye icon-eye-off');
-
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-
         dataset.set('visible', !dataset.get('visible'));
+
+        this.render();
     },
 
     /**
@@ -93,14 +91,6 @@ const LayersPanel = Panel.extend({
         dataset.set('opacity', parseFloat(opacity));
     },
 
-    reorderDisplayedLayers: function (option, dataset) {
-        // Re-set the layer order on the map and then set the new order
-        if (dataset.get('order') === option) {
-            dataset.set('order', null);
-        }
-        dataset.set('order', option);
-    },
-
     reorderLayer: function (event) {
         var option = $(event.currentTarget).attr('m-order-option');
         var dataset = this.collection.get($(event.currentTarget).attr('m-dataset-id'));
@@ -127,14 +117,14 @@ const LayersPanel = Panel.extend({
                 var currentStack = dataset.get('stack');
                 dataset.set('stack', swapDataset.get('stack'));
                 swapDataset.set('stack', currentStack);
-                this.reorderDisplayedLayers(option, dataset);
+                dataset.trigger('reorder', dataset, option);
             }
         } else if (option === 'moveToBottom' && dataset.get('stack') !== 1) {
             _.chain(displayedDatasets)
                 .filter(function (d) { return d.get('stack') < dataset.get('stack'); })
                 .each(function (dataset) { dataset.set('stack', dataset.get('stack') + 1); });
             dataset.set('stack', 1);
-            this.reorderDisplayedLayers(option, dataset);
+            dataset.trigger('reorder', dataset, option);
         } else if (option === 'moveToTop') {
             var topStack = _.max(displayedDatasets, function (dataset) { return dataset.get('stack'); }).get('stack');
             if (dataset.get('stack') !== topStack) {
@@ -142,7 +132,7 @@ const LayersPanel = Panel.extend({
                     .filter(function (d) { return d.get('stack') > dataset.get('stack'); })
                     .each(function (dataset) { dataset.set('stack', dataset.get('stack') - 1); });
                 dataset.set('stack', topStack);
-                this.reorderDisplayedLayers(option, dataset);
+                dataset.trigger('reorder', dataset, option);
             }
         }
     },
@@ -277,7 +267,7 @@ const LayersPanel = Panel.extend({
             {'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down'}
         ];
 
-        this.listenTo(this.collection, 'change:displayed change:order', function () {
+        this.listenTo(this.collection, 'change:displayed reorder', function () {
             this.render();
         }, this);
         this.listenTo(this.collection, 'change:geoError', function () {
@@ -303,16 +293,17 @@ const LayersPanel = Panel.extend({
     },
 
     render: function () {
-        var displayedDatasets = _.filter(this.collection.models, function (set) {
-            return set.get('displayed');
-        });
+        _.filter(this.collection.models, (dataset) => !dataset.get('displayed')).forEach((dataset) => dataset.set('stack', 0));
 
-        // Sort datasets by stack
-        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, function (set) {
-            return set.get('stack');
-        }).reverse();
+        var displayedDatasets = _.filter(this.collection.models, (dataset) => dataset.get('displayed'));
+        var lastValueInStack = _.max(displayedDatasets.map((dataset) => dataset.get('stack')));
+        displayedDatasets
+            .filter((dataset) => dataset.get('stack') === 0)
+            .forEach((dataset) => dataset.set('stack', ++lastValueInStack));
 
-        this.$el.html(template({
+        var sortedDisplayedDatasets = _.sortBy(displayedDatasets, (dataset) => dataset.get('stack')).reverse();
+
+        this.update(template({
             datasets: sortedDisplayedDatasets,
             layersOrderOptions: this.layersOrderOptions
         }));

@@ -13,7 +13,6 @@ const DatasetModel = MinervaModel.extend({
         displayed: false,
         files: null,
         opacity: 1,
-        order: null,
         stack: 0,
         // GeoJs related attributes.
         geoError: false,

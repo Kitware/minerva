@@ -8,7 +8,7 @@
   padding-top $headerHeight
   max-height 100vh
   width $leftColWidth
-  z-index 9
+  z-index 3
   overflow auto
 
 // @todo assumes all panelgroups are divs
@@ -20,6 +20,9 @@
 #m-main-panel-group
   height 100%
   width 100%
+  // use these two to start a separate stacking context
+  position relative
+  z-index 2
 
 #m-panel-groups
   position relative
