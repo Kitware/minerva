@@ -13,7 +13,7 @@ div
             if dataset.get('geoError')
               i.icon-attention.m-remove-dataset-from-layer&attributes(attributes)
             else
-              i.icon-button.m-toggle-dataset(class=dataset.get('visible')?'icon-eye':'icon-eye-off')&attributes(attributes)
+              i.icon-cancel-circled2.icon-button.m-remove-dataset-from-layer&attributes(attributes)
               - var geoRenderType = dataset.getGeoRenderType()
 
               span= dataset.get('name')
@@ -21,32 +21,32 @@ div
                 //- Cog icon for geo rendering configuration
                 if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
                   - var classes = 'icon-cog icon-button m-configure-geo-render'
-                  - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                  - classes += (dataset.get('displayed') ? ' icon-disabled' : ' icon-enabled');
                   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                   i(class=classes)&attributes(attributes)
 
                 if geoRenderType === 'ktile'
                   - var classes = 'icon-cog icon-button m-configure-geo-render'
-                  - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                  - classes += (dataset.get('displayed') ? ' icon-disabled' : ' icon-enabled');
                   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                   i(class=classes)&attributes(attributes)
 
                 // uncomment this line to enable wms layer
                 //- if geoRenderType === 'wms'
                 //-   - var classes = 'icon-cog m-configure-wms-styling'
-                //-   - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                //-   - classes += (dataset.get('displayed') ? ' icon-disabled' : ' icon-enabled');
                 //-   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                 //-   i(class=classes)&attributes(attributes)
 
                 //- //- Table icon for csv
                 //- if dataset.getDatasetType() === 'csv'
                 //-   - var classes = 'icon-table m-display-dataset-table'
-                //-   - classes += (dataset.get('displayed') ? ' icon-disabled dataset-in-session' : ' icon-enabled');
+                //-   - classes += (dataset.get('displayed') ? ' icon-disabled' : ' icon-enabled');
                 //-   i(class=classes)&attributes(attributes)
 
                 if dataset.getDatasetType() === 'geojson' || dataset.getDatasetType() === 'geojson-timeseries'
                   i.icon-download.icon-button.m-download-geojson&attributes(attributes)
-                i.icon-trash.icon-button.m-remove-dataset-from-layer&attributes(attributes)
+                i.icon-button.m-toggle-dataset(class=dataset.get('visible')?'icon-eye':'icon-eye-off')&attributes(attributes)
 
             .m-layer-control-container
               each option in layersOrderOptions

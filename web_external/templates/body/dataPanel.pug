@@ -26,13 +26,13 @@ if sourceCategoryDataset
                 .m-control-left
                   //- Globe icon to move dataset into current session
                   if dataset.isGeoRenderable()
-                    - var classes = (dataset.get('displayed') ? 'icon-globe icon-disabled dataset-in-session' : 'icon-globe icon-enabled add-dataset-to-session')
+                    - var classes = (dataset.get('displayed') ? 'icon-cancel-circled2 icon-enabled remove_dataset-from-session' : 'icon-globe icon-enabled add-dataset-to-session')
                     i(title='add to layers', class=classes)&attributes(attributes)
 
                 .m-name(title=dataset.get('name'))= dataset.get('name')
                 .m-control-right
                   //- Trash icon to delete dataset
-                  - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled dataset-in-session' : 'icon-trash delete-dataset icon-enabled')
+                  - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled' : 'icon-trash delete-dataset icon-enabled')
                   i(class=classes)&attributes(attributes)
 
                   //- Info icon for minerva metadata display
