@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 import Collection from 'girder/collections/Collection';
@@ -17,38 +18,37 @@ const MinervaCollection = Collection.extend({
     // path property
     // override of getInitData, providing any needed params to initialize fetch
 
-    fetchInit: function () {
-        restRequest({
+    fetchInit() {
+        return restRequest({
             url: this.path + '/folder',
             type: 'GET',
             data: this.getInitData()
-        }).done(_.bind(function (resp) {
+        }).then(_.bind(function (resp) {
             if (!resp.folder) {
-                restRequest({
+                return restRequest({
                     url: this.path + '/folder',
                     type: 'POST',
                     data: this.getInitData()
                 }).done(_.bind(function (resp) {
                     this.folderId = resp.folder._id;
-                    this.trigger('m:fetchInitialized');
                 }, this));
             } else {
                 this.folderId = resp.folder._id;
-                this.trigger('m:fetchInitialized');
             }
         }, this));
     },
 
     fetch: function (params, reset) {
+        var p;
         if (!this.folderId) {
-            this.on('m:fetchInitialized', _.bind(function () {
-                params = _.extend(params || {}, { folderId: this.folderId });
-                Collection.prototype.fetch.call(this, params, reset);
-            }, this)).fetchInit();
+            p = this.fetchInit()
         } else {
-            params = _.extend(params || {}, { folderId: this.folderId });
-            Collection.prototype.fetch.call(this, params, reset);
+            p = $.Deferred().resolve();
         }
+        return p.then(() => {
+            params = _.extend(params || {}, { folderId: this.folderId });
+            return Collection.prototype.fetch.call(this, params, reset);
+        });
     }
 
 });

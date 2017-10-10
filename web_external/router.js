@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import girderRouter from 'girder/router';
 import events from 'girder/events';
+import { _whenAll } from 'girder/misc';
 
 import SessionsView from './views/body/SessionsView';
 import SessionView from './views/body/SessionView';
@@ -34,19 +35,17 @@ router.route('session/:id', 'session', function (id) {
     var session = new SessionModel();
     session.set({
         _id: id
-    }).once('g:fetched', function () {
-        var datasetsCollection = new DatasetCollection();
-        datasetsCollection.once('g:changed', function () {
-            var analysisCollection = new AnalysisCollection();
-            analysisCollection.once('g:changed', function () {
-                events.trigger('g:navigateTo', SessionView, {
-                    analysisCollection: analysisCollection,
-                    datasetsCollection: datasetsCollection,
-                    session: session
-                });
-            }).fetch();
-        }).fetch();
-    }, this).on('g:error', function () {
-        router.navigate('sessions', {trigger: true});
-    }, this).fetch();
+    });
+    var datasetsCollection = new DatasetCollection();
+    var analysisCollection = new AnalysisCollection();
+    _whenAll([session.fetch(), datasetsCollection.fetch(), analysisCollection.fetch()])
+        .then(() => {
+            return events.trigger('g:navigateTo', SessionView, {
+                analysisCollection: analysisCollection,
+                datasetsCollection: datasetsCollection,
+                session: session
+            });
+        }).catch(() => {
+            router.navigate('sessions', { trigger: true });
+        });
 });
