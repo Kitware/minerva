@@ -105,7 +105,8 @@ export default Panel.extend({
             noParent: true,
             title: 'Upload a dataset',
             overrideStart: true,
-            parentView: this.parentView
+            parentView: this.parentView,
+            multiFile: false
         }).on('g:uploadFinished', function () {
             this.upload = false;
         }, this).render();
