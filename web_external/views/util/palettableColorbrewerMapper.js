@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import colorbrewer from 'colorbrewer';
 
 const colorbrewerCategories = {
     sequential: ['Blues_9', 'BuGn_9', 'BuPu_9', 'GnBu_9', 'Greens_9', 'Greys_9', 'OrRd_9', 'Oranges_9', 'PuBu_9', 'PuBuGn_9', 'PuRd_9', 'Purples_9', 'RdPu_9', 'Reds_9', 'YlGn_9', 'YlGnBu_9', 'YlOrBr_9', 'YlOrRd_9'],
@@ -6,12 +7,20 @@ const colorbrewerCategories = {
     qualitative: ['Accent_8', 'Dark2_8', 'Paired_12', 'Pastel1_9', 'Pastel2_8', 'Set1_9', 'Set2_8', 'Set3_12']
 };
 
-const colorbrewerMapper = {
+const palettableColorbrewerMapper = {
     toRamp(palettable) {
         if (!palettable) {
             return null;
         }
         return palettable.split('.').slice(-1)[0].split('_')[0];
+    },
+
+    toRampColors(palettable) {
+        if (!palettable) {
+            return null;
+        }
+        var [ramp, number] = palettable.split('.').slice(-1)[0].split('_');
+        return colorbrewer[ramp][number];
     },
 
     toPalettable(rampName) {
@@ -31,6 +40,6 @@ const colorbrewerMapper = {
     }
 };
 
-export default colorbrewerMapper;
+export default palettableColorbrewerMapper;
 
 export { colorbrewerCategories };

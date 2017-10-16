@@ -3,7 +3,7 @@ import { restRequest } from 'girder/rest';
 
 import View from '../view';
 import ColorbrewerPicker from './ColorbrewerPicker';
-import palettableColorbrewerMapper from './palettableColorbrewerMapper';
+import palettableColorbrewerMapper from '../util/palettableColorbrewerMapper';
 import template from '../../templates/widgets/kTileConfigWidget.pug';
 import '../../stylesheets/widgets/kTileConfigWidget.styl';
 /**
@@ -14,10 +14,10 @@ const KTileConfigWidget = View.extend({
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
             var mm = this.dataset.getMinervaMetadata();
-            if (this.custom && this.selectedBand && this.selectedColorbrewer) {
+            if (this.custom && this.selectedBand && this.selectedPalettable) {
                 mm.visProperties = {
                     band: this.selectedBand,
-                    colorbrewer: this.selectedColorbrewer,
+                    palettable: this.selectedPalettable,
                     min: this.min,
                     max: this.max
                 };
@@ -41,6 +41,9 @@ const KTileConfigWidget = View.extend({
         },
         'change select.m-band': function (e) {
             this.selectedBand = e.currentTarget.value;
+            this.max = this.bands[this.selectedBand].max;
+            this.min = this.bands[this.selectedBand].min;
+            this.render();
         },
         'change input.min': function (e) {
             this.min = e.target.value;
@@ -58,15 +61,15 @@ const KTileConfigWidget = View.extend({
         this.modalOpened = false;
         this.bands = [];
         this.selectedBand = null;
-        this.selectedColorbrewer = null;
+        this.selectedPalettable = null;
         this.max = 255;
         this.min = 0;
         this.custom = false;
         var minervaMeta = this.dataset.getMinervaMetadata();
-        if (minervaMeta && minervaMeta.visProperties && minervaMeta.visProperties.band && minervaMeta.visProperties.colorbrewer) {
+        if (minervaMeta && minervaMeta.visProperties && minervaMeta.visProperties.band && minervaMeta.visProperties.palettable) {
             this.custom = true;
             this.selectedBand = minervaMeta.visProperties.band;
-            this.selectedColorbrewer = minervaMeta.visProperties.colorbrewer;
+            this.selectedPalettable = minervaMeta.visProperties.palettable;
             this.min = minervaMeta.visProperties.min;
             this.max = minervaMeta.visProperties.max;
         }
@@ -82,9 +85,9 @@ const KTileConfigWidget = View.extend({
                 parentView: this,
                 el: this.$('.colorbrewer-picker-container'),
                 disabled: !this.custom,
-                ramp: palettableColorbrewerMapper.toRamp(this.selectedColorbrewer),
+                ramp: palettableColorbrewerMapper.toRamp(this.selectedPalettable),
                 onChange: (ramp) => {
-                    this.selectedColorbrewer = palettableColorbrewerMapper.toPalettable(ramp);
+                    this.selectedPalettable = palettableColorbrewerMapper.toPalettable(ramp);
                 }
             }).render();
             this._loadMeta();
@@ -98,8 +101,12 @@ const KTileConfigWidget = View.extend({
             url: `/ktile/${this.dataset.get('meta').minerva.original_files[0]._id}/info`,
             type: 'GET'
         }).done((resp) => {
-            this.bands = _.range(1, resp.bands + 1);
-            this.selectedBand = this.selectedBand || this.bands[0];
+            this.bands = resp.bands;
+            if (!this.selectedBand) {
+                this.selectedBand = _.keys(this.bands)[0];
+                this.max = this.bands[this.selectedBand].max;
+                this.min = this.bands[this.selectedBand].min;
+            }
             this.render();
         });
     }
