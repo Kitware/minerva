@@ -65,7 +65,7 @@ const DatasetModel = MinervaModel.extend({
 
     tryGetDefaultFillColor(summary) {
         var numberFields = _.pairs(summary).filter((pair) => {
-            return !pair[1].values;
+            return !pair[1].values && isFinite(pair[1].min) && isFinite(pair[1].max) && pair[1].min !== pair[1].max;
         });
         if (numberFields.length) {
             return {
@@ -74,7 +74,7 @@ const DatasetModel = MinervaModel.extend({
             };
         }
         var categoricalFields = _.pairs(summary).filter((pair) => {
-            return pair[1].values;
+            return pair[1].values && pair[1].values.length >= 2;
         });
         if (categoricalFields.length) {
             return {
@@ -82,6 +82,7 @@ const DatasetModel = MinervaModel.extend({
                 fillRamp: 'Pastel1'
             };
         }
+        return null;
     },
 
     _applyDefaultStyle: function () {
