@@ -36,13 +36,13 @@ router.route('session/:id', 'session', function (id) {
     session.set({
         _id: id
     });
-    var datasetsCollection = new DatasetCollection();
+    var datasetCollection = new DatasetCollection();
     var analysisCollection = new AnalysisCollection();
-    _whenAll([session.fetch(), datasetsCollection.fetch(), analysisCollection.fetch()])
+    _whenAll([session.fetch(), datasetCollection.fetch(), analysisCollection.fetch()])
         .then(() => {
             return events.trigger('g:navigateTo', SessionView, {
                 analysisCollection: analysisCollection,
-                datasetsCollection: datasetsCollection,
+                datasetCollection: datasetCollection,
                 session: session
             });
         }).catch(() => {

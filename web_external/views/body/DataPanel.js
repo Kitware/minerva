@@ -198,7 +198,7 @@ export default Panel.extend({
     },
     initialize: function (settings) {
         var externalId = 1;
-        this.collection = settings.session.datasetsCollection;
+        this.collection = settings.session.datasetCollection;
         this.visibleMenus = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();

@@ -82,9 +82,9 @@ const SessionView = View.extend({
             this.render();
         }, this);
         this.model = settings.session;
-        this.datasetsCollection = settings.datasetsCollection;
+        this.datasetCollection = settings.datasetCollection;
         this.analysisCollection = settings.analysisCollection;
-        _.each(this.datasetsCollection.models, function (dataset) {
+        _.each(this.datasetCollection.models, function (dataset) {
             if (this.model.datasetInFeatures(dataset)) {
                 dataset.set('displayed', true);
             }
@@ -92,7 +92,7 @@ const SessionView = View.extend({
 
         // listen for a change on a dataset being displayed
         // this should add or remove it from the current session
-        this.listenTo(this.datasetsCollection, 'change:displayed', function (dataset) {
+        this.listenTo(this.datasetCollection, 'change:displayed', function (dataset) {
             this._enableSave();
             if (dataset.get('displayed')) {
                 this.model.addDataset(dataset);

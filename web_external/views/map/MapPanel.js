@@ -239,7 +239,7 @@ const MapPanel = Panel.extend({
         });
         this.datasetLayerReprs = {};
 
-        this.collection = settings.session.datasetsCollection;
+        this.collection = settings.session.datasetCollection;
         this.listenTo(this.collection, 'change:displayed', function (dataset) {
             // There is a slight danger of a user trying to add a dataset
             // to a session while the map is not yet created.  If the map isn't

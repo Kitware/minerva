@@ -257,7 +257,7 @@ const LayersPanel = Panel.extend({
     initialize: function (settings) {
         settings = settings || {};
         this.animationTimeout = null;
-        this.collection = settings.session.datasetsCollection;
+        this.collection = settings.session.datasetCollection;
         this.layersOrderOptions = [
             {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
             {'title': 'move down', 'method': 'moveDown', 'class': 'down'},
