@@ -34,9 +34,10 @@
               label Max
               input.form-control.max(disabled=!custom, value=max)
       .modal-footer
-        .checkbox
-          label
-            input.save-to-dataset(type="checkbox", checked=saveToDataset)
-            | Save to dataset
+        if currentUser.id === dataset.get('creatorId')
+          .checkbox
+            label
+              input.save-to-dataset(type="checkbox", checked=saveToDataset)
+              | Save to dataset
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button.m-geo-render-button.btn.btn-small.btn-primary(type="submit") OK

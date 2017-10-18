@@ -1,12 +1,13 @@
 import { getCurrentUser } from 'girder/auth';
 import { restRequest } from 'girder/rest';
 import Collection from 'girder/collections/Collection';
+import { _whenAll } from 'girder/misc';
 
 import MinervaCollection from '../MinervaCollection';
 import DatasetModel from '../models/DatasetModel';
 import WmsDatasetModel from '../models/WmsDatasetModel';
 
-const DatasetCollection = Collection.extend({
+const DatasetCollection = MinervaCollection.extend({
 
     model: function (attrs, options) {
         // TODO dataset/source refactor
@@ -23,19 +24,24 @@ const DatasetCollection = Collection.extend({
     },
 
     path: 'minerva_dataset',
-    // getInitData: function () {
-    //     var initData = { userId: getCurrentUser().get('_id') };
-    //     return initData;
-    // }
+    getInitData: function () {
+        var initData = { userId: getCurrentUser().get('_id') };
+        return initData;
+    },
 
     fetch() {
-        return restRequest({
-            type: 'GET',
-            url: this.path,
-            data: { userId: getCurrentUser().get('_id') }
-        }).done((datasets) => {
-            this.reset(datasets);
-        });
+        return _whenAll(
+            [
+                restRequest({
+                    type: 'GET',
+                    url: `${this.path}/shared`,
+                    data: { userId: getCurrentUser().get('_id') }
+                }).then((result) => result),
+                MinervaCollection.prototype.fetch.apply(this, arguments)
+            ])
+            .then(([sharedDatasets]) => {
+                this.add(sharedDatasets);
+            });
     }
 
 });

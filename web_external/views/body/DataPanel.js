@@ -2,6 +2,7 @@ import _ from 'underscore';
 import eventStream from 'girder/utilities/EventStream';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
+import { getCurrentUser } from 'girder/auth';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -297,7 +298,8 @@ export default Panel.extend({
 
         this.$el.html(template({
             sourceCategoryDataset: this.sourceCategoryDataset,
-            visibleMenus: this.visibleMenus
+            visibleMenus: this.visibleMenus,
+            currentUser: getCurrentUser()
         }));
 
         // TODO pagination and search?

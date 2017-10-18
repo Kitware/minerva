@@ -1,3 +1,5 @@
+import { getCurrentUser } from 'girder/auth';
+
 import View from '../view';
 import GeoJSONStyleWidget from './GeoJSONStyleWidget';
 import template from '../../templates/widgets/jsonConfigWidget.pug';
@@ -22,6 +24,7 @@ const JsonConfigWidget = View.extend({
 
     initialize: function (settings) {
         this.dataset = settings.dataset;
+        this.currentUser = getCurrentUser();
         this.saveToDataset = false;
         this.modalOpened = false;
     },

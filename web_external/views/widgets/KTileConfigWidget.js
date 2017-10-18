@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import { restRequest } from 'girder/rest';
+import { getCurrentUser } from 'girder/auth';
 
 import View from '../view';
 import ColorbrewerPicker from './ColorbrewerPicker';
@@ -54,6 +55,7 @@ const KTileConfigWidget = View.extend({
 
     initialize(settings) {
         this.dataset = settings.dataset;
+        this.currentUser = getCurrentUser();
         this.saveToDataset = false;
         this.modalOpened = false;
         this.bands = [];
