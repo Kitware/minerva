@@ -1,10 +1,12 @@
 import { getCurrentUser } from 'girder/auth';
+import { restRequest } from 'girder/rest';
+import Collection from 'girder/collections/Collection';
 
 import MinervaCollection from '../MinervaCollection';
 import DatasetModel from '../models/DatasetModel';
 import WmsDatasetModel from '../models/WmsDatasetModel';
 
-const DatasetCollection = MinervaCollection.extend({
+const DatasetCollection = Collection.extend({
 
     model: function (attrs, options) {
         // TODO dataset/source refactor
@@ -21,9 +23,19 @@ const DatasetCollection = MinervaCollection.extend({
     },
 
     path: 'minerva_dataset',
-    getInitData: function () {
-        var initData = { userId: getCurrentUser().get('_id') };
-        return initData;
+    // getInitData: function () {
+    //     var initData = { userId: getCurrentUser().get('_id') };
+    //     return initData;
+    // }
+
+    fetch() {
+        return restRequest({
+            type: 'GET',
+            url: this.path,
+            data: { userId: getCurrentUser().get('_id') }
+        }).done((datasets) => {
+            this.reset(datasets);
+        });
     }
 
 });

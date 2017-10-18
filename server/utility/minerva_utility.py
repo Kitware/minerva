@@ -52,7 +52,6 @@ def findPublicFolder(currentUser, user, create=False):
     return findNamedFolder(currentUser, user, user, 'user',
                            'Public', create)
 
-
 def findDatasetFolder(currentUser, user, create=False):
     minervaFolder = findMinervaFolder(currentUser, user, create)
     if minervaFolder is None:
@@ -61,6 +60,17 @@ def findDatasetFolder(currentUser, user, create=False):
         return findNamedFolder(currentUser, user, minervaFolder, 'folder',
                                PluginSettings.DATASET_FOLDER, create)
 
+def findPublicDatasetFolders(currentUser):
+    # folders = \
+    #     [ModelImporter.model('folder').filter(folder, currentUser) for folder in
+    #      ModelImporter.model('folder').childFolders(parent=parent,
+    #      parentType=parentType, user=currentUser, filters={'name': name})]
+    folderModel = ModelImporter.model('folder')
+    folders = folderModel.find({
+        'public': True,
+        'parentCollection': 'user'
+    })
+    return folders
 
 def findSourceFolder(currentUser, user, create=False):
     minervaFolder = findMinervaFolder(currentUser, user, create)
