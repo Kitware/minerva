@@ -32,7 +32,7 @@ from girder.utility import config, assetstore_utilities
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata, findSharedDatasetFolders, \
-    findPublicFolder
+    findSharedFolder
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, GeoJsonMapper, jsonObjectReader
 from girder.plugins.girder_ktile.util import getInfo
@@ -268,7 +268,7 @@ class Dataset(Resource):
     )
     def shareDataset(self, item, params):
         currentUser = self.getCurrentUser()
-        publicFolder = findPublicFolder(currentUser, currentUser, create=True)
+        publicFolder = findSharedFolder(currentUser, currentUser, create=True)
         self.model('item').move(item, publicFolder)
         return self.model('item').filter(item, currentUser)
 
