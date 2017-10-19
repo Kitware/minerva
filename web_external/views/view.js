@@ -14,9 +14,6 @@ const MinervaView = View.extend({
             reconcile.apply(changes, this.$el.children(0)[0]);
             return true;
         }
-    },
-    setProperties() {
-
     }
 });
 export default MinervaView;

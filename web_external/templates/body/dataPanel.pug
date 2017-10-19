@@ -5,6 +5,7 @@ include ../layout/panelMixins.pug
   // uncomment this line to enable adding wms layer
   //- i.m-add-wms.m-icon-enabled.icon-upload(title="Add WMS dataset")
   i.m-postgres.m-icon-enabled.icon-database(title="Connect to postgres")
+  i.m-share.m-icon-enabled.icon-share(title="Share your dataset")
 
 if sourceCategoryDataset
   +panel-content('collapse in')
@@ -37,6 +38,8 @@ if sourceCategoryDataset
                     //- Trash icon to delete dataset
                     - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled' : 'icon-trash delete-dataset icon-enabled')
                     i(title='Delete dataset', class=classes)&attributes(attributes)
+                  else
+                    i.icon-share.icon-disabled(title='Shared dataset')
 
                   //- Info icon for minerva metadata display
                   i.icon-info-circled.icon-enabled.dataset-info(title='Dataset Info')&attributes(attributes)

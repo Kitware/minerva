@@ -60,7 +60,7 @@ def findDatasetFolder(currentUser, user, create=False):
         return findNamedFolder(currentUser, user, minervaFolder, 'folder',
                                PluginSettings.DATASET_FOLDER, create)
 
-def findPublicDatasetFolders(currentUser):
+def findSharedDatasetFolders(currentUser):
     # folders = \
     #     [ModelImporter.model('folder').filter(folder, currentUser) for folder in
     #      ModelImporter.model('folder').childFolders(parent=parent,

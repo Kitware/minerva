@@ -12,6 +12,7 @@ import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
+import DatasetSharingWidget from '../widgets/DatasetSharingWidget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 
@@ -28,7 +29,8 @@ export default Panel.extend({
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-wms-styling': 'styleWmsDataset',
         'click .source-title': 'toggleSources',
-        'click .category-title': 'toggleCategories'
+        'click .category-title': 'toggleCategories',
+        'click .m-share': 'shareDataset'
     },
     toggleCategories: function (event) {
         // Get the div belov the title which was clicked
@@ -62,7 +64,7 @@ export default Panel.extend({
                 this.collection.add(dataset);
             }, this).fetch();
         });
-        postgresWidget.render({});
+        postgresWidget.render();
     },
 
     // Ability to style a wms layer
@@ -200,6 +202,7 @@ export default Panel.extend({
     initialize: function (settings) {
         var externalId = 1;
         this.collection = settings.session.datasetCollection;
+        this.currentUser = getCurrentUser();
         this.visibleMenus = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -282,6 +285,15 @@ export default Panel.extend({
         return this.parentView.parentView.model;
     },
 
+    shareDataset() {
+        new DatasetSharingWidget({
+            el: $('#g-dialog-container'),
+            datasetCollection: this.collection,
+            user: this.currentUser,
+            parentView: this
+        }).render();
+    },
+
     render() {
         var sourceName = (model) => {
             return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
@@ -299,7 +311,7 @@ export default Panel.extend({
         this.$el.html(template({
             sourceCategoryDataset: this.sourceCategoryDataset,
             visibleMenus: this.visibleMenus,
-            currentUser: getCurrentUser()
+            currentUser: this.currentUser
         }));
 
         // TODO pagination and search?

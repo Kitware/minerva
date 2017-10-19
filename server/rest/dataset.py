@@ -31,7 +31,8 @@ from girder.utility import config, assetstore_utilities
 
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
-    updateMinervaMetadata, findPublicDatasetFolders
+    updateMinervaMetadata, findSharedDatasetFolders, \
+    findPublicFolder
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, GeoJsonMapper, jsonObjectReader
 from girder.plugins.girder_ktile.util import getInfo
@@ -46,6 +47,8 @@ class Dataset(Resource):
         self.resourceName = 'minerva_dataset'
         self.route('GET', (), self.listDatasets)
         self.route('GET', ('shared',), self.listSharedDatasets)
+        self.route('PUT', ('share', ':id'), self.shareDataset)
+        self.route('PUT', ('unshare', ':id'), self.unshareDataset)
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
         self.route('POST', (':id', 'item'), self.promoteItemToDataset)
@@ -244,18 +247,42 @@ class Dataset(Resource):
                required=False, dataType='int'))
 
     @access.public
-    # @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
     @autoDescribeRoute(
         Description('Get shared datasets')
-        .modelParam('userId', 'The ID of the API key.', paramType='query',model='user', level=AccessType.READ)
+        .modelParam('userId', 'The ID of the API key.', paramType='query', model='user', level=AccessType.READ)
         .errorResponse()
     )
     def listSharedDatasets(self, user, params):
-        publicFolders = findPublicDatasetFolders(self.getCurrentUser())
-        
-        items = [item for items in [self.model('folder').childItems(folder) for folder in publicFolders] for item in items]
+        publicFolders = findSharedDatasetFolders(self.getCurrentUser())
+
+        items = [item for items in [self.model('folder').childItems(
+            folder) for folder in publicFolders] for item in items]
 
         return [self.model('item').filter(item, self.getCurrentUser()) for item in items]
+
+    @access.user
+    @autoDescribeRoute(
+        Description('Share a dataset')
+        .modelParam('id', 'The ID of dataset item.', model='item', level=AccessType.WRITE)
+        .errorResponse()
+    )
+    def shareDataset(self, item, params):
+        currentUser = self.getCurrentUser()
+        publicFolder = findPublicFolder(currentUser, currentUser, create=True)
+        self.model('item').move(item, publicFolder)
+        return self.model('item').filter(item, currentUser)
+
+    @access.user
+    @autoDescribeRoute(
+        Description('Unshare a dataset')
+        .modelParam('id', 'The ID of dataset item.', model='item', level=AccessType.WRITE)
+        .errorResponse()
+    )
+    def unshareDataset(self, item, params):
+        currentUser = self.getCurrentUser()
+        datasetFolder = findDatasetFolder(currentUser, currentUser, create=True)
+        self.model('item').move(item, datasetFolder)
+        return self.model('item').filter(item, currentUser)
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)
