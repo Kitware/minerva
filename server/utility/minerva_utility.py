@@ -60,7 +60,8 @@ def findSharedFolder(currentUser, user, create=False):
     if publicMinervaFolder is None:
         return publicMinervaFolder
     else:
-        return findNamedFolder(currentUser, user, publicMinervaFolder, 'folder', PluginSettings.DATASET_FOLDER, create, public=True)
+        return findNamedFolder(currentUser, user, publicMinervaFolder, 'folder',
+                               PluginSettings.DATASET_FOLDER, create, public=True)
 
 
 def findDatasetFolder(currentUser, user, create=False):

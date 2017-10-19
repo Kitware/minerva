@@ -41,7 +41,7 @@ const MinervaCollection = Collection.extend({
     fetch: function (params, reset) {
         var p;
         if (!this.folderId) {
-            p = this.fetchInit()
+            p = this.fetchInit();
         } else {
             p = $.Deferred().resolve();
         }

@@ -63,8 +63,9 @@ const DatasetSharingWidget = View.extend({
                     .done((updatedDataset) => update(dataset, updatedDataset));
                 }))
         )
-            .done(() => {
+            .then(() => {
                 this.$el.modal('hide');
+                return null;
             });
     }
 });

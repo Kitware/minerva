@@ -249,7 +249,8 @@ class Dataset(Resource):
     @access.public
     @autoDescribeRoute(
         Description('Get shared datasets')
-        .modelParam('userId', 'The ID of the API key.', paramType='query', model='user', level=AccessType.READ)
+        .modelParam('userId', 'The ID of the API key.',
+                    paramType='query', model='user', level=AccessType.READ)
         .errorResponse()
     )
     def listSharedDatasets(self, user, params):

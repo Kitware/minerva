@@ -1,6 +1,5 @@
 import { getCurrentUser } from 'girder/auth';
 import { restRequest } from 'girder/rest';
-import Collection from 'girder/collections/Collection';
 import { _whenAll } from 'girder/misc';
 
 import MinervaCollection from '../MinervaCollection';
@@ -39,7 +38,7 @@ const DatasetCollection = MinervaCollection.extend({
                 }).then((result) => result),
                 MinervaCollection.prototype.fetch.apply(this, arguments)
             ])
-            .then(([sharedDatasets]) => {
+            .done(([sharedDatasets]) => {
                 this.add(sharedDatasets);
             });
     }
