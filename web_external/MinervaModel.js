@@ -86,7 +86,7 @@ const MinervaModel = ItemModel.extend({
             events.trigger('g:alert', {
                 icon: 'cancel',
                 text: 'Could not update Minerva metadata in Item.',
-                type: 'error',
+                type: 'danger',
                 timeout: 4000
             });
         }, this));
