@@ -86,12 +86,12 @@ const FeatureInfoWidget = View.extend({
     },
     renderContents(inspectResp) {
         if (inspectResp.length !== 0) {
-            $('#m-wms-info-dialog').html(
+            $('#m-feature-info-dialog').html(
                 contentTemplate({
                     layersInfo: inspectResp
                 })
             );
-            $('#m-wms-info-dialog').dialog('open');
+            $('#m-feature-info-dialog').dialog('open');
         }
     },
 
