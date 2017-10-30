@@ -316,6 +316,13 @@ const DatasetModel = MinervaModel.extend({
                 });
             }, this));
         }
+    },
+
+    removeFromSession() {
+        // Make opacity 1 when a layer is deleted
+        this.set('visible', true);
+        this.set('opacity', 1);
+        this.set('displayed', false);
     }
 });
 export default DatasetModel;

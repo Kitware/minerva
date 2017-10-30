@@ -18,6 +18,7 @@ export default Panel.extend({
     events: {
         // TODO namespace.
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
+        'click .remove_dataset-from-session': 'removeDatasetFromSession',
         'click .m-upload-local': 'uploadDialog',
         'click .m-add-wms': 'addWmsDataset',
         'click .m-postgres': 'connectToPostgres',
@@ -168,6 +169,12 @@ export default Panel.extend({
             dataset = this.collection.get(datasetId);
 
         dataset.set('displayed', true);
+    },
+
+    removeDatasetFromSession: function (event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id'),
+            dataset = this.collection.get(datasetId);
+        dataset.removeFromSession();
     },
 
     deleteDatasetEvent: function (event) {
