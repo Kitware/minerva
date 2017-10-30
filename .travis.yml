@@ -29,6 +29,7 @@ before_install:
 
   - export DEPLOY=true
 
+  - GIRDER_BRANCH="2.x-maintenance"
   - DATABASE_ASSETSTORE_VERSION="73651be9d133178dc1a791c7bec8b20071e08664"
 
   # Install GDAL 2
@@ -48,7 +49,7 @@ before_install:
 
   - export GIRDER_SOURCE_DIR=$BUILD_PATH/girder
   - rm -rf $GIRDER_SOURCE_DIR
-  - git clone https://github.com/girder/girder.git $GIRDER_SOURCE_DIR
+  - git clone https://github.com/girder/girder.git $GIRDER_SOURCE_DIR && git -C $GIRDER_SOURCE_DIR checkout -b $GIRDER_BRANCH
   # - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.dist.cfg $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.local.cfg
