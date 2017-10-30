@@ -49,7 +49,7 @@ before_install:
 
   - export GIRDER_SOURCE_DIR=$BUILD_PATH/girder
   - rm -rf $GIRDER_SOURCE_DIR
-  - git clone https://github.com/girder/girder.git $GIRDER_SOURCE_DIR && git -C $GIRDER_SOURCE_DIR checkout -b $GIRDER_BRANCH
+  - git clone -b $GIRDER_BRANCH https://github.com/girder/girder.git $GIRDER_SOURCE_DIR
   # - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.dist.cfg $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.local.cfg
