@@ -405,7 +405,9 @@ const PostgresWidget = View.extend({
         });
         this.validation.geometryLinkTargetRequired = !this.geometryLink.target;
         this.geometryLink.links = [];
-        this._loadGeometryLinkField();
+        if (this.geometryLink.target) {
+            this._loadGeometryLinkField();
+        }
         this.render();
     },
     _linkFieldChange: function (e) {

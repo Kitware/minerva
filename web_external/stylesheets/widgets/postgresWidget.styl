@@ -1,40 +1,71 @@
-@media (min-width: 1300px)
-    .m-postgres-modal.modal-lg
-        width 1200px
-
 .m-postgres-modal
-    label.no-margin-bottom
-        margin-bottom 0
+  label.no-margin-bottom
+    margin-bottom 0
 
-    .form-control.has-min-width
-        min-width 130px
+  .row.indented
+    margin-left 0
 
-    .help-block
-        margin-top 0px
-        font-weight normal
+  .form-group
+    label.full-width
+      width 100%
 
-    div.m-geometry-field-container
-        .m-link-checkbox-container
-            margin: 5px 0
+  .form-control
+    &.has-min-width
+      min-width 130px
 
-        .m-link-container
-            select, input
-                display inline-block
-                width auto
-            select:not(:first-child), input:not(:first-child)
-                margin-left 3px
-            button
-                display none
+  .help-block
+    margin-top 0px
+    font-weight normal
 
-        .m-link-container:hover
-            button
-                display inline-block
+  .links-container
+    button
+      padding 2px
+      line-height 1.2
+      margin-left 10px
 
-
-        .m-link-container:not(:first-child)
-            margin-top 3px
-
+    .link
+      select, input
+        display inline-block
+        width auto
+      select:not(:first-child), input:not(:first-child)
+        margin-left 3px
         button
-            padding 2px
-            line-height 1.2
-            margin-left 10px
+          display none
+
+      &:hover
+        button
+          display inline-block
+
+      &:not(:first-child)
+        margin-top 3px
+
+  .m-query-builder
+    .form-control
+      line-height 30px
+      height 30px
+      font-size 12px
+      padding 4px
+      border-radius 3px
+
+    select.form-control
+      height auto
+      padding 6px 4px
+
+    .rule-container
+      .rule-filter-container, .rule-value-container
+        width calc(50% - 85px)
+
+      &.has-error
+        .rule-filter-container, .rule-value-container
+          width calc(50% - 100px)
+
+      .rule-operator-container
+        width 80px
+
+      .rule-filter-container, .rule-operator-container, .rule-value-container
+        .form-control
+          width 100%
+
+      .rule-value-container
+        border none
+        padding-left 0
