@@ -35,11 +35,12 @@ export default Panel.extend({
         'click .action-bar button.add-to-session': 'addSelectedDatasetsToSession',
         'click .action-bar button.share': 'shareSelectedDatasets',
         'click .action-bar button.delete': 'deleteSelectedDatasets',
+        'click .action-bar button.toggle-shared': 'toggleShared',
     },
     toggleCategories: function (event) {
-        // Get the div belov the title which was clicked
-        var source = $(event.currentTarget).parent().parent().attr('data-source');
-        var category = $(event.currentTarget).text();
+        var categoryTitle = $(event.currentTarget).closest('.category-title');
+        var source = categoryTitle.data('source');
+        var category = categoryTitle.data('category');
         this.visibleMenus[source][category] = !this.visibleMenus[source][category];
         this.render();
     },
@@ -281,10 +282,13 @@ export default Panel.extend({
     initialize: function (settings) {
         this.allChecked = this.allChecked.bind(this);
         this.deletableSelectedDatasets = this.deletableSelectedDatasets.bind(this);
+        this.sharableSelectedDatasets = this.sharableSelectedDatasets.bind(this);
         var externalId = 1;
         this.collection = settings.session.datasetCollection;
+        this.sessionModel = settings.session.model;
         this.currentUser = getCurrentUser();
         this.visibleMenus = {};
+        this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetId = new Set();
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -385,6 +389,10 @@ export default Panel.extend({
         } else {
             datasetIds.forEach((datasetId) => this.selectedDatasetId.add(datasetId));
         }
+        var categoryTitle = $(event.target).closest('.category-title');
+        var source = categoryTitle.data('source');
+        var category = categoryTitle.data('category');
+        this.visibleMenus[source][category] = true;
         this.render();
     },
 
@@ -394,6 +402,12 @@ export default Panel.extend({
         });
     },
 
+    toggleShared() {
+        this.showSharedDatasets = !this.showSharedDatasets;
+        this.render();
+        this.sessionModel.setValue('showSharedDatasets', this.showSharedDatasets);
+    },
+
     render() {
         var sourceName = (model) => {
             return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
@@ -401,13 +415,21 @@ export default Panel.extend({
 
         this.sourceCategoryDataset = _.chain(this.collection.models)
             .filter(sourceName)
+            .filter((dataset) => {
+                if (this.showSharedDatasets) {
+                    return true;
+                } else {
+                    return dataset.get('creatorId') === this.currentUser.id;
+                }
+            })
             .groupBy(sourceName)
             .mapObject((datasets, key) => {
                 return _.groupBy(datasets, (dataset) => {
                     return dataset.get('meta').minerva.category || 'Other';
                 });
             }).value();
-        this.update(template(this));
+
+        this.$el.html(template(this));
 
         // TODO pagination and search?
         return this;
