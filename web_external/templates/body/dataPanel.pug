@@ -28,7 +28,7 @@ if sourceCategoryDataset
         i.icon-faded(title='Collection', class=expand?'icon-folder-open':'icon-folder')
       .m-sub-category(data-source=source, style={display:expand?'block':'none'})
         each datasets, category in categories
-          .category-title.clearfix(id=category,data-source=source, data-category=category)
+          .category-title.clearfix(id=category, data-source=source, data-category=category)
             .pull-left
               .category-checkbox.checkbox-container(class=hasSelection?'show-checkbox':'')
                 - expand = visibleMenus[source] && visibleMenus[source][category]

@@ -35,7 +35,7 @@ export default Panel.extend({
         'click .action-bar button.add-to-session': 'addSelectedDatasetsToSession',
         'click .action-bar button.share': 'shareSelectedDatasets',
         'click .action-bar button.delete': 'deleteSelectedDatasets',
-        'click .action-bar button.toggle-shared': 'toggleShared',
+        'click .action-bar button.toggle-shared': 'toggleShared'
     },
     toggleCategories: function (event) {
         var categoryTitle = $(event.currentTarget).closest('.category-title');
@@ -215,8 +215,8 @@ export default Panel.extend({
         return Array.from(this.selectedDatasetId)
             .map((datasetId) => this.collection.get(datasetId))
             .filter((dataset) => {
-                return dataset.get('creatorId') === this.currentUser.id
-                    && !dataset.get('displayed')
+                return dataset.get('creatorId') === this.currentUser.id &&
+                    !dataset.get('displayed');
             });
     },
 
@@ -237,12 +237,12 @@ export default Panel.extend({
         return Array.from(this.selectedDatasetId)
             .map((datasetId) => this.collection.get(datasetId))
             .filter((dataset) => {
-                return dataset.get('creatorId') === this.currentUser.id
+                return dataset.get('creatorId') === this.currentUser.id;
             });
     },
 
     shareSelectedDatasets() {
-        var sharableDatasets = this.sharableSelectedDatasets()
+        var sharableDatasets = this.sharableSelectedDatasets();
         var toShareDatasets = sharableDatasets.filter((dataset) => dataset.get('folderId') === this.collection.folderId);
         var toUnshareDatasets = sharableDatasets.filter((dataset) => dataset.get('folderId') !== this.collection.folderId);
         var update = (dataset, updatedDataset) => {
@@ -266,6 +266,7 @@ export default Panel.extend({
         ).then(() => {
             this.clearSelection();
             this.render();
+            return undefined;
         });
     },
 
@@ -375,8 +376,7 @@ export default Panel.extend({
         var datasetId = $(e.target).attr('m-dataset-id');
         if (e.target.checked) {
             this.selectedDatasetId.add(datasetId);
-        }
-        else {
+        } else {
             this.selectedDatasetId.delete(datasetId);
         }
         this.render();
