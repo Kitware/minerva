@@ -130,7 +130,7 @@ const DatasetModel = MinervaModel.extend({
             events.trigger('g:alert', {
                 icon: 'cancel',
                 text: 'Could not create dataset from dataset item.',
-                type: 'error',
+                type: 'danger',
                 timeout: 4000
             });
         }, this));
@@ -255,7 +255,7 @@ const DatasetModel = MinervaModel.extend({
                 events.trigger('g:alert', {
                     icon: 'cancel',
                     text: 'Could not download geoData in Dataset.',
-                    type: 'error',
+                    type: 'danger',
                     timeout: 4000
                 });
             }, this));
@@ -311,7 +311,7 @@ const DatasetModel = MinervaModel.extend({
                 events.trigger('g:alert', {
                     icon: 'cancel',
                     text: 'Could not download the tabular data file.',
-                    type: 'error',
+                    type: 'danger',
                     timeout: 4000
                 });
             }, this));
