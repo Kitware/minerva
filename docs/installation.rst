@@ -105,6 +105,31 @@ if using conda environment instructions above).
 - Navigate to the Admin console in Girder, when you are logged in as an admin user, then click on the Assetstores section.
 - Create a default Assetstore.
 
+Install KTile as a Girder plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. NOTE::
+
+    You can skip this step if you are using Conda environment instructions above.
+
+This is needed because minerva depends on Girder KTile plugin.
+
+- Install girder_ktile plugin into the Girder plugins directory.
+
+::
+
+   cd GIRDER_DIR/plugins
+   git clone https://github.com/OpenGeoscience/girder_ktile
+
+::
+
+- Install the required python packages for the girder_ktile plugin.
+
+::
+
+   cd girder_ktile
+   pip install -r requirements.txt
+
 Install database_assetstore as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -119,7 +144,7 @@ This is needed because minerva depends on database_assetstore plugin.
 ::
 
    cd GIRDER_DIR/plugins
-   git clone https://github.com/OpenGeoscience/girder_db_items database_assetstore
+   git clone https://github.com/OpenGeoscience/database_assetstore
 
 ::
 
