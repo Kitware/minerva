@@ -92,15 +92,11 @@ creating a development environment for Minerva.
     pip install -r requirements.txt
     girder-install web --dev --plugins girder_ktile
 
-
     git clone https://github.com/OpenGeoscience/database_assetstore
     girder-install plugin -s database_assetstore
     cd ../database_assetstore
     pip install -r requirements.txt
     girder-install web --dev --plugins database_assetstore
-
-    export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
-    scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
 
     girder-install plugin -s minerva
     cd ../minerva
