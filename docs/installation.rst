@@ -63,6 +63,15 @@ creating a development environment for Minerva.
     conda env create -f conda_env.yml python=2.7
     source activate minerva-dev
 
+- Run mongo daemon
+
+::
+
+    mongod &
+
+- Install Girder
+
+::
 
     cd ..
     git clone https://github.com/girder/girder.git
@@ -70,11 +79,6 @@ creating a development environment for Minerva.
     pip install -e .
     girder-install web
 
-- Run mongo daemon
-
-::
-
-    mongod &
 
 - Proceed with Minerva installation
 
