@@ -79,6 +79,7 @@ creating a development environment for Minerva.
 - Proceed with Minerva installation
 
 ::
+
     cd .. (assuming that you are inside girder)
 
     git clone https://github.com/OpenGeoscience/girder_ktile
