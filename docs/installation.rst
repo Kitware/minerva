@@ -46,7 +46,7 @@ Fedora 22
 
 
 Conda
-^^^^^^^^^
+^^^^^
 
 Conda installation and conda environment setup should be the first step in
 creating a development environment for Minerva.
@@ -79,29 +79,10 @@ creating a development environment for Minerva.
     pip install -e .
     girder-install web
 
+Notes:
 
-- Proceed with Minerva installation
-
-::
-
-    cd .. (assuming that you are inside girder)
-
-    git clone https://github.com/OpenGeoscience/girder_ktile
-    girder-install plugin -s girder_ktile
-    cd girder/plugins/girder_ktile
-    pip install -r requirements.txt
-    girder-install web --dev --plugins girder_ktile
-
-    git clone https://github.com/OpenGeoscience/database_assetstore
-    girder-install plugin -s database_assetstore
-    cd ../database_assetstore
-    pip install -r requirements.txt
-    girder-install web --dev --plugins database_assetstore
-
-    girder-install plugin -s minerva
-    cd ../minerva
-    pip install -r requirements.txt
-    girder-install web --dev --plugins minerva
+- Make sure that conda minerva-dev environment is active (source activate minerva-dev)
+  for the next steps.
 
 
 Now proceed to setup Girder admin user and assetstore in the next section
@@ -121,66 +102,49 @@ if using conda environment instructions above).
 Install KTile as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. NOTE::
-
-    You can skip this step if you are using Conda environment instructions above.
-
 This is needed because minerva depends on Girder KTile plugin.
 
-- Install girder_ktile plugin into the Girder plugins directory.
+- Install girder_ktile plugin.
 
 ::
 
-   cd GIRDER_DIR/plugins
-   git clone https://github.com/OpenGeoscience/girder_ktile
-
-::
-
-- Install the required python packages for the girder_ktile plugin.
-
-::
-
-   cd girder_ktile
-   pip install -r requirements.txt
+    git clone https://github.com/OpenGeoscience/girder_ktile
+    girder-install plugin -s girder_ktile
+    girder-install web --dev --plugins girder_ktile
 
 Install database_assetstore as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. NOTE::
-
-    You can skip this step if you are using Conda environment instructions above.
-
 This is needed because minerva depends on database_assetstore plugin.
 
-- Install girder_db_items plugin into the Girder plugins directory.
+- Install girder_db_items plugin.
 
 ::
 
-   cd GIRDER_DIR/plugins
-   git clone https://github.com/OpenGeoscience/database_assetstore
+    git clone https://github.com/OpenGeoscience/database_assetstore
+    girder-install plugin -s database_assetstore
+    girder-install web --dev --plugins database_assetstore
 
-::
-
-- Install the required python packages for the database_assetstore plugin.
-
-::
-
-   cd database_assetstore
-   pip install -r requirements.txt
 
 Install of Minerva as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. NOTE::
+Notes:
 
-    You can skip this step if you are using Conda environment instructions above.
+- You can skip the cloning step below if you are using Conda environment.
 
--  Install Minerva into the Girder plugins dir from source.
+-  Clone the Git repository.
 
 ::
 
-    cd GIRDER_DIR/plugins
     git clone https://github.com/Kitware/minerva.git
+
+-  Install Minerva as Girder plugin.
+
+::
+
+    girder-install plugin -s minerva
+    girder-install web --dev --plugins minerva
 
 Notes:
 
