@@ -84,7 +84,7 @@ Notes:
 ::
 
     cd ..
-    git clone https://github.com/girder/girder.git
+    git clone -b 2.x-maintenance https://github.com/girder/girder.git
     cd girder
     pip install -e .
     girder-install web
