@@ -383,7 +383,9 @@ export default Panel.extend({
     },
 
     selectCategory(e) {
-        var datasetIds = $(e.target).closest('.m-sub-category').find('.dataset').map((i, el) => $(el).attr('m-dataset-id')).toArray();
+        var datasetIds = $(e.target).closest('.m-sub-category').find('.dataset')
+            .map((i, el) => $(el).attr('m-dataset-id'))
+            .toArray();
         if (this.allChecked(datasetIds)) {
             datasetIds.forEach((datasetId) => this.selectedDatasetId.delete(datasetId));
         } else {
