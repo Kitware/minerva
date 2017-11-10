@@ -57,7 +57,8 @@ creating a development environment for Minerva.
 
 ::
 
-    mkdir geoviz
+    mkdir MINERVA_DIR (pick name of your choice)
+    cd MINERVA_DIR
     git clone https://github.com/Kitware/minerva.git
     cd minerva
     conda env create -f conda_env.yml python=2.7
@@ -68,6 +69,15 @@ creating a development environment for Minerva.
 ::
 
     mongod &
+
+Notes:
+
+- If mongod fails to start with a message related to dbpath then follow the step below
+
+::
+
+    mkdir MONGO_DATA (directory of your choice)
+    mongod --dbpath PATH_TO_MONGO_DATA &
 
 - Install Girder
 
@@ -155,14 +165,6 @@ Notes:
     sudo pip uninstall cffi
     sudo pip uninstall cryptography
     sudo pip install -U cryptography
-
-
-- Build the client side of Minerva
-
-::
-
-    cd GIRDER_DIR
-    npm install
 
 Configure Minerva
 ~~~~~~~~~~~~~~~~~
