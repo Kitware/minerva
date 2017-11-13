@@ -45,54 +45,116 @@ Fedora 22
 .. _installing node.js on Red Hat: https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora
 
 
+Conda
+^^^^^
+
+Conda installation and conda environment setup should be the first step in
+creating a development environment for Minerva.
+
+- Install Conda (https://conda.io/miniconda.html)
+
+- Create minerva development environment
+
+::
+
+    mkdir MINERVA_DIR (pick name of your choice)
+    cd MINERVA_DIR
+    git clone https://github.com/Kitware/minerva.git
+    cd minerva
+    conda env create -f conda_env.yml python=2.7
+    source activate minerva-dev
+
+- Run mongo daemon
+
+::
+
+    mongod &
+
+Notes:
+
+- If mongod fails to start with a message related to dbpath then follow the step below
+
+::
+
+    mkdir MONGO_DATA (directory of your choice)
+    mongod --dbpath PATH_TO_MONGO_DATA &
+
+- Install Girder
+
+::
+
+    cd ..
+    git clone -b 2.x-maintenance https://github.com/girder/girder.git
+    cd girder
+    pip install -e .
+    girder-install web
+
+Notes:
+
+- Make sure that conda minerva-dev environment is active (source activate minerva-dev)
+  for the next steps.
+
+
+Now proceed to setup Girder admin user and assetstore in the next section
+
 Setup Girder admin user and assetstore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- `Run Girder`_ to ensure that it works.  Mongo should already be running, and you should follow the instructions for a source tree install.
+- `Run Girder`_ to ensure that it works.  Mongo should already be running,
+and you should follow the instructions for a source tree install (ignore
+if using conda environment instructions above).
 
 .. _Run Girder: http://girder.readthedocs.org/en/latest/installation.html#run
 - Navigate to Girder in your browser, register an admin user.
 - Navigate to the Admin console in Girder, when you are logged in as an admin user, then click on the Assetstores section.
 - Create a default Assetstore.
 
+Install KTile as a Girder plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is needed because minerva depends on Girder KTile plugin.
+
+- Install girder_ktile plugin.
+
+::
+
+    git clone https://github.com/OpenGeoscience/girder_ktile
+    girder-install plugin -s girder_ktile
+    girder-install web --dev --plugins girder_ktile
+
 Install database_assetstore as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is needed because minerva depends on database_assetstore plugin.
 
-- Install girder_db_items plugin into the Girder plugins directory.
+- Install girder_db_items plugin.
 
 ::
 
-   cd GIRDER_DIR/plugins
-   git clone https://github.com/OpenGeoscience/girder_db_items database_assetstore
+    git clone https://github.com/OpenGeoscience/database_assetstore
+    girder-install plugin -s database_assetstore
+    girder-install web --dev --plugins database_assetstore
 
-::
-
-- Install the required python packages for the database_assetstore plugin.
-
-::
-
-   cd database_assetstore
-   pip install -r requirements.txt
 
 Install of Minerva as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  Install Minerva into the Girder plugins dir from source.
+Notes:
+
+- You can skip the cloning step below if you are using Conda environment.
+
+-  Clone the Git repository.
 
 ::
 
-    cd GIRDER_DIR/plugins
     git clone https://github.com/Kitware/minerva.git
 
--  Install the Python dependencies of Girder plugins, including dev dependencies.
+-  Install Minerva as Girder plugin.
 
 ::
 
-    cd GIRDER_DIR
-    export IGNORE_PLUGINS=celery_jobs,geospatial,google_analytics,hdfs_assetstore,jquery_widgets,metadata_extractor,mongo_search,oauth,provenance,thumbnails,user_quota,vega;
-    scripts/InstallPythonRequirements.py --mode=dev --ignore-plugins=${IGNORE_PLUGINS}
+    girder-install plugin -s minerva
+    girder-install web --dev --plugins minerva
 
 Notes:
 
@@ -104,13 +166,8 @@ Notes:
     sudo pip uninstall cryptography
     sudo pip install -U cryptography
 
-
-- Build the client side of Minerva
-
-::
-
-    cd GIRDER_DIR
-    npm install
+Configure Minerva
+~~~~~~~~~~~~~~~~~
 
 -  copy the ``minerva.dist.cfg`` file, located in the GIRDER_DIR/plugins/minerva/server/conf
    directory, to ``minerva.local.cfg`` in that same directory. Any
@@ -135,6 +192,12 @@ Notes:
 
     cd GIRDER_DIR
     python -m girder
+
+or
+
+::
+
+    girder-server
 
 
 
