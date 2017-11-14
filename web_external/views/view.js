@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import _ from 'underscore';
 import * as reconcile from 'reconcile.js';
 import View from 'girder/views/View';
 
@@ -12,11 +13,13 @@ const MinervaView = View.extend({
         } else {
             var changes = reconcile.diff($new[0], this.$el.children(0)[0]);
             reconcile.apply(changes, this.$el.children(0)[0]);
+            if (_.some(changes, { name: 'checked' })) {
+                this.$el.find('input:checkbox').each((i, el) => {
+                    el.checked = !!$(el).attr('checked');
+                });
+            }
             return true;
         }
-    },
-    setProperties() {
-
     }
 });
 export default MinervaView;

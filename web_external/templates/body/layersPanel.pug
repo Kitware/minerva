@@ -13,11 +13,12 @@ div
             if dataset.get('geoError')
               i.icon-attention.m-remove-dataset-from-layer&attributes(attributes)
             else
-              i.icon-cancel-circled2.icon-button.m-remove-dataset-from-layer&attributes(attributes)
               - var geoRenderType = dataset.getGeoRenderType()
+              i.icon-button.m-toggle-dataset(class=dataset.get('visible')?'icon-eye':'icon-eye-off')&attributes(attributes)
 
               span= dataset.get('name')
-              .m-push-right
+              .pull-right
+                i.icon-cancel-circled2.icon-button.m-remove-dataset-from-layer&attributes(attributes)
                 //- Cog icon for geo rendering configuration
                 if geoRenderType === 'geojson' || geoRenderType === 'geojson-timeseries'
                   - var classes = 'icon-cog icon-button m-configure-geo-render'
@@ -46,7 +47,6 @@ div
 
                 if dataset.getDatasetType() === 'geojson' || dataset.getDatasetType() === 'geojson-timeseries'
                   i.icon-download.icon-button.m-download-geojson&attributes(attributes)
-                i.icon-button.m-toggle-dataset(class=dataset.get('visible')?'icon-eye':'icon-eye-off')&attributes(attributes)
 
             .m-layer-control-container
               each option in layersOrderOptions

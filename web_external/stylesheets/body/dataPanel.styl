@@ -1,11 +1,33 @@
 #m-data-panel
+  .m-panel-content
+    margin 0
+
   text-align center
+
+  i.icon-faded
+    color #6b6b6b !important
+
+  button.icon-button
+    background none
+    border none
+    margin 0
+    padding 0
+
+    &:focus
+      outline none
+
+    &:disabled
+      i
+        color #cccccc
+
+  .action-bar
+    padding 2px
+    border-bottom 1px solid #ececec
 
   .source-title, .category-title
     font-weight bold
     text-align left
     padding 2px
-    background-color #DFF6E8
     border-style none
     border-width 0px
     i
@@ -15,14 +37,39 @@
       float left
 
     &:hover
-      background-color #D3E9DC
+      background-color #DFF6E8
       cursor pointer
-
-  .category-title
-    background none
 
   .m-sub-category
     margin-left 5px
+
+  .checkbox-container
+    width 20px
+
+    input[type='checkbox']
+      display none
+      margin-top 0
+      margin-bottom 0
+      position relative
+      top 2px
+      left 4px
+
+    &:hover, &.show-checkbox
+      i
+        display none
+
+      input[type='checkbox']
+        display inline
+
+  i
+    color #444
+
+    &.icon-disabled
+      color #cccccc
+    
+    &.icon-enabled:hover
+      color #66a
+      cursor pointer
 
   .dataset
     padding-left 0px
@@ -34,12 +81,14 @@
 
     i
       color #444
-    .icon-disabled
-      color #f0f0f0
-    .icon-enabled:hover
-      color #66a
-      cursor pointer
 
+      &.icon-disabled
+        color #cccccc
+      &.icon-enabled:hover
+        color #66a
+        cursor pointer
+
+    i
       &.m-geo-render-error
         color #ff751a
 
@@ -52,12 +101,10 @@
 
     .m-name
       float left
-      width calc(100% - 60px)
+      width calc(100% - 80px)
       white-space nowrap
       overflow-x hidden
       text-overflow ellipsis
-    
+
     .m-control-right
       float right
-
-    

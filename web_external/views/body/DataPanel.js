@@ -1,7 +1,9 @@
 import _ from 'underscore';
 import eventStream from 'girder/utilities/EventStream';
+import { restRequest } from 'girder/rest';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
+import { getCurrentUser } from 'girder/auth';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -27,12 +29,18 @@ export default Panel.extend({
         'click .dataset-info': 'displayDatasetInfo',
         'click .m-configure-wms-styling': 'styleWmsDataset',
         'click .source-title': 'toggleSources',
-        'click .category-title': 'toggleCategories'
+        'click .category-title .text': 'toggleCategories',
+        'change .category-checkbox.checkbox-container input': 'selectCategory',
+        'change .dataset-checkbox.checkbox-container input': 'selectDataset',
+        'click .action-bar button.add-to-session': 'addSelectedDatasetsToSession',
+        'click .action-bar button.share': 'shareSelectedDatasets',
+        'click .action-bar button.delete': 'deleteSelectedDatasets',
+        'click .action-bar button.toggle-shared': 'toggleShared'
     },
     toggleCategories: function (event) {
-        // Get the div belov the title which was clicked
-        var source = $(event.currentTarget).parent().attr('data-source');
-        var category = $(event.currentTarget).text();
+        var categoryTitle = $(event.currentTarget).closest('.category-title');
+        var source = categoryTitle.data('source');
+        var category = categoryTitle.data('category');
         this.visibleMenus[source][category] = !this.visibleMenus[source][category];
         this.render();
     },
@@ -61,7 +69,7 @@ export default Panel.extend({
                 this.collection.add(dataset);
             }, this).fetch();
         });
-        postgresWidget.render({});
+        postgresWidget.render();
     },
 
     // Ability to style a wms layer
@@ -171,6 +179,19 @@ export default Panel.extend({
         dataset.set('displayed', true);
     },
 
+    addSelectedDatasetsToSession() {
+        Array.from(this.selectedDatasetId)
+            .map((datasetId) => this.collection.get(datasetId))
+            .filter((dataset) => {
+                return !dataset.get('displayed');
+            })
+            .forEach((dataset) => {
+                dataset.set('displayed', true);
+            });
+        this.clearSelection();
+        this.render();
+    },
+
     removeDatasetFromSession: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id'),
             dataset = this.collection.get(datasetId);
@@ -186,6 +207,69 @@ export default Panel.extend({
         }
     },
 
+    clearSelection() {
+        this.selectedDatasetId.clear();
+    },
+
+    deletableSelectedDatasets() {
+        return Array.from(this.selectedDatasetId)
+            .map((datasetId) => this.collection.get(datasetId))
+            .filter((dataset) => {
+                return dataset.get('creatorId') === this.currentUser.id &&
+                    !dataset.get('displayed');
+            });
+    },
+
+    deleteSelectedDatasets() {
+        if (!confirm('Do you want to delete selected datasets?')) {
+            return;
+        }
+        this.deletableSelectedDatasets()
+            .forEach((dataset) => {
+                this.selectedDatasetId.delete(dataset.get('_id'));
+                dataset.destroy();
+                this.collection.remove(dataset);
+            });
+        this.clearSelection();
+    },
+
+    sharableSelectedDatasets() {
+        return Array.from(this.selectedDatasetId)
+            .map((datasetId) => this.collection.get(datasetId))
+            .filter((dataset) => {
+                return dataset.get('creatorId') === this.currentUser.id;
+            });
+    },
+
+    shareSelectedDatasets() {
+        var sharableDatasets = this.sharableSelectedDatasets();
+        var toShareDatasets = sharableDatasets.filter((dataset) => dataset.get('folderId') === this.collection.folderId);
+        var toUnshareDatasets = sharableDatasets.filter((dataset) => dataset.get('folderId') !== this.collection.folderId);
+        var update = (dataset, updatedDataset) => {
+            dataset.set('folderId', updatedDataset.folderId);
+        };
+        return Promise.all(
+            toShareDatasets.map((dataset) => {
+                return restRequest({
+                    type: 'PUT',
+                    url: `minerva_dataset/share/${dataset.id}`
+                })
+                    .done((updatedDataset) => update(dataset, updatedDataset));
+            })
+                .concat(toUnshareDatasets.map((dataset) => {
+                    return restRequest({
+                        type: 'PUT',
+                        url: `minerva_dataset/unshare/${dataset.id}`
+                    })
+                        .done((updatedDataset) => update(dataset, updatedDataset));
+                }))
+        ).then(() => {
+            this.clearSelection();
+            this.render();
+            return undefined;
+        });
+    },
+
     displayDatasetInfo: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
@@ -197,9 +281,16 @@ export default Panel.extend({
         this.datasetInfoWidget.render();
     },
     initialize: function (settings) {
+        this.allChecked = this.allChecked.bind(this);
+        this.deletableSelectedDatasets = this.deletableSelectedDatasets.bind(this);
+        this.sharableSelectedDatasets = this.sharableSelectedDatasets.bind(this);
         var externalId = 1;
-        this.collection = settings.session.datasetsCollection;
+        this.collection = settings.session.datasetCollection;
+        this.sessionModel = settings.session.model;
+        this.currentUser = getCurrentUser();
         this.visibleMenus = {};
+        this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
+        this.selectedDatasetId = new Set();
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -281,6 +372,44 @@ export default Panel.extend({
         return this.parentView.parentView.model;
     },
 
+    selectDataset(e) {
+        var datasetId = $(e.target).attr('m-dataset-id');
+        if (e.target.checked) {
+            this.selectedDatasetId.add(datasetId);
+        } else {
+            this.selectedDatasetId.delete(datasetId);
+        }
+        this.render();
+    },
+
+    selectCategory(e) {
+        var datasetIds = $(e.target).closest('.m-sub-category').find('.dataset')
+            .map((i, el) => $(el).attr('m-dataset-id'))
+            .toArray();
+        if (this.allChecked(datasetIds)) {
+            datasetIds.forEach((datasetId) => this.selectedDatasetId.delete(datasetId));
+        } else {
+            datasetIds.forEach((datasetId) => this.selectedDatasetId.add(datasetId));
+        }
+        var categoryTitle = $(event.target).closest('.category-title');
+        var source = categoryTitle.data('source');
+        var category = categoryTitle.data('category');
+        this.visibleMenus[source][category] = true;
+        this.render();
+    },
+
+    allChecked(datasetIds) {
+        return _.every(datasetIds, (datasetId) => {
+            return this.selectedDatasetId.has(datasetId);
+        });
+    },
+
+    toggleShared() {
+        this.showSharedDatasets = !this.showSharedDatasets;
+        this.render();
+        this.sessionModel.setValue('showSharedDatasets', this.showSharedDatasets);
+    },
+
     render() {
         var sourceName = (model) => {
             return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
@@ -288,6 +417,13 @@ export default Panel.extend({
 
         this.sourceCategoryDataset = _.chain(this.collection.models)
             .filter(sourceName)
+            .filter((dataset) => {
+                if (this.showSharedDatasets) {
+                    return true;
+                } else {
+                    return dataset.get('creatorId') === this.currentUser.id;
+                }
+            })
             .groupBy(sourceName)
             .mapObject((datasets, key) => {
                 return _.groupBy(datasets, (dataset) => {
@@ -295,10 +431,7 @@ export default Panel.extend({
                 });
             }).value();
 
-        this.$el.html(template({
-            sourceCategoryDataset: this.sourceCategoryDataset,
-            visibleMenus: this.visibleMenus
-        }));
+        this.$el.html(template(this));
 
         // TODO pagination and search?
         return this;

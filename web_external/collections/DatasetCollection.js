@@ -1,4 +1,6 @@
 import { getCurrentUser } from 'girder/auth';
+import { restRequest } from 'girder/rest';
+import { _whenAll } from 'girder/misc';
 
 import MinervaCollection from '../MinervaCollection';
 import DatasetModel from '../models/DatasetModel';
@@ -24,6 +26,21 @@ const DatasetCollection = MinervaCollection.extend({
     getInitData: function () {
         var initData = { userId: getCurrentUser().get('_id') };
         return initData;
+    },
+
+    fetch() {
+        return _whenAll(
+            [
+                restRequest({
+                    type: 'GET',
+                    url: `${this.path}/shared`,
+                    data: { userId: getCurrentUser().get('_id') }
+                }).then((result) => result),
+                MinervaCollection.prototype.fetch.apply(this, arguments)
+            ])
+            .done(([sharedDatasets]) => {
+                this.add(sharedDatasets);
+            });
     }
 
 });

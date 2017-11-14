@@ -56,6 +56,18 @@ const SessionModel = MinervaModel.extend({
         // TODO may need to set this to changed because not using setX
     },
 
+    setValue(key, value, save = true) {
+        var metadata = this.metadata();
+        metadata[key] = value;
+        if (save) {
+            this.saveSession();
+        }
+    },
+
+    getValue(key) {
+        return this.metadata()[key];
+    },
+
     /**
      * Async function that initializes the session with minerva metadata, including some defaults
      * for the map.
@@ -71,7 +83,7 @@ const SessionModel = MinervaModel.extend({
             url: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
             attribution: '© OpenStreetMap contributors, © CARTO'
         };
-        map.center = {x: -100, y: 36.5};
+        map.center = { x: -100, y: 36.5 };
         map.zoom = 4;
         map.features = [];
         metadata.map = map;

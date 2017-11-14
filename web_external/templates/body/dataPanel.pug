@@ -8,35 +8,62 @@ include ../layout/panelMixins.pug
 
 if sourceCategoryDataset
   +panel-content('collapse in')
-  each categories, source in sourceCategoryDataset
-    .source-title(id=source)= source
-      - var expand = visibleMenus[source]
-      i(title='Collection', class=expand?'icon-folder-open':'icon-folder')
-    .m-sub-category(data-source=source, style={display:expand?'block':'none'})
-      each datasets, category in categories
-        - expand = visibleMenus[source] && visibleMenus[source][category]
-        .category-title(id=category)= category
-          i(title='Collection', class=expand?'icon-folder-open':'icon-folder')
-        .m-datasets(data-category=category, style={display:expand?'block':'none'})
-          each dataset in datasets
-            if dataset.metadata()
-              .dataset.clearfix
+    - var hasSelection = selectedDatasetId.size;
+    .action-bar
+      .pull-left
+        button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
+          i.icon-user(class=showSharedDatasets?'':'icon-disabled')
+      | &nbsp;
+      .pull-right
+        - multiSelectionButtonClass=hasSelection?'icon-enabled':'icon-disabled';
+        button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
+          i.icon-globe(class=multiSelectionButtonClass)
+        button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
+          i.icon-share(class=multiSelectionButtonClass)
+        button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
+          i.icon-trash(class=multiSelectionButtonClass)
+    each categories, source in sourceCategoryDataset
+      .source-title.clearfix(id=source)= source
+        - var expand = visibleMenus[source]
+        i.icon-faded(title='Collection', class=expand?'icon-folder-open':'icon-folder')
+      .m-sub-category(data-source=source, style={display:expand?'block':'none'})
+        each datasets, category in categories
+          .category-title.clearfix(id=category, data-source=source, data-category=category)
+            .pull-left
+              .category-checkbox.checkbox-container(class=hasSelection?'show-checkbox':'')
+                - expand = visibleMenus[source] && visibleMenus[source][category]
+                i.icon-faded(title='Collection', class=expand?'icon-folder-open':'icon-folder')
+                input(type='checkbox', checked=allChecked(datasets.map((dataset)=>dataset.get('_id'))))
+            .text= category
+          .m-datasets(data-category=category, style={display:expand?'block':'none'})
+            each dataset in datasets
+              if dataset.metadata()
                 - var attributes = {'m-dataset-id': dataset.get('_id')}
-                
-                .m-control-left
-                  //- Globe icon to move dataset into current session
-                  if dataset.isGeoRenderable()
-                    if dataset.get('displayed')
-                      i.icon-enabled.icon-cancel-circled2.remove_dataset-from-session(title='Remove from layers')&attributes(attributes)
-                    else
-                      i.icon-enabled.icon-globe.add-dataset-to-session(title='Add to layers')&attributes(attributes)
+                .dataset.clearfix&attributes(attributes)
+                  .pull-left
+                    .dataset-checkbox.checkbox-container(class=hasSelection?'show-checkbox':'')
+                      if dataset.get('creatorId')===currentUser.id 
+                        if dataset.get('folderId') === collection.folderId
+                          i.icon-doc.icon-faded
+                        else
+                          i.icon-share.icon-faded
+                      else 
+                        i.icon-user.icon-faded
+                      input(type='checkbox', checked=selectedDatasetId.has(dataset.get('_id')))&attributes(attributes)
 
-                .m-name(title=dataset.get('name'))= dataset.get('name')
-                .m-control-right
-                  //- Trash icon to delete dataset
-                  - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled' : 'icon-trash delete-dataset icon-enabled')
-                  i(title='Delete dataset', class=classes)&attributes(attributes)
+                  .m-name(title=dataset.get('name'))= dataset.get('name')
+                  .pull-right
+                    //- Globe icon to move dataset into current session
+                    if dataset.isGeoRenderable()
+                      if dataset.get('displayed')
+                        i.icon-enabled.icon-cancel-circled2.remove_dataset-from-session(title='Remove from layers')&attributes(attributes)
+                      else
+                        i.icon-enabled.icon-globe.add-dataset-to-session(title='Add to layers')&attributes(attributes)
+                    if currentUser.id === dataset.get('creatorId')
+                      //- Trash icon to delete dataset
+                      - var classes = (dataset.get('displayed') ? 'icon-trash delete-dataset icon-disabled' : 'icon-trash delete-dataset icon-enabled')
+                      i(title='Delete dataset', class=classes)&attributes(attributes)
 
-                  //- Info icon for minerva metadata display
-                  i.icon-info-circled.icon-enabled.dataset-info(title='Dataset Info')&attributes(attributes)
-                  - var geoRenderType = dataset.getGeoRenderType()
+                    //- Info icon for minerva metadata display
+                    i.icon-info-circled.icon-enabled.dataset-info(title='Dataset Info')&attributes(attributes)
+                    - var geoRenderType = dataset.getGeoRenderType()
