@@ -7,8 +7,6 @@ import { getCurrentUser } from 'girder/auth';
 
 import events from '../../events';
 import Panel from '../body/Panel';
-import AddWmsSourceWidget from '../widgets/AddWmsSourceWidget';
-import StyleWmsDatasetWidget from '../widgets/StyleWmsDatasetWidget';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
@@ -22,12 +20,10 @@ export default Panel.extend({
         'click .add-dataset-to-session': 'addDatasetToSessionEvent',
         'click .remove_dataset-from-session': 'removeDatasetFromSession',
         'click .m-upload-local': 'uploadDialog',
-        'click .m-add-wms': 'addWmsDataset',
         'click .m-postgres': 'connectToPostgres',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
-        'click .m-configure-wms-styling': 'styleWmsDataset',
         'click .source-title': 'toggleSources',
         'click .category-title .text': 'toggleCategories',
         'change .category-checkbox.checkbox-container input': 'selectCategory',
@@ -37,6 +33,7 @@ export default Panel.extend({
         'click .action-bar button.delete': 'deleteSelectedDatasets',
         'click .action-bar button.toggle-shared': 'toggleShared'
     },
+
     toggleCategories: function (event) {
         var categoryTitle = $(event.currentTarget).closest('.category-title');
         var source = categoryTitle.data('source');
@@ -44,18 +41,11 @@ export default Panel.extend({
         this.visibleMenus[source][category] = !this.visibleMenus[source][category];
         this.render();
     },
+
     toggleSources: function (event) {
         var source = $(event.currentTarget).text();
         this.visibleMenus[source] = this.visibleMenus[source] ? null : {};
         this.render();
-    },
-    addWmsDataset: function (event) {
-        var addWmsWidget = new AddWmsSourceWidget({
-            el: $('#g-dialog-container'),
-            collection: this.collection,
-            parentView: this
-        });
-        addWmsWidget.render();
     },
 
     connectToPostgres: function (event) {
@@ -70,19 +60,6 @@ export default Panel.extend({
             }, this).fetch();
         });
         postgresWidget.render();
-    },
-
-    // Ability to style a wms layer
-    styleWmsDataset: function (event) {
-        var datasetId = $(event.currentTarget).attr('m-dataset-id');
-        var dataset = this.collection.get(datasetId);
-        var styleWmsWidget = new StyleWmsDatasetWidget({
-            el: $('#g-dialog-container'),
-            collection: this.collection,
-            dataset: dataset,
-            parentView: this
-        });
-        styleWmsWidget.render();
     },
 
     /**
