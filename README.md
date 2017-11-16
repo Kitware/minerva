@@ -3,6 +3,7 @@
 ![dependency status](https://david-dm.org/kitware/minerva.svg)
 ![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
+#### Introduction
 Minerva is a sophisticated geospatial application and framework created to enable users to upload, visualize, and analyze small to large geospatial data from a web interface. Minerva uses advancements in web and database technologies such as WebGL and  NoSQL(MongoDB) database. It is designed for big data and cloud enabled data analysis and visualization.
 
 Some of the highlights of Minerva include using a web-enabled data management [Girder](http://www.github.com/Girder/girder) to manage data, metadata, sessions and employing high-performance geospatial data visualization library [GeoJS](http://www.github.com/OpenGeoscience/geojs)
