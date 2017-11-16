@@ -1,6 +1,7 @@
 [![build status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
 ![documentation status](http://readthedocs.org/projects/minervadocs/badge/?version=latest)
 [![dependencies status](https://david-dm.org/kitware/minerva/status.svg)](https://david-dm.org/kitware/minerva)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
 Introduction
