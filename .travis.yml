@@ -53,8 +53,6 @@ before_install:
   # - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.dist.cfg $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.local.cfg
-  - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/jobs/bsve.json.in $GIRDER_SOURCE_DIR/plugins/minerva/server/jobs/bsve.json
-
   - CACHE=$HOME/.cache CMAKE_VERSION=3.4.3 CMAKE_SHORT_VERSION=3.4 source $GIRDER_SOURCE_DIR/scripts/install_cmake.sh
   - cmake --version
 
