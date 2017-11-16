@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
+[![build status](https://travis-ci.org/Kitware/minerva.png?branch=master)](https://travis-ci.org/Kitware/minerva)
+![documentation status](http://readthedocs.org/projects/minervadocs/badge/?version=latest)
+![dependency status](https://david-dm.org/kitware/minerva.svg)
 ![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
 Minerva is a sophisticated geospatial application and framework created to enable users to upload, visualize, and analyze small to large geospatial data from a web interface. Minerva uses advancements in web and database technologies such as WebGL and  NoSQL(MongoDB) database. It is designed for big data and cloud enabled data analysis and visualization.
