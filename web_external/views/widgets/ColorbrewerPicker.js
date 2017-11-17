@@ -1,9 +1,8 @@
 import _ from 'underscore';
-import colorbrewer from 'colorbrewer';
 import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
 
-import { colorbrewerCategories } from './palettableColorbrewerMapper';
+import palettableColorbrewerMapper, { colorbrewerCategories } from '../util/palettableColorbrewerMapper';
 import View from '../view';
 import template from '../../templates/widgets/colorbrewerPicker.pug';
 import '../../stylesheets/widgets/colorBrewerPicker.styl';
@@ -26,8 +25,8 @@ const ColorbrewerPicker = View.extend({
         this.categorizedRamps =
             _.mapObject(colorbrewerCategories, (val, key) => {
                 return val.map((ramp) => {
-                    var [rampName, number] = ramp.split('_');
-                    var colors = colorbrewer[rampName][number];
+                    var [rampName] = ramp.split('_');
+                    var colors = palettableColorbrewerMapper.toRampColors(ramp);
                     var html = "<ul class='m-colorbrewer-ramp'>";
                     _.each(colors, function (color, i) {
                         html += "<li style='background-color: " + color + "'/>";

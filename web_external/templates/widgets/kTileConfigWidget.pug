@@ -19,8 +19,8 @@
             .form-group
               label Band
               select.form-control.m-band(disabled=!custom)
-                each band in bands
-                  option(value=band, selected=band==selectedBand) band #{band}
+                each band, key in bands
+                  option(value=key, selected=key==selectedBand) band #{key}
           .col-md-6
             .form-group
               label Colors
