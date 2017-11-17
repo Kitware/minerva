@@ -22,6 +22,9 @@ import shutil
 import pymongo
 import tempfile
 import json
+import geojson as Geojson
+
+from shapely.geometry import shape
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -56,6 +59,7 @@ class Dataset(Resource):
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
         self.route('GET', (':id', 'download'), self.download)
+        self.route('GET', (':id', 'getbound'), self.getBound)
         self.client = None
 
     def _initClient(self):
@@ -169,7 +173,7 @@ class Dataset(Resource):
         elif minerva_metadata['original_type'] == 'mongo':
             return self._convertMongoToGeoJson(item, params)
         else:
-            raise Exception('Unsupported conversion type %s' %
+            raise RestException('Unsupported conversion type %s' %
                             minerva_metadata['original_type'])
 
         def converterJob(item, tmpdir):
@@ -466,12 +470,23 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
+        return self._download(item, params)
+
+    def _download(self, item, params):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
-            file = self.model('file').load(minervaMeta['geo_render']['file_id'], force=True)
-            return self.model('file').download(file)
+            fileId = None
+            # The storing of file id on item is a little bit messy, so multiple place needs to be checked
+            if 'original_files' in minervaMeta:
+                fileId = minervaMeta['original_files'][0]['_id']
+            elif 'geojson_file' in minervaMeta:
+                fileId = minervaMeta['geojson_file']['_id']
+            else:
+                fileId = minervaMeta['geo_render']['file_id']
+            file = self.model('file').load(fileId, force=True)
+            return self.model('file').open(file).read()
         else:
-            return self._getPostgresGeojsonData(item)
+            return ''.join(list(self._getPostgresGeojsonData(item)()))
 
     def _getPostgresGeojsonData(self, item):
         user = self.getCurrentUser()
@@ -539,3 +554,38 @@ class Dataset(Resource):
                 'type': 'FeatureCollection',
                 'features': assembled
             }
+
+    @access.public
+    @autoDescribeRoute(
+        Description('Get bounding box of a dataset.')
+        .modelParam('id', model='item', level=AccessType.READ)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied on the parent folder.', 403))
+    def getBound(self, item, params):
+        minervaMeta = item['meta']['minerva']
+        if minervaMeta['dataset_type'] == 'geojson':
+            geometry = self._download(item, params)
+            geojson = unwrapFeature(Geojson.loads(geometry))
+            geom = shape(geojson)
+            return {
+                'lrx': geom.bounds[0],
+                'lry': geom.bounds[1],
+                'ulx': geom.bounds[2],
+                'uly': geom.bounds[3]
+            }
+        elif minervaMeta['dataset_type'] == 'geotiff':
+            file = self.model('file').load(minervaMeta['original_files'][
+                0]['_id'], user=self.getCurrentUser())
+            return getInfo(file)['corners']
+        raise RestException('Unsupported dataset type %s' %
+                            minervaMeta['dataset_type'])
+
+
+def unwrapFeature(geojson):
+    if geojson.type == 'FeatureCollection':
+        geometries = [n.geometry for n in geojson.features]
+        return Geojson.GeometryCollection(geometries)
+    elif geojson.type == 'Feature':
+        return geojson.geometry
+    else:
+        return geojson
