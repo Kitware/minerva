@@ -611,9 +611,9 @@ rendering.geo.KtileRepresentation = rendering.geo.defineMapLayer('ktile', functi
         if (_.isEmpty(visProperties)) {
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
         } else {
-            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?
-            palette=${visProperties.palettable}&band=${visProperties.band}&
-            minimum=${visProperties.min}&maximum=${visProperties.max}`);
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?` +
+            `palette=${visProperties.palettable}&band=${visProperties.band}&` +
+            `minimum=${visProperties.min}&maximum=${visProperties.max}`);
             var colorLegendCategory = {
                 type: 'discrete',
                 scale: 'linear',
