@@ -174,7 +174,7 @@ class Dataset(Resource):
             return self._convertMongoToGeoJson(item, params)
         else:
             raise RestException('Unsupported conversion type %s' %
-                            minerva_metadata['original_type'])
+                                minerva_metadata['original_type'])
 
         def converterJob(item, tmpdir):
             geojsonFilepath = converter(item, tmpdir)
@@ -476,7 +476,8 @@ class Dataset(Resource):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
             fileId = None
-            # The storing of file id on item is a little bit messy, so multiple place needs to be checked
+            # The storing of file id on item is a little bit messy, so multiple place
+            # needs to be checked
             if 'original_files' in minervaMeta:
                 fileId = minervaMeta['original_files'][0]['_id']
             elif 'geojson_file' in minervaMeta:
@@ -484,9 +485,9 @@ class Dataset(Resource):
             else:
                 fileId = minervaMeta['geo_render']['file_id']
             file = self.model('file').load(fileId, force=True)
-            return self.model('file').open(file).read()
+            return self.model('file').download(file, headers=False)
         else:
-            return ''.join(list(self._getPostgresGeojsonData(item)()))
+            return self._getPostgresGeojsonData(item)
 
     def _getPostgresGeojsonData(self, item):
         user = self.getCurrentUser()
@@ -564,7 +565,8 @@ class Dataset(Resource):
     def getBound(self, item, params):
         minervaMeta = item['meta']['minerva']
         if minervaMeta['dataset_type'] == 'geojson':
-            geometry = self._download(item, params)
+            generator = self._download(item, params)
+            geometry = ''.join(list(generator()))
             geojson = unwrapFeature(Geojson.loads(geometry))
             geom = shape(geojson)
             return {
