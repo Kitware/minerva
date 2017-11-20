@@ -542,19 +542,13 @@ class Dataset(Resource):
             for record in records:
                 key = ''.join([record[x['value']] for x in valueLinks])
                 if key in mappedGeometries:
-                    assembled.append({
-                        'type': 'Feature',
-                        'geometry': mappedGeometries[key],
-                        'properties': record
-                    })
-
+                    assembled.append(
+                        Geojson.Feature(geometry=mappedGeometries[key], properties=record)
+                    )
             if len(assembled) == 0:
                 raise GirderException('Dataset is empty')
 
-            return {
-                'type': 'FeatureCollection',
-                'features': assembled
-            }
+            return Geojson.FeatureCollection(assembled)
 
     @access.public
     @autoDescribeRoute(
@@ -565,9 +559,13 @@ class Dataset(Resource):
     def getBound(self, item, params):
         minervaMeta = item['meta']['minerva']
         if minervaMeta['dataset_type'] == 'geojson':
-            generator = self._download(item, params)
-            geometry = ''.join(list(generator()))
-            geojson = unwrapFeature(Geojson.loads(geometry))
+            result = self._download(item, params)
+            if callable(result):
+                geometry = ''.join(list(result()))
+                geojson = Geojson.loads(geometry)
+            else:
+                geojson = result
+            geojson = unwrapFeature(geojson)
             geom = shape(geojson)
             return {
                 'lrx': geom.bounds[0],
