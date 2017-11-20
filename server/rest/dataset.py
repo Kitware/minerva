@@ -59,7 +59,7 @@ class Dataset(Resource):
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
         self.route('GET', (':id', 'download'), self.download)
-        self.route('GET', (':id', 'getbound'), self.getBound)
+        self.route('GET', (':id', 'bound'), self.getBound)
         self.client = None
 
     def _initClient(self):

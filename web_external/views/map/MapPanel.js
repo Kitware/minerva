@@ -1,6 +1,8 @@
 import _ from 'underscore';
 import geo from 'geojs';
+import colorbrewer from 'colorbrewer';
 
+import events from '../../events';
 import Panel from '../body/Panel';
 import registry from '../adapters/registry';
 import FeatureInfoWidget from '../widgets/FeatureInfoWidget';
@@ -282,6 +284,55 @@ const MapPanel = Panel.extend({
                 this.changeLayerZIndex(dataset, move);
             }
         }, this);
+
+        this.listenTo(events, 'm:request-show-bounds', (datasetAndBounds) => {
+            if (!this.annotationLayer) {
+                this.annotationLayer = this.map.createLayer('annotation', {
+                    annotations: ['rectangle'],
+                    showLabels: true
+                });
+            } else {
+                this.annotationLayer.removeAllAnnotations();
+            }
+            var i = 0;
+            var features = datasetAndBounds.map(({ dataset, bound }) => {
+                var color = colorbrewer.Pastel1[9][i++ % 9];
+                return {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [[
+                            [bound.lrx, bound.lry],
+                            [bound.ulx, bound.lry],
+                            [bound.ulx, bound.uly],
+                            [bound.lrx, bound.uly],
+                            [bound.lrx, bound.lry]
+                        ]]
+                    },
+                    properties: {
+                        annotationType: 'rectangle',
+                        name: dataset.get('name'),
+                        labelFontWeight: 'normal',
+                        labelColor: 'grey',
+                        fill: true,
+                        fillColor: color,
+                        fillOpacity: 0.2,
+                        stroke: true,
+                        strokeColor: 'grey',
+                        strokeOpacity: 1,
+                        strokeWidth: 1
+                    }
+                };
+            });
+            this.annotationLayer.geojson({
+                'type': 'FeatureCollection',
+                'features': features
+            });
+        });
+
+        this.listenTo(events, 'm:request-hide-bounds', () => {
+            this.annotationLayer.removeAllAnnotations();
+        });
 
         Panel.prototype.initialize.apply(this);
     },

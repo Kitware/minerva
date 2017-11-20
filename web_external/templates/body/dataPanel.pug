@@ -4,7 +4,7 @@ include ../layout/panelMixins.pug
 
 if sourceCategoryDataset
   +panel-content('collapse in')
-    - var hasSelection = selectedDatasetId.size;
+    - var hasSelection = selectedDatasetsId.size;
     .action-bar
       .pull-left
         button.icon-button.m-upload-local(title="Upload local dataset")
@@ -13,13 +13,18 @@ if sourceCategoryDataset
           i.m-icon-enabled.icon-database
         button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
           i.icon-user(class=showSharedDatasets?'':'icon-disabled')
+        if showingBounds
+          button.icon-button.hide-bounds(title='Hide dataset boundaries')
+            i.icon-search
       | &nbsp;
       if hasSelection
         .pull-right
-          button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
-            i.icon-globe
+          button.icon-button.show-bounds(title='Show boundaries of selected datasets', disabled=!hasSelection)
+            i.icon-search
           button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
             i.icon-share
+          button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
+            i.icon-globe
           button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
             i.icon-trash
     each categories, source in sourceCategoryDataset
@@ -49,7 +54,7 @@ if sourceCategoryDataset
                           i.icon-share.icon-faded
                       else 
                         i.icon-user.icon-faded
-                      input(type='checkbox', checked=selectedDatasetId.has(dataset.get('_id')))&attributes(attributes)
+                      input(type='checkbox', checked=selectedDatasetsId.has(dataset.get('_id')))&attributes(attributes)
 
                   .m-name(title=dataset.get('name'))= dataset.get('name')
                   .pull-right
