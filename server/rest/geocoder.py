@@ -32,21 +32,22 @@ from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
 
 
-class TwoFishes(Resource):
+class Geocoder(Resource):
     """Resource that handles geocoding related operations"""
     def __init__(self):
-        super(TwoFishes, self).__init__()
+        super(Geocoder, self).__init__()
         self.resourceName = 'minerva_geocoder'
         self.route('GET', ('geojson',), self.getGeojson)
         self.route('POST', ('geojson',), self.postGeojson)
 
     @staticmethod
-    def getWktFromTwoFishes(twofishes, location):
-        """Gets wkt from twofishes for a given location"""
-        r = requests.get(twofishes,
-                         params={'query': location,
-                                 'responseIncludes': 'WKT_GEOMETRY'})
-        wkt = r.json()['interpretations'][0]['feature']['geometry']['wktGeometry']
+    def getWktFromGeocoder(geocoder, location):
+        """Gets wkt from geocoder for a given location"""
+        r = requests.get(geocoder,
+                         params={'q': location,
+                                 'polygon_text': 1,
+                                 'format': 'jsonv2'})
+        wkt = r.json()[0]['geotext']
 
         return wkt
 
@@ -56,18 +57,21 @@ class TwoFishes(Resource):
         return loads(wkt)
 
     @staticmethod
-    def createGeojson(twofishes, locations):
-        """Create geojson for given locations and twofishes url"""
+    def createGeojson(geocoder, locations):
+        """Create geojson for given locations and geocoder url"""
 
         geoms = []
 
         for i in locations:
-            wkt = TwoFishes.getWktFromTwoFishes(twofishes, i)
-            geom = TwoFishes.createGeometryFromWkt(wkt)
-            for g in geom:
-                geoms.append(geojson.Feature(geometry=g,
+            wkt = Geocoder.getWktFromGeocoder(geocoder, i)
+            geom = Geocoder.createGeometryFromWkt(wkt)
+            try:
+                for g in geom:
+                    geoms.append(geojson.Feature(geometry=g,
+                                                 properties={'location': i}))
+            except TypeError:
+                geoms.append(geojson.Feature(geometry=geom,
                                              properties={'location': i}))
-
         multiPoly = geojson.FeatureCollection(geoms)
 
         return multiPoly
@@ -90,31 +94,31 @@ class TwoFishes(Resource):
     @access.public
     def getGeojson(self, params):
         locations = json.loads(params['locations'])
-        geojson = TwoFishes.createGeojson(params['twofishes'], locations)
+        geojson = Geocoder.createGeojson(params['geocoder'], locations)
         return geojson
 
     getGeojson.description = (
         Description('Create a geojson string from multiple locations')
-        .param('twofishes', 'Twofishes url')
+        .param('geocoder', 'Geocoder url')
         .param('locations', 'List of locations', dataType='list')
     )
 
     @access.public
     def postGeojson(self, params):
-        twofishes = params['twofishes']
+        geocoder = params['geocoder']
         try:
             locationInfo = json.loads(params['locations'])
-            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
+            geojson = Geocoder.createGeojson(geocoder, locationInfo)
         except ValueError:
             locationInfo = params['locations']
-            geojson = TwoFishes.createGeojson(twofishes, locationInfo)
+            geojson = Geocoder.createGeojson(geocoder, locationInfo)
 
         minervaDataset = self.createMinervaDataset(geojson, params['name'])
         return minervaDataset
 
     postGeojson.description = (
         Description('Create a minerva dataset from the search result/results')
-        .param('twofishes', 'Twofishes url')
+        .param('geocoder', 'Geocoder url')
         .param('locations', 'Location name or list of locations to get a geojson')
         .param('name', 'Name for the geojson dataset')
     )

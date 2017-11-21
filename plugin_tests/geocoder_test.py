@@ -45,9 +45,9 @@ def tearDownModule():
 
 
 @urlmatch(scheme='http', netloc='localhost:8087')
-def twofishes_mock(url, request):
+def geocoder_mock(url, request):
     pluginTestDir = os.path.dirname(os.path.realpath(__file__))
-    filepath = os.path.join(pluginTestDir, 'data', 'twofishes_response.json')
+    filepath = os.path.join(pluginTestDir, 'data', 'geocoder_response.json')
     with open(filepath) as mock_response:
         content = json.loads(mock_response.read())
         headers = {
@@ -57,7 +57,7 @@ def twofishes_mock(url, request):
         return httmockresponse(200, content, headers, request=request)
 
 
-class TwoFishesTestCase(base.TestCase):
+class GeocoderTestCase(base.TestCase):
     """
     Tests of the minerva geocoder endpoints.
     """
@@ -66,19 +66,19 @@ class TwoFishesTestCase(base.TestCase):
         """
         Set up the test case
         """
-        super(TwoFishesTestCase, self).setUp()
+        super(GeocoderTestCase, self).setUp()
 
         self.user = self.model('user').createUser('user', 'passwd', 'tst', 'usr',
                                                   'usr@u.com')
 
     def testCreateMinervaDataset(self):
-        with HTTMock(twofishes_mock):
-            twofishes = 'http://localhost:8087'
+        with HTTMock(geocoder_mock):
+            geocoder = 'http://localhost:8087'
             locations = ['boston']
             name = 'boston.geojson'
             self.request(path='/minerva_geocoder/geojson',
                          method='POST',
-                         params={'twofishes': twofishes,
+                         params={'geocoder': geocoder,
                                  'locations': locations,
                                  'name': name}, user=self.user)
 
