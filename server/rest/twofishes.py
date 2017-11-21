@@ -37,7 +37,6 @@ class TwoFishes(Resource):
     def __init__(self):
         super(TwoFishes, self).__init__()
         self.resourceName = 'minerva_geocoder'
-        self.route('GET', ('autocomplete',), self.autocomplete)
         self.route('GET', ('geojson',), self.getGeojson)
         self.route('POST', ('geojson',), self.postGeojson)
 
@@ -87,22 +86,6 @@ class TwoFishes(Resource):
         GeojsonDataset().createGeojsonDataset(itemId=geojsonFile['itemId'],
                                               params={})
         return geojsonFile
-
-    @access.public
-    def autocomplete(self, params):
-        r = requests.get(params['twofishes'],
-                         params={'autocomplete': True,
-                                 'query': params['location'],
-                                 'maxInterpretations': 10,
-                                 'autocompleteBias': None})
-
-        return [i['feature']['matchedName'] for i in r.json()['interpretations']]
-
-    autocomplete.description = (
-        Description('Autocomplete result for a given location name')
-        .param('twofishes', 'Twofishes url')
-        .param('location', 'Location name to autocomplete')
-    )
 
     @access.public
     def getGeojson(self, params):
