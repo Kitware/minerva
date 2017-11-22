@@ -4,7 +4,7 @@ add_python_test(dataset PLUGIN minerva BIND_SERVER)
 add_python_test(geojson PLUGIN minerva BIND_SERVER)
 add_python_test(import_analyses PLUGIN minerva BIND_SERVER)
 add_python_test(session PLUGIN minerva BIND_SERVER)
-add_python_test(twofishes PLUGIN minerva BIND_SERVER)
+add_python_test(geocoder PLUGIN minerva BIND_SERVER)
 add_python_test(wms PLUGIN minerva BIND_SERVER)
 
 set_property(TEST python_static_analysis_minerva PROPERTY LABELS minerva_server)
@@ -13,7 +13,7 @@ set_property(TEST server_minerva.dataset PROPERTY LABELS minerva_server)
 set_property(TEST server_minerva.geojson PROPERTY LABELS minerva_server)
 set_property(TEST server_minerva.import_analyses PROPERTY LABELS minerva_server)
 set_property(TEST server_minerva.session PROPERTY LABELS minerva_server)
-set_property(TEST server_minerva.twofishes PROPERTY LABELS minerva_server)
+set_property(TEST server_minerva.geocoder PROPERTY LABELS minerva_server)
 set_property(TEST server_minerva.wms PROPERTY LABELS minerva_server)
 
 add_web_client_test(
