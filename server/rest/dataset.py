@@ -408,6 +408,9 @@ class Dataset(Resource):
                         'layer_source': 'Tiff'}
                 break
         updateMinervaMetadata(item, minerva_metadata)
+        bounds = self._getBound(item)
+        minerva_metadata['bounds'] = bounds
+        updateMinervaMetadata(item, minerva_metadata)
         return item
     promoteItemToDataset.description = (
         Description('Create metadata for an Item in a user\'s Minerva Dataset' +
@@ -470,9 +473,9 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
-        return self._download(item, params)
+        return self._download(item)
 
-    def _download(self, item, params):
+    def _download(self, item):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
             fileId = None
@@ -552,14 +555,18 @@ class Dataset(Resource):
 
     @access.public
     @autoDescribeRoute(
-        Description('Get bounding box of a dataset.')
+        Description('Calculate bounding box of a dataset.')
         .modelParam('id', model='item', level=AccessType.READ)
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def getBound(self, item, params):
+        bounds = self._getBound(item)
+        return bounds
+
+    def _getBound(self, item):
         minervaMeta = item['meta']['minerva']
         if minervaMeta['dataset_type'] == 'geojson':
-            result = self._download(item, params)
+            result = self._download(item)
             if callable(result):
                 geometry = ''.join(list(result()))
                 geojson = Geojson.loads(geometry)
@@ -568,9 +575,9 @@ class Dataset(Resource):
             geojson = unwrapFeature(geojson)
             geom = shape(geojson)
             return {
-                'lrx': geom.bounds[0],
+                'lrx': geom.bounds[2],
                 'lry': geom.bounds[1],
-                'ulx': geom.bounds[2],
+                'ulx': geom.bounds[0],
                 'uly': geom.bounds[3]
             }
         elif minervaMeta['dataset_type'] == 'geotiff':

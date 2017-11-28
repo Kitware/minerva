@@ -232,6 +232,7 @@ const MapPanel = Panel.extend({
 
     initialize: function (settings) {
         this.session = settings.session.model;
+        this.showBoundsDatasetLabel = false;
         this.listenTo(this.session, 'm:mapUpdated', function () {
             // TODO for now only dealing with center
             if (this.map) {
@@ -286,55 +287,72 @@ const MapPanel = Panel.extend({
         }, this);
 
         this.listenTo(events, 'm:request-show-bounds', (datasetAndBounds) => {
-            if (!this.annotationLayer) {
-                this.annotationLayer = this.map.createLayer('annotation', {
-                    annotations: ['rectangle'],
-                    showLabels: true
-                });
-            } else {
-                this.annotationLayer.removeAllAnnotations();
-            }
-            var i = 0;
-            var features = datasetAndBounds.map(({ dataset, bound }) => {
-                var color = colorbrewer.Pastel1[9][i++ % 9];
-                return {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [[
-                            [bound.lrx, bound.lry],
-                            [bound.ulx, bound.lry],
-                            [bound.ulx, bound.uly],
-                            [bound.lrx, bound.uly],
-                            [bound.lrx, bound.lry]
-                        ]]
-                    },
-                    properties: {
-                        annotationType: 'rectangle',
-                        name: dataset.get('name'),
-                        labelFontWeight: 'normal',
-                        labelColor: 'grey',
-                        fill: true,
-                        fillColor: color,
-                        fillOpacity: 0.2,
-                        stroke: true,
-                        strokeColor: 'grey',
-                        strokeOpacity: 1,
-                        strokeWidth: 1
-                    }
-                };
-            });
-            this.annotationLayer.geojson({
-                'type': 'FeatureCollection',
-                'features': features
-            });
+            this.removeDatasetBounds();
+            this.datasetAndBounds = datasetAndBounds;
+            this.drawDatasetBounds();
         });
 
-        this.listenTo(events, 'm:request-hide-bounds', () => {
-            this.annotationLayer.removeAllAnnotations();
+        this.listenTo(events, 'm:request-remove-bounds', () => {
+            this.datasetAndBounds = null;
+            this.removeDatasetBounds();
+        });
+
+        this.listenTo(events, 'm:toggle-bounds-label', () => {
+            this.showBoundsDatasetLabel = !this.showBoundsDatasetLabel;
+            this.removeDatasetBounds();
+            this.drawDatasetBounds();
         });
 
         Panel.prototype.initialize.apply(this);
+    },
+
+    drawDatasetBounds() {
+        this.annotationLayer = this.map.createLayer('annotation', {
+            annotations: ['rectangle'],
+            showLabels: this.showBoundsDatasetLabel
+        });
+        var i = 0;
+        var features = this.datasetAndBounds.map(({ dataset, bounds }) => {
+            var color = colorbrewer.Set1[9][i++ % 9];
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [[
+                        [bounds.lrx, bounds.lry],
+                        [bounds.ulx, bounds.lry],
+                        [bounds.ulx, bounds.uly],
+                        [bounds.lrx, bounds.uly],
+                        [bounds.lrx, bounds.lry]
+                    ]]
+                },
+                properties: {
+                    annotationType: 'rectangle',
+                    name: dataset.get('name'),
+                    labelFontWeight: 'normal',
+                    labelColor: 'grey',
+                    fill: true,
+                    fillColor: color,
+                    fillOpacity: 0.3,
+                    stroke: true,
+                    strokeColor: 'grey',
+                    strokeOpacity: 1,
+                    strokeWidth: 1
+                }
+            };
+        });
+        this.annotationLayer.geojson({
+            'type': 'FeatureCollection',
+            'features': features
+        });
+    },
+
+    removeDatasetBounds() {
+        if(this.annotationLayer){
+            this.annotationLayer.removeAllAnnotations();
+            this.map.deleteLayer(this.annotationLayer);
+            this.annotationLayer = null;
+        }
     },
 
     render: function () {

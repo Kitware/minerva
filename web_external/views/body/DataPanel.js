@@ -34,7 +34,8 @@ export default Panel.extend({
         'click .action-bar button.delete': 'deleteSelectedDatasets',
         'click .action-bar button.toggle-shared': 'toggleShared',
         'click .action-bar button.show-bounds': 'showBounds',
-        'click .action-bar button.hide-bounds': 'hideBounds'
+        'click .action-bar button.remove-bounds': 'removeBounds',
+        'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel'
     },
 
     toggleCategories: function (event) {
@@ -394,28 +395,36 @@ export default Panel.extend({
     showBounds() {
         _whenAll(
             this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => {
+                var minervaMetadata = dataset.metadata();
+                var bounds = minervaMetadata.bounds || dataset.bounds;
+                if (bounds) {
+                    return { dataset, bounds };
+                }
                 return restRequest({
                     type: 'GET',
                     url: `minerva_dataset/${dataset.get('_id')}/bound`
-                }).then((bound) => {
-                    return {
-                        dataset,
-                        bound
-                    };
+                }).then((bounds) => {
+                    dataset.bounds = bounds;
+                    return { dataset, bounds };
                 });
             })
         ).then((results) => {
             events.trigger('m:request-show-bounds', results);
             this.showingBounds = true;
+            this.clearSelection();
             this.render();
             return undefined;
         });
     },
 
-    hideBounds() {
-        events.trigger('m:request-hide-bounds');
+    removeBounds() {
+        events.trigger('m:request-remove-bounds');
         this.showingBounds = false;
         this.render();
+    },
+
+    toggleBoundsLabel() {
+        events.trigger('m:toggle-bounds-label');
     },
 
     render() {
