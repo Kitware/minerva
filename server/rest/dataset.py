@@ -397,7 +397,7 @@ class Dataset(Resource):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
-            elif 'tif' in file['exts'] and file['mimeType'] == 'image/tiff':
+            elif ('tif' in file['exts'] or 'tiff' in file['exts']) and file['mimeType'] == 'image/tiff':
                 info = getInfo(file)
                 if 'srs' in info and info['srs']:
                     minerva_metadata['original_type'] = 'tiff'
@@ -409,8 +409,9 @@ class Dataset(Resource):
                 break
         updateMinervaMetadata(item, minerva_metadata)
         bounds = self._getBound(item)
-        minerva_metadata['bounds'] = bounds
-        updateMinervaMetadata(item, minerva_metadata)
+        if bounds:
+            minerva_metadata['bounds'] = bounds
+            updateMinervaMetadata(item, minerva_metadata)
         return item
     promoteItemToDataset.description = (
         Description('Create metadata for an Item in a user\'s Minerva Dataset' +
@@ -561,10 +562,14 @@ class Dataset(Resource):
         .errorResponse('Read access was denied on the parent folder.', 403))
     def getBound(self, item, params):
         bounds = self._getBound(item)
+        if not bounds:
+            raise RestException('Unsupported dataset')
         return bounds
 
     def _getBound(self, item):
         minervaMeta = item['meta']['minerva']
+        if 'dataset_type' not in minervaMeta:
+            return
         if (minervaMeta['dataset_type'] == 'geojson' or
                 minervaMeta['dataset_type'] == 'geojson-timeseries'):
             geojson = None
@@ -590,8 +595,6 @@ class Dataset(Resource):
             file = self.model('file').load(minervaMeta['original_files'][
                 0]['_id'], user=self.getCurrentUser())
             return getInfo(file)['corners']
-        raise RestException('Unsupported dataset type %s' %
-                            minervaMeta['dataset_type'])
 
 
 def unwrapFeature(geojson):
