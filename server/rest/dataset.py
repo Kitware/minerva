@@ -21,7 +21,7 @@ import os
 import shutil
 import pymongo
 import tempfile
-import json
+import json as Json
 import geojson as Geojson
 
 from shapely.geometry import shape
@@ -508,7 +508,7 @@ class Dataset(Resource):
             return func
         elif geometryField['type'] == 'link':
             featureCollections = None
-            records = json.loads(''.join(list(func())))
+            records = Json.loads(''.join(list(func())))
             try:
                 item = self.model('item').load(geometryField['itemId'], force=True)
                 file = list(self.model('item').childFiles(item=item, limit=1))[0]
@@ -519,7 +519,7 @@ class Dataset(Resource):
                     contentDisposition=None, extraParameters=None)
             except Exception:
                 raise GirderException('Unable to load link target dataset.')
-            featureCollections = json.loads(''.join(list(func())))
+            featureCollections = Json.loads(''.join(list(func())))
 
             valueLinks = sorted([x for x in geometryField['links']
                                  if x['operator'] == '='])
@@ -565,13 +565,19 @@ class Dataset(Resource):
 
     def _getBound(self, item):
         minervaMeta = item['meta']['minerva']
-        if minervaMeta['dataset_type'] == 'geojson':
-            result = self._download(item)
-            if callable(result):
-                geometry = ''.join(list(result()))
-                geojson = Geojson.loads(geometry)
-            else:
-                geojson = result
+        if (minervaMeta['dataset_type'] == 'geojson' or
+                minervaMeta['dataset_type'] == 'geojson-timeseries'):
+            geojson = None
+            if minervaMeta['dataset_type'] == 'geojson':
+                result = self._download(item)
+                if callable(result):
+                    geojson = Geojson.loads(''.join(list(result())))
+                else:
+                    geojson = result
+            if minervaMeta['dataset_type'] == 'geojson-timeseries':
+                result = self._download(item)
+                json = Json.loads(''.join(list(result())))
+                geojson = Geojson.loads(Json.dumps(json[0]['geojson']))
             geojson = unwrapFeature(geojson)
             geom = shape(geojson)
             return {
