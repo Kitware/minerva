@@ -1,7 +1,8 @@
 import _ from 'underscore';
-import registry from './registry';
 
+import registry from './registry';
 import MapRepresentation from './MapRepresentation';
+import { generateSequence } from '../util/utils';
 
 var multibandTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Style</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><RasterSymbolizer><Opacity>1.0</Opacity><ChannelSelection><RedChannel><SourceChannelName><%= redChannel %></SourceChannelName></RedChannel><GreenChannel><SourceChannelName><%= greenChannel %></SourceChannelName></GreenChannel><BlueChannel><SourceChannelName><%= blueChannel %></SourceChannelName></BlueChannel></ChannelSelection></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
@@ -12,18 +13,6 @@ var polygonTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledL
 var pointTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Point</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName><%= marker %></WellKnownName><Fill><CssParameter name="fill"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Fill></Mark></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
 
 var lineTemplate = _.template('<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"><NamedLayer><Name><%= typeName %></Name><UserStyle><Title>Line</Title><IsDefault>1</IsDefault><FeatureTypeStyle><Rule><LineSymbolizer><Stroke><CssParameter name="stroke"><ogc:Function name="Interpolate"><ogc:PropertyName><%= attribute %></ogc:PropertyName><%= colorValueMapping %><ogc:Literal>color</ogc:Literal></ogc:Function></CssParameter></Stroke></LineSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>');
-
-function generateSequence(start, stop, count) {
-    // Generates a sequence of numbers with the given
-    // start, stop and count variables
-
-    var sequence = [];
-    var step = (stop - start) / (count - 1.0);
-    for (var i = 0; i < count; i++) {
-        sequence.push(parseFloat(start + i * step));
-    }
-    return sequence;
-}
 
 /**
  * GeoJs WMS MapRepresentation definition, with type 'wms'.
