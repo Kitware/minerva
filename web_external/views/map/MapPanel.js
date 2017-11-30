@@ -2,7 +2,8 @@ import _ from 'underscore';
 import geo from 'geojs';
 
 import Panel from '../body/Panel';
-import adapterRegistry from '../adapters/Adapters';
+import registry from '../adapters/registry';
+import '../adapters';
 import FeatureInfoWidget from '../widgets/FeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
@@ -204,7 +205,7 @@ const MapPanel = Panel.extend({
                 dataset.set('geoError', true);
             }
         }, this);
-        adapterRegistry._createRepresentation(this, dataset, layerType, visProperties);
+        registry._createRepresentation(this, dataset, layerType, visProperties);
     },
 
     /**
