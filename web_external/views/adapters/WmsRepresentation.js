@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import registry from './registry';
 
 import MapRepresentation from './MapRepresentation';
 
@@ -170,4 +171,7 @@ class WmsRepresentation extends MapRepresentation {
         this.trigger('m:map_layer_renderable', this);
     }
 }
+
+registry.register('wms', WmsRepresentation);
+
 export default WmsRepresentation;

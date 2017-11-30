@@ -5,6 +5,7 @@ import colorbrewer from 'colorbrewer';
 import MapRepresentation from './MapRepresentation';
 import ClickInfoWidget from '../widgets/ClickInfoWidget';
 import ClickInfoModel from '../../models/ClickInfoModel';
+import registry from './registry';
 
 /**
  * Generic GeoJs Choropleth MapRepresentation definition, with type 'choropleth'.
@@ -106,5 +107,7 @@ class ChoroplethRepresentation extends MapRepresentation {
         this.trigger('m:map_layer_renderable', this);
     }
 }
+
+registry.register('choropleth', ChoroplethRepresentation);
 
 export default ChoroplethRepresentation;

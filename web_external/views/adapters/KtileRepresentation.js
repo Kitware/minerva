@@ -3,6 +3,7 @@ import { getApiRoot } from 'girder/rest';
 
 import palettableColorbrewerMapper from '../util/palettableColorbrewerMapper';
 import MapRepresentation from './MapRepresentation';
+import registry from './registry';
 
 /**
  * Generic GeoJs tile MapRepresentation definition, with type 'ktile'.
@@ -40,4 +41,7 @@ class KtileRepresentation extends MapRepresentation {
         container.removeColorLegendCategories([this.colorLegendCategory]);
     }
 }
+
+registry.register('ktile', KtileRepresentation);
+
 export default KtileRepresentation;

@@ -1,15 +1,5 @@
 import _ from 'underscore';
-import geo from 'geojs';
 import Backbone from 'backbone';
-
-import MapRepresentation from './MapRepresentation';
-import GeometryRepresentation from './GeometryRepresentation';
-import ContourRepresentation from './ContourRepresentation';
-import ChoroplethRepresentation from './ChoroplethRepresentation';
-import WmsRepresentation from './WmsRepresentation';
-import KtileRepresentation from './KtileRepresentation';
-
-window.geo = geo;
 
 /**
  * Definition of the AdapterRegistry, which maps adapters types
@@ -69,13 +59,6 @@ function AdapterRegistry() {
     };
 }
 
-const adapterRegistry = _.extend(new AdapterRegistry(), Backbone.Events);
+const registry = _.extend(new AdapterRegistry(), Backbone.Events);
 
-adapterRegistry.register('map', MapRepresentation);
-adapterRegistry.register('geojson', GeometryRepresentation);
-adapterRegistry.register('contour', ContourRepresentation);
-adapterRegistry.register('choropleth', ChoroplethRepresentation);
-adapterRegistry.register('wms', WmsRepresentation);
-adapterRegistry.register('ktile', KtileRepresentation);
-
-export default adapterRegistry;
+export default registry;

@@ -1,3 +1,5 @@
+import registry from './registry';
+
 import GeometryRepresentation from './GeometryRepresentation';
 
 /**
@@ -9,4 +11,7 @@ class ContourRepresentation extends GeometryRepresentation {
         this.readerType = 'contourJsonReader';
     }
 }
+
+registry.register('contour', ContourRepresentation);
+
 export default ContourRepresentation;

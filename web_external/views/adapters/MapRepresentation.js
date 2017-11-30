@@ -1,3 +1,5 @@
+import registry from './registry';
+
 /**
  * Base MapRepresentation definition
  */
@@ -29,4 +31,7 @@ class MapRepresentation {
         container.renderMap();
     }
 }
+
+registry.register('map', MapRepresentation);
+
 export default MapRepresentation;

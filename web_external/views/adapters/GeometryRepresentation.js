@@ -4,6 +4,7 @@ import colorbrewer from 'colorbrewer';
 
 import MapRepresentation from './MapRepresentation';
 import geojsonUtil from '../../geojsonUtil';
+import registry from './registry';
 /**
  * Generic GeoJson MapRepresentation definition, with type 'geojson'.
  */
@@ -203,4 +204,7 @@ class GeometryRepresentation extends MapRepresentation {
         container.removeColorLegendCategories(this.colorLegendCategories);
     }
 }
+
+registry.register('geojson', GeometryRepresentation);
+
 export default GeometryRepresentation;
