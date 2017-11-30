@@ -96,7 +96,11 @@ const FeatureInfoWidget = View.extend({
     },
 
     render() {
-        this.$el.append(template);
+        this.$el.append(template());
+        this.$("#m-feature-info-dialog").dialog({
+            autoOpen: false,
+            width: 'auto'
+        });
         return this;
     },
 
