@@ -1,5 +1,5 @@
 import view from './view';
-import adapterRegistry, { rendering } from './adapters/Adapters';
+import * as adapters from './adapters';
 import * as map from './map';
 import * as body from './body';
 import * as layout from './layout';
@@ -7,8 +7,7 @@ import * as widgets from './widgets';
 
 export {
     view,
-    adapterRegistry,
-    rendering,
+    adapters,
     map,
     body,
     layout,

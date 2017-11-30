@@ -3,7 +3,6 @@ import geo from 'geojs';
 
 import Panel from '../body/Panel';
 import registry from '../adapters/registry';
-import '../adapters';
 import FeatureInfoWidget from '../widgets/FeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
 import '../../stylesheets/body/mapPanel.styl';
