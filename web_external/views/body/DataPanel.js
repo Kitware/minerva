@@ -290,7 +290,8 @@ export default Panel.extend({
             var dataset = new DatasetModel({
                 _id: externalId++,
                 name: options.name || 'External GeoJSON',
-                folderId: options.folderId || this.collection.folderId
+                folderId: options.folderId || this.collection.folderId,
+                creatorId: this.currentUser.id
             });
             dataset.set({
                 meta: {
@@ -360,7 +361,8 @@ export default Panel.extend({
     },
 
     selectCategory(e) {
-        var datasetIds = $(e.target).closest('.m-sub-category').find('.dataset')
+        var categoryTitle = $(event.target).closest('.category-title');
+        var datasetIds = categoryTitle.next('.m-datasets').find('.dataset')
             .map((i, el) => $(el).attr('m-dataset-id'))
             .toArray();
         if (this.allChecked(datasetIds)) {
@@ -368,7 +370,6 @@ export default Panel.extend({
         } else {
             datasetIds.forEach((datasetId) => this.selectedDatasetId.add(datasetId));
         }
-        var categoryTitle = $(event.target).closest('.category-title');
         var source = categoryTitle.data('source');
         var category = categoryTitle.data('category');
         this.visibleMenus[source][category] = true;
