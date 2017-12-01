@@ -1,13 +1,14 @@
+window.__minervaAnalysisRegistry = window.__minervaAnalysisRegistry || {};
+
 var registry = {
-    _regestry: {},
     register: function (key, widget) {
-        this._regestry[key] = widget;
+        window.__minervaAnalysisRegistry[key] = widget;
     },
     exists: function (key) {
         return !!this.get(key);
     },
     get: function (key) {
-        return this._regestry[key];
+        return window.__minervaAnalysisRegistry[key];
     }
 };
 
