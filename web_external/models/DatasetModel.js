@@ -44,6 +44,7 @@ const DatasetModel = MinervaModel.extend({
      * For now, this is only done for GeoJSON datasets.
      */
     _preprocess: function () {
+        // When the dataset is geojson, apply certain processing and update the geoData property value
         if (this.getDatasetType().match(/(geo)?json/)) {
             var geoData = geojsonUtil.normalize(this.get('geoData'));
             var visProperties = this.getMinervaMetadata().visProperties;
@@ -58,7 +59,8 @@ const DatasetModel = MinervaModel.extend({
                     this.getMinervaMetadata().visProperties.polygon = Object.assign(this.getMinervaMetadata().visProperties.polygon, fillColorProperties);
                 }
             }
-            this.set('geoData', geoData);
+            // Update the property geoData value without triggering event
+            this.attributes['geoData'] = geoData;
         }
     },
 

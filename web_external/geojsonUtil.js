@@ -122,9 +122,12 @@ geojsonUtil.normalize = function normalize(geojson) {  // eslint-disable-line co
                 var label = '' + (entry.label || (entry.time ? moment(entry.time).format('L LTS') : null) || ('Frame ' + (normalized.series.length + 1)));
                 var time = moment.utc(entry.time);
                 normalized.series.push({ time: time, geojson: norm, label: label });
-                $.extend(normalized.summary, norm.summary);
             }
         });
+        normalized.summary = geojsonUtil.accumulate(
+            _.flatten(normalized.series.map((series) => series.geojson.features))
+            .map((feature) => feature.properties)
+        );
         return normalized;
     }
 
