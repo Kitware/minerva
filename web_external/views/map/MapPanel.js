@@ -348,7 +348,7 @@ const MapPanel = Panel.extend({
     },
 
     removeDatasetBounds() {
-        if(this.annotationLayer){
+        if (this.annotationLayer) {
             this.annotationLayer.removeAllAnnotations();
             this.map.deleteLayer(this.annotationLayer);
             this.annotationLayer = null;

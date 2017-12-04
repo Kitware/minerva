@@ -1,3 +1,5 @@
+set( ENV{PYTHONPATH} ${CMAKE_CURRENT_LIST_DIR} )
+
 add_standard_plugin_tests(NO_SERVER_TESTS NO_CLIENT_TESTS)
 add_python_test(analysis PLUGIN minerva BIND_SERVER)
 add_python_test(dataset PLUGIN minerva BIND_SERVER)
@@ -20,7 +22,7 @@ add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
     PLUGIN minerva
     ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "girder_ktile"
-    SETUP_MODULES "${_pluginDir}/plugin_tests/create_user.py"
+    TEST_MODULE "plugin_tests.web_client_test"
 )
 set_property(TEST web_client_minerva.minerva PROPERTY LABELS minerva_client)
 

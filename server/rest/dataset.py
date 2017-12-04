@@ -397,7 +397,8 @@ class Dataset(Resource):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
-            elif ('tif' in file['exts'] or 'tiff' in file['exts']) and file['mimeType'] == 'image/tiff':
+            elif (('tif' in file['exts'] or 'tiff' in file['exts'])
+                  and file['mimeType'] == 'image/tiff'):
                 info = getInfo(file)
                 if 'srs' in info and info['srs']:
                     minerva_metadata['original_type'] = 'tiff'
