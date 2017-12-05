@@ -40,7 +40,7 @@ before_install:
   - gdal-config --version
 
   - MAIN_PATH=$PWD
-  - BUILD_PATH=$HOME/build
+  - BUILD_PATH=$MAIN_PATH/build
   - mkdir -p $BUILD_PATH
 
   - nvm install v6
@@ -50,8 +50,8 @@ before_install:
   - export GIRDER_SOURCE_DIR=$BUILD_PATH/girder
   - rm -rf $GIRDER_SOURCE_DIR
   - git clone -b $GIRDER_BRANCH https://github.com/girder/girder.git $GIRDER_SOURCE_DIR
-  # - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
-  - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
+  - ln -sf $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
+  # - cp -r $MAIN_PATH $GIRDER_SOURCE_DIR/plugins/
   - cp $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.dist.cfg $GIRDER_SOURCE_DIR/plugins/minerva/server/conf/minerva.local.cfg
   - CACHE=$HOME/.cache CMAKE_VERSION=3.4.3 CMAKE_SHORT_VERSION=3.4 source $GIRDER_SOURCE_DIR/scripts/install_cmake.sh
   - cmake --version
@@ -67,7 +67,7 @@ before_install:
   - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
   - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
   - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
-    
+
   # install girder_ktile plugin
   - GIRDER_KTILE_DIR="${GIRDER_SOURCE_DIR}/plugins/girder_ktile"
   - git clone https://github.com/OpenGeoscience/girder_ktile.git "${GIRDER_KTILE_DIR}"
@@ -86,7 +86,7 @@ install:
   - pip install -r $MAIN_PATH/requirements-dev.txt
 
   - npm-install-retry
-  - BABEL_ENV=cover NYC_CWD=$MAIN_PATH girder-install web --plugins=minerva,gravatar,jobs,database_assetstore --dev
+  - BABEL_ENV=cover NYC_CWD="$MAIN_PATH" girder-install web --plugins=minerva,gravatar,jobs,database_assetstore --dev
 
   # replace girder's ctest config with minerva's
   - cp "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/CTestConfig.cmake" "$GIRDER_SOURCE_DIR/."
@@ -96,6 +96,6 @@ script:
   - export GIRDER_BUILD_DIR=$BUILD_PATH/_build
   - mkdir -p $GIRDER_BUILD_DIR
   - cd $GIRDER_BUILD_DIR
-  
+
   - JASMINE_TIMEOUT=15000 ctest -S "$GIRDER_SOURCE_DIR/plugins/minerva/cmake/travis_continuous.cmake" -VV || true
   - if [ -f $GIRDER_BUILD_DIR/test_failed ] ; then false ; fi
