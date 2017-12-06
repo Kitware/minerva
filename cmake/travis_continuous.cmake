@@ -23,13 +23,17 @@ ctest_configure(
 ctest_build()
 
 ctest_test(
-  PARALLEL_LEVEL 1
+  PARALLEL_LEVEL 3
   RETURN_VALUE res
 )
 
+# Report just the javascript coverage to cdash.  To report both javascript and
+# python, we'd have to combine these two xml files in some manner.
+file(RENAME "${CTEST_BINARY_DIRECTORY}/coverage.xml" "${CTEST_BINARY_DIRECTORY}/py_coverage.xml")
 file(RENAME "${CTEST_BINARY_DIRECTORY}/coverage/js_coverage.xml" "${CTEST_BINARY_DIRECTORY}/coverage.xml")
 ctest_coverage()
-file(REMOVE "${CTEST_BINARY_DIRECTORY}/coverage.xml")
+file(RENAME "${CTEST_BINARY_DIRECTORY}/coverage.xml" "${CTEST_BINARY_DIRECTORY}/coverage/js_coverage.xml")
+file(RENAME "${CTEST_BINARY_DIRECTORY}/py_coverage.xml" "${CTEST_BINARY_DIRECTORY}/coverage.xml")
 ctest_submit()
 
 file(REMOVE "${CTEST_BINARY_DIRECTORY}/test_failed")
