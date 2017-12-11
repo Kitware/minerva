@@ -50,6 +50,7 @@ def main():
     parser = argparse.ArgumentParser(description='Import analyses into minerva')
     parser.add_argument('--username', required=False, default=None)
     parser.add_argument('--password', required=False, default=None)
+    parser.add_argument('--apikey', required=False, default=None)
     parser.add_argument('--scheme', required=False, default='http')
     parser.add_argument('--host', required=False, default='localhost')
     parser.add_argument('--port', required=False, default='8080')
@@ -61,7 +62,7 @@ def main():
 
     client = GirderClient(host=config.host, port=config.port,
                           apiRoot=config.api_root, scheme=config.scheme)
-    client.authenticate(config.username, config.password)
+    client.authenticate(config.username, config.password, apiKey=config.apikey)
 
     import_analyses(client, config.path)
 

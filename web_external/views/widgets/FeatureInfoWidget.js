@@ -29,33 +29,6 @@ const FeatureInfoWidget = View.extend({
     callInfo(event) {
         var that = this;
 
-        // function getWMSLayersInfo() {
-        //     var wmsLayers = _.chain(this.parentView.collection.models)
-        //         .filter(function (set) {
-        //             return set.get('displayed') &&
-        //                 set.get('visible') &&
-        //                 set.getDatasetType() !== 'geojson' &&
-        //                 set.getDatasetType() !== 'geojson-timeseries' &&
-        //                 set.getDatasetType() !== 'geotiff'
-        //         });
-        //         .invoke('get', ['_id'])
-        //         .value();
-        //     return restRequest({
-        //         url: '/minerva_get_feature_info',
-        //         type: 'GET',
-        //         data: {
-        //             'activeLayers': wmsLayers,
-        //             'bbox': mapParams.bbox,
-        //             'x': mapParams.x,
-        //             'y': mapParams.y,
-        //             'width': mapParams.width,
-        //             'height': mapParams.height
-        //         }
-        //     }).done((data) => {
-        //         return JSON.parse(data);
-        //     });
-        // }
-
         function getInspectMapParams(event) {
             var mapParams = {};
             var coord = event.geo;
@@ -96,7 +69,11 @@ const FeatureInfoWidget = View.extend({
     },
 
     render() {
-        this.$el.append(template);
+        this.$el.append(template());
+        this.$('#m-feature-info-dialog').dialog({
+            autoOpen: false,
+            width: 'auto'
+        });
         return this;
     },
 
@@ -124,9 +101,9 @@ const FeatureInfoWidget = View.extend({
                     'width': mapParams.width,
                     'height': mapParams.height
                 }
-            }).done(function (data) {
+            }).then(function (data) {
                 var obj = JSON.parse(data);
-                return obj;
+                return obj.features;
             });
         }
     },

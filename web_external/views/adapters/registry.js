@@ -6,7 +6,8 @@ import Backbone from 'backbone';
  * to adapter defintions.
  */
 function AdapterRegistry() {
-    this.registry = {};
+    window.__minervaAdapterRegistry = window.__minervaAdapterRegistry || {};
+    this.registry = window.__minervaAdapterRegistry;
 
     /**
      * Register an adapter definition to a type name, overriding any existing
