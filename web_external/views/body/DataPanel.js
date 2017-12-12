@@ -183,6 +183,7 @@ export default Panel.extend({
         if (!$(event.currentTarget).hasClass('icon-disabled')) {
             var datasetId = $(event.currentTarget).attr('m-dataset-id');
             var dataset = this.collection.get(datasetId);
+            this.selectedDatasetsId.delete(datasetId);
             dataset.destroy();
             this.collection.remove(dataset);
         }
@@ -284,6 +285,11 @@ export default Panel.extend({
             this.render();
         }, this).listenTo(this.collection, 'remove', function () {
             this.render();
+        }, this).listenTo(this.collection, 'zoom-to', function (dataset) {
+            this._getDatasetBounds(dataset)
+                .done((result) => {
+                    events.trigger('m:zoom-to', result);
+                });
         }, this).listenTo(events, 'm:updateDatasets', function () {
             this.collection.fetch(undefined, true);
         }, this).listenTo(events, 'm:addExternalGeoJSON', function (options) {
@@ -392,22 +398,24 @@ export default Panel.extend({
         this.sessionModel.setValue('showSharedDatasets', this.showSharedDatasets);
     },
 
+    _getDatasetBounds(dataset) {
+        var minervaMetadata = dataset.metadata();
+        var bounds = minervaMetadata.bounds || dataset.bounds;
+        if (bounds) {
+            return $.Deferred().resolve({ dataset, bounds });
+        }
+        return restRequest({
+            type: 'GET',
+            url: `minerva_dataset/${dataset.get('_id')}/bound`
+        }).then((bounds) => {
+            dataset.bounds = bounds;
+            return { dataset, bounds };
+        });
+    },
+
     showBounds() {
         _whenAll(
-            this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => {
-                var minervaMetadata = dataset.metadata();
-                var bounds = minervaMetadata.bounds || dataset.bounds;
-                if (bounds) {
-                    return { dataset, bounds };
-                }
-                return restRequest({
-                    type: 'GET',
-                    url: `minerva_dataset/${dataset.get('_id')}/bound`
-                }).then((bounds) => {
-                    dataset.bounds = bounds;
-                    return { dataset, bounds };
-                });
-            })
+            this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => this._getDatasetBounds(dataset))
         ).then((results) => {
             events.trigger('m:request-show-bounds', results);
             this.showingBounds = true;

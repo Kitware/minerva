@@ -6,8 +6,11 @@
 
     li
         border 0
-        margin 2px
-        padding 2px
+        margin 0
+        padding 8px 2px
+
+        &:not(:last-child)
+            border-bottom 1px solid #e6e6e6
 
     .icon-button
         color #444
@@ -28,3 +31,9 @@
         color #ff751a
         float left
 
+    input.m-opacity-range
+        display inline
+        width 88%
+        position relative
+        top 5px
+        margin-left 5px

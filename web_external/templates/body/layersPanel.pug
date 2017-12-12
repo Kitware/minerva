@@ -47,6 +47,7 @@ div
 
                 if dataset.getDatasetType() === 'geojson' || dataset.getDatasetType() === 'geojson-timeseries'
                   i.icon-download.icon-button.m-download-geojson&attributes(attributes)
+                i.icon-button.icon-search.m-zoom-to(title='Zoom to dataset')&attributes(attributes)
 
             .m-layer-control-container
               each option in layersOrderOptions

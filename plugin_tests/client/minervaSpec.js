@@ -273,3 +273,12 @@ describe('Datapanel', function () {
         expect(mapPanel.annotationLayer).toBeFalsy();
     });
 });
+
+describe('Layerpanel', function () {
+    it('Zoom to dataset', function () {
+        var mapPanel = $('#m-map-panel').data('backboneView')[0];
+        var zoom = mapPanel.map.zoom();
+        $('.layersList .dataset').first().find('.m-zoom-to').trigger('click');
+        expect(zoom).not.toEqual(mapPanel.map.zoom());
+    });
+});
