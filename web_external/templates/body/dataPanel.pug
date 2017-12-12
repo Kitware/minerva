@@ -14,10 +14,11 @@ if sourceCategoryDataset
         button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
           i.icon-user(class=showSharedDatasets?'':'icon-disabled')
         if showingBounds
+          ||
           button.icon-button.toggle-bounds-label(title='Toggle boundaries label')
             i.icon-font
           button.icon-button.remove-bounds(title='Remove dataset boundaries')
-            i.icon-search
+            i.icon-trash
       | &nbsp;
       if hasSelection
         .pull-right
