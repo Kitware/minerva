@@ -328,7 +328,7 @@ const MapPanel = Panel.extend({
                     setTimeout(() => {
                         var name = prompt('Dataset name?', 'Boundary');
                         if (name !== null) {
-                            events.trigger('m:dataset-drawn', layer.geojson().features[0].geometry);
+                            events.trigger('m:dataset-drawn', name, layer.geojson().features[0].geometry);
                         }
                         layer.removeAllAnnotations();
                     }, 100);
@@ -336,7 +336,6 @@ const MapPanel = Panel.extend({
                 this.drawDatasetLayer = layer;
             }
             this.drawDatasetLayer.mode('rectangle');
-
         });
 
         Panel.prototype.initialize.apply(this);

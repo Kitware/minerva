@@ -254,23 +254,23 @@ describe('Datapanel', function () {
         }, 'boundaries to be drawn');
 
         runs(function () {
-            expect(mapPanel.annotationLayer).not.toBeFalsy();
-            expect(mapPanel.annotationLayer.annotations().length).toEqual(4);
+            expect(mapPanel.boundariesAnnotationLayer).not.toBeFalsy();
+            expect(mapPanel.boundariesAnnotationLayer.annotations().length).toEqual(4);
         });
     });
 
     it('Toggle boundary label', function () {
         var mapPanel = $('#m-map-panel').data('backboneView')[0];
         $('.icon-button.toggle-bounds-label').trigger('click');
-        expect(mapPanel.annotationLayer.options().showLabels).toEqual(true);
+        expect(mapPanel.boundariesAnnotationLayer.options().showLabels).toEqual(true);
         $('.icon-button.toggle-bounds-label').trigger('click');
-        expect(mapPanel.annotationLayer.options().showLabels).toEqual(false);
+        expect(mapPanel.boundariesAnnotationLayer.options().showLabels).toEqual(false);
     });
 
     it('Hide dataset boundaries', function () {
         var mapPanel = $('#m-map-panel').data('backboneView')[0];
         $('.icon-button.remove-bounds').trigger('click');
-        expect(mapPanel.annotationLayer).toBeFalsy();
+        expect(mapPanel.boundariesAnnotationLayer).toBeFalsy();
     });
 });
 
