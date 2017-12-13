@@ -23,6 +23,7 @@ export default Panel.extend({
         'click .remove_dataset-from-session': 'removeDatasetFromSession',
         'click .m-upload-local': 'uploadDialog',
         'click .m-postgres': 'connectToPostgres',
+        'click .m-boundary-dataset': 'drawBoundaryDataset',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
@@ -65,6 +66,10 @@ export default Panel.extend({
             }, this).fetch();
         });
         postgresWidget.render();
+    },
+
+    drawBoundaryDataset() {
+        events.trigger('m:draw-boundary-dataset');
     },
 
     /**
@@ -345,6 +350,29 @@ export default Panel.extend({
 
             this.collection.add(dataset);
         }, this);
+
+        this.listenTo(events, 'm:dataset-drawn', (geometry) => {
+            var geometryStr = JSON.stringify(geometry);
+            return restRequest({
+                type: 'POST',
+                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=boundary.geojson&size=${geometryStr.length}`,
+                contentType: "application/json",
+                data: geometryStr
+            }).then((file) => {
+                return restRequest({
+                    type: 'GET',
+                    url: `item/${file.itemId}`
+                })
+            }).then((item) => {
+                var dataset = new DatasetModel(item);
+                return dataset.promoteToDataset({});
+            }).then((dataset) => {
+                var minervaMeta = dataset.getMinervaMetadata();
+                minervaMeta.category = 'Boundary';
+                this.collection.add(dataset);
+                dataset.saveMinervaMetadata(minervaMeta);
+            });
+        });
 
         eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);

@@ -119,7 +119,7 @@ const DatasetModel = MinervaModel.extend({
         return restRequest({
             url: 'minerva_dataset/' + this.get('_id') + '/item',
             type: 'POST'
-        }).done(_.bind(function (resp) {
+        }).then((resp) => {
             if (params && params.csvPreview) {
                 resp.meta.minerva.csv_preview = params.csvPreview;
             }
@@ -127,7 +127,8 @@ const DatasetModel = MinervaModel.extend({
             this._initGeoRender();
             this._applyDefaultStyle();
             this.trigger('m:dataset_promoted', this);
-        }, this)).fail(_.bind(function (err) {
+            return this;
+        }).fail((err) => {
             console.error(err);
             events.trigger('g:alert', {
                 icon: 'cancel',
@@ -135,7 +136,7 @@ const DatasetModel = MinervaModel.extend({
                 type: 'danger',
                 timeout: 4000
             });
-        }, this));
+        });
     },
 
     getDatasetType: function () {
