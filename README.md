@@ -2,6 +2,7 @@
 ![documentation status](http://readthedocs.org/projects/minervadocs/badge/?version=latest)
 [![dependencies status](https://david-dm.org/kitware/minerva/status.svg)](https://david-dm.org/kitware/minerva)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![codecov-io](https://codecov.io/github/Kitware/minerva/coverage.svg?branch=master)](https://codecov.io/github/Kitware/minerva?branch=master)
 ![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
 Introduction
