@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import geo from 'geojs';
 import colorbrewer from 'colorbrewer';
+import bootbox from 'bootbox';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -325,13 +326,16 @@ const MapPanel = Panel.extend({
                     showLabels: false
                 });
                 layer.geoOn(geo.event.annotation.state, (e) => {
-                    setTimeout(() => {
-                        var name = prompt('Dataset name?', 'Boundary');
-                        if (name !== null) {
-                            events.trigger('m:dataset-drawn', name, layer.geojson().features[0].geometry);
+                    bootbox.prompt({
+                        title: 'Give dataset a name?',
+                        value: 'Boundary',
+                        callback: (name) => {
+                            if (name !== null) {
+                                events.trigger('m:dataset-drawn', name, layer.geojson().features[0].geometry);
+                            }
+                            layer.removeAllAnnotations();
                         }
-                        layer.removeAllAnnotations();
-                    }, 100);
+                    });
                 });
                 this.drawDatasetLayer = layer;
             }
