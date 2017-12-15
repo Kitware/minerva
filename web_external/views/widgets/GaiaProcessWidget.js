@@ -55,7 +55,7 @@ var GaiaProcessWidget = View.extend({
                 } else {
                     if (inputParams.type) {
                         inputs.push({
-                            '_type': 'girder.plugins.gaia_minerva.inputs.Minerva' + capitalizeFirstLetter(inputParams.type) + 'IO',
+                            '_type': 'gaia_tasks.inputs.Minerva' + capitalizeFirstLetter(inputParams.type) + 'IO',
                             'item_id': inputParams.layer._id
                         });
                     } else {
