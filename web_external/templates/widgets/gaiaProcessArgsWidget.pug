@@ -1,0 +1,6 @@
+.form-group.m-gaiaProcessParamsGroup
+  label.control-label(for="m-gaia-args") #{value.title} (#{value.description})
+  if (value.type === "<type 'float'>")
+    input.input-sm#m-gaia-args.form-control(type="number", name=value.name)
+  if (value.type === "<type 'str'>")
+    input.input-sm#m-gaia-args.form-control(type="text", name=value.name) 
