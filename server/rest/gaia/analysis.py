@@ -24,6 +24,7 @@ from girder.api.rest import Resource
 from girder.plugins.minerva.utility.minerva_utility import addJobOutput
 from girder.plugins.minerva.rest.dataset import Dataset
 from girder.utility import config
+from gaia_tasks.tasks import gaia_task
 
 
 class GaiaAnalysis(Resource):
@@ -32,70 +33,15 @@ class GaiaAnalysis(Resource):
         self.resourceName = 'gaia_analysis'
         self.config = config.getConfig()
         self.route('POST', (), self.gaiaAnalysisTask)
-        self.route('POST', ('remote',), self.remoteGaiaAnalysisTask)
-
-    @access.user
-    def gaiaAnalysisTask(self, params):
-        currentUser = self.getCurrentUser()
-
-        body_json = self.getBodyJson()
-        gaia_json = json.dumps(body_json['process'])
-        datasetName = body_json['datasetName']
-
-        minerva_metadata = {
-            'dataset_type': 'geojson',
-            'source_type': 'gaia_process',
-            'original_type': 'json',
-            'process_json': gaia_json,
-            'source': {
-                'layer_source': 'GeoJSON'
-            }
-        }
-
-        datasetResource = Dataset()
-        dataset = datasetResource.constructDataset(
-            datasetName,
-            minerva_metadata,
-            'created by Gaia'
-        )
-
-        # TODO change token to job token
-        user, token = self.getCurrentUser(returnToken=True)
-        kwargs = {
-            'params': params,
-            'user': currentUser,
-            'dataset': dataset,
-            'analysis': gaia_json,
-            'token': token
-        }
-
-        job = self.model('job', 'jobs').createLocalJob(
-            title='Gaia process: %s' % datasetName,
-            user=currentUser,
-            type='gaia.process',
-            public=False,
-            kwargs=kwargs,
-            module='girder.plugins.gaia_minerva.jobs.gaia_worker',
-            async=True)
-        addJobOutput(job, dataset)
-        self.model('job', 'jobs').scheduleJob(job)
-        return job
-
-    gaiaAnalysisTask.description = (
-        Description('Run a Gaia analysis.')
-        .param('analysis',
-               'JSON describing the output dataset name and Gaia process',
-               paramType='body')
-    )
 
     @access.user
     @autoDescribeRoute(
-        Description('New.')
+        Description('Run a Gaia analysis.')
         .jsonParam('analysis',
                    'JSON describing the output dataset name and Gaia process',
                    paramType='body')
     )
-    def remoteGaiaAnalysisTask(self, analysis, params):
+    def gaiaAnalysisTask(self, analysis, params):
         print analysis
 
         currentUser = self.getCurrentUser()
@@ -129,9 +75,7 @@ class GaiaAnalysis(Resource):
             'analysis': gaia_json,
             'token': token
         }
-
-        from gaia_tasks.tasks import example_task
-        result = example_task.delay(kwargs)
+        result = gaia_task.delay(kwargs, girder_job_title=datasetName)
         job = result.job
 
         addJobOutput(job, dataset)
