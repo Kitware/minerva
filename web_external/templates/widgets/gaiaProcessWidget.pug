@@ -1,0 +1,25 @@
+.modal-dialog
+  .modal-content
+    form#m-gaia-process-form.modal-form(role="form")
+        .modal-header
+          button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+          h4.modal-title
+            | Gaia Process
+        .modal-body
+            .form-group.m-gaiaProcessDatasetNameGroup
+                label.control-label(for="m-gaiaProcessDatasetName") Process Name
+                input.input-sm#m-gaiaProcessDatasetName.form-control(type="text")
+            .form-group.m-gaiaProcessParamsGroup
+              label.control-label(for="m-gaia-process-type") Select Process
+              select.input-sm#m-gaia-process-type.form-control
+                option(value='', selected, disabled) Please select a process
+                each process in processes
+                  option(value=process.data)= process.title
+            #m-gaia-process-inputs
+            #m-gaia-process-args
+            .g-validation-failed-message
+        .modal-footer
+            a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+            button.m-runGaiaProcess.btn.btn-small.btn-primary(type="submit")
+                i.icon-play-circled
+                | Run

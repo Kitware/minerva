@@ -7,7 +7,8 @@
         "jobs",
         "database_assetstore",
         "girder_ktile",
-        "autojoin"
+        "autojoin",
+        "worker"
     ],
     "npm": {
         "file": "package.json",

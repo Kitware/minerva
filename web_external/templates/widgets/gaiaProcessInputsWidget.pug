@@ -1,0 +1,16 @@
+.form-group.m-gaiaProcessParamsGroup
+  label.control-label(for="m-gaia-layer-type") Select #{type} layer
+  select.input-sm#m-gaia-layer-type.form-control
+    option(value='', selected, disabled) Please select a layer
+    - for(var group in groups)
+      optgroup(label=group)
+        each layer in groups[group]
+          - var layerMata = layer.get('meta').minerva
+          if (layerMata.dataset_type !== 'wms')
+            - var layerName = layer.get('name')
+            - var layerId = layer.get('_id')
+            option(value=JSON.stringify({layer: { title: layerName, _id: layerId }, type: type}))= layer.get('name')
+          else if (gaia_minerva_wms.indexOf(layerMata.base_url) !== -1)
+            - var layerName = layer.get('name')
+            - var layerId = layer.get('_id')
+            option(value=JSON.stringify({layer: { title: layerName, _id: layerId }, type: type}))= layer.get('name')

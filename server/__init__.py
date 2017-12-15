@@ -29,6 +29,14 @@ for f in _cfgs:
     if os.path.exists(configPath):
         _mergeConfig(configPath)
 
+# Read the configuration files
+PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
+_cfgs = (('conf', 'gaia_minerva.cfg'),)
+for (path, f) in _cfgs:
+    configPath = os.path.join(PACKAGE_DIR, path, f)
+    if os.path.exists(configPath):
+        _mergeConfig(configPath)
+
 
 def load(info):
     loader.load(info)
