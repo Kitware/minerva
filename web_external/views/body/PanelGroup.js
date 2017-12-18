@@ -16,7 +16,7 @@ const PanelGroup = View.extend({
                 session: this.parentView
             });
 
-            this.$el.append('<div id="' + panelViewSpec.id + '"></div>');
+            this.$el.append('<div class="m-panel" id="' + panelViewSpec.id + '"></div>');
             panelView.setElement(this.$('#' + panelViewSpec.id)).render();
         }, this);
 

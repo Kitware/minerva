@@ -1,5 +1,7 @@
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
+import _ from 'underscore';
+
 import View from '../view';
 import gaiaProcessArgsWidgetTemplate from '../../templates/widgets/gaiaProcessArgsWidget.pug';
 import gaiaProcessInputsWidgetTemplate from '../../templates/widgets/gaiaProcessInputsWidget.pug';
@@ -64,12 +66,12 @@ var GaiaProcessWidget = View.extend({
                 }
             });
 
-            var gaia = Object.assign({'_type': process}, {inputs: inputs}, args);
+            var gaia = Object.assign({ '_type': process }, { inputs: inputs }, args);
 
             console.log(JSON.stringify(gaia));
 
-            var query = Object.assign({'datasetName': datasetName},
-                {'process': gaia});
+            var query = Object.assign({ 'datasetName': datasetName },
+                { 'process': gaia });
 
             console.log(JSON.stringify(query));
 
@@ -84,6 +86,16 @@ var GaiaProcessWidget = View.extend({
             }, this));
         },
         'change #m-gaia-process-type': 'renderProcessInputs'
+    },
+
+    initialize: function (settings) {
+        this.collection = settings.datasetCollection;
+        this.processes = [];
+        this.requiredInputs = {};
+        // Get list of available processes on initialize
+        this.renderListOfAvailableProcesses();
+        this.gaia_minerva_wms = null;
+        this.layers = [];
     },
 
     renderProcessInputs: function () {
@@ -146,21 +158,11 @@ var GaiaProcessWidget = View.extend({
                 this.processes = data.processes.map(_.bind(function (process) {
                     var processName = _.first(_.keys(process));
                     var formattedProcessName = this.splitOnCaps(processName.split('.').pop());
-                    return {title: formattedProcessName, data: JSON.stringify(process)};
+                    return { title: formattedProcessName, data: JSON.stringify(process) };
                 }, this));
                 this.render();
             }
         }, this));
-    },
-
-    initialize: function (settings) {
-        this.collection = settings.datasetCollection;
-        this.processes = [];
-        this.requiredInputs = {};
-        // Get list of available processes on initialize
-        this.renderListOfAvailableProcesses();
-        this.gaia_minerva_wms;
-        this.layers = [];
     },
 
     getSourceNameFromModel: function (model) {
@@ -168,15 +170,15 @@ var GaiaProcessWidget = View.extend({
     },
 
     render: function () {
-        this.layers = _.groupBy(
-            _.filter(this.collection.models, this.getSourceNameFromModel),
-            this.getSourceNameFromModel
-        );
+        this.layers = _.chain(this.collection.toArray())
+            .filter(this.getSourceNameFromModel)
+            .groupBy(this.getSourceNameFromModel)
+            .value();
         var modal = this.$el.html(gaiaProcessWidgetTemplate({
             processes: this.processes
         })).girderModal(this).on('ready.girder.modal', _.bind(function () {
         }, this));
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         return this;
     }
 });
