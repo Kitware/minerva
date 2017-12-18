@@ -1,4 +1,8 @@
 #m-data-panel
+  // This is a good fix for z-index issue caused by the fact the panels have changing opacity, see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ for detail
+  position relative
+  z-index 1
+
   .m-panel-content
     margin 0
 
@@ -6,6 +10,9 @@
 
   i.icon-faded
     color #6b6b6b !important
+
+  .dropdown-icon-button
+    display inline-block
 
   button.icon-button
     background none
