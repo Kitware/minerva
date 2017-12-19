@@ -7,7 +7,6 @@ import SessionsView from './views/body/SessionsView';
 import SessionView from './views/body/SessionView';
 import SessionModel from './models/SessionModel';
 import DatasetCollection from './collections/DatasetCollection';
-import AnalysisCollection from './collections/AnalysisCollection';
 
 girderRouter.enabled(false);
 
@@ -35,11 +34,9 @@ router.route('session/:id', 'session', function (id) {
         _id: id
     });
     var datasetCollection = new DatasetCollection();
-    var analysisCollection = new AnalysisCollection();
-    _whenAll([session.fetch(), datasetCollection.fetch(), analysisCollection.fetch()])
+    _whenAll([session.fetch(), datasetCollection.fetch()])
         .then(() => {
             return events.trigger('g:navigateTo', SessionView, {
-                analysisCollection: analysisCollection,
                 datasetCollection: datasetCollection,
                 session: session
             });

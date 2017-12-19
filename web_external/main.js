@@ -4,7 +4,6 @@ import { registerPluginNamespace } from 'girder/pluginUtils';
 import App from './App';
 import events from './events';
 import * as minerva from './';
-import './gaiaRegister';
 window.minerva = minerva;
 
 $(function () {

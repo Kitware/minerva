@@ -24,7 +24,7 @@ from base64 import b64encode
 from girder import events
 from girder.utility.webroot import Webroot
 from girder.plugins.minerva.rest import \
-    analysis, dataset, session, \
+    dataset, session, \
     wms_dataset, geojson_dataset, wms_styles, feature, geocoder, \
     postgres_geojson
 from girder.plugins.minerva.rest.gaia import analysis as gaia_analysis, geoprocess
@@ -77,7 +77,6 @@ def load(info):
     events.bind('model.setting.validate', 'minerva', validate_settings)
 
     info['apiRoot'].minerva_dataset = dataset.Dataset()
-    info['apiRoot'].minerva_analysis = analysis.Analysis()
     info['apiRoot'].minerva_session = session.Session()
 
     info['apiRoot'].minerva_datasets_wms = wms_dataset.WmsDataset()
