@@ -174,11 +174,18 @@ var GaiaProcessWidget = View.extend({
             .filter(this.getSourceNameFromModel)
             .groupBy(this.getSourceNameFromModel)
             .value();
-        var modal = this.$el.html(gaiaProcessWidgetTemplate({
-            processes: this.processes
-        })).girderModal(this).on('ready.girder.modal', _.bind(function () {
-        }, this));
-        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+        if (!this.modalOpened) {
+            this.modalOpened = true;
+            var modal = this.$el.html(gaiaProcessWidgetTemplate({
+                processes: this.processes
+            })).girderModal(this).on('ready.girder.modal', _.bind(function () {
+            }, this));
+            modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+        } else {
+            this.$el.html(gaiaProcessWidgetTemplate({
+                processes: this.processes
+            }));
+        }
         return this;
     }
 });
