@@ -12,7 +12,6 @@ import EditSessionWidget from '../widgets/EditSessionWidget';
 import SessionCollection from '../../collections/SessionCollection';
 import PanelGroup from './PanelGroup';
 import MapPanel from '../map/MapPanel';
-import AnalysisPanel from './AnalysisPanel';
 import DataPanel from './DataPanel';
 import LayersPanel from './LayersPanel';
 import JobsPanel from './JobsPanel';
@@ -83,7 +82,6 @@ const SessionView = View.extend({
         }, this);
         this.model = settings.session;
         this.datasetCollection = settings.datasetCollection;
-        this.analysisCollection = settings.analysisCollection;
         _.each(this.datasetCollection.models, function (dataset) {
             if (this.model.datasetInFeatures(dataset)) {
                 dataset.set('displayed', true);
@@ -123,10 +121,6 @@ const SessionView = View.extend({
                     id: 'm-left-panel-group',
                     view: PanelGroup,
                     panelViews: [
-                        {
-                            id: 'm-analysis-panel',
-                            view: AnalysisPanel
-                        },
                         {
                             id: 'm-data-panel',
                             view: DataPanel
