@@ -1,16 +1,7 @@
 .m-session-header
-  .m-sessions-list
-    .m-sessions-list-button.dropdown-toggle(
-        data-toggle="dropdown", title="Sessions list")
-      .m-session-title= session.get('name') 
-        i.icon-angle-circled-down
-    if sessionsList.length
-      ul.m-sessions-list-menu.dropdown-menu
-        each session in sessionsList
-          li(role="presentation")
-            a.m-session-link(m-session-cid=session.cid)= session.get('name')
-            .m-session-description= session.get('description')
-  .m-session-description= session.get('description')
+  .m-title= session.get('name') 
+    if session.get('description')
+      | - #{session.get('description')}
   .m-session-header-buttons
     if (accessLevel >= AccessType.WRITE)
       button.m-save-session-button.btn.btn-sm(title="Save session", disabled="disabled")
@@ -22,7 +13,7 @@
           button.m-session-actions-button.btn.btn-sm.btn-default.dropdown-toggle(
               data-toggle="dropdown", title="Session actions")
             i.icon-menu
-            |  Actions
+            |  Session
             i.icon-down-dir
           ul.m-session-actions-menu.dropdown-menu.pull-right(role="menu")
             li(role="presentation")
@@ -37,6 +28,13 @@
               a.m-edit-baselayer(role="menuitem")
                 i.icon-bullseye
                 | Recenter base layer
+            if sessionsList.length
+              li.divider(role="presentation")
+              each session in sessionsList
+                li(role="presentation")
+                  a.m-session-link(m-session-cid=session.cid)
+                    i.icon-right-open
+                    = session.get('name')
             if (accessLevel  >= AccessType.ADMIN)
               li.divider(role="presentation")
               li(role="presentation")
