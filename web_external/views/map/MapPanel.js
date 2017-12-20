@@ -130,7 +130,7 @@ const MapPanel = Panel.extend({
             this.colorLegend = this.uiLayer.createWidget('colorLegend', {
                 position: {
                     right: 10,
-                    top: 100
+                    top: 45
                 }
             });
             this.mapCreated = true;

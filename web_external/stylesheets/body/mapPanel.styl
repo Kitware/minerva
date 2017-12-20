@@ -5,6 +5,13 @@
 .m-map-panel-map
   width 100%
   height 100%
+  
+  &:focus
+    outline none
+
+// Remove geojs map focus highlight
+.m-map-panel-map.geojs-map.highlight-focus:after
+  display none
 
 .m-map-legend-container
   position: absolute
