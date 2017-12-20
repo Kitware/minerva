@@ -1,9 +1,9 @@
 @import '~nib/index'
 
 
-$headerHeight = 3.5em
+$headerHeight = 40px
 $portraitHeight = 38px
-$headerColor = #fff
+$headerColor = #fffcfa
 $leftColWidth = 280px
 
 .m-header-wrapper
@@ -22,8 +22,7 @@ $leftColWidth = 280px
     align-items center
     justify-content flex-start
     width $leftColWidth
-    padding-left 2em
-    background-color #fff
+    padding-left 10px
     img
       height 2.5em
 
@@ -83,7 +82,15 @@ $leftColWidth = 280px
   height 100%
   margin 0
   padding 0
+  padding-top $headerHeight
   overflow hidden
 
 html, body
   height 100%
+
+#m-jobs-panel
+  .m-jobsListContainer
+    .g-jobs-list-table
+      tr
+        td:first-child
+          width 30px

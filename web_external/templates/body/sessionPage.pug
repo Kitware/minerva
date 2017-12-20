@@ -4,21 +4,22 @@
         data-toggle="dropdown", title="Sessions list")
       .m-session-title= session.get('name') 
         i.icon-angle-circled-down
-    ul.m-sessions-list-menu.dropdown-menu
-      each session in sessionsList
-        li(role="presentation")
-          a.m-session-link(m-session-cid=session.cid)= session.get('name')
-          .m-session-description= session.get('description')
+    if sessionsList.length
+      ul.m-sessions-list-menu.dropdown-menu
+        each session in sessionsList
+          li(role="presentation")
+            a.m-session-link(m-session-cid=session.cid)= session.get('name')
+            .m-session-description= session.get('description')
   .m-session-description= session.get('description')
   .m-session-header-buttons
     if (accessLevel >= AccessType.WRITE)
-      button.m-save-session-button.btn.bn-small(title="Save session", disabled="disabled")
+      button.m-save-session-button.btn.btn-sm(title="Save session", disabled="disabled")
         | Save
         i.icon-check
 
       if (accessLevel >= AccessType.WRITE)
         .btn-group.pull-right
-          button.m-session-actions-button.btn.btn-default.dropdown-toggle(
+          button.m-session-actions-button.btn.btn-sm.btn-default.dropdown-toggle(
               data-toggle="dropdown", title="Session actions")
             i.icon-menu
             |  Actions

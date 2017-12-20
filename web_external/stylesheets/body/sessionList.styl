@@ -1,41 +1,40 @@
 @import '../layout.styl'
 @import '~nib/index'
 
-.m-session-list-header
-  margin-top $headerHeight
-  padding-bottom 10px
+.m-session-list
+  padding 15px 10px 0 10px
 
-  .m-session-pagination
-    display inline-block
-    >ul
-      margin 0 13px 0 0
+  .m-session-list-header
+    padding-bottom 10px
 
-    .pagination>li>a
-      float none
-      line-height 1.5
-      padding 7px 12px
-
-  .m-session-search-form
-    display inline
-
-    .form-group
+    .m-session-pagination
       display inline-block
+      >ul
+        margin 0 13px 0 0
 
-    input[type="text"]
-      width 170px
-      margin-right 13px
+      .pagination>li>a
+        float none
+        line-height 1.5
+        padding 7px 12px
 
-.m-session-list-entry
-  padding 11px 14px
-  margin 2px 0
-  border-radius 3px
-  background-color #fafafc
-  border 1px solid #eaeaea
-  box-shadow inset 0 0 2px 2px #f4f4f4
+    .m-session-search-form
+      display inline
+      margin-right 15px
 
-  .m-session-title
-    font-size 17px
-    font-weight bold
+      .form-group
+        display inline-block
 
-  .m-session-description
-    color #626262
+  .m-session-list-entry
+    padding 11px 14px
+    margin 2px 0
+    border-radius 3px
+    background-color #fafafc
+    border 1px solid #eaeaea
+    box-shadow inset 0 0 2px 2px #f4f4f4
+
+    .m-session-title
+      font-size 17px
+      font-weight bold
+
+    .m-session-description
+      color #626262
