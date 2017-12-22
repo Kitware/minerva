@@ -29,5 +29,6 @@ for f in _cfgs:
     if os.path.exists(configPath):
         _mergeConfig(configPath)
 
+
 def load(info):
     loader.load(info)
