@@ -214,6 +214,7 @@ class DatasetTestCase(base.TestCase):
             'mimeType': 'application/vnd.geo+json'
         }]
         geojsonDatasetItem, itemId = createDataset('geojson', files)
+        stateItemId = itemId
         minervaMetadata = geojsonDatasetItem['meta']['minerva']
         self.assertEquals(minervaMetadata['original_type'],
                           'geojson', 'Expected geojson dataset original_type')
@@ -374,3 +375,25 @@ class DatasetTestCase(base.TestCase):
             user=self._user,
         )
         self.assertStatus(response, 400)
+
+        # test new dataset download endpoint
+        response = self.request(
+            path='/minerva_dataset/{0}/download'.format(stateItemId),
+            method='GET',
+            user=self._user
+        )
+        geojsonContent = response.json
+        self.assertEqual(len(geojsonContent['features'][0]['geometry']['coordinates']), 245)
+
+
+        # test new dataset download endpoint
+        response = self.request(
+            path='/minerva_dataset/{0}/bound'.format(stateItemId),
+            method='GET',
+            user=self._user
+        )
+        geojsonContent = response.json
+        self.assertEqual(geojsonContent['lrx'], -89.686924)
+        self.assertEqual(geojsonContent['lry'], 31.332502)
+        self.assertEqual(geojsonContent['ulx'], -114.813613)
+        self.assertEqual(geojsonContent['uly'], 41.003444)
