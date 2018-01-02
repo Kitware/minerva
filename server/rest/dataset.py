@@ -21,8 +21,8 @@ import os
 import shutil
 import pymongo
 import tempfile
-import json as Json
-import geojson as Geojson
+import json
+import geojson
 
 from shapely.geometry import shape
 
@@ -510,7 +510,7 @@ class Dataset(Resource):
             return func
         elif geometryField['type'] == 'link':
             featureCollections = None
-            records = Json.loads(''.join(list(func())))
+            records = json.loads(''.join(list(func())))
             try:
                 item = self.model('item').load(geometryField['itemId'], force=True)
                 file = list(self.model('item').childFiles(item=item, limit=1))[0]
@@ -521,7 +521,7 @@ class Dataset(Resource):
                     contentDisposition=None, extraParameters=None)
             except Exception:
                 raise GirderException('Unable to load link target dataset.')
-            featureCollections = Json.loads(''.join(list(func())))
+            featureCollections = json.loads(''.join(list(func())))
 
             valueLinks = sorted([x for x in geometryField['links']
                                  if x['operator'] == '='])
@@ -548,12 +548,12 @@ class Dataset(Resource):
                 key = ''.join([record[x['value']] for x in valueLinks])
                 if key in mappedGeometries:
                     assembled.append(
-                        Geojson.Feature(geometry=mappedGeometries[key], properties=record)
+                        geojson.Feature(geometry=mappedGeometries[key], properties=record)
                     )
             if len(assembled) == 0:
                 raise GirderException('Dataset is empty')
 
-            return Geojson.FeatureCollection(assembled)
+            return geojson.FeatureCollection(assembled)
 
     @access.public
     @autoDescribeRoute(
@@ -573,19 +573,19 @@ class Dataset(Resource):
             return
         if (minervaMeta['dataset_type'] == 'geojson' or
                 minervaMeta['dataset_type'] == 'geojson-timeseries'):
-            geojson = None
+            geometry = None
             if minervaMeta['dataset_type'] == 'geojson':
                 result = self._download(item)
                 if callable(result):
-                    geojson = Geojson.loads(''.join(list(result())))
+                    geometry = geojson.loads(''.join(list(result())))
                 else:
-                    geojson = result
+                    geometry = result
             if minervaMeta['dataset_type'] == 'geojson-timeseries':
                 result = self._download(item)
-                json = Json.loads(''.join(list(result())))
-                geojson = Geojson.loads(Json.dumps(json[0]['geojson']))
-            geojson = unwrapFeature(geojson)
-            geom = shape(geojson)
+                obj = json.loads(''.join(list(result())))
+                geometry = geojson.loads(json.dumps(obj[0]['geojson']))
+            geometry = unwrapFeature(geometry)
+            geom = shape(geometry)
             return {
                 'lrx': geom.bounds[2],
                 'lry': geom.bounds[1],
@@ -598,11 +598,11 @@ class Dataset(Resource):
             return getInfo(file)['corners']
 
 
-def unwrapFeature(geojson):
-    if geojson.type == 'FeatureCollection':
-        geometries = [n.geometry for n in geojson.features]
-        return Geojson.GeometryCollection(geometries)
-    elif geojson.type == 'Feature':
-        return geojson.geometry
+def unwrapFeature(geometry):
+    if geometry.type == 'FeatureCollection':
+        geometries = [n.geometry for n in geometry.features]
+        return geojson.GeometryCollection(geometries)
+    elif geometry.type == 'Feature':
+        return geometry.geometry
     else:
-        return geojson
+        return geometry
