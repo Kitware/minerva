@@ -605,6 +605,7 @@ export default Panel.extend({
     gaiaProcessClicked(e) {
         var process = this.gaiaProcesses[$(e.currentTarget).data('index')];
         var processAttributes = Object.values(process.processMeta)[0];
+        // If the process requires only one dataset and no parameter run it directly
         if (processAttributes.required_inputs.length === 1 &&
             processAttributes.required_inputs[0].type === 'vector' &&
             processAttributes.required_args.length === 0) {
@@ -642,7 +643,10 @@ export default Panel.extend({
             new GaiaProcessWidget({
                 el: $('#g-dialog-container'),
                 parentView: this,
-                datasetCollection: this.collection
+                datasetCollection: this.collection,
+                processes: this.gaiaProcesses,
+                selectedProcess: process,
+                datasetsId: this.selectedDatasetsId
             }).render();
         }
     },
