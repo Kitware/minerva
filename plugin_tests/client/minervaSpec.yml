@@ -1,0 +1,32 @@
+users:
+  - login: admin
+    email: minerva@email.com
+    firstName: Admin
+    lastName: Admin
+    password: adminpassword!
+    admin: true
+    folders:
+      - name: 'minerva'
+        folders:
+          - name: dataset
+            items:
+              - name: three_states.geojson
+                files:
+                - name: three_states.geojson
+                  path: ../data/states.geojson
+                  mimeType: application/json
+              - name: raster.tiff
+                files:
+                - name: raster.tiff
+                  path: ../data/aerial_rgba.tiff
+                  mimeType: image/tiff
+
+          - name: session
+            items:
+              - name: a session
+
+  - login: user
+    email: user@email.com
+    firstName: User 1
+    lastName: User 1
+    password: userpassword!

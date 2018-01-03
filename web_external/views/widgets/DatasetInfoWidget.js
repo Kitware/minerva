@@ -20,8 +20,9 @@ const DatasetInfoWidget = View.extend({
     },
     normalizeMetaInfo() {
         var meta = this.dataset.get('meta').minerva;
+        var name = meta.original_files ? meta.original_files[0].name : meta.geojson_file.name;
         var output = {
-            Name: meta.geojson_file.name,
+            Name: name,
             Source: 'file'
         };
         switch (meta.dataset_type) {

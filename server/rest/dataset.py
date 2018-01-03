@@ -22,6 +22,9 @@ import shutil
 import pymongo
 import tempfile
 import json
+import geojson
+
+from shapely.geometry import shape
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -56,6 +59,7 @@ class Dataset(Resource):
         self.route('POST', (':id', 'geojson'), self.createGeojson)
         self.route('POST', (':id', 'jsonrow'), self.createJsonRow)
         self.route('GET', (':id', 'download'), self.download)
+        self.route('GET', (':id', 'bound'), self.getBound)
         self.client = None
 
     def _initClient(self):
@@ -169,8 +173,8 @@ class Dataset(Resource):
         elif minerva_metadata['original_type'] == 'mongo':
             return self._convertMongoToGeoJson(item, params)
         else:
-            raise Exception('Unsupported conversion type %s' %
-                            minerva_metadata['original_type'])
+            raise RestException('Unsupported conversion type %s' %
+                                minerva_metadata['original_type'])
 
         def converterJob(item, tmpdir):
             geojsonFilepath = converter(item, tmpdir)
@@ -393,7 +397,8 @@ class Dataset(Resource):
                 minerva_metadata['original_files'] = [{
                     'name': file['name'], '_id': file['_id']}]
                 break
-            elif 'tif' in file['exts'] and file['mimeType'] == 'image/tiff':
+            elif ({'tif', 'tiff'}.intersection(file['exts']) and
+                  file['mimeType'] == 'image/tiff'):
                 info = getInfo(file)
                 if 'srs' in info and info['srs']:
                     minerva_metadata['original_type'] = 'tiff'
@@ -404,6 +409,10 @@ class Dataset(Resource):
                         'layer_source': 'Tiff'}
                 break
         updateMinervaMetadata(item, minerva_metadata)
+        bounds = self._getBound(item)
+        if bounds:
+            minerva_metadata['bounds'] = bounds
+            updateMinervaMetadata(item, minerva_metadata)
         return item
     promoteItemToDataset.description = (
         Description('Create metadata for an Item in a user\'s Minerva Dataset' +
@@ -466,10 +475,22 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
+        return self._download(item)
+
+    def _download(self, item):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
-            file = self.model('file').load(minervaMeta['geo_render']['file_id'], force=True)
-            return self.model('file').download(file)
+            fileId = None
+            # The storing of file id on item is a little bit messy, so multiple place
+            # needs to be checked
+            if 'original_files' in minervaMeta:
+                fileId = minervaMeta['original_files'][0]['_id']
+            elif 'geojson_file' in minervaMeta:
+                fileId = minervaMeta['geojson_file']['_id']
+            else:
+                fileId = minervaMeta['geo_render']['file_id']
+            file = self.model('file').load(fileId, force=True)
+            return self.model('file').download(file, headers=False)
         else:
             return self._getPostgresGeojsonData(item)
 
@@ -526,16 +547,62 @@ class Dataset(Resource):
             for record in records:
                 key = ''.join([record[x['value']] for x in valueLinks])
                 if key in mappedGeometries:
-                    assembled.append({
-                        'type': 'Feature',
-                        'geometry': mappedGeometries[key],
-                        'properties': record
-                    })
-
+                    assembled.append(
+                        geojson.Feature(geometry=mappedGeometries[key], properties=record)
+                    )
             if len(assembled) == 0:
                 raise GirderException('Dataset is empty')
 
+            return geojson.FeatureCollection(assembled)
+
+    @access.public
+    @autoDescribeRoute(
+        Description('Calculate bounding box of a dataset.')
+        .modelParam('id', model='item', level=AccessType.READ)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied on the parent folder.', 403))
+    def getBound(self, item, params):
+        bounds = self._getBound(item)
+        if not bounds:
+            raise RestException('Unsupported dataset')
+        return bounds
+
+    def _getBound(self, item):
+        minervaMeta = item['meta']['minerva']
+        if 'dataset_type' not in minervaMeta:
+            return
+        if (minervaMeta['dataset_type'] == 'geojson' or
+                minervaMeta['dataset_type'] == 'geojson-timeseries'):
+            geometry = None
+            if minervaMeta['dataset_type'] == 'geojson':
+                result = self._download(item)
+                if callable(result):
+                    geometry = geojson.loads(''.join(list(result())))
+                else:
+                    geometry = result
+            if minervaMeta['dataset_type'] == 'geojson-timeseries':
+                result = self._download(item)
+                obj = json.loads(''.join(list(result())))
+                geometry = geojson.loads(json.dumps(obj[0]['geojson']))
+            geometry = unwrapFeature(geometry)
+            geom = shape(geometry)
             return {
-                'type': 'FeatureCollection',
-                'features': assembled
+                'lrx': geom.bounds[2],
+                'lry': geom.bounds[1],
+                'ulx': geom.bounds[0],
+                'uly': geom.bounds[3]
             }
+        elif minervaMeta['dataset_type'] == 'geotiff':
+            file = self.model('file').load(minervaMeta['original_files'][
+                0]['_id'], user=self.getCurrentUser())
+            return getInfo(file)['corners']
+
+
+def unwrapFeature(geometry):
+    if geometry.type == 'FeatureCollection':
+        geometries = [n.geometry for n in geometry.features]
+        return geojson.GeometryCollection(geometries)
+    elif geometry.type == 'Feature':
+        return geometry.geometry
+    else:
+        return geometry

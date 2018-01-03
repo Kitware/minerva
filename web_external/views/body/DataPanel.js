@@ -4,6 +4,7 @@ import { restRequest } from 'girder/rest';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
 import { getCurrentUser } from 'girder/auth';
+import { _whenAll } from 'girder/misc';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -31,7 +32,10 @@ export default Panel.extend({
         'click .action-bar button.add-to-session': 'addSelectedDatasetsToSession',
         'click .action-bar button.share': 'shareSelectedDatasets',
         'click .action-bar button.delete': 'deleteSelectedDatasets',
-        'click .action-bar button.toggle-shared': 'toggleShared'
+        'click .action-bar button.toggle-shared': 'toggleShared',
+        'click .action-bar button.show-bounds': 'showBounds',
+        'click .action-bar button.remove-bounds': 'removeBounds',
+        'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel'
     },
 
     toggleCategories: function (event) {
@@ -157,7 +161,7 @@ export default Panel.extend({
     },
 
     addSelectedDatasetsToSession() {
-        Array.from(this.selectedDatasetId)
+        Array.from(this.selectedDatasetsId)
             .map((datasetId) => this.collection.get(datasetId))
             .filter((dataset) => {
                 return !dataset.get('displayed');
@@ -185,11 +189,11 @@ export default Panel.extend({
     },
 
     clearSelection() {
-        this.selectedDatasetId.clear();
+        this.selectedDatasetsId.clear();
     },
 
     deletableSelectedDatasets() {
-        return Array.from(this.selectedDatasetId)
+        return Array.from(this.selectedDatasetsId)
             .map((datasetId) => this.collection.get(datasetId))
             .filter((dataset) => {
                 return dataset.get('creatorId') === this.currentUser.id &&
@@ -203,7 +207,7 @@ export default Panel.extend({
         }
         this.deletableSelectedDatasets()
             .forEach((dataset) => {
-                this.selectedDatasetId.delete(dataset.get('_id'));
+                this.selectedDatasetsId.delete(dataset.get('_id'));
                 dataset.destroy();
                 this.collection.remove(dataset);
             });
@@ -211,7 +215,7 @@ export default Panel.extend({
     },
 
     sharableSelectedDatasets() {
-        return Array.from(this.selectedDatasetId)
+        return Array.from(this.selectedDatasetsId)
             .map((datasetId) => this.collection.get(datasetId))
             .filter((dataset) => {
                 return dataset.get('creatorId') === this.currentUser.id;
@@ -267,7 +271,7 @@ export default Panel.extend({
         this.currentUser = getCurrentUser();
         this.visibleMenus = {};
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
-        this.selectedDatasetId = new Set();
+        this.selectedDatasetsId = new Set();
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -353,22 +357,22 @@ export default Panel.extend({
     selectDataset(e) {
         var datasetId = $(e.target).attr('m-dataset-id');
         if (e.target.checked) {
-            this.selectedDatasetId.add(datasetId);
+            this.selectedDatasetsId.add(datasetId);
         } else {
-            this.selectedDatasetId.delete(datasetId);
+            this.selectedDatasetsId.delete(datasetId);
         }
         this.render();
     },
 
-    selectCategory(e) {
+    selectCategory(event) {
         var categoryTitle = $(event.target).closest('.category-title');
         var datasetIds = categoryTitle.next('.m-datasets').find('.dataset')
             .map((i, el) => $(el).attr('m-dataset-id'))
             .toArray();
         if (this.allChecked(datasetIds)) {
-            datasetIds.forEach((datasetId) => this.selectedDatasetId.delete(datasetId));
+            datasetIds.forEach((datasetId) => this.selectedDatasetsId.delete(datasetId));
         } else {
-            datasetIds.forEach((datasetId) => this.selectedDatasetId.add(datasetId));
+            datasetIds.forEach((datasetId) => this.selectedDatasetsId.add(datasetId));
         }
         var source = categoryTitle.data('source');
         var category = categoryTitle.data('category');
@@ -378,7 +382,7 @@ export default Panel.extend({
 
     allChecked(datasetIds) {
         return _.every(datasetIds, (datasetId) => {
-            return this.selectedDatasetId.has(datasetId);
+            return this.selectedDatasetsId.has(datasetId);
         });
     },
 
@@ -386,6 +390,41 @@ export default Panel.extend({
         this.showSharedDatasets = !this.showSharedDatasets;
         this.render();
         this.sessionModel.setValue('showSharedDatasets', this.showSharedDatasets);
+    },
+
+    showBounds() {
+        _whenAll(
+            this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => {
+                var minervaMetadata = dataset.metadata();
+                var bounds = minervaMetadata.bounds || dataset.bounds;
+                if (bounds) {
+                    return { dataset, bounds };
+                }
+                return restRequest({
+                    type: 'GET',
+                    url: `minerva_dataset/${dataset.get('_id')}/bound`
+                }).then((bounds) => {
+                    dataset.bounds = bounds;
+                    return { dataset, bounds };
+                });
+            })
+        ).then((results) => {
+            events.trigger('m:request-show-bounds', results);
+            this.showingBounds = true;
+            this.clearSelection();
+            this.render();
+            return undefined;
+        });
+    },
+
+    removeBounds() {
+        events.trigger('m:request-remove-bounds');
+        this.showingBounds = false;
+        this.render();
+    },
+
+    toggleBoundsLabel() {
+        events.trigger('m:toggle-bounds-label');
     },
 
     render() {

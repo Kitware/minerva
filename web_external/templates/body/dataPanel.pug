@@ -1,27 +1,35 @@
 include ../layout/panelMixins.pug
 
 +panel-title('Datasets', 'm-data-panel')
-  i.m-upload-local.m-icon-enabled.icon-upload(title="Upload local file")
-  // uncomment this line to enable adding wms layer
-  //- i.m-add-wms.m-icon-enabled.icon-upload(title="Add WMS dataset")
-  i.m-postgres.m-icon-enabled.icon-database(title="Connect to postgres")
 
 if sourceCategoryDataset
   +panel-content('collapse in')
-    - var hasSelection = selectedDatasetId.size;
+    - var hasSelection = selectedDatasetsId.size;
     .action-bar
       .pull-left
+        button.icon-button.m-upload-local(title="Upload local dataset")
+          i.m-icon-enabled.icon-upload
+        button.icon-button.m-postgres(title="Create postgres dataset")
+          i.m-icon-enabled.icon-database
         button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
           i.icon-user(class=showSharedDatasets?'':'icon-disabled')
+        if showingBounds
+          ||
+          button.icon-button.toggle-bounds-label(title='Toggle boundaries label')
+            i.icon-font
+          button.icon-button.remove-bounds(title='Remove dataset boundaries')
+            i.icon-trash
       | &nbsp;
-      .pull-right
-        - multiSelectionButtonClass=hasSelection?'icon-enabled':'icon-disabled';
-        button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
-          i.icon-globe(class=multiSelectionButtonClass)
-        button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
-          i.icon-share(class=multiSelectionButtonClass)
-        button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
-          i.icon-trash(class=multiSelectionButtonClass)
+      if hasSelection
+        .pull-right
+          button.icon-button.show-bounds(title='Show boundaries of selected datasets', disabled=!hasSelection)
+            i.icon-search
+          button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
+            i.icon-share
+          button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
+            i.icon-globe
+          button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
+            i.icon-trash
     each categories, source in sourceCategoryDataset
       .source-title.clearfix(id=source)= source
         - var expand = visibleMenus[source]
@@ -49,7 +57,7 @@ if sourceCategoryDataset
                           i.icon-share.icon-faded
                       else 
                         i.icon-user.icon-faded
-                      input(type='checkbox', checked=selectedDatasetId.has(dataset.get('_id')))&attributes(attributes)
+                      input(type='checkbox', checked=selectedDatasetsId.has(dataset.get('_id')))&attributes(attributes)
 
                   .m-name(title=dataset.get('name'))= dataset.get('name')
                   .pull-right

@@ -4,17 +4,26 @@ girderTest.importPlugin('database_assetstore');
 girderTest.importPlugin('girder_ktile');
 girderTest.importPlugin('minerva');
 
+girderTest.importStylesheet('/static/built/plugins/minerva/minerva.min.css');
+girderTest.importStylesheet('/static/built/plugins/jobs/plugin.min.css');
+
 girderTest.addScripts([
     '/clients/web/static/built/plugins/minerva/minerva.min.js'
 ]);
 
+// helper function to make it easy to get Backbone View instance from DOM element
+var setElement = Backbone.View.prototype.setElement;
+Backbone.View.prototype.setElement = function (element) {
+    if (!$(element).data('backboneView')) {
+        $(element).data('backboneView', []);
+    }
+    var views = $(element).data('backboneView');
+    if (views) {
+        views.push(this);
+    }
+    return setElement.apply(this, arguments);
+};
 $(function () {
-    var setElement = Backbone.View.prototype.setElement;
-    Backbone.View.prototype.setElement = function (element) {
-        $(element).data('backboneView', this);
-        return setElement.apply(this, arguments);
-    };
-
     girder.auth.login('admin', 'adminpassword!').done(function () {
     });
 });
@@ -94,7 +103,7 @@ describe('Main view', function () {
 describe('Session view', function () {
     var layerPanelView = null;
     it('Upload a geojson and a geojson-timeseries files', function () {
-        layerPanelView = $('#m-layer-panel').data('backboneView');
+        layerPanelView = $('#m-layer-panel').data('backboneView')[0];
 
         runs(function () {
             window.geo.util.mockVGLRenderer();
@@ -206,5 +215,61 @@ describe('Session view', function () {
             expect(layerPanelView.$('select[class^="m-cycle-duration"]').find(':selected').text()).toBe('1 minute');
             expect(dataset.get('animationDuration')).toBe(60);
         });
+    });
+});
+
+describe('Datapanel', function () {
+    it('Select and unselect datasets', function () {
+        $('.source-title#Tiff').trigger('click');
+        $('.source-title#GeoJSON').trigger('click');
+
+        // Test category selection
+        $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(1);
+        $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(4);
+        // unselect checked categories
+        $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+        $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(0);
+
+        // test individual dataset selection
+        $('.source-title#GeoJSON').next('.m-sub-category').find('.dataset input').first().prop('checked', true).trigger('change');
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(1);
+        $('.source-title#GeoJSON').next('.m-sub-category').find('.dataset input').first().prop('checked', false).trigger('change');
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(0);
+    });
+
+    it('Show dataset boundaries', function () {
+        var mapPanel = $('#m-map-panel').data('backboneView')[0];
+        runs(function () {
+            $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+            $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
+
+            $('.icon-button.show-bounds').trigger('click');
+        });
+
+        waitsFor(function () {
+            return $('.icon-button.remove-bounds').length;
+        }, 'boundaries to be drawn');
+
+        runs(function () {
+            expect(mapPanel.annotationLayer).not.toBeFalsy();
+            expect(mapPanel.annotationLayer.annotations().length).toEqual(4);
+        });
+    });
+
+    it('Toggle boundary label', function () {
+        var mapPanel = $('#m-map-panel').data('backboneView')[0];
+        $('.icon-button.toggle-bounds-label').trigger('click');
+        expect(mapPanel.annotationLayer.options().showLabels).toEqual(true);
+        $('.icon-button.toggle-bounds-label').trigger('click');
+        expect(mapPanel.annotationLayer.options().showLabels).toEqual(false);
+    });
+
+    it('Hide dataset boundaries', function () {
+        var mapPanel = $('#m-map-panel').data('backboneView')[0];
+        $('.icon-button.remove-bounds').trigger('click');
+        expect(mapPanel.annotationLayer).toBeFalsy();
     });
 });
