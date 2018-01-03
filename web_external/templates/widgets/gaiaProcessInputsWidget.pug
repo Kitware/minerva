@@ -1,16 +1,15 @@
 .form-group.m-gaiaProcessParamsGroup
-  label.control-label(for="m-gaia-layer-type") Select #{type} layer
-  select#m-gaia-layer-type.input-sm.form-control
-    option(value='', selected, disabled) Please select a layer
-    - for(var group in groups)
+  label.control-label Select #{type} layer
+  - var inputArg = inputArgs[index]
+  select.input-arg.input-sm.form-control(data-index=index, data-type=type)
+    option(disabled, selected=!inputArg) Please select a layer
+    - for(var group in layers)
       optgroup(label=group)
-        each layer in groups[group]
-          - var layerMata = layer.get('meta').minerva
+        each dataset in layers[group]
+          - var layerName = dataset.get('name')
+          - var datasetId = dataset.get('_id')
+          - var layerMata = dataset.get('meta').minerva
           if (layerMata.dataset_type !== 'wms')
-            - var layerName = layer.get('name')
-            - var layerId = layer.get('_id')
-            option(value=JSON.stringify({layer: { title: layerName, _id: layerId }, type: type}))= layer.get('name')
+            option(value=datasetId, selected=(inputArg&&inputArg.item_id===datasetId))= dataset.get('name')
           else if (gaia_minerva_wms.indexOf(layerMata.base_url) !== -1)
-            - var layerName = layer.get('name')
-            - var layerId = layer.get('_id')
-            option(value=JSON.stringify({layer: { title: layerName, _id: layerId }, type: type}))= layer.get('name')
+            option(value=datasetId)= dataset.get('name')

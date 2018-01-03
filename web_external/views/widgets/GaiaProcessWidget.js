@@ -16,175 +16,118 @@ var GaiaProcessWidget = View.extend({
     events: {
         'submit #m-gaia-process-form': function (e) {
             e.preventDefault();
-            var inputs = [];
-            var process;
-            var args = {};
 
-            var datasetName = $('#m-gaiaProcessDatasetName').val();
-
-            var capitalizeFirstLetter = function (string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
+            var params = {
+                datasetName: this.datasetName,
+                process: Object.assign({
+                    _type: Object.keys(this.selectedProcess.processMeta)[0],
+                    inputs: this.inputArgs
+                }, this.inputParams)
             };
-
-            var IsJsonString = function (str) {
-                var obj;
-                try {
-                    obj = JSON.parse(str);
-                } catch (e) {
-                    return false;
-                }
-                return _.isObject(obj);
-            };
-
-            $('input[type=text], input[type=number], select').each(function (indx, elm) {
-                var value = $(elm).val();
-                var name = elm.name;
-                var inputParams;
-                if (!value) {
-                    return;
-                }
-                if (IsJsonString(value)) {
-                    inputParams = JSON.parse(value);
-                }
-                if (!inputParams) {
-                    if (name) {
-                        if (!isNaN(value)) {
-                            args[name] = parseFloat(value);
-                        } else {
-                            args[name] = value;
-                        }
-                    }
-                } else {
-                    if (inputParams.type) {
-                        inputs.push({
-                            '_type': 'gaia_tasks.inputs.Minerva' + capitalizeFirstLetter(inputParams.type) + 'IO',
-                            'item_id': inputParams.layer._id
-                        });
-                    } else {
-                        process = _.first(_.keys(inputParams));
-                    }
-                }
-            });
-
-            var gaia = Object.assign({ '_type': process }, { inputs: inputs }, args);
-
-            console.log(JSON.stringify(gaia));
-
-            var query = Object.assign({ 'datasetName': datasetName },
-                { 'process': gaia });
-
-            console.log(JSON.stringify(query));
 
             restRequest({
                 path: 'gaia_analysis',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(query)
-            }).done(_.bind(function () {
+                data: JSON.stringify(params)
+            }).done(() => {
                 events.trigger('m:job.created');
                 this.$el.modal('hide');
-            }, this));
+            });
         },
-        'change #m-gaia-process-type': 'renderProcessInputs'
+        'change .dataset-name': function (e) {
+            this.datasetName = e.target.value;
+        },
+        'change #m-gaia-process-type': function (e) {
+            this.selectedProcess = this.processes[e.target.value];
+            this.inputArgs = [];
+            this.inputParams = {};
+            this.render();
+        },
+        'change .input-arg': function (e) {
+            var index = $(e.target).data('index');
+            var type = $(e.target).data('type');
+            var datasetId = e.target.value;
+            this._setInput(index, type, datasetId);
+        },
+        'change .input-params': function (e) {
+            var name = $(e.target).data('name');
+            var value = e.target.value;
+            if (e.target.type === 'number') {
+                value = parseInt(value);
+            }
+            this.inputParams[name] = value;
+        }
     },
 
-    initialize: function (settings) {
+    initialize(settings) {
+        this.generateInputsFields = this.generateInputsFields.bind(this);
+        this.generateArgsFields = this.generateArgsFields.bind(this);
         this.collection = settings.datasetCollection;
-        this.processes = [];
+        this.selectedProcess = settings.selectedProcess;
+        this.processes = settings.processes;
         this.requiredInputs = {};
         // Get list of available processes on initialize
-        this.renderListOfAvailableProcesses();
         this.gaia_minerva_wms = null;
+        this.inputArgs = [];
+        this.inputParams = {};
+        this.datasetName = '';
         this.layers = [];
+        // Set initial inputs based on datset selection
+        var inputs = Object.values(this.selectedProcess.processMeta)[0].required_inputs;
+        Array.from(settings.datasetsId).forEach((datasetId, index) => {
+            if (inputs[index]) {
+                this._setInput(index, inputs[index].type, datasetId);
+            }
+        });
+        this.settings = settings;
     },
 
-    renderProcessInputs: function () {
-        // Clear input dom
-        $('#m-gaia-process-inputs').html('');
-        $('#m-gaia-process-args').html('');
+    _setInput(index, type, datasetId) {
+        var capitalizeFirstLetter = (string) => {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        };
+        this.inputArgs[index] = {
+            '_type': 'gaia_tasks.inputs.Minerva' + capitalizeFirstLetter(type) + 'IO',
+            'item_id': datasetId
+        };
+    },
 
-        var process = this.$('#m-gaia-process-type').val();
-        try {
-            // parse for side effect of validation
-            JSON.parse(process);
-            this.$('.g-validation-failed-message').text('');
-        } catch (err) {
-            this.$('.g-validation-failed-message').text('Error with getting layer data');
-            return;
-        }
-        this.requiredInputs = _.first(_.values(JSON.parse(process))).required_inputs;
-        this.requiredArguments = _.first(_.values(JSON.parse(process))).required_args;
+    generateInputsFields(process) {
+        var inputs = Object.values(process.processMeta)[0].required_inputs;
+        return _.flatten(inputs.map((input, index) => {
+            var numberOfPossibleLayers = input.max;
+            return _.times(numberOfPossibleLayers, () => {
+                return gaiaProcessInputsWidgetTemplate(Object.assign({}, this, { index, type: input.type }));
+            });
+        })).join('');
+    },
 
-        var gaiaArgsView = _.map(this.requiredArguments, _.bind(function (value) {
+    generateArgsFields(process) {
+        var args = Object.values(process.processMeta)[0].required_args;
+        return args.map((value) => {
             return gaiaProcessArgsWidgetTemplate({
                 value: value
             });
-        }, this));
-        $('#m-gaia-process-args').append(gaiaArgsView);
-        var gaiaInputsView = _.flatten(_.map(this.requiredInputs, _.bind(function (value) {
-            var numberOfPossibleLayers = value.max;
-            return _.times(numberOfPossibleLayers, _.bind(function () {
-                return gaiaProcessInputsWidgetTemplate({
-                    groups: this.layers,
-                    type: value.type,
-                    gaia_minerva_wms: this.gaia_minerva_wms
-                });
-            }, this));
-        }, this)));
-        $('#m-gaia-process-inputs').append(gaiaInputsView);
-    },
-
-    splitOnCaps: function (string) {
-        if (!string) {
-            return;
-        }
-        return string.split(/(?=[A-Z])/).join(' ');
-    },
-
-    splitOnUnderscore: function (string) {
-        if (!string) {
-            return;
-        }
-        return string.match(/([^_]+)/g).join(' ');
-    },
-
-    renderListOfAvailableProcesses: function () {
-        restRequest({
-            path: 'gaia_process/classes',
-            type: 'GET'
-        }).done(_.bind(function (data) {
-            if (data && data.processes) {
-                if (data.gaia_minerva_wms) this.gaia_minerva_wms = data.gaia_minerva_wms;
-                this.processes = data.processes.map(_.bind(function (process) {
-                    var processName = _.first(_.keys(process));
-                    var formattedProcessName = this.splitOnCaps(processName.split('.').pop());
-                    return { title: formattedProcessName, data: JSON.stringify(process) };
-                }, this));
-                this.render();
-            }
-        }, this));
+        }).join('');
     },
 
     getSourceNameFromModel: function (model) {
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
     },
 
-    render: function () {
+    render() {
         this.layers = _.chain(this.collection.toArray())
             .filter(this.getSourceNameFromModel)
             .groupBy(this.getSourceNameFromModel)
             .value();
         if (!this.modalOpened) {
             this.modalOpened = true;
-            var modal = this.$el.html(gaiaProcessWidgetTemplate({
-                processes: this.processes
-            })).girderModal(this).on('ready.girder.modal', _.bind(function () {
+            var modal = this.$el.html(gaiaProcessWidgetTemplate(this)).girderModal(this).on('ready.girder.modal', _.bind(function () {
             }, this));
             modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         } else {
-            this.$el.html(gaiaProcessWidgetTemplate({
-                processes: this.processes
-            }));
+            this.$el.html(gaiaProcessWidgetTemplate(this));
         }
         return this;
     }
