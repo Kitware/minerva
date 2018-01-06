@@ -19,16 +19,17 @@
 from cryptography.fernet import Fernet
 from girder.utility import config
 from girder.utility.model_importer import ModelImporter
+from girder.exceptions import AccessException
 
 from girder.plugins.minerva.constants import PluginSettings
 
 
 def findNamedFolder(currentUser, user, parent, parentType, name, create=False,
-                    public=False):
+                    joinShareGroup=None, public=False):
     folders = \
         [ModelImporter.model('folder').filter(folder, currentUser) for folder in
          ModelImporter.model('folder').childFolders(parent=parent,
-         parentType=parentType, user=currentUser, filters={'name': name})]
+            parentType=parentType, user=currentUser, filters={'name': name})]
     # folders should have len of 0 or 1, since we are looking in a
     # user folder for a folder with a certain name
     if len(folders) == 0:
@@ -36,6 +37,14 @@ def findNamedFolder(currentUser, user, parent, parentType, name, create=False,
             folder = ModelImporter.model('folder').createFolder(
                 parent, name, parentType=parentType, public=public,
                 creator=currentUser)
+
+            if joinShareGroup:
+                groupModel = ModelImporter.model('group')
+                datasetSharingGroup = groupModel.findOne(query={
+                    'name': PluginSettings.DATASET_SHARING_GROUP_NAME
+                })
+                ModelImporter.model('folder').setGroupAccess(
+                    folder, datasetSharingGroup, 0, currentUser=currentUser, save=True)
             return folder
         else:
             return None
@@ -54,14 +63,10 @@ def findPublicFolder(currentUser, user, create=False):
 
 
 def findSharedFolder(currentUser, user, create=False):
-    publicFolder = findPublicFolder(currentUser, user, create)
-    publicMinervaFolder = findNamedFolder(currentUser, user, publicFolder, 'folder',
-                                          PluginSettings.MINERVA_FOLDER, create, public=True)
-    if publicMinervaFolder is None:
-        return publicMinervaFolder
-    else:
-        return findNamedFolder(currentUser, user, publicMinervaFolder, 'folder',
-                               PluginSettings.DATASET_FOLDER, create, public=True)
+    minervaSharedFolder = findNamedFolder(
+        currentUser, user, user, 'user', PluginSettings.MINERVA_SHARED_DATASET,
+        create, joinShareGroup=True, public=False)
+    return minervaSharedFolder
 
 
 def findDatasetFolder(currentUser, user, create=False):
@@ -75,11 +80,23 @@ def findDatasetFolder(currentUser, user, create=False):
 
 def findSharedDatasetFolders(currentUser):
     folderModel = ModelImporter.model('folder')
+    groupModel = ModelImporter.model('group')
+    datasetSharingGroup = groupModel.findOne(query={
+        'name': PluginSettings.DATASET_SHARING_GROUP_NAME
+    })
+    if not datasetSharingGroup:
+        raise AccessException('user group "{0}" doesn\'t exist'.format(
+            PluginSettings.DATASET_SHARING_GROUP_NAME))
+    if datasetSharingGroup['_id'] not in currentUser['groups']:
+        raise AccessException('user doesn\'t belong to user group "{0}"'.format(
+            PluginSettings.DATASET_SHARING_GROUP_NAME))
+
     folders = folderModel.find({
-        'public': True,
+        'public': False,
         'baseParentType': 'user',
-        'parentCollection': 'folder',
-        'name': 'dataset'
+        'parentCollection': 'user',
+        'access.groups.id': datasetSharingGroup['_id'],
+        'name': PluginSettings.MINERVA_SHARED_DATASET
     })
     return folders
 
