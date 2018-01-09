@@ -5,7 +5,6 @@ import colorbrewer from 'colorbrewer';
 
 window.colorbrewer = colorbrewer;
 const geojsonUtil = {};
-export default geojsonUtil;
 
 /**
  * Merge a new value into an accumulation object.
@@ -99,7 +98,7 @@ geojsonUtil.accumulate = function accumulate(features) {
  * property statistics that can be used to generate numeric/color
  * scales for visualization.
  */
-geojsonUtil.normalize = function normalize(geojson) {  // eslint-disable-line complexity
+geojsonUtil.normalize = function normalize(geojson) { // eslint-disable-line complexity
     var normalized;
 
     if (_.isString(geojson)) {
@@ -126,7 +125,7 @@ geojsonUtil.normalize = function normalize(geojson) {  // eslint-disable-line co
         });
         normalized.summary = geojsonUtil.accumulate(
             _.flatten(normalized.series.map((series) => series.geojson.features))
-            .map((feature) => feature.properties)
+                .map((feature) => feature.properties)
         );
         return normalized;
     }
@@ -262,7 +261,7 @@ geojsonUtil.colorScale = function colorScale(
         scale = d3.scale.ordinal()
             .domain(_.keys(summary.values))
             .range(colors[indices[n]]);
-    } else {                          // continuous
+    } else { // continuous
         n = indices.length - 1;
         // handle the case when all values are the same
         if (summary.min >= summary.max) {
@@ -310,3 +309,5 @@ geojsonUtil.getFeatures = function getFeatures(data) {
         return _.indexOf(types, geom.type, true) >= 0;
     });
 };
+
+export default geojsonUtil;

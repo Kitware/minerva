@@ -13,8 +13,6 @@ girderRouter.enabled(false);
 
 var router = new Backbone.Router();
 
-export default router;
-
 router.route('', 'index', function () {
     events.trigger('g:navigateTo', SessionsView);
 });
@@ -49,3 +47,5 @@ router.route('session/:id', 'session', function (id) {
             router.navigate('sessions', { trigger: true });
         });
 });
+
+export default router;

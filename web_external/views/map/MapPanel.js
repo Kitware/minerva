@@ -123,7 +123,8 @@ const MapPanel = Panel.extend({
             });
             this.map.createLayer(mapSettings.basemap,
                 _.has(mapSettings, 'basemap_args')
-                    ? mapSettings.basemap_args : {});
+                    ? mapSettings.basemap_args
+                    : {});
             this.uiLayer = this.map.createLayer('ui');
             this.uiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
             this.colorLegend = this.uiLayer.createWidget('colorLegend', {

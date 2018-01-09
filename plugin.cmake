@@ -1,4 +1,4 @@
-add_standard_plugin_tests(NO_SERVER_TESTS NO_CLIENT_TESTS)
+add_standard_plugin_tests(NO_SERVER_TESTS NO_CLIENT)
 add_python_test(analysis PLUGIN minerva BIND_SERVER)
 add_python_test(dataset PLUGIN minerva BIND_SERVER)
 add_python_test(geojson PLUGIN minerva BIND_SERVER)
@@ -32,15 +32,29 @@ add_web_client_test(
 )
 set_property(TEST web_client_minerva.geojson PROPERTY LABELS minerva_client)
 
+add_puglint_test(minerva "${CMAKE_CURRENT_LIST_DIR}/web_client/templates")
 set_property(TEST puglint_minerva PROPERTY LABELS minerva_client)
-set_property(TEST eslint_minerva PROPERTY LABELS minerva_client)
 
 add_puglint_test(minerva_external "${CMAKE_CURRENT_LIST_DIR}/web_external/templates")
 set_property(TEST puglint_minerva_external PROPERTY LABELS minerva_client)
 
-add_eslint_test(minerva_tests "${CMAKE_CURRENT_LIST_DIR}/plugin_tests" ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/clients/web/test/.eslintrc.json")
+add_test(
+    NAME "eslint_minerva"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    COMMAND npx eslint "--ignore-path" "${CMAKE_CURRENT_LIST_DIR}/.eslintignore" "${CMAKE_CURRENT_LIST_DIR}/web_client"
+)
+set_property(TEST eslint_minerva PROPERTY LABELS minerva_client)
+
+add_test(
+    NAME "eslint_minerva_tests"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    COMMAND npx eslint "--ignore-path" "${CMAKE_CURRENT_LIST_DIR}/.eslintignore" "${CMAKE_CURRENT_LIST_DIR}/plugin_tests/client"
+)
 set_property(TEST eslint_minerva_tests PROPERTY LABELS minerva_client)
-add_eslint_test(minerva_external "${CMAKE_CURRENT_LIST_DIR}/web_external" ESLINT_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/.eslintrc.js"
-ESLINT_IGNORE_FILE "${CMAKE_CURRENT_LIST_DIR}/.eslintignore"
+
+add_test(
+    NAME "eslint_minerva_external"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    COMMAND npx eslint "--ignore-path" "${CMAKE_CURRENT_LIST_DIR}/.eslintignore" "${CMAKE_CURRENT_LIST_DIR}/web_external"
 )
 set_property(TEST eslint_minerva_external PROPERTY LABELS minerva_client)

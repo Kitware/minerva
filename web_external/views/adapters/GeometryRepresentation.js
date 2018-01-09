@@ -42,12 +42,12 @@ class GeometryRepresentation extends MapRepresentation {
         try {
             var reader = geo.createFileReader(this.readerType, { layer: this.geoJsLayer });
             this._prepareColorLegendMeta(dataset, container, data, visProperties, data.summary);
-            if (!data.series) {  // not a timeseries
+            if (!data.series) { // not a timeseries
                 this._injectStyle(data, visProperties, data.summary || {});
                 reader.read(data, _.bind(function (features) {
                     this._processFeatures(visProperties, features);
                 }, this));
-            } else {    // a timeseries
+            } else { // a timeseries
                 var lastFeature = 0;
                 var curframe = 0;
                 _.each(data.series, function (entry, index) {

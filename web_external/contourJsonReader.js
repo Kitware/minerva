@@ -84,25 +84,25 @@ geo.contourJsonReader = function (arg) {
     this.read = function (file, done, progress) {
         function _done(data) {
             var contour = that.layer().createFeature('contour')
-                    .data(data.position || data.values)
-                    .style({
-                        opacity: 0.75
-                    })
-                    .contour({
-                        gridWidth: data.gridWidth,
-                        gridHeight: data.gridHeight,
-                        /* The color range doesn't have to be linear:
+                .data(data.position || data.values)
+                .style({
+                    opacity: 0.75
+                })
+                .contour({
+                    gridWidth: data.gridWidth,
+                    gridHeight: data.gridHeight,
+                    /* The color range doesn't have to be linear:
                          rangeValues: [0, 25, 50, 75, 100, 125, 250, 500, 750, 2000],
                          */
-                        /* Or, you could plot iso-contour lines using a varying opacity:
+                    /* Or, you could plot iso-contour lines using a varying opacity:
                          rangeValues: [100, 100, 200, 200, 300, 300, 400, 400, 500, 500],
                          opacityRange: [1, 0, 1, 0, 1, 0, 1, 0, 1],
                          */
-                        /* You can make smooth contours instead of stepped contours:
+                    /* You can make smooth contours instead of stepped contours:
                          stepped: false,
                          */
-                        min: 0
-                    });
+                    min: 0
+                });
             if (data.position) {
                 contour
                     .position(function (d) { return {x: d.x, y: d.y, z: d.z}; })
