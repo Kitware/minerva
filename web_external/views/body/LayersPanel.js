@@ -79,7 +79,7 @@ const LayersPanel = Panel.extend({
             dataset: dataset,
             parentView: this
         })
-        .render();
+            .render();
     },
 
     changeLayerOpacity: function (event) {

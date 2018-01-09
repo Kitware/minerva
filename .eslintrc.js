@@ -1,8 +1,9 @@
 module.exports = {
-    extends: process.cwd() + '/.eslintrc',
     rules: {
         complexity: [2, 12],
-        'underscore/prefer-invoke': 0
+        'no-alert': 0,
+        'underscore/prefer-invoke': 0,
+        'promise/no-native': 0,
     },
     globals: {
         minerva: true,
