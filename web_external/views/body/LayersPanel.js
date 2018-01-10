@@ -18,6 +18,7 @@ const LayersPanel = Panel.extend({
         'click .m-configure-geo-render': 'configureGeoRender',
         'change .m-opacity-range': 'changeLayerOpacity',
         'click .m-order-layer': 'reorderLayer',
+        'click .m-zoom-to': 'zoomToLayer',
         'click .m-anim-play': 'seriesFramePlay',
         'click .m-anim-step': 'seriesFrameStep',
         'click .m-anim-step-back': 'seriesFrameStepBack',
@@ -133,6 +134,11 @@ const LayersPanel = Panel.extend({
                 dataset.trigger('reorder', dataset, option);
             }
         }
+    },
+
+    zoomToLayer(event) {
+        var dataset = this.collection.get($(event.currentTarget).attr('m-dataset-id'));
+        dataset.trigger('zoom-to', dataset);
     },
 
     seriesFramePlay: function (event) {

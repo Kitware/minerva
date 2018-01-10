@@ -304,6 +304,17 @@ const MapPanel = Panel.extend({
             this.drawDatasetBounds();
         });
 
+        this.listenTo(events, 'm:zoom-to', ({ dataset, bounds }) => {
+            var { center, zoom } = this.map.zoomAndCenterFromBounds({
+                left: bounds.ulx,
+                right: bounds.lrx,
+                top: bounds.uly,
+                bottom: bounds.lry
+            });
+            this.map.zoom(zoom);
+            this.map.center(center);
+        });
+
         Panel.prototype.initialize.apply(this);
     },
 
