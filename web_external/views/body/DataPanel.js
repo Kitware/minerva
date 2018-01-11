@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import bootbox from 'bootbox';
 import eventStream from 'girder/utilities/EventStream';
 import { restRequest } from 'girder/rest';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
@@ -180,13 +181,19 @@ export default Panel.extend({
     },
 
     deleteDatasetEvent: function (event) {
-        if (!$(event.currentTarget).hasClass('icon-disabled')) {
+        if ($(event.currentTarget).hasClass('icon-disabled')) {
+            return;
+        }
+        bootbox.confirm('Do you want to delete this dataset?', (result) => {
+            if (!result) {
+                return;
+            }
             var datasetId = $(event.currentTarget).attr('m-dataset-id');
             var dataset = this.collection.get(datasetId);
             this.selectedDatasetsId.delete(datasetId);
             dataset.destroy();
             this.collection.remove(dataset);
-        }
+        });
     },
 
     clearSelection() {
@@ -203,16 +210,17 @@ export default Panel.extend({
     },
 
     deleteSelectedDatasets() {
-        if (!confirm('Do you want to delete selected datasets?')) {
-            return;
-        }
-        this.deletableSelectedDatasets()
-            .forEach((dataset) => {
-                this.selectedDatasetsId.delete(dataset.get('_id'));
-                dataset.destroy();
-                this.collection.remove(dataset);
-            });
-        this.clearSelection();
+        bootbox.confirm('Do you want to delete these selected datasets?', (result) => {
+            if (result) {
+                this.deletableSelectedDatasets()
+                    .forEach((dataset) => {
+                        this.selectedDatasetsId.delete(dataset.get('_id'));
+                        dataset.destroy();
+                        this.collection.remove(dataset);
+                    });
+                this.clearSelection();
+            }
+        });
     },
 
     sharableSelectedDatasets() {

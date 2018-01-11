@@ -14,7 +14,7 @@ const JobsPanel = Panel.extend({
         this.jobListWidget = new JobListWidget({ // eslint-disable-line new-cap
             columns: columns,
             showHeader: false,
-            pageLimit: 10,
+            pageLimit: 6,
             showPaging: false,
             triggerJobClick: true,
             parentView: this
