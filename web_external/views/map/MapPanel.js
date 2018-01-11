@@ -121,6 +121,9 @@ const MapPanel = Panel.extend({
                     }
                 })
             });
+            var interactorOpts = this.map.interactor().options();
+            interactorOpts.keyboard.focusHighlight = false;
+            this.map.interactor().options(interactorOpts);
             this.map.createLayer(mapSettings.basemap,
                 _.has(mapSettings, 'basemap_args')
                     ? mapSettings.basemap_args
