@@ -97,8 +97,7 @@ Table of Contents
    :maxdepth: 2
 
    installation
-   getting-started
-   deploy-data-services
-   developer-documentation
    user-documentation
+   developer-documentation
+   deploy-data-services
    api-documentation
