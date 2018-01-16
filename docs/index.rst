@@ -15,21 +15,6 @@ Currently Minerva is pegged to Girder version |girder-version|.  To update the v
 depends on, update the version in the `.girder-version` file in Minerva's root directory.
 
 Glossary
---------
-
-Source
-~~~~~~
-
-Sources are likely going to be removed, at least from the UI.  The intention behind a source is to produce data, i.e. to produce a specific dataset, and to describe How/What/Why of data.
-A source also tracks provenance information.  The current plan is to remove sources from the UI, and to have the functionality that Sources provide appear in the
-Datasets panel.  All of the source info could be contained in a `source` or `source_type` key in the minerva metadata.
-
-A source produces data. A source itself cannot be visualized, but a source can create a dataset that can be visualized, or it can be the input to an analysis, which then creates a dataset that can be visualized.
-
-.. seealso::
-
-   Information on how to create a Minerva source can be found in :doc:`/creating-a-source`.
-
 
 Dataset
 ~~~~~~~
@@ -97,8 +82,6 @@ Table of Contents
    :maxdepth: 2
 
    installation
-   getting-started
-   deploy-data-services
-   developer-documentation
    user-documentation
-   api-documentation
+   developer-documentation
+   deploy-data-services

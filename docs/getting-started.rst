@@ -1,44 +1,7 @@
 
 ===============
-Getting Started
+Getting started
 ===============
-
-GeoJSON
-=======
-
-Loading
--------
-
-A GeoJSON can be loaded to Minerva the same way a GeoTIFF is loaded.
-Upload the GeoJSON using the uploader widget. This step will add a
-new entry in the datasets panel.
-
-.. image:: img/list_dataset_geojson.png
-
-With the globe button, the layer can be added to the map.
-
-.. image:: img/visualize_dataset_geojson.png
-
-Similar to the GeoTIFF, clicking on a feature on the map will return the
-attributes for the clicked feature.
-
-.. image:: img/feature_info_geojson.png
-
-Styling
--------
-
-When a GeoJSON dataset is uploaded, a default style will be assigned to it.
-In order to change that click on the cog button.
-
-.. image:: img/style_layer_geojson.png
-
-This will open up the modal for styling the layers. Here points, lines or
-polygons can be styled. A color table can be created based on a given attribute,
-opacity values can be assigned and values can be rescaled in a linear, logarithmic
-or quantile fashion. Values can also be clamped between a minimum and maximum
-value. These options make it possible to visualize the datasets in lot of different ways.
-
-.. image:: img/styled_geojson.png
 
 GeoTIFF
 =======
@@ -95,3 +58,40 @@ selected styling.
 After clicking on "OK" the new styling would be applied.
 
 .. image:: img/styled_tiff.png
+
+GeoJSON
+=======
+
+Loading
+-------
+
+A GeoJSON can be loaded to Minerva the same way a GeoTIFF is loaded.
+Upload the GeoJSON using the uploader widget. This step will add a
+new entry in the datasets panel.
+
+.. image:: img/list_dataset_geojson.png
+
+With the globe button, the layer can be added to the map.
+
+.. image:: img/visualize_dataset_geojson.png
+
+Similar to the GeoTIFF, clicking on a feature on the map will return the
+attributes for the clicked feature.
+
+.. image:: img/feature_info_geojson.png
+
+Styling
+-------
+
+When a GeoJSON dataset is uploaded, a default style will be assigned to it.
+In order to change that click on the cog button.
+
+.. image:: img/style_layer_geojson.png
+
+This will open up the modal for styling the layers. Here points, lines or
+polygons can be styled. A color table can be created based on a given attribute,
+opacity values can be assigned and values can be rescaled in a linear, logarithmic
+or quantile fashion. Values can also be clamped between a minimum and maximum
+value. These options make it possible to visualize the datasets in lot of different ways.
+
+.. image:: img/styled_geojson.png
