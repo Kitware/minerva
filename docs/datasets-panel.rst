@@ -21,9 +21,9 @@ Visualize dataset
 -----------------
 .. image:: img/datasets_panel-globe_button.png
 
-Click the globe button after the dataset name to add the dataset to layer panel and visualize the dataset.
+The globe button after the dataset name adds the dataset to layer panel and visualize the dataset.
 
-Once the dataset is visualized. The globe button will be replaced by a remove button. Click this button to remove the dataset from visualization.
+Once the dataset is visualized, the globe button will be replaced by a remove button. Click this button to remove the dataset from visualization.
 
 .. image:: img/datasets_panel-dataset_shown_remove.png
 
@@ -33,7 +33,7 @@ Delete dataset
 --------------
 .. image:: img/datasets_panel-trash_button.png
 
-Click the trash can button after dataset name to delete one dataset. A confirmation prompt will be shown before deleting the dataset. Dataset deletion is irreversible.
+The trash button after dataset name deletes one dataset. A confirmation prompt will be shown before deleting the dataset. Dataset deletion is irreversible.
 
 |
 
@@ -41,14 +41,14 @@ Dataset info
 ------------
 .. image:: img/datasets_panel-info_button.png
 
-Click this button will show a popup window displaying dataset related metadata
+Info button shows a popup window displaying dataset related metadata
 
 |
 |
 
 Dataset selection actions
 =========================
-There are features available only when there are datasets in selected states. To select a dataset or group of datasets, hovering cursor before a dataset or group name, then check the checkbox.
+There are features available only when there are datasets in selected states. To select a dataset or group of datasets, hover the cursor on a dataset or category icon, then check the checkbox.
 
 .. image:: img/datasets_panel_selection-single.png
 
@@ -60,7 +60,7 @@ Visualize datasets boundaries
 -----------------------------
 .. image:: img/datasets_panel-selection-boundary_button.png
 
-This action will visualize boundary bounding box of one or more selected datasets. 
+This button visualizes boundary bounding box of one or more selected datasets. 
 
 .. image:: img/datasets_panel-boundary_shown-buttons.png
 
@@ -72,11 +72,11 @@ Filter dataset list boundary
 ----------------------------
 .. image:: img/datasets_panel-selection-filter_button.png
 
-When there is one dataset selected, click on this action will filter the list of datasets available and only show datasets that overlap the boundary of selected dataset. 
+When there is one dataset selected, this button filters the list of datasets available and only show datasets that overlap the boundary of selected dataset. 
 
 .. image:: img/datasets_panel-filtered_remove-filter-button.png
 
-When the list of datasets being filtered a remove action will be available to stop the filtering.
+When the list of datasets are being filtered, a remove button will be available to stop the filtering.
 
 |
 
@@ -84,7 +84,7 @@ Visualize or delete multiple datasets
 -------------------------------------
 .. image:: img/datasets_panel-selection_multiple-globe-remove-buttons.png
 
-When more than one dataset has been selected, a globe and trash can icon will appear on the top right as selection action. They will visualize or delete all selected datasets.
+When more than one dataset has been selected, a globe and a trash can button will appear on the top right as selection actions. Those buttons will visualize or delete all selected datasets.
 
 |
 
