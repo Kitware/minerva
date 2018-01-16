@@ -9,7 +9,7 @@ Upload
 .. image:: img/datasets_panel-upload_button.png
 
 This is the initial state of dataset panel.
-You could use this upload button to upload dataset. See :doc:`/getting-started` for more detail.
+A user could use this upload button to upload dataset. See :doc:`/getting-started` for more detail.
 
 |
 |
@@ -23,7 +23,7 @@ Visualize dataset
 
 The globe button after the dataset name adds the dataset to layer panel and visualize the dataset.
 
-Once the dataset is visualized, the globe button will be replaced by a remove button. Click this button to remove the dataset from visualization.
+Once the dataset is visualized, the globe button will be replaced by a remove button. Click on this button to remove the dataset from the map.
 
 .. image:: img/datasets_panel-dataset_shown_remove.png
 
@@ -41,7 +41,7 @@ Dataset info
 ------------
 .. image:: img/datasets_panel-info_button.png
 
-Info button shows a popup window displaying dataset related metadata
+Info button shows a popup window displaying dataset related metadata.
 
 |
 |
@@ -60,7 +60,7 @@ Visualize datasets boundaries
 -----------------------------
 .. image:: img/datasets_panel-selection-boundary_button.png
 
-This button visualizes boundary bounding box of one or more selected datasets. 
+This button visualizes boundary of one or more selected datasets. 
 
 .. image:: img/datasets_panel-boundary_shown-buttons.png
 
