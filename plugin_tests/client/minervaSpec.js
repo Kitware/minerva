@@ -292,12 +292,32 @@ describe('Datapanel', function () {
         $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').first().parent().find('input').trigger('click');
         $('.icon-button.intersect-filter').trigger('click');
         waitsFor(function () {
-            return $('.icon-button.remove-filter').length;
+            return $('.icon-button.clear-filters').length;
         }, 'dataset to be filtered');
         runs(function () {
             expect($('.m-datasets .dataset').length).toBe(4);
-            $('.icon-button.remove-filter').trigger('click');
+            $('.icon-button.clear-filters').trigger('click');
             expect($('.m-datasets .dataset').length).not.toBe(3);
+        });
+    });
+
+    it('Filter datasets by dataset name', function () {
+        $('#m-data-panel .search-bar input').val('geojson').trigger('keyup');
+        waitsFor(function () {
+            return $('.icon-button.clear-filters').length;
+        }, 'dataset to be filtered');
+        runs(function () {
+            expect($('.m-datasets .dataset').length).toBe(4);
+            $('.icon-button.clear-filters').trigger('click');
+            expect($('.m-datasets .dataset').length).not.toBe(4);
+            $('#m-data-panel .search-bar input').val('raster').trigger('keyup');
+        });
+        waitsFor(function () {
+            return $('.icon-button.clear-filters').length;
+        }, 'dataset to be filtered');
+        runs(function () {
+            expect($('.m-datasets .dataset').length).toBe(1);
+            $('.icon-button.clear-filters').trigger('click');
         });
     });
 });
