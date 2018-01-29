@@ -6,6 +6,7 @@ import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
 import { getCurrentUser } from 'girder/auth';
 import { _whenAll } from 'girder/misc';
+import girderEvents from 'girder/events';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -13,6 +14,7 @@ import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
+import { getBoundSupported } from '../util/utils';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 
@@ -231,6 +233,11 @@ export default Panel.extend({
         });
     },
 
+    selectionGetBoundSupported() {
+        var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
+        return getBoundSupported(dataset);
+    },
+
     sharableSelectedDatasets() {
         return Array.from(this.selectedDatasetsId)
             .map((datasetId) => this.collection.get(datasetId))
@@ -283,6 +290,7 @@ export default Panel.extend({
         this._ = _;
         this.deletableSelectedDatasets = this.deletableSelectedDatasets.bind(this);
         this.sharableSelectedDatasets = this.sharableSelectedDatasets.bind(this);
+        this.selectionGetBoundSupported = this.selectionGetBoundSupported.bind(this);
         var externalId = 1;
         this.collection = settings.session.datasetCollection;
         this.sessionModel = settings.session.model;
@@ -445,12 +453,24 @@ export default Panel.extend({
         if (bounds) {
             return $.Deferred().resolve({ dataset, bounds });
         }
+        if (!getBoundSupported(dataset)) {
+            return $.Deferred().resolve({ dataset, bounds: null });
+        }
         return restRequest({
             type: 'GET',
             url: `minerva_dataset/${dataset.get('_id')}/bound`
         }).then((bounds) => {
             dataset.bounds = bounds;
             return { dataset, bounds };
+        }).catch((e) => {
+            if (e.status === 400) {
+                girderEvents.trigger('g:alert', {
+                    text: e.responseJSON.message,
+                    type: 'info',
+                    timeout: 5000,
+                    icon: 'info'
+                });
+            }
         });
     },
 
@@ -458,6 +478,17 @@ export default Panel.extend({
         _whenAll(
             this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => this._getDatasetBounds(dataset))
         ).then((results) => {
+            if (results.find((result) => {
+                return !result.bounds;
+            })) {
+                girderEvents.trigger('g:alert', {
+                    text: 'Show boundary is unsupported for some datasets',
+                    type: 'info',
+                    timeout: 5000,
+                    icon: 'info'
+                });
+            }
+            results = results.filter((result) => result.bounds);
             events.trigger('m:request-show-bounds', results);
             this.showingBounds = true;
             this.clearSelection();
@@ -479,7 +510,7 @@ export default Panel.extend({
     intersectFilter() {
         var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
         this._getDatasetBounds(dataset)
-            .then(({ datsaet, bounds }) => {
+            .then(({ dataset, bounds }) => {
                 var filterBounds = bounds;
                 _whenAll(
                     this.collection
@@ -493,6 +524,10 @@ export default Panel.extend({
                                 (bounds1.lry <= bounds2.uly && bounds1.lry >= bounds2.lry));
                     }
                     this.filters.intersect = results.filter(({ dataset, bounds }) => {
+                        // If can't find boundary, allow it to show
+                        if (!bounds) {
+                            return true;
+                        }
                         return check(bounds, filterBounds) || check(filterBounds, bounds);
                     }).map(({ dataset }) => dataset.get('_id'));
                     this.clearSelection();

@@ -33,7 +33,7 @@ if sourceCategoryDataset
             i.icon-search
           button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
             i.icon-share
-          if selectionCount === 1
+          if selectionCount === 1 && selectionGetBoundSupported()
             button.icon-button.intersect-filter(title='Show datasets that have boundaries overlap with selected dataset boundary')
               i.icon-filter
           if selectionCount > 1

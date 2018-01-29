@@ -327,7 +327,7 @@ const MapPanel = Panel.extend({
                 });
                 layer.geoOn(geo.event.annotation.state, (e) => {
                     bootbox.prompt({
-                        title: 'Give dataset a name?',
+                        title: 'Boundary dataset name',
                         value: 'Boundary',
                         callback: (name) => {
                             if (name !== null) {
