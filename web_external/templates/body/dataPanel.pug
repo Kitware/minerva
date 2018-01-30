@@ -11,7 +11,7 @@ if sourceCategoryDataset
           i.m-icon-enabled.icon-upload
         button.icon-button.m-postgres(title="Create postgres dataset")
           i.m-icon-enabled.icon-database
-        button.icon-button.m-boundary-dataset(title="Draw a boundary dataset")
+        button.icon-button.m-boundary-dataset(title="Draw a boundary dataset", class=drawing?'active':'')
           i.m-icon-enabled.icon-pencil
         ||
         button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
@@ -42,7 +42,7 @@ if sourceCategoryDataset
             button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
               i.icon-trash
     .search-bar
-      input(type='text' placeholder='Name regexp', value=nameFilterKeyword)
+      input(type='text', placeholder='Name regexp', value=nameFilterKeyword)
     each categories, source in sourceCategoryDataset
       .source-title.clearfix(id=source)= source
         - var expand = visibleMenus[source]

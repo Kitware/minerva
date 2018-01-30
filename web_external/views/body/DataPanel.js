@@ -301,6 +301,7 @@ export default Panel.extend({
         this.selectedDatasetsId = new Set();
         this.filters = {};
         this.nameFilterKeyword = '';
+        this.drawing = false;
         this.applyNameFilter = _.debounce(this.applyNameFilter, 300);
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
@@ -388,6 +389,9 @@ export default Panel.extend({
                 this.collection.add(dataset);
                 dataset.saveMinervaMetadata(minervaMeta);
             });
+        }).listenTo(events, 'm:map-drawing-change', (value) => {
+            this.drawing = value;
+            this.render();
         });
 
         eventStream.on('g:event.job_status', _.bind(function (event) {
