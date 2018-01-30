@@ -380,10 +380,10 @@ const MapPanel = Panel.extend({
                 properties: {
                     annotationType: 'rectangle',
                     name: dataset.get('name'),
-                    labelFontWeight: 'normal',
+                    labelFontWeight: 'bold',
                     labelColor: '#444444',
                     labelShadowColor: '#FFFFFF',
-                    labelShadowBlur: 7,
+                    labelShadowBlur: 9,
                     fill: true,
                     fillColor: color,
                     fillOpacity: 0.3,
