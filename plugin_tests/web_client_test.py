@@ -27,9 +27,4 @@ class WebClientTestCase(web_client_test.WebClientTestCase):
                      str(item['_id']) + '/item', method='POST', user=admin)
 
         # Create the user group for sharing feature
-        groupModel = self.model('group')
-        datasetSharingGroup = groupModel.findOne(query={
-            'name': 'dataset sharing'
-        })
-        if not datasetSharingGroup:
-            groupModel.createGroup('dataset sharing', admin, public=False)
+        self.request(path='/minerva_dataset/prepare_sharing', method='POST', user=admin)
