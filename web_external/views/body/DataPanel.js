@@ -6,6 +6,7 @@ import UploadWidget from 'girder/views/widgets/UploadWidget';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
 import { getCurrentUser } from 'girder/auth';
 import { _whenAll } from 'girder/misc';
+import girderEvents from 'girder/events';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -13,6 +14,7 @@ import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
+import { getBoundSupported } from '../util/utils';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 
@@ -23,6 +25,7 @@ export default Panel.extend({
         'click .remove_dataset-from-session': 'removeDatasetFromSession',
         'click .m-upload-local': 'uploadDialog',
         'click .m-postgres': 'connectToPostgres',
+        'click .m-boundary-dataset': 'drawBoundaryDataset',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
         'click .dataset-info': 'displayDatasetInfo',
@@ -36,7 +39,9 @@ export default Panel.extend({
         'click .action-bar button.toggle-shared': 'toggleShared',
         'click .action-bar button.show-bounds': 'showBounds',
         'click .action-bar button.remove-bounds': 'removeBounds',
-        'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel'
+        'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
+        'click .action-bar button.intersect-filter': 'intersectFilter',
+        'click .action-bar button.remove-filter': 'removeFilter'
     },
 
     toggleCategories: function (event) {
@@ -65,6 +70,10 @@ export default Panel.extend({
             }, this).fetch();
         });
         postgresWidget.render();
+    },
+
+    drawBoundaryDataset() {
+        events.trigger('m:draw-boundary-dataset');
     },
 
     /**
@@ -149,6 +158,7 @@ export default Panel.extend({
         }
         this.newDataset.on('m:dataset_promoted', function () {
             this.collection.add(this.newDataset);
+            this.filters = {};
         }, this).on('g:error', function (err) {
             console.error(err);
         }).promoteToDataset(params);
@@ -223,6 +233,11 @@ export default Panel.extend({
         });
     },
 
+    selectionGetBoundSupported() {
+        var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
+        return getBoundSupported(dataset);
+    },
+
     sharableSelectedDatasets() {
         return Array.from(this.selectedDatasetsId)
             .map((datasetId) => this.collection.get(datasetId))
@@ -272,8 +287,10 @@ export default Panel.extend({
     },
     initialize: function (settings) {
         this.allChecked = this.allChecked.bind(this);
+        this._ = _;
         this.deletableSelectedDatasets = this.deletableSelectedDatasets.bind(this);
         this.sharableSelectedDatasets = this.sharableSelectedDatasets.bind(this);
+        this.selectionGetBoundSupported = this.selectionGetBoundSupported.bind(this);
         var externalId = 1;
         this.collection = settings.session.datasetCollection;
         this.sessionModel = settings.session.model;
@@ -281,6 +298,7 @@ export default Panel.extend({
         this.visibleMenus = {};
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
+        this.filters = {};
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -345,6 +363,29 @@ export default Panel.extend({
 
             this.collection.add(dataset);
         }, this);
+
+        this.listenTo(events, 'm:dataset-drawn', (name, geometry) => {
+            var geometryStr = JSON.stringify(geometry);
+            return restRequest({
+                type: 'POST',
+                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${name}.geojson&size=${geometryStr.length}`,
+                contentType: 'application/json',
+                data: geometryStr
+            }).then((file) => {
+                return restRequest({
+                    type: 'GET',
+                    url: `item/${file.itemId}`
+                });
+            }).then((item) => {
+                var dataset = new DatasetModel(item);
+                return dataset.promoteToDataset({});
+            }).then((dataset) => {
+                var minervaMeta = dataset.getMinervaMetadata();
+                minervaMeta.category = 'Boundary';
+                this.collection.add(dataset);
+                dataset.saveMinervaMetadata(minervaMeta);
+            });
+        });
 
         eventStream.on('g:event.job_status', _.bind(function (event) {
             var status = window.parseInt(event.data.status);
@@ -412,12 +453,24 @@ export default Panel.extend({
         if (bounds) {
             return $.Deferred().resolve({ dataset, bounds });
         }
+        if (!getBoundSupported(dataset)) {
+            return $.Deferred().resolve({ dataset, bounds: null });
+        }
         return restRequest({
             type: 'GET',
             url: `minerva_dataset/${dataset.get('_id')}/bound`
         }).then((bounds) => {
             dataset.bounds = bounds;
             return { dataset, bounds };
+        }).catch((e) => {
+            if (e.status === 400) {
+                girderEvents.trigger('g:alert', {
+                    text: e.responseJSON.message,
+                    type: 'info',
+                    timeout: 5000,
+                    icon: 'info'
+                });
+            }
         });
     },
 
@@ -425,6 +478,17 @@ export default Panel.extend({
         _whenAll(
             this.collection.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id'))).map((dataset) => this._getDatasetBounds(dataset))
         ).then((results) => {
+            if (results.find((result) => {
+                return !result.bounds;
+            })) {
+                girderEvents.trigger('g:alert', {
+                    text: 'Show boundary is unsupported for some datasets',
+                    type: 'info',
+                    timeout: 5000,
+                    icon: 'info'
+                });
+            }
+            results = results.filter((result) => result.bounds);
             events.trigger('m:request-show-bounds', results);
             this.showingBounds = true;
             this.clearSelection();
@@ -443,13 +507,47 @@ export default Panel.extend({
         events.trigger('m:toggle-bounds-label');
     },
 
-    render() {
-        var sourceName = (model) => {
-            return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
-        };
+    intersectFilter() {
+        var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
+        this._getDatasetBounds(dataset)
+            .then(({ dataset, bounds }) => {
+                var filterBounds = bounds;
+                _whenAll(
+                    this.collection
+                        .filter(this.getSourceName)
+                        .map((dataset) => this._getDatasetBounds(dataset))
+                ).then((results) => {
+                    function check(bounds1, bounds2) {
+                        return ((bounds1.ulx <= bounds2.lrx && bounds1.ulx >= bounds2.ulx) ||
+                            (bounds1.lrx <= bounds2.lrx && bounds1.lrx >= bounds2.ulx)) &&
+                            ((bounds1.uly <= bounds2.uly && bounds1.uly >= bounds2.lry) ||
+                                (bounds1.lry <= bounds2.uly && bounds1.lry >= bounds2.lry));
+                    }
+                    this.filters.intersect = results.filter(({ dataset, bounds }) => {
+                        // If can't find boundary, allow it to show
+                        if (!bounds) {
+                            return true;
+                        }
+                        return check(bounds, filterBounds) || check(filterBounds, bounds);
+                    }).map(({ dataset }) => dataset.get('_id'));
+                    this.clearSelection();
+                    this.render();
+                });
+            });
+    },
 
+    removeFilter() {
+        this.filters = {};
+        this.render();
+    },
+
+    getSourceName(model) {
+        return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
+    },
+
+    render() {
         this.sourceCategoryDataset = _.chain(this.collection.models)
-            .filter(sourceName)
+            .filter(this.getSourceName)
             .filter((dataset) => {
                 if (this.showSharedDatasets) {
                     return true;
@@ -457,7 +555,15 @@ export default Panel.extend({
                     return dataset.get('creatorId') === this.currentUser.id;
                 }
             })
-            .groupBy(sourceName)
+            .filter((dataset) => {
+                if (_.isEmpty(this.filters)) {
+                    return true;
+                }
+                var includeIds = Object.values(this.filters).reduce((set, ids) => { ids.forEach(set.add, set); return set; }, new Set());
+                // console.log(includeIds.values());
+                return includeIds.has(dataset.get('_id'));
+            })
+            .groupBy(this.getSourceName)
             .mapObject((datasets, key) => {
                 return _.groupBy(datasets, (dataset) => {
                     return dataset.get('meta').minerva.category || 'Other';

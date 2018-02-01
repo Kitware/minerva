@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import geo from 'geojs';
 import colorbrewer from 'colorbrewer';
+import bootbox from 'bootbox';
 
 import events from '../../events';
 import Panel from '../body/Panel';
@@ -318,11 +319,34 @@ const MapPanel = Panel.extend({
             this.map.center(center);
         });
 
+        this.listenTo(events, 'm:draw-boundary-dataset', () => {
+            if (!this.drawDatasetLayer) {
+                var layer = this.map.createLayer('annotation', {
+                    annotations: ['rectangle'],
+                    showLabels: false
+                });
+                layer.geoOn(geo.event.annotation.state, (e) => {
+                    bootbox.prompt({
+                        title: 'Boundary dataset name',
+                        value: 'Boundary',
+                        callback: (name) => {
+                            if (name !== null) {
+                                events.trigger('m:dataset-drawn', name, layer.geojson().features[0].geometry);
+                            }
+                            layer.removeAllAnnotations();
+                        }
+                    });
+                });
+                this.drawDatasetLayer = layer;
+            }
+            this.drawDatasetLayer.mode('rectangle');
+        });
+
         Panel.prototype.initialize.apply(this);
     },
 
     drawDatasetBounds() {
-        this.annotationLayer = this.map.createLayer('annotation', {
+        this.boundariesAnnotationLayer = this.map.createLayer('annotation', {
             annotations: ['rectangle'],
             showLabels: this.showBoundsDatasetLabel
         });
@@ -358,17 +382,17 @@ const MapPanel = Panel.extend({
                 }
             };
         });
-        this.annotationLayer.geojson({
+        this.boundariesAnnotationLayer.geojson({
             'type': 'FeatureCollection',
             'features': features
         });
     },
 
     removeDatasetBounds() {
-        if (this.annotationLayer) {
-            this.annotationLayer.removeAllAnnotations();
-            this.map.deleteLayer(this.annotationLayer);
-            this.annotationLayer = null;
+        if (this.boundariesAnnotationLayer) {
+            this.boundariesAnnotationLayer.removeAllAnnotations();
+            this.map.deleteLayer(this.boundariesAnnotationLayer);
+            this.boundariesAnnotationLayer = null;
         }
     },
 

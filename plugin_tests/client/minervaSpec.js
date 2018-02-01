@@ -219,6 +219,7 @@ describe('Session view', function () {
 });
 
 describe('Datapanel', function () {
+    var mapPanel;
     it('Select and unselect datasets', function () {
         $('.source-title#Tiff').trigger('click');
         $('.source-title#GeoJSON').trigger('click');
@@ -241,7 +242,7 @@ describe('Datapanel', function () {
     });
 
     it('Show dataset boundaries', function () {
-        var mapPanel = $('#m-map-panel').data('backboneView')[0];
+        mapPanel = $('#m-map-panel').data('backboneView')[0];
         runs(function () {
             $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
             $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
@@ -254,23 +255,50 @@ describe('Datapanel', function () {
         }, 'boundaries to be drawn');
 
         runs(function () {
-            expect(mapPanel.annotationLayer).not.toBeFalsy();
-            expect(mapPanel.annotationLayer.annotations().length).toEqual(4);
+            expect(mapPanel.boundariesAnnotationLayer).not.toBeFalsy();
+            expect(mapPanel.boundariesAnnotationLayer.annotations().length).toEqual(4);
         });
     });
 
     it('Toggle boundary label', function () {
-        var mapPanel = $('#m-map-panel').data('backboneView')[0];
         $('.icon-button.toggle-bounds-label').trigger('click');
-        expect(mapPanel.annotationLayer.options().showLabels).toEqual(true);
+        expect(mapPanel.boundariesAnnotationLayer.options().showLabels).toEqual(true);
         $('.icon-button.toggle-bounds-label').trigger('click');
-        expect(mapPanel.annotationLayer.options().showLabels).toEqual(false);
+        expect(mapPanel.boundariesAnnotationLayer.options().showLabels).toEqual(false);
     });
 
     it('Hide dataset boundaries', function () {
-        var mapPanel = $('#m-map-panel').data('backboneView')[0];
         $('.icon-button.remove-bounds').trigger('click');
-        expect(mapPanel.annotationLayer).toBeFalsy();
+        expect(mapPanel.boundariesAnnotationLayer).toBeFalsy();
+    });
+
+    it('Create boundary dataset with drawing', function () {
+        $('.icon-button.m-boundary-dataset').trigger('click');
+        mapPanel.drawDatasetLayer.geojson({ 'type': 'FeatureCollection', 'features': [{ 'type': 'Feature', 'geometry': { 'type': 'Polygon', 'coordinates': [[[-123.774414, 32.887971], [-123.774414, 39.748663], [-104.721679, 39.748663], [-104.721679, 32.887971], [-123.774414, 32.887971]]] }, 'properties': { 'annotationType': 'rectangle', 'name': 'Rectangle 1', 'annotationId': 1, 'fill': true, 'fillColor': '#00ff00', 'fillOpacity': 0.25, 'stroke': true, 'strokeColor': '#000000', 'strokeOpacity': 1, 'strokeWidth': 3 } }] });
+        mapPanel.drawDatasetLayer.geoTrigger(geo.event.annotation.state, {});
+        waitsFor(function () {
+            return $('.bootbox-prompt .modal-footer .btn-primary').length;
+        }, 'confirm modal to show');
+        runs(function () {
+            $('.bootbox-prompt .modal-footer .btn-primary').trigger('click');
+        });
+        waitsFor(function () {
+            return $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').length &&
+                !$('.modal-backdrop').length;
+        }, 'Boundary dataset to be created');
+    });
+
+    it('Filter datasets by intersecting', function () {
+        $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').first().parent().find('input').trigger('click');
+        $('.icon-button.intersect-filter').trigger('click');
+        waitsFor(function () {
+            return $('.icon-button.remove-filter').length;
+        }, 'dataset to be filtered');
+        runs(function () {
+            expect($('.m-datasets .dataset').length).toBe(4);
+            $('.icon-button.remove-filter').trigger('click');
+            expect($('.m-datasets .dataset').length).not.toBe(3);
+        });
     });
 });
 

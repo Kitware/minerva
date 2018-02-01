@@ -4,6 +4,8 @@ module.exports = {
         'no-alert': 0,
         'underscore/prefer-invoke': 0,
         'promise/no-native': 0,
+        'promise/no-nesting': 'off',
+        'promise/always-return': 'off'
     },
     globals: {
         minerva: true,

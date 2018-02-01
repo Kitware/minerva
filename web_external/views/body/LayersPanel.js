@@ -4,6 +4,7 @@ import Panel from '../body/Panel';
 import ChoroplethRenderWidget from '../widgets/ChoroplethRenderWidget';
 import JsonConfigWidget from '../widgets/JsonConfigWidget';
 import KTileConfigWidget from '../widgets/KTileConfigWidget';
+import { getBoundSupported } from '../util/utils';
 
 import template from '../../templates/body/layersPanel.pug';
 import '../../stylesheets/body/layersPanel.styl';
@@ -309,7 +310,8 @@ const LayersPanel = Panel.extend({
 
         this.update(template({
             datasets: sortedDisplayedDatasets,
-            layersOrderOptions: this.layersOrderOptions
+            layersOrderOptions: this.layersOrderOptions,
+            getBoundSupported: getBoundSupported
         }));
 
         return this;

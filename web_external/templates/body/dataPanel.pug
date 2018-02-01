@@ -4,13 +4,16 @@ include ../layout/panelMixins.pug
 
 if sourceCategoryDataset
   +panel-content('collapse in')
-    - var hasSelection = selectedDatasetsId.size;
+    - var selectionCount = selectedDatasetsId.size;
     .action-bar
       .pull-left
         button.icon-button.m-upload-local(title="Upload local dataset")
           i.m-icon-enabled.icon-upload
         button.icon-button.m-postgres(title="Create postgres dataset")
           i.m-icon-enabled.icon-database
+        button.icon-button.m-boundary-dataset(title="Draw a boundary dataset")
+          i.m-icon-enabled.icon-pencil
+        ||
         button.icon-button.toggle-shared(title=showSharedDatasets?'Hide shared datasets':'Show shared datasets')
           i.icon-user(class=showSharedDatasets?'':'icon-disabled')
         if showingBounds
@@ -19,17 +22,25 @@ if sourceCategoryDataset
             i.icon-font
           button.icon-button.remove-bounds(title='Remove dataset boundaries')
             i.icon-trash
+        if !_.isEmpty(filters)
+          ||
+          button.icon-button.remove-filter(title='Stop filtering')
+            i.icon-cancel
       | &nbsp;
-      if hasSelection
+      if selectionCount
         .pull-right
-          button.icon-button.show-bounds(title='Show boundaries of selected datasets', disabled=!hasSelection)
+          button.icon-button.show-bounds(title='Show boundaries of selected datasets')
             i.icon-search
           button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)
             i.icon-share
-          button.icon-button.add-to-session(title='Add selected datasets to session', disabled=!hasSelection)
-            i.icon-globe
-          button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
-            i.icon-trash
+          if selectionCount === 1 && selectionGetBoundSupported()
+            button.icon-button.intersect-filter(title='Show datasets that have boundaries overlap with selected dataset boundary')
+              i.icon-filter
+          if selectionCount > 1
+            button.icon-button.add-to-session(title='Add selected datasets to session')
+              i.icon-globe
+            button.icon-button.delete(title='Delete selected datasets', disabled=!deletableSelectedDatasets().length)
+              i.icon-trash
     each categories, source in sourceCategoryDataset
       .source-title.clearfix(id=source)= source
         - var expand = visibleMenus[source]
@@ -38,7 +49,7 @@ if sourceCategoryDataset
         each datasets, category in categories
           .category-title.clearfix(id=category, data-source=source, data-category=category)
             .pull-left
-              .category-checkbox.checkbox-container(class=hasSelection?'show-checkbox':'')
+              .category-checkbox.checkbox-container(class=selectionCount?'show-checkbox':'')
                 - expand = visibleMenus[source] && visibleMenus[source][category]
                 i.icon-faded(title='Collection', class=expand?'icon-folder-open':'icon-folder')
                 input(type='checkbox', checked=allChecked(datasets.map((dataset)=>dataset.get('_id'))))
@@ -49,7 +60,7 @@ if sourceCategoryDataset
                 - var attributes = {'m-dataset-id': dataset.get('_id')}
                 .dataset.clearfix&attributes(attributes)
                   .pull-left
-                    .dataset-checkbox.checkbox-container(class=hasSelection?'show-checkbox':'')
+                    .dataset-checkbox.checkbox-container(class=selectionCount?'show-checkbox':'')
                       if dataset.get('creatorId')===currentUser.id 
                         if dataset.get('folderId') === collection.folderId
                           i.icon-doc.icon-faded
