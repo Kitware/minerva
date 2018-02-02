@@ -531,9 +531,8 @@ export default Panel.extend({
                     try {
                         var regex = new RegExp(keyword, 'i');
                         match = !!regex.exec(dataset.get('name'));
-                    } catch (ex) {
-                        match = dataset.get('name').toLocaleLowerCase().indexOf(keyword) !== -1;
-                    }
+                    } catch (ex) { }
+                    match = match || dataset.get('name').toLocaleLowerCase().indexOf(keyword) !== -1;
                     if (match) {
                         ids.push(dataset.get('_id'));
                     }
