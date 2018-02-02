@@ -376,7 +376,7 @@ export default Panel.extend({
             var geometryStr = JSON.stringify(geometry);
             return restRequest({
                 type: 'POST',
-                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${name}.geojson&size=${geometryStr.length}`,
+                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
                 contentType: 'application/json',
                 data: geometryStr
             }).then((file) => {

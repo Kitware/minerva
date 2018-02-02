@@ -326,7 +326,7 @@ const MapPanel = Panel.extend({
                     showLabels: false
                 });
                 layer.geoOn(geo.event.annotation.state, (e) => {
-                    bootbox.prompt({
+                    var prompt = bootbox.prompt({
                         title: 'Boundary dataset name',
                         value: 'Boundary',
                         callback: (name) => {
@@ -336,6 +336,7 @@ const MapPanel = Panel.extend({
                             layer.removeAllAnnotations();
                         }
                     });
+                    prompt.find('.bootbox-body input').attr('maxlength', '30');
                 });
                 layer.geoOn(geo.event.annotation.mode, (e) => {
                     events.trigger('m:map-drawing-change', e.mode === 'rectangle');
