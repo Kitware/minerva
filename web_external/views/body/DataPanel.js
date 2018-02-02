@@ -74,7 +74,11 @@ export default Panel.extend({
     },
 
     drawBoundaryDataset() {
-        events.trigger('m:draw-boundary-dataset');
+        if (!this.drawing) {
+            events.trigger('m:draw-boundary-dataset');
+        } else {
+            events.trigger('m:stop-draw-boundary-dataset');
+        }
     },
 
     /**

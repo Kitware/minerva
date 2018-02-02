@@ -347,6 +347,12 @@ const MapPanel = Panel.extend({
             this.$('.geojs-map').focus();
         });
 
+        this.listenTo(events, 'm:stop-draw-boundary-dataset', () => {
+            if (this.drawDatasetLayer) {
+                this.drawDatasetLayer.mode(null);
+            }
+        });
+
         Panel.prototype.initialize.apply(this);
     },
 
