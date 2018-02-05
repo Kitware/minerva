@@ -336,7 +336,7 @@ const MapPanel = Panel.extend({
                             layer.removeAllAnnotations();
                         }
                     });
-                    prompt.find('.bootbox-body input').attr('maxlength', '30');
+                    prompt.find('.bootbox-body input').attr('maxlength', '250');
                 });
                 layer.geoOn(geo.event.annotation.mode, (e) => {
                     events.trigger('m:map-drawing-change', e.mode === 'rectangle');
