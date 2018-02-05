@@ -326,7 +326,7 @@ const MapPanel = Panel.extend({
                     showLabels: false
                 });
                 layer.geoOn(geo.event.annotation.state, (e) => {
-                    bootbox.prompt({
+                    var prompt = bootbox.prompt({
                         title: 'Boundary dataset name',
                         value: 'Boundary',
                         callback: (name) => {
@@ -336,10 +336,22 @@ const MapPanel = Panel.extend({
                             layer.removeAllAnnotations();
                         }
                     });
+                    prompt.find('.bootbox-body input').attr('maxlength', '250');
+                });
+                layer.geoOn(geo.event.annotation.mode, (e) => {
+                    events.trigger('m:map-drawing-change', e.mode === 'rectangle');
                 });
                 this.drawDatasetLayer = layer;
             }
             this.drawDatasetLayer.mode('rectangle');
+            // focus the map so user could immediately press esc to exit rectangle creating mode
+            this.$('.geojs-map').focus();
+        });
+
+        this.listenTo(events, 'm:stop-draw-boundary-dataset', () => {
+            if (this.drawDatasetLayer) {
+                this.drawDatasetLayer.mode(null);
+            }
         });
 
         Panel.prototype.initialize.apply(this);

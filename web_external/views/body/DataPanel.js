@@ -41,7 +41,8 @@ export default Panel.extend({
         'click .action-bar button.remove-bounds': 'removeBounds',
         'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
         'click .action-bar button.intersect-filter': 'intersectFilter',
-        'click .action-bar button.remove-filter': 'removeFilter'
+        'click .action-bar button.clear-filters': 'clearFilters',
+        'keyup .search-bar input': 'applyNameFilter'
     },
 
     toggleCategories: function (event) {
@@ -73,7 +74,11 @@ export default Panel.extend({
     },
 
     drawBoundaryDataset() {
-        events.trigger('m:draw-boundary-dataset');
+        if (!this.drawing) {
+            events.trigger('m:draw-boundary-dataset');
+        } else {
+            events.trigger('m:stop-draw-boundary-dataset');
+        }
     },
 
     /**
@@ -299,6 +304,9 @@ export default Panel.extend({
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
         this.filters = {};
+        this.nameFilterKeyword = '';
+        this.drawing = false;
+        this.applyNameFilter = _.debounce(this.applyNameFilter, 300);
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -368,7 +376,7 @@ export default Panel.extend({
             var geometryStr = JSON.stringify(geometry);
             return restRequest({
                 type: 'POST',
-                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${name}.geojson&size=${geometryStr.length}`,
+                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
                 contentType: 'application/json',
                 data: geometryStr
             }).then((file) => {
@@ -385,6 +393,9 @@ export default Panel.extend({
                 this.collection.add(dataset);
                 dataset.saveMinervaMetadata(minervaMeta);
             });
+        }).listenTo(events, 'm:map-drawing-change', (value) => {
+            this.drawing = value;
+            this.render();
         });
 
         eventStream.on('g:event.job_status', _.bind(function (event) {
@@ -507,6 +518,32 @@ export default Panel.extend({
         events.trigger('m:toggle-bounds-label');
     },
 
+    applyNameFilter(e) {
+        var keyword = e.target.value;
+        if (this.nameFilterKeyword === keyword) {
+            return;
+        }
+        this.nameFilterKeyword = keyword;
+        if (keyword) {
+            this.filters.name = this.collection.models
+                .reduce((ids, dataset) => {
+                    var match = false;
+                    try {
+                        var regex = new RegExp(keyword, 'i');
+                        match = !!regex.exec(dataset.get('name'));
+                    } catch (ex) { }
+                    match = match || dataset.get('name').toLocaleLowerCase().indexOf(keyword) !== -1;
+                    if (match) {
+                        ids.push(dataset.get('_id'));
+                    }
+                    return ids;
+                }, []);
+        } else {
+            delete this.filters.name;
+        }
+        this.render();
+    },
+
     intersectFilter() {
         var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
         this._getDatasetBounds(dataset)
@@ -536,8 +573,9 @@ export default Panel.extend({
             });
     },
 
-    removeFilter() {
+    clearFilters() {
         this.filters = {};
+        this.nameFilterKeyword = '';
         this.render();
     },
 
@@ -546,6 +584,7 @@ export default Panel.extend({
     },
 
     render() {
+        var idFilters = new Set(_.intersection(...Object.values(this.filters)));
         this.sourceCategoryDataset = _.chain(this.collection.models)
             .filter(this.getSourceName)
             .filter((dataset) => {
@@ -559,9 +598,7 @@ export default Panel.extend({
                 if (_.isEmpty(this.filters)) {
                     return true;
                 }
-                var includeIds = Object.values(this.filters).reduce((set, ids) => { ids.forEach(set.add, set); return set; }, new Set());
-                // console.log(includeIds.values());
-                return includeIds.has(dataset.get('_id'));
+                return idFilters.has(dataset.get('_id'));
             })
             .groupBy(this.getSourceName)
             .mapObject((datasets, key) => {
@@ -569,8 +606,14 @@ export default Panel.extend({
                     return dataset.get('meta').minerva.category || 'Other';
                 });
             }).value();
-
+        var searchBar = this.$('.search-bar input');
+        var serachBarFocused = searchBar.is(':focus');
         this.$el.html(template(this));
+        // This method is used to preserve input cursor state. There might be other methods, but I found this one more straightforward.
+        if (serachBarFocused) {
+            this.$('.search-bar input').replaceWith(searchBar);
+            this.$('.search-bar input').focus();
+        }
 
         // TODO pagination and search?
         return this;

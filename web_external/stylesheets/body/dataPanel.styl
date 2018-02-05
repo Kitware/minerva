@@ -15,10 +15,15 @@
 
     &:focus
       outline none
-    
+
     &:hover
+      background #eee
       i
         color #66a
+
+    &.active
+      background #ccc
+
     &:disabled
       i
         color #cccccc
@@ -26,6 +31,18 @@
   .action-bar
     padding 2px
     border-bottom 1px solid #ececec
+
+  .search-bar
+    input[type="text"]
+      margin 2px 4px
+      height 22px
+      padding 0 2px
+      width calc(100% - 8px)
+      border none
+      border-bottom 1px solid #ececec
+
+    input[type="text"]::placeholder
+      color #ccc
 
   .source-title, .category-title
     font-weight bold
@@ -66,11 +83,14 @@
 
   i
     color #444
+    height 20px
+    display inline-block
 
     &.icon-disabled
       color #cccccc
     
     &.icon-enabled:hover
+      background #eee
       color #66a
       cursor pointer
 
@@ -81,15 +101,6 @@
     margin-left 5px
     padding 2px
     background-color #FFFFFF
-
-    i
-      color #444
-
-      &.icon-disabled
-        color #cccccc
-      &.icon-enabled:hover
-        color #66a
-        cursor pointer
 
     i
       &.m-geo-render-error
