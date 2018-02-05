@@ -100,4 +100,4 @@ script:
   - if [ -f $GIRDER_BUILD_DIR/test_failed ] ; then false ; fi
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -R $MAIN_PATH -s $GIRDER_BUILD_DIR
+  - bash <(curl -s https://codecov.io/bash) -R $MAIN_PATH -s $GIRDER_SOURCE_DIR
