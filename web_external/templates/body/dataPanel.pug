@@ -36,6 +36,13 @@ if sourceCategoryDataset
           if selectionCount === 1 && selectionGetBoundSupported()
             button.icon-button.intersect-filter(title='Show datasets that have boundaries overlap with selected dataset boundary')
               i.icon-filter
+          .dropdown.dropdown-icon-button
+            button#gaiaProcessMenu.dropdown-toggle.icon-button.gaia-process(data-toggle='dropdown', title='Apply Process to selected datasets')
+              i.icon-cog-alt
+            ul.dropdown-menu(aria-labelledby="gaiaProcessMenu")
+              each process, index in gaiaProcesses
+                li(data-index=index)
+                  a= process.title
           if selectionCount > 1
             button.icon-button.add-to-session(title='Add selected datasets to session')
               i.icon-globe

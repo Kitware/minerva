@@ -1,0 +1,15 @@
+.form-group.m-gaiaProcessParamsGroup
+  label.control-label Select #{type} layer
+  - var inputArg = inputArgs[index]
+  select.input-arg.input-sm.form-control(data-index=index, data-type=type)
+    option(disabled, selected=!inputArg) Please select a layer
+    - for(var group in layers)
+      optgroup(label=group)
+        each dataset in layers[group]
+          - var layerName = dataset.get('name')
+          - var datasetId = dataset.get('_id')
+          - var layerMata = dataset.get('meta').minerva
+          if (layerMata.dataset_type !== 'wms')
+            option(value=datasetId, selected=(inputArg&&inputArg.item_id===datasetId))= dataset.get('name')
+          else if (gaia_minerva_wms.indexOf(layerMata.base_url) !== -1)
+            option(value=datasetId)= dataset.get('name')

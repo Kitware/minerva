@@ -17,6 +17,7 @@ import PostgresWidget from '../widgets/PostgresWidget';
 import { getBoundSupported } from '../util/utils';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
+import GaiaProcessWidget from '../widgets/GaiaProcessWidget';
 
 export default Panel.extend({
     events: {
@@ -42,7 +43,8 @@ export default Panel.extend({
         'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
         'click .action-bar button.intersect-filter': 'intersectFilter',
         'click .action-bar button.clear-filters': 'clearFilters',
-        'keyup .search-bar input': 'applyNameFilter'
+        'keyup .search-bar input': 'applyNameFilter',
+        'click .action-bar .dropdown li': 'gaiaProcessClicked'
     },
 
     toggleCategories: function (event) {
@@ -307,6 +309,8 @@ export default Panel.extend({
         this.nameFilterKeyword = '';
         this.drawing = false;
         this.applyNameFilter = _.debounce(this.applyNameFilter, 300);
+        this.gaiaProcesses = [];
+        this.loadGaiaProcesses();
         this.listenTo(this.collection, 'g:changed', function () {
             this.render();
         }, this).listenTo(this.collection, 'change', function () {
@@ -581,6 +585,70 @@ export default Panel.extend({
 
     getSourceName(model) {
         return (((model.get('meta') || {}).minerva || {}).source || {}).layer_source;
+    },
+
+    loadGaiaProcesses() {
+        restRequest({
+            path: 'gaia_process/classes',
+            type: 'GET'
+        }).done((data) => {
+            this.gaiaProcesses = data.processes
+                .map((process) => {
+                    var processName = Object.keys(process)[0];
+                    var formattedProcessName = processName.split('.').pop().split(/(?=[A-Z])/).join(' ');
+                    return { title: formattedProcessName, processMeta: process };
+                });
+            this.render();
+        });
+    },
+
+    gaiaProcessClicked(e) {
+        var process = this.gaiaProcesses[$(e.currentTarget).data('index')];
+        var processAttributes = Object.values(process.processMeta)[0];
+        // If the process requires only one dataset and no parameter run it directly
+        if (processAttributes.required_inputs.length === 1 &&
+            processAttributes.required_inputs[0].type === 'vector' &&
+            processAttributes.required_args.length === 0) {
+            bootbox.prompt({
+                title: 'New dataset name?',
+                value: process.title.split(' ')[0],
+                callback: (name) => {
+                    if (name !== null) {
+                        this.selectedDatasetsId.forEach((datsetId) => {
+                            var request = {
+                                datasetName: name,
+                                process: {
+                                    _type: Object.keys(process.processMeta)[0],
+                                    inputs: [
+                                        {
+                                            _type: 'gaia_tasks.inputs.MinervaVectorIO',
+                                            item_id: datsetId
+                                        }
+                                    ]
+                                }
+                            };
+                            restRequest({
+                                path: 'gaia_analysis',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(request)
+                            }).done(_.bind(function () {
+                                events.trigger('m:job.created');
+                            }, this));
+                        });
+                    }
+                }
+            });
+        } else {
+            new GaiaProcessWidget({
+                el: $('#g-dialog-container'),
+                parentView: this,
+                datasetCollection: this.collection,
+                processes: this.gaiaProcesses,
+                selectedProcess: process,
+                datasetsId: this.selectedDatasetsId
+            }).render();
+        }
     },
 
     render() {
