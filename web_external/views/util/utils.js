@@ -10,12 +10,6 @@ function generateSequence(start, stop, count) {
     return sequence;
 }
 
-function getBoundSupported(dataset) {
-    var minervaMetadata = dataset.metadata();
-    return ['geojson', 'geotiff', 'geojson-timeseries'].indexOf(minervaMetadata.dataset_type) !== -1;
-}
-
 export {
-    generateSequence,
-    getBoundSupported
+    generateSequence
 };
