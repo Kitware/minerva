@@ -25,7 +25,6 @@ from base64 import b64encode
 import fiona
 import geopandas
 import requests
-# from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from six import StringIO
 
 from gaia.core import GaiaException
@@ -90,6 +89,7 @@ class MinervaVectorIO(GaiaIO):
             with open(self.uri, 'w') as outjson:
                 json.dump(geojson, outjson)
         # elif 'dataset_type' in minerva and minerva['dataset_type'] == 'wms':
+        # from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
         #     servers = config.getConfig()['gaia_minerva_wms']['servers']
         #     if minerva['base_url'] in servers:
         #         params = 'srsName=EPSG:4326&typename={name}&outputFormat=json'\

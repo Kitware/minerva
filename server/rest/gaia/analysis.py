@@ -42,8 +42,6 @@ class GaiaAnalysis(Resource):
                    paramType='body')
     )
     def gaiaAnalysisTask(self, analysis, params):
-        print analysis
-
         currentUser = self.getCurrentUser()
 
         gaia_json = json.dumps(analysis['process'])
@@ -80,5 +78,4 @@ class GaiaAnalysis(Resource):
 
         addJobOutput(job, dataset)
 
-        # r = result.get()
         return job

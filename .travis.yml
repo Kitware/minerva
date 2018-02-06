@@ -79,8 +79,7 @@ before_install:
   # install gaia
   - GAIA_DIR=$HOME/gaia
   - git clone https://github.com/OpenDataAnalytics/gaia.git ${GAIA_DIR}
-  - pip install -e ${GAIA_DIR}
-  - pip install -r "${GAIA_DIR}/requirements.txt"
+  - pip install -e ${GAIA_DIR} -r "${GAIA_DIR}/requirements.txt"
 
   - npm install -g npm
   - npm install -g npm-install-retry
