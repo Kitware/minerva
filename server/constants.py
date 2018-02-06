@@ -22,6 +22,8 @@ class PluginSettings():
     MINERVA_COLLECTION = 'minerva'
     MINERVA_FOLDER = 'minerva'
     DATASET_FOLDER = 'dataset'
+    MINERVA_SHARED_DATASET = 'minerva_shared_dataset'
+    DATASET_SHARING_GROUP_NAME = 'dataset sharing'
     SOURCE_FOLDER = 'source'
     SESSION_FOLDER = 'session'
     GEOJSON_EXTENSION = '.geojson'
