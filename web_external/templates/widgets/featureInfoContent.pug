@@ -2,11 +2,14 @@
   each layer in layersInfo
     .m-layer
       h4= layer.id
-      .m-feature-info-table.clearfix
-        .m-table-wrapper
-          .m-key-column
-            each key, index in Object.keys(layer.properties)
-              div(class=index%2===0?'odd':'even')= key
-          .m-value-column
-            each value, index in Object.values(layer.properties)
-              div(class=index%2===0?'odd':'even')= value
+      if Object.keys(layer.properties).length
+        .m-feature-info-table.clearfix
+          .m-table-wrapper
+            .m-key-column
+              each key, index in Object.keys(layer.properties)
+                div(class=index%2===0?'odd':'even')= key
+            .m-value-column
+              each value, index in Object.values(layer.properties)
+                div(class=index%2===0?'odd':'even')= value
+      else
+        | Empty
