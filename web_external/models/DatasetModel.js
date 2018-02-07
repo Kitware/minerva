@@ -323,10 +323,19 @@ const DatasetModel = MinervaModel.extend({
     },
 
     removeFromSession() {
-        // Make opacity 1 when a layer is deleted
+        // Make opacity 1 when a layer is deletedid
         this.set('visible', true);
         this.set('opacity', 1);
         this.set('displayed', false);
+    },
+
+    getBoundSupported() {
+        if (this.get('_id').toString().length < 7) {
+            // dataset with a short id are dynamically created, so that the server can't calculate its bounds
+            return false;
+        }
+        var minervaMetadata = this.metadata();
+        return ['geojson', 'geotiff', 'geojson-timeseries'].indexOf(minervaMetadata.dataset_type) !== -1;
     }
 });
 export default DatasetModel;
