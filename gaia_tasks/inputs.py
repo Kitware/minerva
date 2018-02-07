@@ -31,7 +31,7 @@ from gaia.core import GaiaException
 from gaia.filters import filter_pandas
 from gaia.inputs import GaiaIO
 from gaia import formats, types
-from girder.utility import config
+import girder_worker
 from girder.constants import PACKAGE_DIR
 import girder_client
 
@@ -61,10 +61,17 @@ class MinervaVectorIO(GaiaIO):
             tmpdir = tempfile.mkdtemp()
             self.uri = tempfile.mkstemp(suffix='.json', dir=tmpdir)[1]
         self.filename = name
-        girderHost = config.getConfig().get('minerva', {}).get('worker_girder_host_name', 'localhost')
-        girderScheme = config.getConfig().get('minerva', {}).get('worker_girder_host_scheme', 'http')
-
-        girderPort = config.getConfig()['server.socket_port']
+        girderHost = None
+        girderPort = None
+        girderScheme = None
+        try:
+            girderHost = girder_worker.config.get('minerva', 'girder_host_name')
+            girderPort = girder_worker.config.get('minerva', 'girder_host_port')
+            girderScheme = girder_worker.config.get('minerva', 'girder_host_scheme')
+        except:
+            girderHost = 'localhost'
+            girderPort = '8080'
+            girderScheme = 'http'
         client = girder_client.GirderClient(host=girderHost, port=girderPort, scheme=girderScheme)
         client.token = token
         self.client = client
