@@ -41,7 +41,6 @@ from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     findSharedFolder
 from girder.plugins.minerva.utility.dataset_utility import \
     jsonArrayHead, GeoJsonMapper, jsonObjectReader
-from girder.plugins.girder_ktile.util import getInfo
 
 import girder_client
 
@@ -425,8 +424,10 @@ class Dataset(Resource):
                 break
             elif ({'tif', 'tiff'}.intersection(file['exts']) and
                   file['mimeType'] == 'image/tiff'):
-                info = getInfo(file)
-                if 'srs' in info and info['srs']:
+                if not self.client:
+                    self._initClient()
+                info = self.client.get(path='/item/%s/tiles' % str(item['_id']))
+                if 'srs' in info['sourceBounds'] and info['sourceBounds']['srs']:
                     minerva_metadata['original_type'] = 'tiff'
                     minerva_metadata['dataset_type'] = 'geotiff'
                     minerva_metadata['original_files'] = [{
@@ -619,9 +620,16 @@ class Dataset(Resource):
                 'uly': geom.bounds[3]
             }
         elif minervaMeta['dataset_type'] == 'geotiff':
-            file = self.model('file').load(minervaMeta['original_files'][
-                0]['_id'], user=self.getCurrentUser())
-            return getInfo(file)['corners']
+            if not self.client:
+                self._initClient()
+            info = self.client.get(path='/item/%s/tiles' % str(item['_id']))
+            bounds = info['bounds']
+            return {
+                'lrx': bounds['xmax'],
+                'lry': bounds['ymin'],
+                'ulx': bounds['xmin'],
+                'uly': bounds['ymax']
+            }
 
 
 def unwrapFeature(geometry):
