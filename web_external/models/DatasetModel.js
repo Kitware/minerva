@@ -193,7 +193,7 @@ const DatasetModel = MinervaModel.extend({
                 };
             } else if (mm.dataset_type === 'geotiff') {
                 mm.geo_render = {
-                    type: 'ktile'
+                    type: 'large_image'
                 };
             } else {
                 console.log('An unknown type');

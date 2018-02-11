@@ -3,7 +3,7 @@ import geo from 'geojs';
 import registry from './registry';
 import MapRepresentation from './MapRepresentation';
 import GeometryRepresentation from './GeometryRepresentation';
-import KtileRepresentation from './KtileRepresentation';
+import LargeImageRepresentation from './LargeImageRepresentation';
 import WmsRepresentation from './WmsRepresentation';
 import ContourRepresentation from './ContourRepresentation';
 import ChoroplethRepresentation from './ChoroplethRepresentation';
@@ -14,7 +14,7 @@ export {
     registry,
     MapRepresentation,
     GeometryRepresentation,
-    KtileRepresentation,
+    LargeImageRepresentation,
     WmsRepresentation,
     ContourRepresentation,
     ChoroplethRepresentation
