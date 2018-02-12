@@ -156,14 +156,16 @@ const FeatureInfoWidget = View.extend({
             return $.when([]);
         } else {
             var infoDeferreds = geotiffLayers.map((dataset) => {
-                let fileId = dataset.get('meta').minerva.original_files[0]._id;
-                let coord = event.geo;
+                let itemId = dataset.get('_id');
+                let coord = event.mapgcs;
                 return restRequest({
-                    url: `ktile/${fileId}/query`,
+                    url: `item/${itemId}/tiles/pixel`,
                     type: 'GET',
                     data: {
-                        'lat': coord.y,
-                        'lon': coord.x
+                        'top': coord.y,
+                        'left': coord.x,
+			'projection': 'EPSG:3857',
+			'units': 'projection'
                     }
                 }).then((result) => {
                     if (_.isEmpty(result)) {
@@ -171,7 +173,7 @@ const FeatureInfoWidget = View.extend({
                     }
                     return {
                         id: dataset.get('name'),
-                        properties: result
+                        properties: result.bands
                     };
                 });
             });
