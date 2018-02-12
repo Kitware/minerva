@@ -164,8 +164,8 @@ const FeatureInfoWidget = View.extend({
                     data: {
                         'top': coord.y,
                         'left': coord.x,
-			'projection': 'EPSG:3857',
-			'units': 'projection'
+                        'projection': 'EPSG:3857',
+                        'units': 'projection'
                     }
                 }).then((result) => {
                     if (_.isEmpty(result)) {

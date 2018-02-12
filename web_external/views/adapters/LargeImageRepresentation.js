@@ -15,20 +15,20 @@ class LargeImageRepresentation extends MapRepresentation {
             keepLower: false
         });
         var itemId = dataset.get('_id');
-	var apiRoot = getApiRoot();
-	var params = encodeURI('encoding=PNG&projection=EPSG:3857');
+        var apiRoot = getApiRoot();
+        var params = encodeURI('encoding=PNG&projection=EPSG:3857');
         var url = `${apiRoot}/item/${itemId}/tiles/zxy`;
         if (_.isEmpty(visProperties)) {
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}`);
         } else {
-	    var style = encodeURI(JSON.stringify({
-		band: parseInt(visProperties.band),
-		min: visProperties.min,
-		max: visProperties.max,
-		palette: visProperties.palettable
-	    }));
+            var style = encodeURI(JSON.stringify({
+                band: parseInt(visProperties.band),
+                min: visProperties.min,
+                max: visProperties.max,
+                palette: visProperties.palettable
+            }));
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}&style=${style}`);
-	    var colorLegendCategory = {
+            var colorLegendCategory = {
                 type: 'discrete',
                 scale: 'linear',
                 colors: palettableColorbrewerMapper.toRampColors(visProperties.palettable),
