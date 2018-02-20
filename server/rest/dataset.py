@@ -32,6 +32,9 @@ from girder.api.rest import Resource, loadmodel, RestException, GirderException
 from girder.constants import AccessType
 from girder.utility import config, assetstore_utilities
 
+from girder.models.group import Group
+from girder.models.user import User
+from girder.models.setting import Setting
 from girder.plugins.minerva.constants import PluginSettings
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder, \
     updateMinervaMetadata, findSharedDatasetFolders, \
@@ -52,6 +55,7 @@ class Dataset(Resource):
         self.route('GET', ('shared',), self.listSharedDatasets)
         self.route('PUT', ('share', ':id'), self.shareDataset)
         self.route('PUT', ('unshare', ':id'), self.unshareDataset)
+        self.route('POST', ('prepare_sharing',), self.prepareSharing)
         self.route('GET', ('folder',), self.getDatasetFolder)
         self.route('POST', ('folder',), self.createDatasetFolder)
         self.route('POST', (':id', 'item'), self.promoteItemToDataset)
@@ -288,6 +292,28 @@ class Dataset(Resource):
         datasetFolder = findDatasetFolder(currentUser, currentUser, create=True)
         self.model('item').move(item, datasetFolder)
         return self.model('item').filter(item, currentUser)
+
+    @access.admin
+    @autoDescribeRoute(
+        Description('Prepare sharing feature')
+        .errorResponse()
+    )
+    def prepareSharing(self, params):
+        datasetSharingGroup = Group().findOne(query={
+            'name': PluginSettings.DATASET_SHARING_GROUP_NAME
+        })
+        if not datasetSharingGroup:
+            datasetSharingGroup = Group().createGroup(
+                PluginSettings.DATASET_SHARING_GROUP_NAME,
+                self.getCurrentUser(), public=False)
+        for user in User().find():
+            if not User().hasAccess(datasetSharingGroup, user=user):
+                Group().addUser(datasetSharingGroup, user)
+
+        Setting().set('autojoin', [{
+            'pattern': '@',
+            'groupId': str(datasetSharingGroup['_id']),
+            'level': 0}])
 
     @access.public
     @loadmodel(map={'userId': 'user'}, model='user', level=AccessType.READ)

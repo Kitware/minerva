@@ -25,3 +25,6 @@ class WebClientTestCase(web_client_test.WebClientTestCase):
         item = self.model('item').findOne({'name': 'raster.tiff'})
         self.request(path='/minerva_dataset/' +
                      str(item['_id']) + '/item', method='POST', user=admin)
+
+        # Create the user group for sharing feature
+        self.request(path='/minerva_dataset/prepare_sharing', method='POST', user=admin)

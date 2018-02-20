@@ -6,7 +6,8 @@
         "gravatar",
         "jobs",
         "database_assetstore",
-        "girder_ktile"
+        "girder_ktile",
+        "autojoin"
     ],
     "npm": {
         "file": "package.json",
