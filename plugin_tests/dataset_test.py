@@ -385,7 +385,6 @@ class DatasetTestCase(base.TestCase):
         geojsonContent = response.json
         self.assertEqual(len(geojsonContent['features'][0]['geometry']['coordinates']), 245)
 
-
         # test new dataset download endpoint
         response = self.request(
             path='/minerva_dataset/{0}/bound'.format(stateItemId),
@@ -397,3 +396,15 @@ class DatasetTestCase(base.TestCase):
         self.assertEqual(geojsonContent['lry'], 31.332502)
         self.assertEqual(geojsonContent['ulx'], -114.813613)
         self.assertEqual(geojsonContent['uly'], 41.003444)
+
+    def testPrepareDatasetSharing(self):
+        self.assertEqual(len(self.request(path='/group', user=self._user, method='GET').json), 0)
+        response = self.request(path='/minerva_dataset/prepare_sharing',
+                                method='POST',
+                                user=self._user)
+        groups = self.request(path='/group', user=self._user, method='GET').json
+
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]['name'], 'dataset sharing')
+        self.assertEqual(groups[0]['public'], False)
+        self.assertStatusOk(response)
