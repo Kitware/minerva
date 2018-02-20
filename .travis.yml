@@ -71,6 +71,16 @@ before_install:
   - git clone https://github.com/OpenGeoscience/girder_ktile.git "${GIRDER_KTILE_DIR}"
   - pip install -r "${GIRDER_KTILE_DIR}/requirements.txt" -U
 
+  # install girder worker
+  - GIRDER_WORKER_DIR=$HOME/girder_worker
+  - git clone https://github.com/girder/girder_worker.git ${GIRDER_WORKER_DIR}
+  - pip install -e ${GIRDER_WORKER_DIR}
+
+  # install gaia
+  - GAIA_DIR=$HOME/gaia
+  - git clone https://github.com/OpenDataAnalytics/gaia.git ${GAIA_DIR}
+  - pip install -e ${GAIA_DIR} -r "${GAIA_DIR}/requirements.txt"
+
   - npm install -g npm
   - npm install -g npm-install-retry
   - npm --version
@@ -81,6 +91,7 @@ install:
   - cd $GIRDER_SOURCE_DIR
   - pip install --no-cache-dir -U -r requirements-dev.txt -e .
   - pip install -r $MAIN_PATH/requirements.txt
+  - pip install girder[worker]
   - pip install -r $MAIN_PATH/requirements-dev.txt
 
   - girder-install plugin --symlink $MAIN_PATH
