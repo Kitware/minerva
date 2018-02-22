@@ -501,9 +501,9 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
-        return self._download(item)
+        return self.downloadDataset(item)
 
-    def _download(self, item):
+    def downloadDataset(self, item):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
             fileId = None
@@ -516,7 +516,8 @@ class Dataset(Resource):
             else:
                 fileId = minervaMeta['geo_render']['file_id']
             file = self.model('file').load(fileId, force=True)
-            return self.model('file').download(file, headers=False)
+            func = self.model('file').download(file, headers=False)
+            return geojson.loads(''.join(list(func())))
         else:
             return self._getPostgresGeojsonData(item)
 
@@ -535,19 +536,12 @@ class Dataset(Resource):
         if geometryField['type'] == 'built-in':
             return func
         elif geometryField['type'] == 'link':
-            featureCollections = None
             records = json.loads(''.join(list(func())))
             try:
                 item = self.model('item').load(geometryField['itemId'], force=True)
-                file = list(self.model('item').childFiles(item=item, limit=1))[0]
-                assetstore = self.model('assetstore').load(file['assetstoreId'])
-                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-                func = adapter.downloadFile(
-                    file, offset=0, headers=False, endByte=None,
-                    contentDisposition=None, extraParameters=None)
+                featureCollections = self.downloadDataset(item)
             except Exception:
                 raise GirderException('Unable to load link target dataset.')
-            featureCollections = json.loads(''.join(list(func())))
 
             valueLinks = sorted([x for x in geometryField['links']
                                  if x['operator'] == '='])
@@ -601,15 +595,10 @@ class Dataset(Resource):
                 minervaMeta['dataset_type'] == 'geojson-timeseries'):
             geometry = None
             if minervaMeta['dataset_type'] == 'geojson':
-                result = self._download(item)
-                if callable(result):
-                    geometry = geojson.loads(''.join(list(result())))
-                else:
-                    geometry = result
+                geometry = self.downloadDataset(item)
             if minervaMeta['dataset_type'] == 'geojson-timeseries':
-                result = self._download(item)
-                obj = json.loads(''.join(list(result())))
-                geometry = geojson.loads(json.dumps(obj[0]['geojson']))
+                geometries = self.downloadDataset(item)
+                geometry = geometries[0]['geojson']
             geometry = unwrapFeature(geometry)
             geom = shape(geometry)
             return {

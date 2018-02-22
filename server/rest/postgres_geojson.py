@@ -7,6 +7,7 @@ from girder.api.rest import Resource, ValidationException, loadmodel
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
+from .dataset import Dataset
 
 
 class PostgresGeojson(Resource):
@@ -19,22 +20,14 @@ class PostgresGeojson(Resource):
         self.route('GET', ('columns', ), self.getColumns)
         self.route('GET', ('values', ), self.getValues)
         self.route('GET', ('all_values', ), self.getAllValues)
-        self.route('POST', (), self.createPostgresGeojsonData)
+        self.route('POST', (), self.createPostgresGeojsonDataset)
         self.route('GET', ('geometrylink', ), self.getGeometryLinkTarget)
         self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
-
-    def _getDbName(self):
-        assetstores = self.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['type'] == 'database' and
-                  a['database']['dbtype'] == 'sqlalchemy_postgres']
-        dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
-        return dbName
 
     def _getQueryParams(self, schema, table, fields, group, filters,
                         output_format):
         return {
             'tables': [{'name': '{}.{}'.format(schema, table),
-                        'database': self._getDbName(),
                         'table': table,
                         'schema': schema}],
             'fields': fields,
@@ -138,7 +131,7 @@ class PostgresGeojson(Resource):
         .param('geometryField', 'Geometry data definition object')
         .param('datasetName', 'A custom name for the dataset', required=False)
     )
-    def createPostgresGeojsonData(self, assetstore, params):
+    def createPostgresGeojsonDataset(self, assetstore, params):
         filter = params['filter']
         table = params['table']
         field = params['field']
@@ -215,7 +208,6 @@ class PostgresGeojson(Resource):
             schema, table, fields, group, filter,
             'GeoJSON' if geometryField['type'] == 'built-in' else 'json')
         dbParams['tables'][0]['name'] = output_name
-        del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,
                                     progress.noProgress, currentUser)
         resItem = result[0]['item']
@@ -247,8 +239,7 @@ class PostgresGeojson(Resource):
         folder = findDatasetFolder(currentUser, currentUser)
         items = list(self.model('item').find(
             query={'folderId': folder['_id'],
-                   'meta.minerva.dataset_type': 'geojson',
-                   'meta.minerva.postgresGeojson.geometryField.type': {'$ne': 'link'}},
+                   'meta.minerva.dataset_type': 'geojson'},
             fields=['name']))
         return items
 
@@ -261,16 +252,7 @@ class PostgresGeojson(Resource):
         currentUser = self.getCurrentUser()
         itemId = params['itemId']
         item = self.model('item').load(itemId, user=currentUser)
-        files = list(self.model('item').childFiles(item))
-        if len(files) != 1:
-            raise ValidationException('the item has multiple files')
-        file = files[0]
-        assetstore = self.model('assetstore').load(file['assetstoreId'])
-        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-        func = adapter.downloadFile(
-            file, offset=0, headers=False, endByte=None,
-            contentDisposition=None, extraParameters=None)
-        featureCollections = json.loads(''.join(list(func())))
+        featureCollections = Dataset().downloadDataset(item)
         if 'features' not in featureCollections or \
                 len(featureCollections['features']) == 0 or \
                 'properties' not in featureCollections['features'][0]:
