@@ -13,6 +13,7 @@ import 'jQuery-QueryBuilder/dist/css/query-builder.default.min.css';
 const PostgresWidget = View.extend({
     events: {
         'submit #m-postgres': 'getGeojson',
+        'click #m-preview': 'preview',
         'change #m-postgres-assetstore': '_assetstoreChanged',
         'change #m-postgres-source': '_sourceChanged',
         'change #m-postgres-dataset-name': '_datasetNameChanged',
@@ -186,6 +187,116 @@ const PostgresWidget = View.extend({
                 this.trigger('m:dataset_created', datasetId);
                 this.$el.modal('hide');
             }.bind(this));
+    },
+    preview() {
+        var operatorConverter = function (operator) {
+            switch (operator) {
+                case 'equal':
+                    return 'eq';
+                case 'not_equal':
+                    return 'ne';
+                case 'less':
+                    return 'lt';
+                case 'in':
+                    return 'in';
+                case 'less_or_equal':
+                    return 'lte';
+                case 'greater':
+                    return 'gt';
+                case 'greater_or_equal':
+                    return 'gte';
+                case 'is_empty':
+                    return 'eq';
+                case 'is_not_empty':
+                    return 'ne';
+                case 'is_null':
+                    return 'is';
+                case 'is_not_null':
+                    return 'notis';
+                default:
+                    throw 'unsupported operator';
+            }
+        };
+        var valueConverter = function (operator, value) {
+            switch (operator) {
+                case 'is_empty':
+                    return '';
+                case 'is_not_empty':
+                    return '';
+                case 'is_null':
+                    return null;
+                case 'is_not_null':
+                    return null;
+                case 'equal':
+                case 'not_equal':
+                case 'less':
+                case 'less_or_equal':
+                case 'greater':
+                case 'greater_or_equal':
+                    if (Array.isArray(value)) {
+                        return value[0];
+                    }
+                    return value;
+                default:
+                    return value;
+            }
+        };
+        var groupRelationConverter = function (relation) {
+            switch (relation) {
+                case 'AND':
+                    return 'and';
+                case 'OR':
+                    return 'or';
+            }
+        };
+        var buildQueryFilter = function (element) {
+            var expression = {};
+            if (element.condition) {
+                var group = [];
+                expression[groupRelationConverter(element.condition)] = group;
+                for (var i = 0; i < element.rules.length; i++) {
+                    group.push(buildQueryFilter(element.rules[i]));
+                }
+            } else {
+                expression['field'] = element.field;
+                expression['operator'] = operatorConverter(element.operator);
+                expression['value'] = valueConverter(element.operator, element.value);
+            }
+            return expression;
+        };
+        var result = this.$queryBuilder[0].queryBuilder.getRules();
+        if (!result | !this.validate()) {
+            return;
+        }
+
+        var queryFilter = buildQueryFilter(result);
+
+        var geometryFieldGenerator = function () {
+            var geometryField = {
+                type: this.geometryFieldType
+            };
+            if (this.geometryFieldType === 'built-in') {
+                geometryField['field'] = this.geometryBuiltInField;
+            } else if (this.geometryFieldType === 'link') {
+                geometryField['itemId'] = this.geometryLink.target._id;
+                geometryField['links'] = this.geometryLink.links;
+            }
+            return geometryField;
+        }.bind(this);
+
+        restRequest({
+            url: '/minerva_postgres_geojson/preview',
+            type: 'POST',
+            data: {
+                datasetName: this.datasetName,
+                assetstoreId: this.selectedAssetstoreId,
+                table: this.selectedSource,
+                field: this.valueField,
+                aggregateFunction: this.aggregateFunction,
+                filter: JSON.stringify(queryFilter),
+                geometryField: JSON.stringify(geometryFieldGenerator())
+            }
+        })
     },
     render: function () {
         if (!this.modalOpenned) {

@@ -537,43 +537,47 @@ class Dataset(Resource):
             return func
         elif geometryField['type'] == 'link':
             records = json.loads(''.join(list(func())))
-            try:
-                item = self.model('item').load(geometryField['itemId'], force=True)
-                featureCollections = self.downloadDataset(item)
-            except Exception:
-                raise GirderException('Unable to load link target dataset.')
-
-            valueLinks = sorted([x for x in geometryField['links']
-                                 if x['operator'] == '='])
-            constantLinks = [x for x in geometryField['links']
-                             if x['operator'] == 'constant']
-            mappedGeometries = {}
-            for feature in featureCollections['features']:
-                skip = False
-                for constantLink in constantLinks:
-                    if feature['properties'][constantLink['field']] != constantLink['value']:
-                        skip = True
-                        break
-                if skip:
-                    continue
-                try:
-                    key = ''.join([feature['properties'][x['field']] for x in valueLinks])
-                except KeyError:
-                    raise GirderException('missing property for key ' +
-                                          x['field'] + ' in geometry link target geojson')
-                mappedGeometries[key] = feature['geometry']
-
-            assembled = []
-            for record in records:
-                key = ''.join([record[x['value']] for x in valueLinks])
-                if key in mappedGeometries:
-                    assembled.append(
-                        geojson.Feature(geometry=mappedGeometries[key], properties=record)
-                    )
-            if len(assembled) == 0:
+            featureCollection = self.linkAndAssembleGeometry(geometryField['links'], geometryField['itemId'], records)
+            if len(featureCollection.features) == 0:
                 raise GirderException('Dataset is empty')
+            return featureCollection
 
-            return geojson.FeatureCollection(assembled)
+    def linkAndAssembleGeometry(self, link, linkItemId, records):
+        try:
+            item = self.model('item').load(linkItemId, force=True)
+            featureCollections = self.downloadDataset(item)
+        except Exception:
+            raise GirderException('Unable to load link target dataset.')
+
+        valueLinks = sorted([x for x in link
+                             if x['operator'] == '='])
+        constantLinks = [x for x in link
+                         if x['operator'] == 'constant']
+        mappedGeometries = {}
+        for feature in featureCollections['features']:
+            skip = False
+            for constantLink in constantLinks:
+                if feature['properties'][constantLink['field']] != constantLink['value']:
+                    skip = True
+                    break
+            if skip:
+                continue
+            try:
+                key = ''.join([feature['properties'][x['field']] for x in valueLinks])
+            except KeyError:
+                raise GirderException('missing property for key ' +
+                                      x['field'] + ' in geometry link target geojson')
+            mappedGeometries[key] = feature['geometry']
+
+        assembled = []
+        for record in records:
+            key = ''.join([record[x['value']] for x in valueLinks])
+            if key in mappedGeometries:
+                assembled.append(
+                    geojson.Feature(geometry=mappedGeometries[key], properties=record)
+                )
+
+        return geojson.FeatureCollection(assembled)
 
     @access.public
     @autoDescribeRoute(
