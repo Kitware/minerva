@@ -23,8 +23,8 @@ class LargeImageRepresentation extends MapRepresentation {
         } else {
             var style = encodeURI(JSON.stringify({
                 band: parseInt(visProperties.band),
-                min: visProperties.min,
-                max: visProperties.max,
+                min: parseFloat(visProperties.min),
+                max: parseFloat(visProperties.max),
                 palette: visProperties.palettable
             }));
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}&style=${style}`);
