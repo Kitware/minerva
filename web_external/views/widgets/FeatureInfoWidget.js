@@ -157,7 +157,7 @@ const FeatureInfoWidget = View.extend({
         } else {
             var infoDeferreds = geotiffLayers.map((dataset) => {
                 let itemId = dataset.get('_id');
-                let coord = event.mapgcs;
+                let coord = event.geo;
                 return restRequest({
                     url: `item/${itemId}/tiles/pixel`,
                     type: 'GET',
@@ -165,7 +165,7 @@ const FeatureInfoWidget = View.extend({
                         'top': coord.y,
                         'left': coord.x,
                         'projection': 'EPSG:3857',
-                        'units': 'projection'
+                        'units': 'EPSG:4326'
                     }
                 }).then((result) => {
                     if (_.isEmpty(result)) {
