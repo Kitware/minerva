@@ -26,7 +26,7 @@ div
                   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');
                   i(class=classes)&attributes(attributes)
 
-                if geoRenderType === 'ktile'
+                if geoRenderType === 'large_image'
                   - var classes = 'icon-cog icon-button m-configure-geo-render'
                   - classes += (dataset.get('displayed') ? ' icon-disabled' : ' icon-enabled');
                   - classes += ((!dataset.get('displayed') && dataset.get('geoError')) ? ' m-geo-render-error' : '');

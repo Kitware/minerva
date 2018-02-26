@@ -5,12 +5,12 @@ import { getCurrentUser } from 'girder/auth';
 import View from '../view';
 import ColorbrewerPicker from './ColorbrewerPicker';
 import palettableColorbrewerMapper from '../util/palettableColorbrewerMapper';
-import template from '../../templates/widgets/kTileConfigWidget.pug';
-import '../../stylesheets/widgets/kTileConfigWidget.styl';
+import template from '../../templates/widgets/largeImageConfigWidget.pug';
+import '../../stylesheets/widgets/largeImageConfigWidget.styl';
 /**
  * This widget displays options for rendering json datasets.
  */
-const KTileConfigWidget = View.extend({
+const LargeImageConfigWidget = View.extend({
     events: {
         'submit #m-json-geo-render-form': function (e) {
             e.preventDefault();
@@ -100,7 +100,7 @@ const KTileConfigWidget = View.extend({
 
     _loadMeta() {
         restRequest({
-            url: `/ktile/${this.dataset.get('meta').minerva.original_files[0]._id}/info`,
+            url: `/item/${this.dataset.get('_id')}/tiles`,
             type: 'GET'
         }).done((resp) => {
             this.bands = resp.bands;
@@ -113,4 +113,4 @@ const KTileConfigWidget = View.extend({
         });
     }
 });
-export default KTileConfigWidget;
+export default LargeImageConfigWidget;

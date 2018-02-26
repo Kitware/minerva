@@ -109,18 +109,19 @@ if using conda environment instructions above).
 - Navigate to the Admin console in Girder, when you are logged in as an admin user, then click on the Assetstores section.
 - Create a default Assetstore.
 
-Install KTile as a Girder plugin
+Install large_image as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is needed because minerva depends on Girder KTile plugin.
+This is needed because minerva depends on large_image plugin.
 
-- Install girder_ktile plugin.
+- Install large_image plugin.
 
 ::
 
-    git clone https://github.com/OpenGeoscience/girder_ktile
-    girder-install plugin -s girder_ktile
-    girder-install web --dev --plugins girder_ktile
+    git clone https://github.com/girder/large_image
+    pip install -e .[mapnik]
+    girder-install plugin -s large_image
+    girder-install web --dev --plugins large_image
 
 Install database_assetstore as a Girder plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

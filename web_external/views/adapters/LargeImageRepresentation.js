@@ -6,22 +6,28 @@ import MapRepresentation from './MapRepresentation';
 import registry from './registry';
 
 /**
- * Generic GeoJs tile MapRepresentation definition, with type 'ktile'.
+ * Generic GeoJs tile MapRepresentation definition, with type 'large_image'.
  */
-class KtileRepresentation extends MapRepresentation {
+class LargeImageRepresentation extends MapRepresentation {
     init(container, dataset, visProperties) {
         var layer = container.createLayer('osm', {
             attribution: null,
             keepLower: false
         });
-        var fileId = dataset.get('meta').minerva.original_files[0]._id;
-        var url = getApiRoot() + '/ktile/' + fileId;
+        var itemId = dataset.get('_id');
+        var apiRoot = getApiRoot();
+        var params = encodeURI('encoding=PNG&projection=EPSG:3857');
+        var url = `${apiRoot}/item/${itemId}/tiles/zxy`;
         if (_.isEmpty(visProperties)) {
-            layer.url((x, y, z) => `${url}/${z}/${x}/${y}`);
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}`);
         } else {
-            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?` +
-                `palette=${visProperties.palettable}&band=${visProperties.band}&` +
-                `minimum=${visProperties.min}&maximum=${visProperties.max}`);
+            var style = encodeURI(JSON.stringify({
+                band: parseInt(visProperties.band),
+                min: parseFloat(visProperties.min),
+                max: parseFloat(visProperties.max),
+                palette: visProperties.palettable
+            }));
+            layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}&style=${style}`);
             var colorLegendCategory = {
                 type: 'discrete',
                 scale: 'linear',
@@ -42,6 +48,6 @@ class KtileRepresentation extends MapRepresentation {
     }
 }
 
-registry.register('ktile', KtileRepresentation);
+registry.register('large_image', LargeImageRepresentation);
 
-export default KtileRepresentation;
+export default LargeImageRepresentation;

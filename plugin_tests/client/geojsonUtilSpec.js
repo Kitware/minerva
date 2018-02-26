@@ -1,7 +1,7 @@
 girderTest.importPlugin('jobs');
 girderTest.importPlugin('gravatar');
 girderTest.importPlugin('database_assetstore');
-girderTest.importPlugin('girder_ktile');
+girderTest.importPlugin('large_image');
 girderTest.importPlugin('minerva');
 
 girderTest.addCoveredScripts([

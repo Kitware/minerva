@@ -66,10 +66,11 @@ before_install:
   - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
   - pip install -r "${DB_ASSETSTORE_DIR}/requirements.txt" -U
 
-  # install girder_ktile plugin
-  - GIRDER_KTILE_DIR="${GIRDER_SOURCE_DIR}/plugins/girder_ktile"
-  - git clone https://github.com/OpenGeoscience/girder_ktile.git "${GIRDER_KTILE_DIR}"
-  - pip install -r "${GIRDER_KTILE_DIR}/requirements.txt" -U
+  # install large_image plugin
+  - GIRDER_LARGE_IMAGE_DIR="${GIRDER_SOURCE_DIR}/plugins/large_image"
+  - git clone https://github.com/girder/large_image.git "${GIRDER_LARGE_IMAGE_DIR}"
+  - pip install GDAL==2.1.0 celery
+  - pip install "${GIRDER_LARGE_IMAGE_DIR}/[mapnik]"
 
   # install girder worker
   - GIRDER_WORKER_DIR=$HOME/girder_worker

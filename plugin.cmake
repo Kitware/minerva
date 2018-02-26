@@ -15,7 +15,7 @@ set_property(TEST server_minerva.wms PROPERTY LABELS minerva_server)
 add_web_client_test(
     minerva "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/minervaSpec.js"
     PLUGIN minerva
-    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "girder_ktile"
+    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "large_image"
     TEST_MODULE "plugin_tests.web_client_test"
     TEST_PYTHONPATH "${CMAKE_CURRENT_LIST_DIR}"
 )
@@ -24,7 +24,7 @@ set_property(TEST web_client_minerva.minerva PROPERTY LABELS minerva_client)
 add_web_client_test(
     geojson "${PROJECT_SOURCE_DIR}/plugins/minerva/plugin_tests/client/geojsonUtilSpec.js"
     PLUGIN minerva
-    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "girder_ktile"
+    ENABLEDPLUGINS "gravatar" "jobs" "database_assetstore" "large_image"
 )
 set_property(TEST web_client_minerva.geojson PROPERTY LABELS minerva_client)
 
