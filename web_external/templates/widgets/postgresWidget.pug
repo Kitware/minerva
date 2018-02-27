@@ -106,10 +106,22 @@
                     .span.help-block Invalid
         .m-query-builder
       .modal-footer
+        .metadata-container.text-info
+          if metadataPending
+            | Querying result metadata...
+          if metadata
+            div Record count: #{metadata.recordCount}
+            div
+              - var arr = [`Total: ${metadata.recordCountInTable}`, `After filter: ${metadata.recordCountAfterFilter}`, `After aggregation: ${metadata.recordCountAfterAggregation}`];
+              - if(metadata.recordCountAfterGeometryLinking !== null){
+              -   arr.push(`After geometry linking: ${metadata.recordCountAfterGeometryLinking}`)
+              - }
+              - var output = arr.join(',&nbsp;&nbsp;')
+              | (!{output})
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
-        button#m-get-geojson.btn.btn-small.btn-primary(disabled=!columns.length)
+        button#result-metadata.btn.btn-small.btn-primary(disabled=!columns.length || metadataPending, type="button")
+          i.icon-search
+          | Metadata
+        button#create-dataset.btn.btn-small.btn-primary(disabled=!columns.length || !metadata || metadata.recordCount===0, title= !metadata ? 'Query result metadata first' : '')
           i.icon-plus-squared
-          | Get geometry
-        button#m-preview.btn.btn-small.btn-primary(disabled=!columns.length)
-          i.icon-plus-squared
-          | Preview
+          | Dataset

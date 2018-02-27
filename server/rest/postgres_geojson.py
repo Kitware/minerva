@@ -1,6 +1,5 @@
 import hashlib
 import json
-import geojson
 
 from girder.api import access
 from girder.api.describe import describeRoute, Description
@@ -22,7 +21,7 @@ class PostgresGeojson(Resource):
         self.route('GET', ('values', ), self.getValues)
         self.route('GET', ('all_values', ), self.getAllValues)
         self.route('POST', (), self.createPostgresGeojsonDataset)
-        self.route('POST', ('preview',), self.previewPostgresDataset)
+        self.route('GET', ('result_metadata',), self.resultMetadata)
         self.route('GET', ('geometrylink', ), self.getGeometryLinkTarget)
         self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
 
@@ -227,24 +226,22 @@ class PostgresGeojson(Resource):
     @access.user
     @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
-        Description('Create json dataset for the given view/table filtering values')
+        Description('Get metadata for result')
         .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
         .param('field', 'Field to which the aggregate function will be applied')
         .param('aggregationFunction', 'aggregate function used on the field')
         .param('filter', 'Filter condition object for filtering table data')
         .param('geometryField', 'Geometry data definition object')
-        .param('datasetName', 'A custom name for the dataset', required=False)
     )
     # This endpoint is very similar to createPostgresGeojsonDataset
     # but because preview doesn't need actual GeoJSON or
     # a long-term use dataset, and it returns meta of the result
     # instead of the actual result, this endpoint is created.
-    def previewPostgresDataset(self, assetstore, params):
+    def resultMetadata(self, assetstore, params):
         filter = params['filter']
         table = params['table']
         field = params['field']
-        aggregateFunction = params['aggregateFunction']
         geometryField = json.loads(params['geometryField'])
 
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
@@ -272,23 +269,37 @@ class PostgresGeojson(Resource):
             recordCountAfterFilter = recordCountInTable
 
         # Get record count after aggregation
-        fields = {'field': geometryField['field']} \
-            if geometryField['type'] == 'built-in' else \
-            [{'field': x['value']} for x in geometryField['links']]
-        query = adapter.queryDatabase(conn, self._getQueryParams(
-            'public', table, [{
-                'func': 'count',
-                'param': {
-                    'func': 'distinct',
-                    'param': fields,
-                },
-                'reference': 'count'
-            }], None, filter, 'rawdict'))
+        if geometryField['type'] == 'built-in':
+            field = {'field': geometryField['field']}
+            query = adapter.queryDatabase(conn, self._getQueryParams(
+                'public', table, [{
+                    'func': 'count',
+                    'param': {
+                        'func': 'distinct',
+                        'param': field,
+                    },
+                    'reference': 'count'
+                }], None, filter, 'rawdict'))
+        elif geometryField['type'] == 'link':
+            fields = [{'field': x['value']} for x in geometryField['links']]
+            query = adapter.queryDatabase(conn, self._getQueryParams(
+                'public', table, [{
+                    'func': 'count',
+                    'param': {
+                        'func': 'distinct',
+                        'param': {
+                            'func': 'concat',
+                            'param': fields,
+                        },
+                    },
+                    'reference': 'count'
+                }], None, filter, 'rawdict'))
         recordCountAfterAggregation = list(query[0]())[0]['count']
 
         # Get record count after geometry
         if geometryField['type'] == 'built-in':
             recordCountAfterGeometryLinking = None
+            recordCount = recordCountAfterAggregation
         elif geometryField['type'] == 'link':
             fields = [x['value'] for x in geometryField['links']]
             group = [x['value'] for x in geometryField['links']]
@@ -302,12 +313,14 @@ class PostgresGeojson(Resource):
             assembled = dataset.linkAndAssembleGeometry(
                 geometryField['links'], geometryField['itemId'], records)
             recordCountAfterGeometryLinking = len(assembled.features)
+            recordCount = recordCountAfterGeometryLinking
 
         return {
             'recordCountInTable': recordCountInTable,
             'recordCountAfterFilter': recordCountAfterFilter,
             'recordCountAfterAggregation': recordCountAfterAggregation,
-            'recordCountAfterGeometryLinking': recordCountAfterGeometryLinking
+            'recordCountAfterGeometryLinking': recordCountAfterGeometryLinking,
+            'recordCount': recordCount
         }
 
     @access.user
