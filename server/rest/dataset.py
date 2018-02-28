@@ -537,7 +537,7 @@ class Dataset(Resource):
             return func
         elif geometryField['type'] == 'link':
             records = json.loads(''.join(list(func())))
-            featureCollection = self.linkAndAssembleGeometry(
+            featureCollection, _ = self.linkAndAssembleGeometry(
                 geometryField['links'], geometryField['itemId'], records)
             if len(featureCollection.features) == 0:
                 raise GirderException('Dataset is empty')
@@ -555,6 +555,7 @@ class Dataset(Resource):
         constantLinks = [x for x in link
                          if x['operator'] == 'constant']
         mappedGeometries = {}
+        linkingDuplicateCount = 0
         for feature in featureCollections['features']:
             skip = False
             for constantLink in constantLinks:
@@ -568,6 +569,8 @@ class Dataset(Resource):
             except KeyError:
                 raise GirderException('missing property for key ' +
                                       x['field'] + ' in geometry link target geojson')
+            if key in mappedGeometries:
+                linkingDuplicateCount += 1
             mappedGeometries[key] = feature['geometry']
 
         assembled = []
@@ -577,8 +580,7 @@ class Dataset(Resource):
                 assembled.append(
                     geojson.Feature(geometry=mappedGeometries[key], properties=record)
                 )
-
-        return geojson.FeatureCollection(assembled)
+        return geojson.FeatureCollection(assembled), linkingDuplicateCount
 
     @access.public
     @autoDescribeRoute(

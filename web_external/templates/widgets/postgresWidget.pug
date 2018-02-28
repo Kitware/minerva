@@ -118,6 +118,9 @@
               - }
               - var output = arr.join(',&nbsp;&nbsp;')
               | (!{output})
+            if metadata.linkingDuplicate
+              div(title='With current linking conditions, there are duplicate records in geometry linking dataset, consider using a different dataset or adding more conditions.') (Linking duplicate: #{metadata.linkingDuplicate})
+
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button#result-metadata.btn.btn-small.btn-primary(disabled=!columns.length || metadataPending, type="button")
           i.icon-search

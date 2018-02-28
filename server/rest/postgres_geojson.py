@@ -226,7 +226,7 @@ class PostgresGeojson(Resource):
     @access.user
     @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
     @describeRoute(
-        Description('Get metadata for result')
+        Description('Query metadata of result')
         .param('assetstoreId', 'assetstore ID of the target database')
         .param('table', 'Table name from the database')
         .param('field', 'Field to which the aggregate function will be applied')
@@ -234,10 +234,6 @@ class PostgresGeojson(Resource):
         .param('filter', 'Filter condition object for filtering table data')
         .param('geometryField', 'Geometry data definition object')
     )
-    # This endpoint is very similar to createPostgresGeojsonDataset
-    # but because preview doesn't need actual GeoJSON or
-    # a long-term use dataset, and it returns meta of the result
-    # instead of the actual result, this endpoint is created.
     def resultMetadata(self, assetstore, params):
         filter = params['filter']
         table = params['table']
@@ -310,7 +306,7 @@ class PostgresGeojson(Resource):
             records = list(query[0]())
 
             dataset = Dataset()
-            assembled = dataset.linkAndAssembleGeometry(
+            assembled, linkingDuplicateCount = dataset.linkAndAssembleGeometry(
                 geometryField['links'], geometryField['itemId'], records)
             recordCountAfterGeometryLinking = len(assembled.features)
             recordCount = recordCountAfterGeometryLinking
@@ -320,6 +316,7 @@ class PostgresGeojson(Resource):
             'recordCountAfterFilter': recordCountAfterFilter,
             'recordCountAfterAggregation': recordCountAfterAggregation,
             'recordCountAfterGeometryLinking': recordCountAfterGeometryLinking,
+            'linkingDuplicate': linkingDuplicateCount,
             'recordCount': recordCount
         }
 
