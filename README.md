@@ -3,7 +3,6 @@
 [![dependencies status](https://david-dm.org/kitware/minerva/status.svg)](https://david-dm.org/kitware/minerva)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov-io](https://codecov.io/github/Kitware/minerva/coverage.svg?branch=master)](https://codecov.io/github/Kitware/minerva?branch=master)
-![Minerva](http://kitware.github.io/minerva/media/minerva.png)
 
 Introduction
 ============
@@ -12,6 +11,8 @@ Minerva is a sophisticated geospatial application and framework created to enabl
 Some of the highlights of Minerva include using a web-enabled data management [Girder](http://www.github.com/Girder/girder) to manage data, metadata, sessions and employing high-performance geospatial data visualization library [GeoJS](http://www.github.com/OpenGeoscience/geojs)
 to provide fast interactive visualization of geospatial data on a map. Minerva backend uses open-source tools such as Gaia, GDAL, Shapely, and Fiona for performing geospatial data I/O, filtering, and spatial analysis.
 
+![Minerva](https://user-images.githubusercontent.com/3123478/36909396-d3ff26a2-1e0b-11e8-8b18-582a1d5f8d63.png)
+![Minerva](https://user-images.githubusercontent.com/3123478/36910012-94dc2856-1e0d-11e8-9821-62f63f0bce40.jpg)
 Documentation
 =============
 Documentation for Minerva can be found at http://minervadocs.readthedocs.org.
