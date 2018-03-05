@@ -1,5 +1,5 @@
 import matplotlib  # noqa
-matplotlib.use('Agg')  # noqa
+matplotlib.use('TkAgg')  # noqa
 import matplotlib.pyplot as plt  # noqa
 
 from base64 import b64encode
