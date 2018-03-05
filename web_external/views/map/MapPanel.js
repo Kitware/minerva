@@ -35,10 +35,14 @@ const MapPanel = Panel.extend({
     changeLayerZIndex: function (dataset, move) {
         var baseMapZIndex = 1;
         this.datasetLayerReprs[dataset.id]['geoJsLayer'][move]();
-        // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
+        // HACK: MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
         if (move === 'moveToBottom') {
             this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveUp(baseMapZIndex);
+        }
+        // HACK: MoveToTop method will set the layer on top of uiLayer
+        if (move === 'moveToTop') {
+            this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveDown();
         }
         this.map.draw();
     },

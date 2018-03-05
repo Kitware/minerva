@@ -168,7 +168,7 @@ const FeatureInfoWidget = View.extend({
                         'units': 'EPSG:4326'
                     }
                 }).then((result) => {
-                    if (_.isEmpty(result)) {
+                    if (_.isEmpty(result) || !result.bands) {
                         return null;
                     }
                     return {
