@@ -10,6 +10,7 @@ import PostgresWidget from './PostgresWidget';
 import EditBaseLayerWidget from './EditBaseLayerWidget';
 import StyleWmsDatasetWidget from './StyleWmsDatasetWidget';
 import EditSessionWidget from './EditSessionWidget';
+import ScreenshotResultWidget from './ScreenshotResultWidget';
 
 export {
     GeoJSONStyleWidget,
@@ -23,5 +24,6 @@ export {
     PostgresWidget,
     EditBaseLayerWidget,
     StyleWmsDatasetWidget,
-    EditSessionWidget
+    EditSessionWidget,
+    ScreenshotResultWidget
 };

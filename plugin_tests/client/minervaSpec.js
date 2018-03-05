@@ -42,7 +42,7 @@ describe('Main view', function () {
                     var existingCreateWidget = layer.createWidget;
                     layer.createWidget = function (widgetName) {
                         if (widgetName === 'slider') {
-                            return {};
+                            return { canvas: function () { } };
                         } else {
                             return existingCreateWidget.apply(this, arguments);
                         }
@@ -350,5 +350,21 @@ describe('Layerpanel', function () {
         var zoom = mapPanel.map.zoom();
         $('.layersList .dataset').first().find('.m-zoom-to').trigger('click');
         expect(zoom).not.toEqual(mapPanel.map.zoom());
+    });
+});
+
+describe('Mappanel', function () {
+    it('Take screenshot', function () {
+        $('button.m-screenshot').click();
+        waitsFor(function () {
+            return $('.m-screenshot-result').length;
+        }, 'screenshot be taken and shown');
+        runs(function () {
+            var screenshotResult = $('.m-screenshot-result');
+            var image = screenshotResult.find('img').attr('src');
+            var image2 = screenshotResult.find('a.save').attr('href');
+            expect(image).toEqual(image2);
+            expect(image.startsWith('data:image/png;base64,')).toBe(true);
+        });
     });
 });

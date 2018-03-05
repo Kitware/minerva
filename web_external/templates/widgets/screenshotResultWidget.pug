@@ -1,0 +1,13 @@
+.m-screenshot-result.modal-dialog
+  .modal-content
+    form#m-postgres.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+          | Screenshot
+      .modal-body
+        img.preview(src=image)
+      .modal-footer
+        a.save.btn.btn-sm.btn-primary(href=image, download='screenshot.png')
+          i.icon-download
+          | Save
