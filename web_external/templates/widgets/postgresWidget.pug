@@ -117,14 +117,14 @@
               -   arr.push(`After geometry linking: ${metadata.recordCountAfterGeometryLinking}`)
               - }
               - var output = arr.join(',&nbsp;&nbsp;')
-              | (!{output})
+              | !{output}
             if metadata.linkingDuplicate
-              div(title='With current linking conditions, there are duplicate records in geometry linking dataset, consider using a different dataset or adding more conditions.') (Linking duplicate: #{metadata.linkingDuplicate})
+              div(title='With current linking conditions, there are duplicate records in geometry linking dataset, consider using a different dataset or adding more conditions.') Linking duplicate: #{metadata.linkingDuplicate}
 
         a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
         button#result-metadata.btn.btn-small.btn-primary(disabled=!columns.length || metadataPending, type="button")
           i.icon-search
-          | Metadata
+          | Inspect query
         button#create-dataset.btn.btn-small.btn-primary(disabled=!columns.length || !metadata || metadata.recordCount===0, title= !metadata ? 'Query result metadata first' : '')
           i.icon-plus-squared
           | Dataset
