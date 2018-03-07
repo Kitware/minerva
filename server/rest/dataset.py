@@ -507,9 +507,9 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
-        return self._download(item)
+        return self.downloadDataset(item)
 
-    def _download(self, item):
+    def downloadDataset(self, item):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
             fileId = None
@@ -522,7 +522,8 @@ class Dataset(Resource):
             else:
                 fileId = minervaMeta['geo_render']['file_id']
             file = self.model('file').load(fileId, force=True)
-            return self.model('file').download(file, headers=False)
+            func = self.model('file').download(file, headers=False)
+            return geojson.loads(''.join(list(func())))
         else:
             return self._getPostgresGeojsonData(item)
 
@@ -541,51 +542,52 @@ class Dataset(Resource):
         if geometryField['type'] == 'built-in':
             return func
         elif geometryField['type'] == 'link':
-            featureCollections = None
             records = json.loads(''.join(list(func())))
-            try:
-                item = self.model('item').load(geometryField['itemId'], force=True)
-                file = list(self.model('item').childFiles(item=item, limit=1))[0]
-                assetstore = self.model('assetstore').load(file['assetstoreId'])
-                adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-                func = adapter.downloadFile(
-                    file, offset=0, headers=False, endByte=None,
-                    contentDisposition=None, extraParameters=None)
-            except Exception:
-                raise GirderException('Unable to load link target dataset.')
-            featureCollections = json.loads(''.join(list(func())))
-
-            valueLinks = sorted([x for x in geometryField['links']
-                                 if x['operator'] == '='])
-            constantLinks = [x for x in geometryField['links']
-                             if x['operator'] == 'constant']
-            mappedGeometries = {}
-            for feature in featureCollections['features']:
-                skip = False
-                for constantLink in constantLinks:
-                    if feature['properties'][constantLink['field']] != constantLink['value']:
-                        skip = True
-                        break
-                if skip:
-                    continue
-                try:
-                    key = ''.join([feature['properties'][x['field']] for x in valueLinks])
-                except KeyError:
-                    raise GirderException('missing property for key ' +
-                                          x['field'] + ' in geometry link target geojson')
-                mappedGeometries[key] = feature['geometry']
-
-            assembled = []
-            for record in records:
-                key = ''.join([record[x['value']] for x in valueLinks])
-                if key in mappedGeometries:
-                    assembled.append(
-                        geojson.Feature(geometry=mappedGeometries[key], properties=record)
-                    )
-            if len(assembled) == 0:
+            featureCollection, _ = self.linkAndAssembleGeometry(
+                geometryField['links'], geometryField['itemId'], records)
+            if len(featureCollection.features) == 0:
                 raise GirderException('Dataset is empty')
+            return featureCollection
 
-            return geojson.FeatureCollection(assembled)
+    def linkAndAssembleGeometry(self, link, linkItemId, records):
+        try:
+            item = self.model('item').load(linkItemId, force=True)
+            featureCollections = self.downloadDataset(item)
+        except Exception:
+            raise GirderException('Unable to load link target dataset.')
+
+        valueLinks = sorted([x for x in link
+                             if x['operator'] == '='])
+        constantLinks = [x for x in link
+                         if x['operator'] == 'constant']
+        mappedGeometries = {}
+        linkingDuplicateCount = 0
+        for feature in featureCollections['features']:
+            skipCurrentFeature = False
+            for constantLink in constantLinks:
+                if feature['properties'][constantLink['field']] != constantLink['value']:
+                    # If the feature dones't satisfy any constant linking condition
+                    skipCurrentFeature = True
+                    break
+            if skipCurrentFeature:
+                continue
+            try:
+                key = ''.join([str(feature['properties'][x['field']]) for x in valueLinks])
+            except KeyError:
+                raise GirderException('missing property for key ' +
+                                      x['field'] + ' in geometry link target geojson')
+            if key in mappedGeometries:
+                linkingDuplicateCount += 1
+            mappedGeometries[key] = feature['geometry']
+
+        assembled = []
+        for record in records:
+            key = ''.join([str(record[x['value']]) for x in valueLinks])
+            if key in mappedGeometries:
+                assembled.append(
+                    geojson.Feature(geometry=mappedGeometries[key], properties=record)
+                )
+        return geojson.FeatureCollection(assembled), linkingDuplicateCount
 
     @access.public
     @autoDescribeRoute(
@@ -607,15 +609,10 @@ class Dataset(Resource):
                 minervaMeta['dataset_type'] == 'geojson-timeseries'):
             geometry = None
             if minervaMeta['dataset_type'] == 'geojson':
-                result = self._download(item)
-                if callable(result):
-                    geometry = geojson.loads(''.join(list(result())))
-                else:
-                    geometry = result
+                geometry = self.downloadDataset(item)
             if minervaMeta['dataset_type'] == 'geojson-timeseries':
-                result = self._download(item)
-                obj = json.loads(''.join(list(result())))
-                geometry = geojson.loads(json.dumps(obj[0]['geojson']))
+                geometries = self.downloadDataset(item)
+                geometry = geometries[0]['geojson']
             geometry = unwrapFeature(geometry)
             geom = shape(geometry)
             return {

@@ -7,6 +7,7 @@ from girder.api.rest import Resource, ValidationException, loadmodel
 from girder.utility import assetstore_utilities, progress
 from girder.plugins.minerva.rest.geojson_dataset import GeojsonDataset
 from girder.plugins.minerva.utility.minerva_utility import findDatasetFolder
+from .dataset import Dataset
 
 
 class PostgresGeojson(Resource):
@@ -19,28 +20,23 @@ class PostgresGeojson(Resource):
         self.route('GET', ('columns', ), self.getColumns)
         self.route('GET', ('values', ), self.getValues)
         self.route('GET', ('all_values', ), self.getAllValues)
-        self.route('POST', (), self.createPostgresGeojsonData)
+        self.route('POST', (), self.createPostgresGeojsonDataset)
+        self.route('GET', ('result_metadata',), self.resultMetadata)
         self.route('GET', ('geometrylink', ), self.getGeometryLinkTarget)
         self.route('GET', ('geometrylinkfields', ), self.geometryLinkField)
-
-    def _getDbName(self):
-        assetstores = self.model('assetstore').list(limit=10)
-        astore = [a for a in assetstores if a['type'] == 'database' and
-                  a['database']['dbtype'] == 'sqlalchemy_postgres']
-        dbName = astore[0]['database']['uri'].rsplit('/', 1)[-1]
-        return dbName
 
     def _getQueryParams(self, schema, table, fields, group, filters,
                         output_format):
         return {
             'tables': [{'name': '{}.{}'.format(schema, table),
-                        'database': self._getDbName(),
                         'table': table,
                         'schema': schema}],
             'fields': fields,
             'group': group,
             'filters': filters,
             'limit': -1,
+            # This will potentially save database computing resource
+            'clientid': str(self.getCurrentUser()['_id']),
             'format': output_format
         }
 
@@ -138,7 +134,7 @@ class PostgresGeojson(Resource):
         .param('geometryField', 'Geometry data definition object')
         .param('datasetName', 'A custom name for the dataset', required=False)
     )
-    def createPostgresGeojsonData(self, assetstore, params):
+    def createPostgresGeojsonDataset(self, assetstore, params):
         filter = params['filter']
         table = params['table']
         field = params['field']
@@ -215,7 +211,6 @@ class PostgresGeojson(Resource):
             schema, table, fields, group, filter,
             'GeoJSON' if geometryField['type'] == 'built-in' else 'json')
         dbParams['tables'][0]['name'] = output_name
-        del dbParams['tables'][0]['database']
         result = adapter.importData(datasetFolder, 'folder', dbParams,
                                     progress.noProgress, currentUser)
         resItem = result[0]['item']
@@ -227,6 +222,103 @@ class PostgresGeojson(Resource):
                 'aggregateFunction': aggregateFunction
             }, params={})
         return resItem['_id']
+
+    @access.user
+    @loadmodel(model='assetstore', map={'assetstoreId': 'assetstore'})
+    @describeRoute(
+        Description('Query metadata of result')
+        .param('assetstoreId', 'assetstore ID of the target database')
+        .param('table', 'Table name from the database')
+        .param('field', 'Field to which the aggregate function will be applied')
+        .param('aggregationFunction', 'aggregate function used on the field')
+        .param('filter', 'Filter condition object for filtering table data')
+        .param('geometryField', 'Geometry data definition object')
+    )
+    def resultMetadata(self, assetstore, params):
+        filter = params['filter']
+        table = params['table']
+        field = params['field']
+        geometryField = json.loads(params['geometryField'])
+
+        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
+        conn = adapter.getDBConnectorForTable(table)
+
+        # Get total record count in table
+        query = adapter.queryDatabase(conn, self._getQueryParams(
+            'public', table, [{
+                'func': 'count',
+                'param': {'field': field},
+                'reference': 'count'
+            }], None, None, 'rawdict'))
+        recordCountInTable = list(query[0]())[0]['count']
+
+        # Get record count after filter
+        if filter:
+            query = adapter.queryDatabase(conn, self._getQueryParams(
+                'public', table, [{
+                    'func': 'count',
+                    'param': {'field': field},
+                    'reference': 'count'
+                }], None, filter, 'rawdict'))
+            recordCountAfterFilter = list(query[0]())[0]['count']
+        else:
+            recordCountAfterFilter = recordCountInTable
+
+        # Get record count after aggregation
+        if geometryField['type'] == 'built-in':
+            field = {'field': geometryField['field']}
+            query = adapter.queryDatabase(conn, self._getQueryParams(
+                'public', table, [{
+                    'func': 'count',
+                    'param': {
+                        'func': 'distinct',
+                        'param': field,
+                    },
+                    'reference': 'count'
+                }], None, filter, 'rawdict'))
+        elif geometryField['type'] == 'link':
+            fields = [{'field': x['value']} for x in geometryField['links']]
+            query = adapter.queryDatabase(conn, self._getQueryParams(
+                'public', table, [{
+                    'func': 'count',
+                    'param': {
+                        'func': 'distinct',
+                        'param': {
+                            'func': 'concat',
+                            'param': fields,
+                        },
+                    },
+                    'reference': 'count'
+                }], None, filter, 'rawdict'))
+        recordCountAfterAggregation = list(query[0]())[0]['count']
+
+        # Get record count after geometry
+        if geometryField['type'] == 'built-in':
+            recordCountAfterGeometryLinking = None
+            recordCount = recordCountAfterAggregation
+        elif geometryField['type'] == 'link':
+            fields = [x['value'] for x in geometryField['links']]
+            group = [x['value'] for x in geometryField['links']]
+            schema = 'public'
+            dbParams = self._getQueryParams(
+                schema, table, fields, group, filter, 'rawdict')
+            query = adapter.queryDatabase(conn, dbParams)
+            records = list(query[0]())
+
+            dataset = Dataset()
+            assembled, linkingDuplicateCount = dataset.linkAndAssembleGeometry(
+                geometryField['links'], geometryField['itemId'], records)
+            recordCountAfterGeometryLinking = len(assembled.features)
+            recordCount = recordCountAfterGeometryLinking
+
+        return {
+            'recordCountInTable': recordCountInTable,
+            'recordCountAfterFilter': recordCountAfterFilter,
+            'recordCountAfterAggregation': recordCountAfterAggregation,
+            'recordCountAfterGeometryLinking': recordCountAfterGeometryLinking,
+            'linkingDuplicate': linkingDuplicateCount,
+            'recordCount': recordCount
+        }
 
     @access.user
     @describeRoute(
@@ -247,8 +339,7 @@ class PostgresGeojson(Resource):
         folder = findDatasetFolder(currentUser, currentUser)
         items = list(self.model('item').find(
             query={'folderId': folder['_id'],
-                   'meta.minerva.dataset_type': 'geojson',
-                   'meta.minerva.postgresGeojson.geometryField.type': {'$ne': 'link'}},
+                   'meta.minerva.dataset_type': 'geojson'},
             fields=['name']))
         return items
 
@@ -261,16 +352,7 @@ class PostgresGeojson(Resource):
         currentUser = self.getCurrentUser()
         itemId = params['itemId']
         item = self.model('item').load(itemId, user=currentUser)
-        files = list(self.model('item').childFiles(item))
-        if len(files) != 1:
-            raise ValidationException('the item has multiple files')
-        file = files[0]
-        assetstore = self.model('assetstore').load(file['assetstoreId'])
-        adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
-        func = adapter.downloadFile(
-            file, offset=0, headers=False, endByte=None,
-            contentDisposition=None, extraParameters=None)
-        featureCollections = json.loads(''.join(list(func())))
+        featureCollections = Dataset().downloadDataset(item)
         if 'features' not in featureCollections or \
                 len(featureCollections['features']) == 0 or \
                 'properties' not in featureCollections['features'][0]:
