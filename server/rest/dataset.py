@@ -557,12 +557,13 @@ class Dataset(Resource):
         mappedGeometries = {}
         linkingDuplicateCount = 0
         for feature in featureCollections['features']:
-            skip = False
+            skipCurrentFeature = False
             for constantLink in constantLinks:
                 if feature['properties'][constantLink['field']] != constantLink['value']:
-                    skip = True
+                    # If the feature dones't satisfy any constant linking condition
+                    skipCurrentFeature = True
                     break
-            if skip:
+            if skipCurrentFeature:
                 continue
             try:
                 key = ''.join([str(feature['properties'][x['field']]) for x in valueLinks])
