@@ -359,7 +359,7 @@ export default Panel.extend({
                 }
             });
 
-            // these datasets are temporary, so these are noops
+            // these datasets are in memory, so these are noops
             dataset.sync = function () { };
             dataset.fetch = function () { };
             dataset.save = function () { };

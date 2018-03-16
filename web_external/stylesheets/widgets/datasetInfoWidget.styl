@@ -1,12 +1,23 @@
 @import './infoTableMixin.styl'
 
-.m-dataset-info-table
-  info-table()
+.m-dataset-info-widget
+  .m-dataset-info-table
+    margin-top 5px
+    info-table()
 
-.modal-dialog.wrapping-content
-    position relative
-    display table
-    overflow-y auto
-    overflow-x auto
-    width auto
-    min-width 300px
+  .modal-dialog.wrapping-content
+      position relative
+      display table
+      overflow-y auto
+      overflow-x auto
+      width auto
+      min-width 300px
+
+  .dataset-name
+    .form-control, .form-control-static
+      font-size 14px
+
+  //overwrite fixes
+  .form-control-static
+    min-height auto
+    padding-left 0 !important
