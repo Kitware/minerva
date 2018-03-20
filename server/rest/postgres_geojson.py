@@ -93,6 +93,7 @@ class PostgresGeojson(Resource):
         return self._getValues(assetstore, params)
 
     def _getValues(self, assetstore, params):
+        filter = params['filter'] if 'filter' in params else None
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         conn = adapter.getDBConnectorForTable(params['table'])
         queryParams = {
@@ -101,7 +102,8 @@ class PostgresGeojson(Resource):
                 'param': [{'field': params['column']}],
                 'reference': 'value',
             }],
-            'limit': 100,
+            'filters': filter,
+            'limit': 200,
             'format': 'rawdict'}
         result = list(adapter.queryDatabase(conn, queryParams)[0]())
         return [row['value'] for row in result]
@@ -293,6 +295,7 @@ class PostgresGeojson(Resource):
         recordCountAfterAggregation = list(query[0]())[0]['count']
 
         # Get record count after geometry
+        linkingDuplicateCount = None
         if geometryField['type'] == 'built-in':
             recordCountAfterGeometryLinking = None
             recordCount = recordCountAfterAggregation
