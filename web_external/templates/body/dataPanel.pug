@@ -68,7 +68,7 @@ if sourceCategoryDataset
               if dataset.metadata()
                 - var attributes = {'m-dataset-id': dataset.get('_id')}
                 .dataset.clearfix&attributes(attributes)
-                  .pull-left
+                  .left
                     .dataset-checkbox.checkbox-container(class=selectionCount?'show-checkbox':'')
                       if dataset.get('creatorId')===currentUser.id 
                         if dataset.get('folderId') === collection.folderId
@@ -80,7 +80,9 @@ if sourceCategoryDataset
                       input(type='checkbox', checked=selectedDatasetsId.has(dataset.get('_id')))&attributes(attributes)
 
                   .m-name(title=dataset.get('name'))= dataset.get('name')
-                  .pull-right
+                  .right
+                    if dataset.isInMemoryDataset()
+                      i.icon-enabled.icon-floppy.persist-dataset(title='Save dataset')&attributes(attributes)
                     //- Globe icon to move dataset into current session
                     if dataset.isGeoRenderable()
                       if dataset.get('displayed')

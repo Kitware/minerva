@@ -250,13 +250,13 @@ describe('Datapanel', function () {
             $('.bootbox-prompt .modal-footer .btn-primary').trigger('click');
         });
         waitsFor(function () {
-            return $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').length &&
+            return $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary)').length &&
                 !$('.modal-backdrop').length;
         }, 'Boundary dataset to be created');
     });
 
     it('Filter datasets by intersecting', function () {
-        $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').first().parent().find('input').trigger('click');
+        $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary)').first().parent().find('input').trigger('click');
         $('.icon-button.intersect-filter').trigger('click');
         waitsFor(function () {
             return $('.icon-button.clear-filters').length;
@@ -274,9 +274,9 @@ describe('Datapanel', function () {
             return $('.icon-button.clear-filters').length;
         }, 'dataset to be filtered');
         runs(function () {
-            expect($('.m-datasets .dataset').length).toBe(4);
+            expect($('.m-datasets .dataset').length).toBe(3);
             $('.icon-button.clear-filters').trigger('click');
-            expect($('.m-datasets .dataset').length).not.toBe(4);
+            expect($('.m-datasets .dataset').length).not.toBe(3);
             $('#m-data-panel .search-bar input').val('raster').trigger('keyup');
         });
         waitsFor(function () {
@@ -309,6 +309,18 @@ describe('Datapanel', function () {
                 return $('.dataset .m-name:contains("Three states")').length;
             }, 'dataset name change on dataset panel');
         });
+    });
+
+    it('Persist in memory dataset', function () {
+        minerva.events.trigger('m:addExternalGeoJSON', {
+            name: 'In memory dataset',
+            data: { 'type': 'FeatureCollection', 'features': [{ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'Point', 'coordinates': [-91.7578125, 41.244772343082076] } }] }
+        });
+        $($('.dataset').filter(function () { return $(this).children('.m-name:contains("In memory dataset")').length; })[0]).find('.persist-dataset').click();
+        waitsFor(function () {
+            var datasetElement = $($('.dataset').filter(function () { return $(this).children('.m-name:contains("In memory dataset")').length; })[0]);
+            return datasetElement.length === 1 && datasetElement.find('.persist-dataset').length === 0;
+        }, 'In memory dataset be persisted');
     });
 });
 

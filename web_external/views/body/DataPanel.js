@@ -43,7 +43,8 @@ export default Panel.extend({
         'click .action-bar button.intersect-filter': 'intersectFilter',
         'click .action-bar button.clear-filters': 'clearFilters',
         'keyup .search-bar input': 'applyNameFilter',
-        'click .action-bar .dropdown li': 'gaiaProcessClicked'
+        'click .action-bar .dropdown li': 'gaiaProcessClicked',
+        'click .persist-dataset': 'persistInMemoryDataset'
     },
 
     toggleCategories: function (event) {
@@ -375,26 +376,10 @@ export default Panel.extend({
         }, this);
 
         this.listenTo(events, 'm:dataset-drawn', (name, geometry) => {
-            var geometryStr = JSON.stringify(geometry);
-            return restRequest({
-                type: 'POST',
-                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
-                contentType: 'application/json',
-                data: geometryStr
-            }).then((file) => {
-                return restRequest({
-                    type: 'GET',
-                    url: `item/${file.itemId}`
+            this._createDatasetfromGeometry(name, geometry, 'Boundary')
+                .then((dataset) => {
+                    this.collection.add(dataset);
                 });
-            }).then((item) => {
-                var dataset = new DatasetModel(item);
-                return dataset.promoteToDataset({});
-            }).then((dataset) => {
-                var minervaMeta = dataset.getMinervaMetadata();
-                minervaMeta.category = 'Boundary';
-                this.collection.add(dataset);
-                dataset.saveMinervaMetadata(minervaMeta);
-            });
         }).listenTo(events, 'm:map-drawing-change', (value) => {
             this.drawing = value;
             this.render();
@@ -416,6 +401,38 @@ export default Panel.extend({
         }, this));
 
         Panel.prototype.initialize.apply(this);
+    },
+
+    _createDatasetfromGeometry(name, geometry, category) {
+        var geometryStr = JSON.stringify(geometry);
+        return restRequest({
+            type: 'POST',
+            url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
+            contentType: 'application/json',
+            data: geometryStr
+        }).then((file) => {
+            return restRequest({
+                type: 'GET',
+                url: `item/${file.itemId}`
+            });
+        }).then((item) => {
+            var dataset = new DatasetModel(item);
+            return dataset.promoteToDataset({});
+        }).then((dataset) => {
+            return restRequest({
+                type: 'PUT',
+                url: `item/${dataset.get('_id')}`,
+                data: { name: name }
+            }).then((item) => {
+                dataset.set('name', name);
+                return dataset;
+            });
+        }).then((dataset) => {
+            var minervaMeta = dataset.getMinervaMetadata();
+            minervaMeta.category = category;
+            dataset.saveMinervaMetadata(minervaMeta);
+            return dataset;
+        });
     },
 
     getDatasetModel: function () {
@@ -647,6 +664,18 @@ export default Panel.extend({
                 datasetsId: this.selectedDatasetsId
             }).render();
         }
+    },
+
+    persistInMemoryDataset(event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id'),
+            dataset = this.collection.get(datasetId);
+        var minervaMeta = dataset.getMinervaMetadata();
+        var geometry = minervaMeta.geojson.data;
+        this._createDatasetfromGeometry(dataset.get('name'), geometry)
+            .then((newDataset) => {
+                this.collection.add(newDataset);
+                this.collection.remove(dataset);
+            });
     },
 
     render() {
