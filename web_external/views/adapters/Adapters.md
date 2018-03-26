@@ -64,8 +64,7 @@ A `MapRepresentation` should most likely use `minerva.rendering.geo.MapRepresent
 as its ParentDefinition, when defining a new representation type through the
 `defineMapLayer` utility function.  The requirements of a representation are
 to provide an `init` method that takes in `container`, `dataset`, and optionally
-`visProperties` and `data` params, then defines a GeoJs layer using those params,
-and triggers a `m:map_layer_renderable` event when the definition is complete.
+`visProperties` and `data` params, then defines a GeoJs layer using those params.
 
 Currently, and for simplicity's sake, the MapRepresentations are immutable, meaning
 that if a new set of visProperties is desired, a layer will have to be removed from

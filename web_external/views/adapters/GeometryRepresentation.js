@@ -22,8 +22,6 @@ class GeometryRepresentation extends MapRepresentation {
      * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
      * @param {Object} visProperties - Properties used to render the dataset as a GeoJson layer
      * @param {string} data - The data to be rendered in the layer, assumed to be json
-     * @fires 'm:map_layer_renderable' event upon successful layer render definition
-     * @fires 'm:map_layer_error' event upon an error defining the layer rendering
      */
     init(container, dataset, visProperties, data) {
         this.geoJsLayer = container.createLayer('feature');
@@ -62,11 +60,10 @@ class GeometryRepresentation extends MapRepresentation {
                     });
                 }, this);
             }
-            this.trigger('m:map_layer_renderable', this);
         } catch (err) {
             console.error('This layer cannot be rendered to the map');
             console.error(err);
-            this.trigger('m:map_layer_error', this);
+            throw err;
         }
     }
 

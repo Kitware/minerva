@@ -20,8 +20,6 @@ class ChoroplethRepresentation extends MapRepresentation {
      * @param {string} visProperties.colorByValue - The key in jsonData whose value should be colored by
      * @param {string} visProperties.colorScheme - Name of a colorbrewer color scheme, to color the chorlopleth
      * @param {string} jsonData - The data to be rendered in the layer, assumed to be json
-     * @fires 'm:map_layer_renderable' event upon successful layer render definition
-     * @fires 'm:map_layer_error' event upon an error defining the layer rendering
      */
     init(container, dataset, visProperties, jsonData) {
         // Set the visProperties from the dataset as a HACK,
@@ -104,7 +102,6 @@ class ChoroplethRepresentation extends MapRepresentation {
                 });
             }
         }, this));
-        this.trigger('m:map_layer_renderable', this);
     }
 }
 

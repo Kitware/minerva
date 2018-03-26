@@ -40,8 +40,6 @@ class LargeImageRepresentation extends MapRepresentation {
             container.addColorLegendCategories([colorLegendCategory]);
         }
         this.geoJsLayer = layer;
-
-        this.trigger('m:map_layer_renderable', this);
     }
 
     delete(container) {

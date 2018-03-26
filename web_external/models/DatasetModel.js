@@ -233,28 +233,26 @@ const DatasetModel = MinervaModel.extend({
     /*
      * Async function that loads any data needed by this dataset to render in GeoJs,
      * setting that data as an attribute on this dataset named 'geoData'.
-     *
-     * @fires 'm:dataset_geo_dataLoaded' event upon the geo data being loaded.
      */
-    loadGeoData: function () {
+    loadGeoData() {
         var mm = this.metadata();
         if (this.get('geoData') !== null || mm.geo_render === null || !mm.geo_render.file_id) {
             if (mm.geojson && mm.geojson.data) {
                 // Some datasets have geojson in the metadata.
                 this.set('geoData', mm.geojson.data);
             }
-            this.trigger('m:dataset_geo_dataLoaded', this);
+            return Promise.resolve(this);
         } else {
             var url = '/minerva_dataset/' + this.get('_id') + '/download';
-            restRequest({
+            return restRequest({
                 url: url,
                 contentType: 'application/json',
                 // Prevent json from getting parsed.
                 dataType: null
-            }).done(_.bind(function (data) {
+            }).done((data) => {
                 this.set('geoData', data);
-                this.trigger('m:dataset_geo_dataLoaded', this);
-            }, this)).fail(_.bind(function (err) {
+                return this;
+            }).fail((err) => {
                 console.error(err);
                 events.trigger('g:alert', {
                     icon: 'cancel',
@@ -262,7 +260,7 @@ const DatasetModel = MinervaModel.extend({
                     type: 'danger',
                     timeout: 4000
                 });
-            }, this));
+            });
         }
     },
 
