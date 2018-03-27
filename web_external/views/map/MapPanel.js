@@ -439,7 +439,7 @@ const MapPanel = Panel.extend({
             // A workaround to exclude unnecessary widgets from uilayer
             $(this.screenshotWidget.canvas()).hide();
             $(this.sliderWidget.canvas()).hide();
-            this.map.screenshot(false, { wait: 'idle' }).then((image) => {
+            this.map.screenshot().then((image) => {
                 new ScreenshotResultWidget({
                     image,
                     el: $('#g-dialog-container'),
