@@ -329,8 +329,13 @@ const DatasetModel = MinervaModel.extend({
         this.set('displayed', false);
     },
 
+    isInMemoryDataset() {
+        // dynamically created dataset does not have proper id
+        return this.get('_id').indexOf('in-memory-') === 0;
+    },
+
     getBoundSupported() {
-        if (this.get('_id').toString().length < 7) {
+        if (this.isInMemoryDataset()) {
             // dataset with a short id are dynamically created, so that the server can't calculate its bounds
             return false;
         }

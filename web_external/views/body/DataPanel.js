@@ -335,7 +335,7 @@ export default Panel.extend({
                 return;
             }
             var dataset = new DatasetModel({
-                _id: externalId++,
+                _id: 'in-memory-' + externalId++,
                 name: options.name || 'External GeoJSON',
                 folderId: options.folderId || this.collection.folderId,
                 creatorId: this.currentUser.id
