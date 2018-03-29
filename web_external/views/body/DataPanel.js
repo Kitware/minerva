@@ -14,7 +14,6 @@ import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
-import { getBoundSupported } from '../util/utils';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 import GaiaProcessWidget from '../widgets/GaiaProcessWidget';
@@ -242,7 +241,7 @@ export default Panel.extend({
 
     selectionGetBoundSupported() {
         var dataset = this.collection.get(this.selectedDatasetsId.values().next().value);
-        return getBoundSupported(dataset);
+        return dataset.getBoundSupported();
     },
 
     sharableSelectedDatasets() {
@@ -336,7 +335,7 @@ export default Panel.extend({
                 return;
             }
             var dataset = new DatasetModel({
-                _id: externalId++,
+                _id: 'in-memory-' + externalId++,
                 name: options.name || 'External GeoJSON',
                 folderId: options.folderId || this.collection.folderId,
                 creatorId: this.currentUser.id
@@ -468,7 +467,7 @@ export default Panel.extend({
         if (bounds) {
             return $.Deferred().resolve({ dataset, bounds });
         }
-        if (!getBoundSupported(dataset)) {
+        if (!dataset.getBoundSupported()) {
             return $.Deferred().resolve({ dataset, bounds: null });
         }
         return restRequest({

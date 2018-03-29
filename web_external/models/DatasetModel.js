@@ -327,6 +327,20 @@ const DatasetModel = MinervaModel.extend({
         this.set('visible', true);
         this.set('opacity', 1);
         this.set('displayed', false);
+    },
+
+    isInMemoryDataset() {
+        // dynamically created dataset does not have proper id
+        return this.get('_id').indexOf('in-memory-') === 0;
+    },
+
+    getBoundSupported() {
+        if (this.isInMemoryDataset()) {
+            // dataset with a short id are dynamically created, so that the server can't calculate its bounds
+            return false;
+        }
+        var minervaMetadata = this.metadata();
+        return ['geojson', 'geotiff', 'geojson-timeseries'].indexOf(minervaMetadata.dataset_type) !== -1;
     }
 });
 export default DatasetModel;
