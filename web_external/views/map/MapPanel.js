@@ -114,6 +114,7 @@ const MapPanel = Panel.extend({
                 node: '.m-map-panel-map',
                 center: mapSettings.center,
                 zoom: mapSettings.zoom,
+                max: 21,
                 interactor: geo.mapInteractor({
                     map: this.map,
                     click: {

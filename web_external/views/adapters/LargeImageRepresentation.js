@@ -12,7 +12,8 @@ class LargeImageRepresentation extends MapRepresentation {
     init(container, dataset, visProperties) {
         var layer = container.createLayer('osm', {
             attribution: null,
-            keepLower: false
+            keepLower: false,
+            maxLevel: 21
         });
         var itemId = dataset.get('_id');
         var apiRoot = getApiRoot();
