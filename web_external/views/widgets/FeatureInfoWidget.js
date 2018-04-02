@@ -81,6 +81,7 @@ const FeatureInfoWidget = View.extend({
         var wmsLayers = _.chain(this.parentView.collection.models)
             .filter((set) => {
                 return set.get('displayed') && set.get('visible') &&
+                    set.getDatasetType() !== 'wms2' &&
                     set.getDatasetType() !== 'geojson' &&
                     set.getDatasetType() !== 'geojson-timeseries' &&
                     set.getDatasetType() !== 'geotiff';

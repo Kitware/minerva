@@ -1,0 +1,19 @@
+.m-add-wms-modal.modal-dialog
+  .modal-content
+    form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title
+        | Add WMS layer
+      .modal-body
+        .form-group.form-group-sm
+          label.control-label(style={width: '100%'}) Custom Dataset name
+            input#name.form-control(type='text', value=name)
+        .form-group.form-group-sm
+          label.control-label(style={width: '100%'}) URL
+            input#url.form-control(type='text', value=url)
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button#result-metadata.btn.btn-small.btn-primary(type="submit")
+          i.icon-plus-squared
+          | Dataset

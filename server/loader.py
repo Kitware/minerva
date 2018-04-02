@@ -26,7 +26,7 @@ from girder.utility.webroot import Webroot
 from girder.plugins.minerva.rest import \
     dataset, session, \
     wms_dataset, geojson_dataset, wms_styles, feature, geocoder, \
-    postgres_geojson
+    postgres_geojson, wms2_dataset
 from girder.plugins.minerva.rest.gaia import analysis as gaia_analysis, geoprocess
 from girder.plugins.minerva.utility.minerva_utility import decryptCredentials
 from girder.plugins.minerva.utility.cookie import getExtraHeaders
@@ -85,6 +85,7 @@ def load(info):
     info['apiRoot'].minerva_get_feature_info = feature.FeatureInfo()
     info['apiRoot'].minerva_geocoder = geocoder.Geocoder()
     info['apiRoot'].minerva_postgres_geojson = postgres_geojson.PostgresGeojson()
+    info['apiRoot'].minerva_dataset_wms2 = wms2_dataset.WMS2Dataset()
 
     info['apiRoot'].gaia_analysis = gaia_analysis.GaiaAnalysis()
     info['apiRoot'].gaia_process = geoprocess.GeoProcess()

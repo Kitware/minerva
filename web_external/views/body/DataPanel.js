@@ -14,6 +14,7 @@ import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
+import AddWMS2Widget from '../widgets/AddWMS2Widget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
 import GaiaProcessWidget from '../widgets/GaiaProcessWidget';
@@ -25,6 +26,7 @@ export default Panel.extend({
         'click .remove_dataset-from-session': 'removeDatasetFromSession',
         'click .m-upload-local': 'uploadDialog',
         'click .m-postgres': 'connectToPostgres',
+        'click .m-wms2': 'addWMS2Layer',
         'click .m-boundary-dataset': 'drawBoundaryDataset',
         'click .delete-dataset': 'deleteDatasetEvent',
         'click .m-display-dataset-table': 'displayTableDataset',
@@ -70,8 +72,18 @@ export default Panel.extend({
             dataset.on('g:fetched', function () {
                 this.collection.add(dataset);
             }, this).fetch();
-        });
-        postgresWidget.render();
+        }).render();
+    },
+
+    addWMS2Layer() {
+        new AddWMS2Widget({
+            el: $('#g-dialog-container'),
+            collection: this.collection,
+            parentView: this
+        }).on('m:dataset_created', function (dataset) {
+            var dataset = new DatasetModel(dataset);
+            this.collection.add(dataset);
+        }).render();
     },
 
     drawBoundaryDataset() {
