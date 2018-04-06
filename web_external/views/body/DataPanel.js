@@ -285,7 +285,6 @@ export default Panel.extend({
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
         this.datasetInfoWidget = new DatasetInfoWidget({
-            el: $('#g-dialog-container'),
             dataset: dataset,
             parentView: this
         });

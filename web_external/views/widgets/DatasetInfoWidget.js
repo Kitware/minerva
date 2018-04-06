@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { restRequest } from 'girder/rest';
 
 import View from '../view';
@@ -6,6 +7,10 @@ import '../../stylesheets/widgets/datasetInfoWidget.styl';
 /**
 * This widget is used to diplay minerva metadata for a dataset.
 */
+
+// Prevent jQuery dialog from focusing on the first focusable element
+$.ui.dialog.prototype._focusTabbable = $.noop;
+
 const DatasetInfoWidget = View.extend({
     events: {
         'click button.edit-name': function (e) {
@@ -14,6 +19,10 @@ const DatasetInfoWidget = View.extend({
         },
         'click button.commit-name': function (e) {
             this.editing = false;
+            if (!this.datasetName.trim()) {
+                this.datasetName = this.dataset.get('name');
+                return;
+            }
             if (!this.dataset.isInMemoryDataset()) {
                 restRequest({
                     type: 'PUT',
@@ -48,12 +57,20 @@ const DatasetInfoWidget = View.extend({
     },
 
     render() {
-        if (!this.modalOpenned) {
-            this.modalOpenned = true;
-            var modal = this.$el.html(template(this))
-                .girderModal(this);
-
-            modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
+        if (!this.modalOpen) {
+            this.modalOpen = true;
+            var $element = $(template(this));
+            this.$el.append($element);
+            $element.dialog({
+                width: 'auto',
+                title: 'Dataset Info',
+                close: (event, ui) => {
+                    $element.dialog('destroy');
+                    $element.remove();
+                },
+                position: { my: 'center top', at: 'center top+150', of: 'body' }
+            });
+            this.setElement($element);
         } else {
             this.$el.html(template(this));
         }
