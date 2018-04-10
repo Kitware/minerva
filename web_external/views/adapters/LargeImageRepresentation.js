@@ -30,6 +30,7 @@ class LargeImageRepresentation extends MapRepresentation {
             }));
             layer.url((x, y, z) => `${url}/${z}/${x}/${y}?${params}&style=${style}`);
             var colorLegendCategory = {
+                name: `${dataset.get('name')} - band ${visProperties.band}`,
                 type: 'discrete',
                 scale: 'linear',
                 colors: palettableColorbrewerMapper.toRampColors(visProperties.palettable),
