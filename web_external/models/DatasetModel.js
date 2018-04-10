@@ -249,7 +249,7 @@ const DatasetModel = MinervaModel.extend({
                 contentType: 'application/json',
                 // Prevent json from getting parsed.
                 dataType: null
-            }).done((data) => {
+            }).then((data) => {
                 this.set('geoData', data);
                 return this;
             }).fail((err) => {

@@ -13,6 +13,7 @@ import Panel from '../body/Panel';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
+import InfovizWidget from '../widgets/InfovizWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
@@ -38,6 +39,7 @@ export default Panel.extend({
         'click .action-bar button.delete': 'deleteSelectedDatasets',
         'click .action-bar button.toggle-shared': 'toggleShared',
         'click .action-bar button.show-bounds': 'showBounds',
+        'click .action-bar button.show-infoviz': 'showInfoviz',
         'click .action-bar button.remove-bounds': 'removeBounds',
         'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
         'click .action-bar button.intersect-filter': 'intersectFilter',
@@ -304,6 +306,7 @@ export default Panel.extend({
         this.visibleMenus = {};
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
+        this.datasetInfovizMap = new Map();
         this.filters = {};
         this.nameFilterKeyword = '';
         this.drawing = false;
@@ -531,6 +534,28 @@ export default Panel.extend({
         events.trigger('m:request-remove-bounds');
         this.showingBounds = false;
         this.render();
+    },
+
+    showInfoviz() {
+        for (let datasetId of this.selectedDatasetsId) {
+            var dataset = this.collection.get(datasetId);
+            dataset.loadGeoData().then((dataset) => {
+                if (this.datasetInfovizMap.has(datasetId)) {
+                    return;
+                }
+                let infovizWidget = new InfovizWidget({
+                    session: this.session,
+                    parentView: this,
+                    dataset
+                });
+                this.datasetInfovizMap.set(datasetId, infovizWidget);
+                infovizWidget
+                    .once('removed', () => {
+                        this.datasetInfovizMap.delete(datasetId);
+                    })
+                    .render();
+            });
+        }
     },
 
     toggleBoundsLabel() {
