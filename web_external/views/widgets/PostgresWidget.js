@@ -78,7 +78,9 @@ const PostgresWidget = View.extend({
         this._loadGeometryLinks();
     },
     buildQueryFilter(element) {
-        if (element.value && element.value.length && (element.value[0] === 'loading...' || element.value[0] === undefined)) {
+        if (element.value && element.value.length &&
+            (element.value[0] === 'loading...' || element.value[0] === undefined)
+        ) {
             return;
         }
         var operatorConverter = (operator) => {
@@ -213,11 +215,13 @@ const PostgresWidget = View.extend({
         var p = Promise.resolve();
         if (!hasFilter) {
             p = new Promise((resolve, reject) => {
-                bootbox.confirm('Query could take long time to execute without filters, do you want to continue?', (result) => {
-                    if (result) {
-                        resolve();
-                    }
-                });
+                bootbox.confirm(
+                    'Query could take long time to execute without filters, do you want to continue?',
+                    (result) => {
+                        if (result) {
+                            resolve();
+                        }
+                    });
             });
         }
         p.then(() => {
@@ -250,7 +254,9 @@ const PostgresWidget = View.extend({
 
             this.$queryBuilder = this.$('.m-query-builder').queryBuilder({
                 filters: [{ id: 'a', type: 'string' }],
-                operators: ['equal', 'not_equal', 'in', 'not_in', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                operators: ['equal', 'not_equal', 'in', 'not_in', 'less',
+                    'less_or_equal', 'greater', 'greater_or_equal', 'is_empty',
+                    'is_not_empty', 'is_null', 'is_not_null'],
                 icons: {
                     add_group: 'icon-plus-squared',
                     add_rule: 'icon-plus',
@@ -261,25 +267,40 @@ const PostgresWidget = View.extend({
                 allow_empty: true
             })
                 .hide()
-                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleValue.queryBuilder afterUpdateRuleOperator.queryBuilder afterUpdateRuleFilter.queryBuilder afterUpdateGroupCondition.queryBuilder afterAddRule.queryBuilder afterDeleteRule.queryBuilder afterAddGroup.queryBuilder afterDeleteGroup.queryBuilder', () => {
+                .on(['afterCreateRuleInput.queryBuilder', 'afterUpdateRuleValue.queryBuilder',
+                    'afterUpdateRuleOperator.queryBuilder', 'afterUpdateRuleFilter.queryBuilder',
+                    'afterUpdateGroupCondition.queryBuilder', 'afterAddRule.queryBuilder',
+                    'afterDeleteRule.queryBuilder', 'afterAddGroup.queryBuilder',
+                    'afterDeleteGroup.queryBuilder'
+                ].join(' '), () => {
                     this.metadata = null;
                     this.render();
                 })
-                .on('beforeDeleteRule.queryBuilder afterUpdateRuleOperator.queryBuilder afterUpdateRuleValue.queryBuilder', (e, rule) => {
+                .on(['beforeDeleteRule.queryBuilder', 'afterUpdateRuleOperator.queryBuilder',
+                    'afterUpdateRuleValue.queryBuilder'
+                ].join(' '), (e, rule) => {
                     if (this.interactiveFilterBuilder) {
-                        // Values of later created rules are derived from former rules, so they are invalid now
+                        // Values of later created rules are derived from former rules,
+                        // so they are invalid now
                         this._removeLaterRules(e.builder, rule);
                     }
                 })
-                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder', function (e, rule) {
-                    if (rule.filter.input === 'select') {
-                        if (rule.operator.multiple) {
-                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', true).attr('size', 5);
-                        } else {
-                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', false).removeAttr('size');
+                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder',
+                    function (e, rule) {
+                        if (rule.filter.input === 'select') {
+                            if (rule.operator.multiple) {
+                                rule.$el
+                                    .find($.fn.queryBuilder.constructor.selectors.rule_value)
+                                    .attr('multiple', true)
+                                    .attr('size', 5);
+                            } else {
+                                rule.$el
+                                    .find($.fn.queryBuilder.constructor.selectors.rule_value)
+                                    .attr('multiple', false)
+                                    .removeAttr('size');
+                            }
                         }
-                    }
-                })
+                    })
                 .on('afterUpdateRuleFilter.queryBuilder', function (e, rule) {
                     if (
                         // Don't load values when no filter selected
@@ -288,7 +309,9 @@ const PostgresWidget = View.extend({
                         rule.filter.input === 'number' ||
                         // Don't load if already loaded
                         (!this.interactiveFilterBuilder && rule.filter.populated) ||
-                        (this.interactiveFilterBuilder && rule.populatedWithFilter && rule.populatedWithFilter === rule.filter.id)) {
+                        (this.interactiveFilterBuilder &&
+                            rule.populatedWithFilter &&
+                            rule.populatedWithFilter === rule.filter.id)) {
                         return;
                     }
                     var queryData = {
@@ -336,13 +359,13 @@ const PostgresWidget = View.extend({
         return this;
     },
     primativeColumns: function () {
-        return this.columns.filter(function (column) { return column.datatype !== 'geometry'; });
+        return this.columns.filter((column) => column.datatype !== 'geometry');
     },
     geometryColumns: function () {
-        return this.columns.filter(function (column) { return column.datatype === 'geometry'; });
+        return this.columns.filter((column) => column.datatype === 'geometry');
     },
     getAvailableAggregateFunctions: function () {
-        var datatype = this.columns.find(function (c) { return c.name === this.valueField; }.bind(this)).datatype;
+        var datatype = this.columns.find((c) => c.name === this.valueField).datatype;
         var funcs = [];
         if (datatype === 'number' || datatype === 'date') {
             funcs = funcs.concat(['sum', 'avg', 'stddev', 'variance']);
@@ -598,9 +621,12 @@ const PostgresWidget = View.extend({
             this.validation.datasetNameRequired = !this.datasetName;
         }
         this.validation.valueFieldRequired = !this.valueField;
-        this.validation.geometryLinkTargetRequired = (!this.geometryLink.target && this.geometryFieldType === 'link');
-        this.validation.geometryBuiltInFieldRequired = (!this.geometryBuiltInField && this.geometryFieldType === 'built-in');
-        this.validation.geometryLinksRequired = (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType === 'link');
+        this.validation.geometryLinkTargetRequired =
+            (!this.geometryLink.target && this.geometryFieldType === 'link');
+        this.validation.geometryBuiltInFieldRequired =
+            (!this.geometryBuiltInField && this.geometryFieldType === 'built-in');
+        this.validation.geometryLinksRequired =
+            (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType === 'link');
         this.validation.geometryLinksInvalid = false;
         if (this.geometryFieldType === 'link' && this.geometryLink.target && this.geometryLink.links) {
             this.validation.geometryLinksInvalid =

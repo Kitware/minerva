@@ -93,7 +93,7 @@ class PostgresGeojson(Resource):
         return self._getValues(assetstore, params)
 
     def _getValues(self, assetstore, params):
-        filter = params['filter'] if 'filter' in params else None
+        filter = params.get('filter')
         adapter = assetstore_utilities.getAssetstoreAdapter(assetstore)
         conn = adapter.getDBConnectorForTable(params['table'])
         queryParams = {
