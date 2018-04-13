@@ -319,6 +319,29 @@ describe('Datapanel', function () {
             $('.icon-button.clear-filters').trigger('click');
         });
     });
+
+    it('Rename dataset', function () {
+        $($('.dataset').filter(function () { return $(this).children('.m-name:contains("three_states.geojson")').length; })[0]).find('.dataset-info').click();
+        waitsFor(function () {
+            return $('.m-dataset-info-widget').length;
+        }, 'Dataset info modal to be created');
+        runs(function () {
+            $('.m-dataset-info-widget .edit-name').click();
+            // canceling edit with esc key
+            $('.m-dataset-info-widget .dataset-name input').val('abc');
+            var e = $.Event('keydown', { keyCode: 27 });
+            $('.m-dataset-info-widget .dataset-name input').trigger(e);
+            $('.m-dataset-info-widget .edit-name').click();
+            expect($('.m-dataset-info-widget .dataset-name input').val()).toBe('three_states.geojson');
+            // Test change dataset name
+            $('.m-dataset-info-widget .dataset-name input').val('Three states');
+            $('.m-dataset-info-widget .dataset-name input').trigger('change');
+            $('.m-dataset-info-widget .dataset-name button.commit-name').click();
+            waitsFor(function () {
+                return $('.dataset .m-name:contains("Three states")').length;
+            }, 'dataset name change on dataset panel');
+        });
+    });
 });
 
 describe('Layerpanel', function () {

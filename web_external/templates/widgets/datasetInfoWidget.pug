@@ -1,17 +1,21 @@
-.modal-dialog.wrapping-content
-  .modal-content
-    form.modal-form(role="form")
-      .modal-header
-        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
-        h4.modal-title
-        | Dataset Info
-      .modal-body
-        - var meta = normalizeMetaInfo()
-        .m-dataset-info-table.clearfix
-          .m-table-wrapper
-            .m-key-column
-              each key, index in Object.keys(meta)
-                div(class=index%2===0?'odd':'even')= key
-            .m-value-column
-              each value, index in Object.values(meta)
-                div(class=index%2===0?'odd':'even')= value
+.m-dataset-info-widget
+  .form-inline.dataset-name
+    if !editing
+      .form-group.form-group-sm
+        .form-control-static= datasetName
+      button.btn.btn-link.btn-xs.edit-name(type='button')
+        i.icon-pencil
+    else
+      .form-group.form-group-sm
+        input.name.form-control(maxlength="250", value=datasetName)
+      button.btn.btn-link.btn-xs.commit-name(type='button')
+        i.icon-ok
+  - var meta = normalizeMetaInfo()
+  .m-dataset-info-table.clearfix
+    .m-table-wrapper
+      .m-key-column
+        each key, index in Object.keys(meta)
+          div(class=index%2===0?'odd':'even')= key
+      .m-value-column
+        each value, index in Object.values(meta)
+          div(class=index%2===0?'odd':'even')= value
