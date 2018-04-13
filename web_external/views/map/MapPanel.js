@@ -36,15 +36,17 @@ const MapPanel = Panel.extend({
 
     changeLayerZIndex: function (dataset, move) {
         var baseMapZIndex = 1;
-        this.datasetLayerReprs[dataset.id]['geoJsLayer'][move]();
+        var layer = this.datasetLayerReprs[dataset.id]['geoJsLayer'];
+        layer[move]();
         // HACK: MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
         if (move === 'moveToBottom') {
-            this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveUp(baseMapZIndex);
+            layer.moveUp(baseMapZIndex);
         }
-        // HACK: MoveToTop method will set the layer on top of uiLayer
+        // HACK: MoveToTop method will set the layer on top of uiLayers
         if (move === 'moveToTop') {
-            this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveDown();
+            layer.moveDown();
+            layer.moveDown();
         }
         this.map.draw();
     },
@@ -137,14 +139,20 @@ const MapPanel = Panel.extend({
                     ? mapSettings.basemap_args
                     : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.sliderWidget = this.uiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.uiLayer2 = this.map.createLayer('ui');
+            this.sliderWidget = this.uiLayer2.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.uiLayer.createWidget('scale', {
+                position: { left: 15, bottom: 15 },
+                orientation: 'top',
+                units: 'miles'
+            });
             this.colorLegend = this.uiLayer.createWidget('colorLegend', {
                 position: {
                     right: 10,
                     top: 45
                 }
             });
-            this.screenshotWidget = this.uiLayer.createWidget('dom', {
+            this.screenshotWidget = this.uiLayer2.createWidget('dom', {
                 position: {
                     right: 18,
                     bottom: 200
@@ -435,19 +443,15 @@ const MapPanel = Panel.extend({
         var screenshotButtonContainer = $(this.screenshotWidget.canvas());
         screenshotButtonContainer.empty().append(screenshotButtonTemplate());
         screenshotButtonContainer.find('button').on('click', () => {
-            // Multiple uilayer doesn't work well
-            // A workaround to exclude unnecessary widgets from uilayer
-            $(this.screenshotWidget.canvas()).hide();
-            $(this.sliderWidget.canvas()).hide();
-            this.map.screenshot().then((image) => {
+            var layers = this.map.layers();
+            layers.splice(layers.indexOf(this.uiLayer2), 1);
+            this.map.screenshot({ layers }).then((image) => {
                 new ScreenshotResultWidget({
                     image,
                     el: $('#g-dialog-container'),
                     parentView: this
                 }).render();
             });
-            $(this.screenshotWidget.canvas()).show();
-            $(this.sliderWidget.canvas()).show();
         });
 
         return this;
