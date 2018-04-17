@@ -82,7 +82,7 @@ before_install:
   # install gaia
   # - GAIA_DIR=$HOME/gaia
   # - git clone https://github.com/OpenDataAnalytics/gaia.git ${GAIA_DIR}
-  # - pip install -e ${GAIA_DIR} -r "${GAIA_DIR}/requirements.txt"
+  # - pip install ${GAIA_DIR}
 
   - npm install -g npm
   - npm install -g npm-install-retry
@@ -92,7 +92,9 @@ install:
   - cd $GIRDER_SOURCE_DIR
   - pip install --no-cache-dir -U -r requirements-dev.txt -e .
   - pip install girder[worker]
-  - pip install $MAIN_PATH
+  # We need to add --process-dependency-link to install gaia from github rather
+  # than pypi
+  - pip install --process-dependency-link $MAIN_PATH
   - pip install -r $MAIN_PATH/requirements-dev.txt
 
   - girder-install plugin --symlink $MAIN_PATH
