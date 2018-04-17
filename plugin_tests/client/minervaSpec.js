@@ -29,38 +29,6 @@ $(function () {
 });
 
 describe('Main view', function () {
-    var _map;
-    beforeEach(function () {
-        // disable the ui slider because it doesn't work on phantomjs
-        _map = geo.map;
-        geo.map = function () {
-            var m = _map.apply(this, arguments);
-            var existingCreateLayer = m.createLayer;
-            m.createLayer = function (type) {
-                var layer = existingCreateLayer.apply(this, arguments);
-                if (type === 'ui') {
-                    var existingCreateWidget = layer.createWidget;
-                    layer.createWidget = function (widgetName) {
-                        if (widgetName === 'slider') {
-                            return { canvas: function () { } };
-                        } else {
-                            return existingCreateWidget.apply(this, arguments);
-                        }
-                    };
-                }
-                return layer;
-            };
-            return m;
-        };
-        waitsFor(function () {
-            return $('.m-sessions-search-container:visible').length === 1;
-        }, 'the main panel to be visible');
-    });
-
-    afterEach(function () {
-        geo.map = _map;
-    });
-
     it('contains the minerva app body', function () {
         waitsFor(function () {
             return $('.m-sessions-search-container:visible').length === 1;

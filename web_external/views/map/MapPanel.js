@@ -139,8 +139,8 @@ const MapPanel = Panel.extend({
                     ? mapSettings.basemap_args
                     : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer2 = this.map.createLayer('ui');
-            this.sliderWidget = this.uiLayer2.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.controlUiLayer = this.map.createLayer('ui');
+            this.sliderWidget = this.controlUiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
             this.uiLayer.createWidget('scale', {
                 position: { left: 15, bottom: 15 },
                 orientation: 'top',
@@ -152,7 +152,7 @@ const MapPanel = Panel.extend({
                     top: 45
                 }
             });
-            this.screenshotWidget = this.uiLayer2.createWidget('dom', {
+            this.screenshotWidget = this.controlUiLayer.createWidget('dom', {
                 position: {
                     right: 18,
                     bottom: 200
@@ -444,7 +444,8 @@ const MapPanel = Panel.extend({
         screenshotButtonContainer.empty().append(screenshotButtonTemplate());
         screenshotButtonContainer.find('button').on('click', () => {
             var layers = this.map.layers();
-            layers.splice(layers.indexOf(this.uiLayer2), 1);
+            // Exclude the controls in the screenshot
+            layers.splice(layers.indexOf(this.controlsUiLayer), 1);
             this.map.screenshot({ layers }).then((image) => {
                 new ScreenshotResultWidget({
                     image,
