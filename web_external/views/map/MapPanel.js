@@ -8,6 +8,8 @@ import Panel from '../body/Panel';
 import registry from '../adapters/registry';
 import FeatureInfoWidget from '../widgets/FeatureInfoWidget';
 import template from '../../templates/body/mapPanel.pug';
+import screenshotButtonTemplate from '../../templates/widgets/screenshotButton.pug';
+import ScreenshotResultWidget from '../widgets/ScreenshotResultWidget';
 import '../../stylesheets/body/mapPanel.styl';
 
 const MapPanel = Panel.extend({
@@ -34,11 +36,17 @@ const MapPanel = Panel.extend({
 
     changeLayerZIndex: function (dataset, move) {
         var baseMapZIndex = 1;
-        this.datasetLayerReprs[dataset.id]['geoJsLayer'][move]();
-        // TODO: HACK MoveToBottom method will set the layer's index to 0 and put it under the base map.
+        var layer = this.datasetLayerReprs[dataset.id]['geoJsLayer'];
+        layer[move]();
+        // HACK: MoveToBottom method will set the layer's index to 0 and put it under the base map.
         // Calling moveUp(1) to place it on top of base map
         if (move === 'moveToBottom') {
-            this.datasetLayerReprs[dataset.id]['geoJsLayer'].moveUp(baseMapZIndex);
+            layer.moveUp(baseMapZIndex);
+        }
+        // HACK: MoveToTop method will set the layer on top of uiLayers
+        if (move === 'moveToTop') {
+            layer.moveDown();
+            layer.moveDown();
         }
         this.map.draw();
     },
@@ -131,11 +139,23 @@ const MapPanel = Panel.extend({
                     ? mapSettings.basemap_args
                     : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.uiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.controlUiLayer = this.map.createLayer('ui');
+            this.sliderWidget = this.controlUiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.uiLayer.createWidget('scale', {
+                position: { left: 15, bottom: 15 },
+                orientation: 'top',
+                units: 'miles'
+            });
             this.colorLegend = this.uiLayer.createWidget('colorLegend', {
                 position: {
                     right: 10,
                     top: 45
+                }
+            });
+            this.screenshotWidget = this.controlUiLayer.createWidget('dom', {
+                position: {
+                    right: 18,
+                    bottom: 200
                 }
             });
             this.mapCreated = true;
@@ -419,6 +439,22 @@ const MapPanel = Panel.extend({
             trigger: 'hover'
         };
         this.$('.m-save-current-baselayer').tooltip(tooltipProperties);
+
+        var screenshotButtonContainer = $(this.screenshotWidget.canvas());
+        screenshotButtonContainer.empty().append(screenshotButtonTemplate());
+        screenshotButtonContainer.find('button').on('click', () => {
+            var layers = this.map.layers();
+            // Exclude the controls in the screenshot
+            layers.splice(layers.indexOf(this.controlsUiLayer), 1);
+            this.map.screenshot({ layers }).then((image) => {
+                new ScreenshotResultWidget({
+                    image,
+                    el: $('#g-dialog-container'),
+                    parentView: this
+                }).render();
+            });
+        });
+
         return this;
     }
 });

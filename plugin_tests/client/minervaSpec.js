@@ -29,38 +29,6 @@ $(function () {
 });
 
 describe('Main view', function () {
-    var _map;
-    beforeEach(function () {
-        // disable the ui slider because it doesn't work on phantomjs
-        _map = geo.map;
-        geo.map = function () {
-            var m = _map.apply(this, arguments);
-            var existingCreateLayer = m.createLayer;
-            m.createLayer = function (type) {
-                var layer = existingCreateLayer.apply(this, arguments);
-                if (type === 'ui') {
-                    var existingCreateWidget = layer.createWidget;
-                    layer.createWidget = function (widgetName) {
-                        if (widgetName === 'slider') {
-                            return {};
-                        } else {
-                            return existingCreateWidget.apply(this, arguments);
-                        }
-                    };
-                }
-                return layer;
-            };
-            return m;
-        };
-        waitsFor(function () {
-            return $('.m-sessions-search-container:visible').length === 1;
-        }, 'the main panel to be visible');
-    });
-
-    afterEach(function () {
-        geo.map = _map;
-    });
-
     it('contains the minerva app body', function () {
         waitsFor(function () {
             return $('.m-sessions-search-container:visible').length === 1;
@@ -350,5 +318,21 @@ describe('Layerpanel', function () {
         var zoom = mapPanel.map.zoom();
         $('.layersList .dataset').first().find('.m-zoom-to').trigger('click');
         expect(zoom).not.toEqual(mapPanel.map.zoom());
+    });
+});
+
+describe('Mappanel', function () {
+    it('Take screenshot', function () {
+        $('button.m-screenshot').click();
+        waitsFor(function () {
+            return $('.m-screenshot-result').length;
+        }, 'screenshot be taken and shown');
+        runs(function () {
+            var screenshotResult = $('.m-screenshot-result');
+            var image = screenshotResult.find('img').attr('src');
+            var image2 = screenshotResult.find('a.save').attr('href');
+            expect(image).toEqual(image2);
+            expect(image.startsWith('data:image/png;base64,')).toBe(true);
+        });
     });
 });
