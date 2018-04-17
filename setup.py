@@ -1,15 +1,26 @@
+import re
 from setuptools import setup, find_packages
-from pip.req import parse_requirements
 
-install_reqs = list(parse_requirements('requirements.txt', session=False))
-reqs = [str(ir.req) if not ir.original_link else str(ir.req).split('-')[0] for ir in install_reqs]
-dep_links = [str(ir.original_link) for ir in install_reqs if ir.original_link]
+requires = []
+dep_links = []
+# parse requirements file
+with open('requirements.txt') as f:
+    comment = re.compile('(^#.*$|\s+#.*$)')
+    for line in f.readlines():
+        line = line.strip()
+        line = comment.sub('', line)
+        if line:
+            if line.startswith('git+') and '#egg=' in line:
+                dep_links.append(line)
+                requires.append(line.split('#egg=', 1)[1].replace('-', '=='))
+            else:
+                requires.append(line)
 
 setup(name='minerva.geo',
       version='0.0.0.dev1',
       description='Minerva: client/server/services for analysis and visualization',
       url='https://github.com/kitware/minerva',
-      install_requires=reqs,
+      install_requires=requires,
       dependency_links=dep_links,
       author='Kitware Inc',
       author_email='minerva-developers@kitware.com',

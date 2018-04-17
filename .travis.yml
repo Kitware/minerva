@@ -61,6 +61,8 @@ before_install:
   - mongod --dbpath=/tmp/db >/dev/null 2>/dev/null &
   - mongod --version
 
+  - pip install --no-cache-dir -U pip virtualenv setuptools
+
   # install database_assetstore plugin
   - DB_ASSETSTORE_DIR="${GIRDER_SOURCE_DIR}/plugins/database_assetstore"
   - git clone https://github.com/OpenGeoscience/database_assetstore.git "${DB_ASSETSTORE_DIR}" && git -C "${DB_ASSETSTORE_DIR}" checkout $DATABASE_ASSETSTORE_VERSION
@@ -78,21 +80,19 @@ before_install:
   - pip install -e ${GIRDER_WORKER_DIR}
 
   # install gaia
-  - GAIA_DIR=$HOME/gaia
-  - git clone https://github.com/OpenDataAnalytics/gaia.git ${GAIA_DIR}
-  - pip install -e ${GAIA_DIR} -r "${GAIA_DIR}/requirements.txt"
+  # - GAIA_DIR=$HOME/gaia
+  # - git clone https://github.com/OpenDataAnalytics/gaia.git ${GAIA_DIR}
+  # - pip install -e ${GAIA_DIR} -r "${GAIA_DIR}/requirements.txt"
 
   - npm install -g npm
   - npm install -g npm-install-retry
   - npm --version
 
-  - pip install --no-cache-dir -U pip virtualenv setuptools
-
 install:
   - cd $GIRDER_SOURCE_DIR
   - pip install --no-cache-dir -U -r requirements-dev.txt -e .
-  - pip install -r $MAIN_PATH/requirements.txt
   - pip install girder[worker]
+  - pip install $MAIN_PATH
   - pip install -r $MAIN_PATH/requirements-dev.txt
 
   - girder-install plugin --symlink $MAIN_PATH
