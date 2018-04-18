@@ -27,7 +27,8 @@ const PostgresWidget = View.extend({
         'change select.link-operator': '_linkOperatorChange',
         'change select.link-value,input.link-value': '_linkValueChange',
         'click button.add-link': '_addLinkClick',
-        'click button.remove-link': '_removeLinkClick'
+        'click button.remove-link': '_removeLinkClick',
+        'change input.interactive-filter-checkbox': '_interactiveFilterModeChange'
     },
     initialize: function () {
         this.primativeColumns = this.primativeColumns.bind(this);
@@ -35,8 +36,8 @@ const PostgresWidget = View.extend({
         this.getAvailableAggregateFunctions = this.getAvailableAggregateFunctions.bind(this);
 
         this.$queryBuilder = null;
-
         this.filters = null;
+        this.interactiveFilterBuilder = false;
 
         var Query = Backbone.Model.extend({
             defaults: this._getDefaults
@@ -77,6 +78,11 @@ const PostgresWidget = View.extend({
         this._loadGeometryLinks();
     },
     buildQueryFilter(element) {
+        if (element.value && element.value.length &&
+            (element.value[0] === 'loading...' || element.value[0] === undefined)
+        ) {
+            return;
+        }
         var operatorConverter = (operator) => {
             switch (operator) {
                 case 'equal':
@@ -142,7 +148,10 @@ const PostgresWidget = View.extend({
             var group = [];
             expression[groupRelationConverter(element.condition)] = group;
             for (var i = 0; i < element.rules.length; i++) {
-                group.push(this.buildQueryFilter(element.rules[i]));
+                var result = this.buildQueryFilter(element.rules[i]);
+                if (result) {
+                    group.push(result);
+                }
             }
         } else {
             expression['field'] = element.field;
@@ -163,15 +172,21 @@ const PostgresWidget = View.extend({
         }
         return geometryField;
     },
+    _getQueryFilter() {
+        var result = this.$queryBuilder[0].queryBuilder.getRules({ skip_empty: true });
+        if (!result) {
+            return;
+        }
+        return this.buildQueryFilter(result);
+    },
     createDataset: function (e) {
         e.preventDefault();
-
-        var result = this.$queryBuilder[0].queryBuilder.getRules();
-        if (!result | !this._validate()) {
+        var queryFilter = this._getQueryFilter();
+        if (!queryFilter) return;
+        if (!this._validate()) {
             return;
         }
 
-        var queryFilter = this.buildQueryFilter(result);
         restRequest({
             url: '/minerva_postgres_geojson',
             type: 'POST',
@@ -190,21 +205,23 @@ const PostgresWidget = View.extend({
         });
     },
     getResultMetadata() {
-        var result = this.$queryBuilder[0].queryBuilder.getRules();
-        if (!result | !this._validateForResultMetadata()) {
+        var queryFilter = this._getQueryFilter();
+        if (!queryFilter) return;
+        if (!this._validate(false)) {
             return;
         }
 
-        var queryFilter = this.buildQueryFilter(result);
         var hasFilter = _.some(Array.from(Object.values(queryFilter)), 'length');
         var p = Promise.resolve();
         if (!hasFilter) {
             p = new Promise((resolve, reject) => {
-                bootbox.confirm('Query could take long time to execute without filters, do you want to continue?', (result) => {
-                    if (result) {
-                        resolve();
-                    }
-                });
+                bootbox.confirm(
+                    'Query could take long time to execute without filters, do you want to continue?',
+                    (result) => {
+                        if (result) {
+                            resolve();
+                        }
+                    });
             });
         }
         p.then(() => {
@@ -229,7 +246,7 @@ const PostgresWidget = View.extend({
             });
         });
     },
-    render: function () {
+    render() {
         if (!this.modalOpenned) {
             var el = this.$el.html(template(this));
             this.modalOpenned = true;
@@ -237,7 +254,9 @@ const PostgresWidget = View.extend({
 
             this.$queryBuilder = this.$('.m-query-builder').queryBuilder({
                 filters: [{ id: 'a', type: 'string' }],
-                operators: ['equal', 'not_equal', 'in', 'not_in', 'less', 'less_or_equal', 'greater', 'greater_or_equal', 'is_empty', 'is_not_empty', 'is_null', 'is_not_null'],
+                operators: ['equal', 'not_equal', 'in', 'not_in', 'less',
+                    'less_or_equal', 'greater', 'greater_or_equal', 'is_empty',
+                    'is_not_empty', 'is_null', 'is_not_null'],
                 icons: {
                     add_group: 'icon-plus-squared',
                     add_rule: 'icon-plus',
@@ -248,36 +267,81 @@ const PostgresWidget = View.extend({
                 allow_empty: true
             })
                 .hide()
-                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleValue.queryBuilder afterUpdateRuleOperator.queryBuilder afterUpdateRuleFilter.queryBuilder afterUpdateGroupCondition.queryBuilder afterAddRule.queryBuilder afterDeleteRule.queryBuilder afterAddGroup.queryBuilder afterDeleteGroup.queryBuilder', () => {
+                .on(['afterCreateRuleInput.queryBuilder', 'afterUpdateRuleValue.queryBuilder',
+                    'afterUpdateRuleOperator.queryBuilder', 'afterUpdateRuleFilter.queryBuilder',
+                    'afterUpdateGroupCondition.queryBuilder', 'afterAddRule.queryBuilder',
+                    'afterDeleteRule.queryBuilder', 'afterAddGroup.queryBuilder',
+                    'afterDeleteGroup.queryBuilder'
+                ].join(' '), () => {
                     this.metadata = null;
                     this.render();
                 })
-                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder', function (e, rule) {
-                    if (rule.filter.input === 'select') {
-                        if (rule.operator.multiple) {
-                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', true).attr('size', 5);
-                        } else {
-                            rule.$el.find($.fn.queryBuilder.constructor.selectors.rule_value).attr('multiple', false).removeAttr('size');
-                        }
+                .on(['beforeDeleteRule.queryBuilder', 'afterUpdateRuleOperator.queryBuilder',
+                    'afterUpdateRuleValue.queryBuilder'
+                ].join(' '), (e, rule) => {
+                    if (this.interactiveFilterBuilder) {
+                        // Values of later created rules are derived from former rules,
+                        // so they are invalid now
+                        this._removeLaterRules(e.builder, rule);
                     }
                 })
+                .on('afterCreateRuleInput.queryBuilder afterUpdateRuleOperator.queryBuilder',
+                    function (e, rule) {
+                        if (rule.filter.input === 'select') {
+                            if (rule.operator.multiple) {
+                                rule.$el
+                                    .find($.fn.queryBuilder.constructor.selectors.rule_value)
+                                    .attr('multiple', true)
+                                    .attr('size', 5);
+                            } else {
+                                rule.$el
+                                    .find($.fn.queryBuilder.constructor.selectors.rule_value)
+                                    .attr('multiple', false)
+                                    .removeAttr('size');
+                            }
+                        }
+                    })
                 .on('afterUpdateRuleFilter.queryBuilder', function (e, rule) {
-                    if (!rule.filter || rule.filter.valuePopulated) {
+                    if (
+                        // Don't load values when no filter selected
+                        !rule.filter ||
+                        // Don't load values for number column
+                        rule.filter.input === 'number' ||
+                        // Don't load if already loaded
+                        (!this.interactiveFilterBuilder && rule.filter.populated) ||
+                        (this.interactiveFilterBuilder &&
+                            rule.populatedWithFilter &&
+                            rule.populatedWithFilter === rule.filter.id)) {
                         return;
+                    }
+                    var queryData = {
+                        assetstoreId: this.selectedAssetstoreId,
+                        table: this.selectedSource,
+                        column: rule.filter.id
+                    };
+                    if (this.interactiveFilterBuilder) {
+                        let filter = this._getQueryFilter();
+                        if (!filter) {
+                            return;
+                        } else {
+                            queryData.filter = JSON.stringify(filter);
+                        }
                     }
                     Promise.resolve(restRequest({
                         url: '/minerva_postgres_geojson/values',
                         type: 'GET',
-                        data: {
-                            assetstoreId: this.selectedAssetstoreId,
-                            table: this.selectedSource,
-                            column: rule.filter.id
-                        }
+                        data: queryData
                     })).then(function (values) {
-                        rule.filter.values = values.sort();
-                        rule.filter.valuePopulated = true;
+                        rule.filter.values = [''].concat(values.sort());
                         this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
                         this.$queryBuilder[0].queryBuilder.createRuleInput(rule);
+                        if (!this.interactiveFilterBuilder) {
+                            rule.filter.populated = true;
+                        } else {
+                            rule.populatedWithFilter = rule.filter.id;
+                            rule.filter.values = ['loading...'];
+                            this.$queryBuilder[0].queryBuilder.setFilters(this.filters);
+                        }
                     }.bind(this));
                 }.bind(this));
 
@@ -295,13 +359,13 @@ const PostgresWidget = View.extend({
         return this;
     },
     primativeColumns: function () {
-        return this.columns.filter(function (column) { return column.datatype !== 'geometry'; });
+        return this.columns.filter((column) => column.datatype !== 'geometry');
     },
     geometryColumns: function () {
-        return this.columns.filter(function (column) { return column.datatype === 'geometry'; });
+        return this.columns.filter((column) => column.datatype === 'geometry');
     },
     getAvailableAggregateFunctions: function () {
-        var datatype = this.columns.find(function (c) { return c.name === this.valueField; }.bind(this)).datatype;
+        var datatype = this.columns.find((c) => c.name === this.valueField).datatype;
         var funcs = [];
         if (datatype === 'number' || datatype === 'date') {
             funcs = funcs.concat(['sum', 'avg', 'stddev', 'variance']);
@@ -422,6 +486,40 @@ const PostgresWidget = View.extend({
             this.render();
         }.bind(this));
     },
+    _removeAllRules(queryBuilder) {
+        var rules = queryBuilder.model.root.rules;
+        for (let i = rules.length - 1; i >= 0; i--) {
+            // Is a group
+            if (rules[i].rules) {
+                queryBuilder.deleteGroup(rules[i].rules);
+            } else {
+                queryBuilder.deleteRule(rules[i]);
+            }
+        }
+    },
+    _removeLaterRules(queryBuilder, rule) {
+        function getAllRules(rules) {
+            var allRules = [];
+            for (let rule of rules) {
+                // Is a group
+                if (rule.rules) {
+                    allRules = allRules.concat(getAllRules(rule.rules));
+                } else {
+                    allRules.push(rule);
+                }
+            }
+            return allRules;
+        }
+        var allRules = getAllRules(queryBuilder.model.root.rules);
+        var index = allRules.indexOf(rule);
+        for (let i = allRules.length - 1; i > index; i--) {
+            queryBuilder.deleteRule(allRules[i]);
+        }
+    },
+    _interactiveFilterModeChange(e) {
+        this.interactiveFilterBuilder = e.target.checked;
+        this._removeAllRules(this.$queryBuilder[0].queryBuilder);
+    },
     _valueFieldChanged: function (e) {
         this.valueField = $(e.target).val();
         this.validation.valueFieldRequired = !this.valueField;
@@ -518,15 +616,17 @@ const PostgresWidget = View.extend({
             this.geometryLink.fields = [];
         }.bind(this));
     },
-    _validate() {
-        this.validation.datasetNameRequired = !this.datasetName;
-        return this._validateForResultMetadata();
-    },
-    _validateForResultMetadata() {
+    _validate(includeDatasetName = true) {
+        if (includeDatasetName) {
+            this.validation.datasetNameRequired = !this.datasetName;
+        }
         this.validation.valueFieldRequired = !this.valueField;
-        this.validation.geometryLinkTargetRequired = (!this.geometryLink.target && this.geometryFieldType === 'link');
-        this.validation.geometryBuiltInFieldRequired = (!this.geometryBuiltInField && this.geometryFieldType === 'built-in');
-        this.validation.geometryLinksRequired = (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType === 'link');
+        this.validation.geometryLinkTargetRequired =
+            (!this.geometryLink.target && this.geometryFieldType === 'link');
+        this.validation.geometryBuiltInFieldRequired =
+            (!this.geometryBuiltInField && this.geometryFieldType === 'built-in');
+        this.validation.geometryLinksRequired =
+            (!this.geometryLink.links.length && this.geometryLink.target && this.geometryFieldType === 'link');
         this.validation.geometryLinksInvalid = false;
         if (this.geometryFieldType === 'link' && this.geometryLink.target && this.geometryLink.links) {
             this.validation.geometryLinksInvalid =

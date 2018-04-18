@@ -104,6 +104,11 @@
                 if validation.geometryLinksInvalid
                   .has-error
                     .span.help-block Invalid
+        if columns.length
+          .checkbox
+            label(title='')
+              input.interactive-filter-checkbox(type='checkbox', checked=interactiveFilterBuilder)
+              | Interactive query builder
         .m-query-builder
       .modal-footer
         .metadata-container.text-info
