@@ -139,8 +139,8 @@ const MapPanel = Panel.extend({
                     ? mapSettings.basemap_args
                     : {});
             this.uiLayer = this.map.createLayer('ui');
-            this.controlUiLayer = this.map.createLayer('ui');
-            this.sliderWidget = this.controlUiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
+            this.controlsUiLayer = this.map.createLayer('ui');
+            this.sliderWidget = this.controlsUiLayer.createWidget('slider', { position: { right: 20, bottom: 30 } });
             this.uiLayer.createWidget('scale', {
                 position: { left: 15, bottom: 15 },
                 orientation: 'top',
@@ -152,7 +152,7 @@ const MapPanel = Panel.extend({
                     top: 45
                 }
             });
-            this.screenshotWidget = this.controlUiLayer.createWidget('dom', {
+            this.screenshotWidget = this.controlsUiLayer.createWidget('dom', {
                 position: {
                     right: 18,
                     bottom: 200
