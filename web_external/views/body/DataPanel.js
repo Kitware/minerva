@@ -674,6 +674,9 @@ export default Panel.extend({
         this._createDatasetfromGeometry(dataset.get('name'), geometry)
             .then((newDataset) => {
                 this.collection.add(newDataset);
+                if (dataset.get('displayed')) {
+                    dataset.removeFromSession();
+                }
                 this.collection.remove(dataset);
             });
     },
