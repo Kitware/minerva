@@ -525,7 +525,7 @@ class Dataset(Resource):
             func = self.model('file').download(file, headers=False)
         else:
             func = self._getPostgresGeojsonData(item)
-        if funcAllowed:
+        if not callable(func) or funcAllowed:
             return func
         return geojson.loads(''.join(list(func())))
 
