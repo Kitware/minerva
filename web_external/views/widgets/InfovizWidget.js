@@ -27,6 +27,8 @@ const InfovizWidget = View.extend({
     },
     initialize(settings) {
         this.dataset = settings.dataset;
+        this.yOffset = settings.yOffset;
+        this.xOffset = settings.xOffset;
         this.errorMessage = null;
         this._debouncedUpdateVegaViewHeight = _.debounce(this._updateVegaViewHeight, 500);
         this.listenTo(this.dataset, 'm:dataset_config_change', () => {
@@ -35,6 +37,10 @@ const InfovizWidget = View.extend({
         });
 
         this._prepare();
+    },
+
+    moveToTop() {
+        this.$el.dialog('moveToTop');
     },
 
     _prepare() {
@@ -130,7 +136,7 @@ const InfovizWidget = View.extend({
                     $element.remove();
                     this.trigger('removed');
                 },
-                position: { my: 'right top', at: 'right-15 top+' + (5 + $('.m-session-header').outerHeight()), of: '#m-map-panel' },
+                position: { my: 'right top', at: 'right' + (this.xOffset - 15) + ' top+' + (40 + this.yOffset), of: '#m-map-panel' },
                 resize: () => {
                     this._debouncedUpdateVegaViewHeight();
                 }

@@ -307,6 +307,7 @@ export default Panel.extend({
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
         this.datasetInfovizMap = new Map();
+        this.datasetInfovizPositionOffset = 0;
         this.filters = {};
         this.nameFilterKeyword = '';
         this.drawing = false;
@@ -541,17 +542,24 @@ export default Panel.extend({
             var dataset = this.collection.get(datasetId);
             dataset.loadGeoData().then((dataset) => {
                 if (this.datasetInfovizMap.has(datasetId)) {
+                    this.datasetInfovizMap.get(datasetId).moveToTop();
                     return;
                 }
                 let infovizWidget = new InfovizWidget({
                     session: this.session,
                     parentView: this,
-                    dataset
+                    dataset,
+                    yOffset: this.datasetInfovizPositionOffset,
+                    xOffset: -0.5 * this.datasetInfovizPositionOffset
                 });
                 this.datasetInfovizMap.set(datasetId, infovizWidget);
+                this.datasetInfovizPositionOffset = this.datasetInfovizPositionOffset < 150 ? this.datasetInfovizPositionOffset + 30 : 0;
                 infovizWidget
                     .once('removed', () => {
                         this.datasetInfovizMap.delete(datasetId);
+                        if (!this.datasetInfovizMap.size) {
+                            this.datasetInfovizPositionOffset = 0;
+                        }
                     })
                     .render();
             });
