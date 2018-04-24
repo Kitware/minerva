@@ -35,8 +35,9 @@ const LayersPanel = Panel.extend({
         dataset.once('m:dataset_geo_dataLoaded', function (dataset) {
             var data = dataset.get('geoData');
             var a = window.document.createElement('a');
-            a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
-            var filename = dataset.get('name') + '.geojson';
+            a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+            var filename = dataset.get('name');
+            filename += dataset.get('name').slice(-8) === '.geojson' ? '' : '.geojson';
             a.download = filename;
             document.body.appendChild(a);
             a.click();
