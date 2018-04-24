@@ -522,12 +522,12 @@ class Dataset(Resource):
             else:
                 fileId = minervaMeta['geo_render']['file_id']
             file = self.model('file').load(fileId, force=True)
-            func = self.model('file').download(file, headers=False)
+            result = self.model('file').download(file, headers=False)
         else:
-            func = self._getPostgresGeojsonData(item)
-        if not callable(func) or funcAllowed:
-            return func
-        return geojson.loads(''.join(list(func())))
+            result = self._getPostgresGeojsonData(item)
+        if not callable(result) or funcAllowed:
+            return result
+        return geojson.loads(''.join(list(result())))
 
     def _getPostgresGeojsonData(self, item):
         user = self.getCurrentUser()
