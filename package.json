@@ -7,7 +7,7 @@
   "dependencies": {
     "JSONPath": "0.10.0",
     "bootbox": "^4.4.0",
-    "bootstrap-select": "^1.10.0",
+    "bootstrap-select": "1.12.4",
     "bootstrap-slider": "^7.1.0",
     "colorbrewer": "1.0.0",
     "dot": "^1.1.2",
