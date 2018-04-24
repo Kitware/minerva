@@ -507,9 +507,9 @@ class Dataset(Resource):
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied on the parent folder.', 403))
     def download(self, item, params):
-        return self.downloadDataset(item)
+        return self.downloadDataset(item, funcAllowed=True)
 
-    def downloadDataset(self, item):
+    def downloadDataset(self, item, funcAllowed=False):
         minervaMeta = item['meta']['minerva']
         if not minervaMeta.get('postgresGeojson'):
             fileId = None
@@ -522,10 +522,12 @@ class Dataset(Resource):
             else:
                 fileId = minervaMeta['geo_render']['file_id']
             file = self.model('file').load(fileId, force=True)
-            func = self.model('file').download(file, headers=False)
-            return geojson.loads(''.join(list(func())))
+            result = self.model('file').download(file, headers=False)
         else:
-            return self._getPostgresGeojsonData(item)
+            result = self._getPostgresGeojsonData(item)
+        if not callable(result) or funcAllowed:
+            return result
+        return geojson.loads(''.join(list(result())))
 
     def _getPostgresGeojsonData(self, item):
         user = self.getCurrentUser()
