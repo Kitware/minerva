@@ -538,14 +538,20 @@ export default Panel.extend({
     },
 
     showInfoviz() {
-        for (let datasetId of this.selectedDatasetsId) {
-            var dataset = this.collection.get(datasetId);
-            dataset.loadGeoData().then((dataset) => {
+        var datasetsId = this.collection.models.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id')));
+        Promise.all(
+            datasetsId.map((datasetId) => {
+                var dataset = this.collection.get(datasetId);
+                return dataset.loadGeoData();
+            })
+        ).then((datasets) => {
+            datasets.forEach((dataset) => {
+                var datasetId = dataset.get('_id');
                 if (this.datasetInfovizMap.has(datasetId)) {
                     this.datasetInfovizMap.get(datasetId).moveToTop();
                     return;
                 }
-                let infovizWidget = new InfovizWidget({
+                var infovizWidget = new InfovizWidget({
                     session: this.session,
                     parentView: this,
                     dataset,
@@ -561,9 +567,10 @@ export default Panel.extend({
                             this.datasetInfovizPositionOffset = 0;
                         }
                     })
-                    .render();
+                    .render()
+                    .moveToTop();
             });
-        }
+        });
     },
 
     toggleBoundsLabel() {
