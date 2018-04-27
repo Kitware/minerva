@@ -32,17 +32,19 @@ const LayersPanel = Panel.extend({
     downloadGeojsonEvent: function (event) {
         var datasetId = $(event.currentTarget).attr('m-dataset-id');
         var dataset = this.collection.get(datasetId);
-        dataset.once('m:dataset_geo_dataLoaded', function (dataset) {
-            var data = dataset.get('geoData');
-            var a = window.document.createElement('a');
-            a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
-            var filename = dataset.get('name');
-            filename += dataset.get('name').slice(-8) === '.geojson' ? '' : '.geojson';
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }).loadGeoData();
+        dataset
+            .loadGeoData()
+            .then(() => {
+                var data = dataset.get('geoData');
+                var a = window.document.createElement('a');
+                a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+                var filename = dataset.get('name');
+                filename += dataset.get('name').slice(-8) === '.geojson' ? '' : '.geojson';
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
     },
 
     removeDatasetEvent: function (event) {
@@ -266,10 +268,10 @@ const LayersPanel = Panel.extend({
         this.animationTimeout = null;
         this.collection = settings.session.datasetCollection;
         this.layersOrderOptions = [
-            {'title': 'move up', 'method': 'moveUp', 'class': 'up'},
-            {'title': 'move down', 'method': 'moveDown', 'class': 'down'},
-            {'title': 'move to top', 'method': 'moveToTop', 'class': 'double-up'},
-            {'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down'}
+            { 'title': 'move up', 'method': 'moveUp', 'class': 'up' },
+            { 'title': 'move down', 'method': 'moveDown', 'class': 'down' },
+            { 'title': 'move to top', 'method': 'moveToTop', 'class': 'double-up' },
+            { 'title': 'move to bottom', 'method': 'moveToBottom', 'class': 'double-down' }
         ];
 
         this.listenTo(this.collection, 'change:displayed reorder', function () {

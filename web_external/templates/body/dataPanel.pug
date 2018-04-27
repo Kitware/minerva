@@ -29,6 +29,8 @@ if sourceCategoryDataset
       | &nbsp;
       if selectionCount
         .pull-right
+          button.icon-button.show-infoviz(title='Show infoviz view of this dataset')
+            i.icon-chart-bar
           button.icon-button.show-bounds(title='Show boundaries of selected datasets')
             i.icon-search
           button.icon-button.share(title='Share/Unshare selected datasets', disabled=!sharableSelectedDatasets().length)

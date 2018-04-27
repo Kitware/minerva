@@ -13,6 +13,7 @@ import Panel from '../body/Panel';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
+import InfovizWidget from '../widgets/InfovizWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
@@ -38,6 +39,7 @@ export default Panel.extend({
         'click .action-bar button.delete': 'deleteSelectedDatasets',
         'click .action-bar button.toggle-shared': 'toggleShared',
         'click .action-bar button.show-bounds': 'showBounds',
+        'click .action-bar button.show-infoviz': 'showInfoviz',
         'click .action-bar button.remove-bounds': 'removeBounds',
         'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
         'click .action-bar button.intersect-filter': 'intersectFilter',
@@ -304,6 +306,8 @@ export default Panel.extend({
         this.visibleMenus = {};
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
+        this.datasetInfovizMap = new Map();
+        this.datasetInfovizPositionOffset = 0;
         this.filters = {};
         this.nameFilterKeyword = '';
         this.drawing = false;
@@ -531,6 +535,42 @@ export default Panel.extend({
         events.trigger('m:request-remove-bounds');
         this.showingBounds = false;
         this.render();
+    },
+
+    showInfoviz() {
+        var datasetsId = this.collection.models.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id')));
+        Promise.all(
+            datasetsId.map((datasetId) => {
+                var dataset = this.collection.get(datasetId);
+                return dataset.loadGeoData();
+            })
+        ).then((datasets) => {
+            datasets.forEach((dataset) => {
+                var datasetId = dataset.get('_id');
+                if (this.datasetInfovizMap.has(datasetId)) {
+                    this.datasetInfovizMap.get(datasetId).moveToTop();
+                    return;
+                }
+                var infovizWidget = new InfovizWidget({
+                    session: this.session,
+                    parentView: this,
+                    dataset,
+                    yOffset: this.datasetInfovizPositionOffset,
+                    xOffset: -0.5 * this.datasetInfovizPositionOffset
+                });
+                this.datasetInfovizMap.set(datasetId, infovizWidget);
+                this.datasetInfovizPositionOffset = this.datasetInfovizPositionOffset < 150 ? this.datasetInfovizPositionOffset + 30 : 0;
+                infovizWidget
+                    .once('removed', () => {
+                        this.datasetInfovizMap.delete(datasetId);
+                        if (!this.datasetInfovizMap.size) {
+                            this.datasetInfovizPositionOffset = 0;
+                        }
+                    })
+                    .render()
+                    .moveToTop();
+            });
+        });
     },
 
     toggleBoundsLabel() {

@@ -197,42 +197,39 @@ const MapPanel = Panel.extend({
             return;
         }
 
-        if (!_.contains(this.datasetLayerReprs, dataset.get('_id'))) {
-            // For now, get the layerType directly from the dataset,
-            // but we should really allow the user to specify the desired
-            // layerType.
-            layerType = dataset.getMinervaMetadata().adapter || dataset.getGeoRenderType();
+        layerType = dataset.getMinervaMetadata().adapter || dataset.getGeoRenderType();
 
-            // If visProperties is not provided, check for properties stored in the metadata.
-            if (!visProperties) {
-                visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
-            }
-
-            this._renderDataset(dataset, layerType, visProperties);
-
-            this.listenTo(dataset, 'm:dataset_config_change', () => {
-                var currentZIndex = this.datasetLayerReprs[dataset.id]['geoJsLayer'].zIndex();
-                this.removeDataset(dataset);
-                let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
-                this.addDataset(dataset, layerType, visProperties);
-                this.datasetLayerReprs[dataset.id]['geoJsLayer'].zIndex(currentZIndex);
-            });
+        // If visProperties is not provided, check for properties stored in the metadata.
+        if (!visProperties) {
+            visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
         }
+
+        return this._renderDataset(dataset, layerType, visProperties)
+            .then((repr) => {
+                this.listenTo(dataset, 'm:dataset_config_change', () => {
+                    var currentZIndex = repr['geoJsLayer'].zIndex();
+                    this.removeDataset(dataset);
+                    let visProperties = (dataset.getMinervaMetadata() || {}).visProperties || {};
+                    this.addDataset(dataset, layerType, visProperties)
+                        .then((repr) => {
+                            repr['geoJsLayer'].zIndex(currentZIndex);
+                        });
+                });
+                return repr;
+            });
     },
 
     _renderDataset(dataset, layerType, visProperties) {
-        dataset.once('m:map_adapter_layerCreated', function (repr) {
-            this.datasetLayerReprs[dataset.get('_id')] = repr;
-            repr.render(this);
-        }, this).once('m:map_adapter_error', function (dataset, layerType) {
-            dataset.set('geoError', true);
-        }, this).once('m:map_adapter_layerError', function (repr) {
-            if (repr) {
-                repr.delete(this);
+        return registry._createRepresentation(this, dataset, layerType, visProperties)
+            .then((repr) => {
+                this.datasetLayerReprs[dataset.get('_id')] = repr;
+                this.renderMap();
+                return repr;
+            }).catch((repr) => {
+                // repr.delete(this);
                 dataset.set('geoError', true);
-            }
-        }, this);
-        registry._createRepresentation(this, dataset, layerType, visProperties);
+                return repr;
+            });
     },
 
     /**

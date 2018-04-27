@@ -21,15 +21,6 @@ class MapRepresentation {
     setOpacity(opacity) {
         this.geoJsLayer.opacity(opacity);
     }
-
-    /**
-     * Render this instance of a MapRepresentation into the MapContainer
-     *
-     * @param {Object} container - An implementor of the MapContainer interface
-     */
-    render(container) {
-        container.renderMap();
-    }
 }
 
 registry.register('map', MapRepresentation);

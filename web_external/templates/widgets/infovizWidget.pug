@@ -1,0 +1,14 @@
+.m-infoviz-widget
+  .chart-container
+  .xlabel-selector
+    .btn-group
+      .dropup
+        button.btn.btn-default.btn-xs.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') X labels&nbsp;
+          span.caret
+        ul.dropdown-menu
+          each xlabel in xlabels
+            li
+              a
+                label.checkbox-inline
+                  input.xlabel(type='checkbox', value=xlabel, checked=propertiesForX.indexOf(xlabel)!==-1)
+                  = xlabel

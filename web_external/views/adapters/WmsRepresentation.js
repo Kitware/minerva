@@ -23,8 +23,6 @@ class WmsRepresentation extends MapRepresentation {
      *
      * @param {Object} container - An implementor of the MapContainer interface
      * @param {minerva.models.DatasetModel} dataset - The dataset to be rendered
-     * @fires 'm:map_layer_renderable' event upon successful layer render definition
-     * @fires 'm:map_layer_error' event upon an error defining the layer rendering
      */
     init(container, dataset) {
         this.geoJsLayer = container.createLayer('osm', {
@@ -157,7 +155,6 @@ class WmsRepresentation extends MapRepresentation {
                 return this.geoJsLayer.baseUrl + '?' + $.param(params);
             }, this)
         );
-        this.trigger('m:map_layer_renderable', this);
     }
 }
 

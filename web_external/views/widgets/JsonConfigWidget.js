@@ -43,8 +43,10 @@ const JsonConfigWidget = View.extend({
 
     _loadDataset: function () {
         this.dataset
-            .once('m:dataset_geo_dataLoaded', this._loadStyleConfig, this)
-            .loadGeoData();
+            .loadGeoData()
+            .then(() => {
+                this._loadStyleConfig();
+            });
     },
 
     _loadStyleConfig: function () {
