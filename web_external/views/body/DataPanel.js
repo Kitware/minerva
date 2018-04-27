@@ -13,6 +13,7 @@ import Panel from '../body/Panel';
 import CsvViewerWidget from '../widgets/CsvViewerWidget';
 import DatasetModel from '../../models/DatasetModel';
 import DatasetInfoWidget from '../widgets/DatasetInfoWidget';
+import InfovizWidget from '../widgets/InfovizWidget';
 import PostgresWidget from '../widgets/PostgresWidget';
 import template from '../../templates/body/dataPanel.pug';
 import '../../stylesheets/body/dataPanel.styl';
@@ -38,12 +39,14 @@ export default Panel.extend({
         'click .action-bar button.delete': 'deleteSelectedDatasets',
         'click .action-bar button.toggle-shared': 'toggleShared',
         'click .action-bar button.show-bounds': 'showBounds',
+        'click .action-bar button.show-infoviz': 'showInfoviz',
         'click .action-bar button.remove-bounds': 'removeBounds',
         'click .action-bar button.toggle-bounds-label': 'toggleBoundsLabel',
         'click .action-bar button.intersect-filter': 'intersectFilter',
         'click .action-bar button.clear-filters': 'clearFilters',
         'keyup .search-bar input': 'applyNameFilter',
-        'click .action-bar .dropdown li': 'gaiaProcessClicked'
+        'click .action-bar .dropdown li': 'gaiaProcessClicked',
+        'click .persist-dataset': 'persistInMemoryDataset'
     },
 
     toggleCategories: function (event) {
@@ -303,6 +306,8 @@ export default Panel.extend({
         this.visibleMenus = {};
         this.showSharedDatasets = !!this.sessionModel.getValue('showSharedDatasets');
         this.selectedDatasetsId = new Set();
+        this.datasetInfovizMap = new Map();
+        this.datasetInfovizPositionOffset = 0;
         this.filters = {};
         this.nameFilterKeyword = '';
         this.drawing = false;
@@ -375,26 +380,10 @@ export default Panel.extend({
         }, this);
 
         this.listenTo(events, 'm:dataset-drawn', (name, geometry) => {
-            var geometryStr = JSON.stringify(geometry);
-            return restRequest({
-                type: 'POST',
-                url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
-                contentType: 'application/json',
-                data: geometryStr
-            }).then((file) => {
-                return restRequest({
-                    type: 'GET',
-                    url: `item/${file.itemId}`
+            this._createDatasetfromGeometry(name, geometry, 'Boundary')
+                .then((dataset) => {
+                    this.collection.add(dataset);
                 });
-            }).then((item) => {
-                var dataset = new DatasetModel(item);
-                return dataset.promoteToDataset({});
-            }).then((dataset) => {
-                var minervaMeta = dataset.getMinervaMetadata();
-                minervaMeta.category = 'Boundary';
-                this.collection.add(dataset);
-                dataset.saveMinervaMetadata(minervaMeta);
-            });
         }).listenTo(events, 'm:map-drawing-change', (value) => {
             this.drawing = value;
             this.render();
@@ -416,6 +405,38 @@ export default Panel.extend({
         }, this));
 
         Panel.prototype.initialize.apply(this);
+    },
+
+    _createDatasetfromGeometry(name, geometry, category) {
+        var geometryStr = JSON.stringify(geometry);
+        return restRequest({
+            type: 'POST',
+            url: `file?parentType=folder&parentId=${this.collection.folderId}&name=${encodeURIComponent(name)}.geojson&size=${geometryStr.length}`,
+            contentType: 'application/json',
+            data: geometryStr
+        }).then((file) => {
+            return restRequest({
+                type: 'GET',
+                url: `item/${file.itemId}`
+            });
+        }).then((item) => {
+            var dataset = new DatasetModel(item);
+            return dataset.promoteToDataset({});
+        }).then((dataset) => {
+            return restRequest({
+                type: 'PUT',
+                url: `item/${dataset.get('_id')}`,
+                data: { name: name }
+            }).then((item) => {
+                dataset.set('name', name);
+                return dataset;
+            });
+        }).then((dataset) => {
+            var minervaMeta = dataset.getMinervaMetadata();
+            minervaMeta.category = category;
+            dataset.saveMinervaMetadata(minervaMeta);
+            return dataset;
+        });
     },
 
     getDatasetModel: function () {
@@ -514,6 +535,42 @@ export default Panel.extend({
         events.trigger('m:request-remove-bounds');
         this.showingBounds = false;
         this.render();
+    },
+
+    showInfoviz() {
+        var datasetsId = this.collection.models.filter((dataset) => this.selectedDatasetsId.has(dataset.get('_id')));
+        Promise.all(
+            datasetsId.map((datasetId) => {
+                var dataset = this.collection.get(datasetId);
+                return dataset.loadGeoData();
+            })
+        ).then((datasets) => {
+            datasets.forEach((dataset) => {
+                var datasetId = dataset.get('_id');
+                if (this.datasetInfovizMap.has(datasetId)) {
+                    this.datasetInfovizMap.get(datasetId).moveToTop();
+                    return;
+                }
+                var infovizWidget = new InfovizWidget({
+                    session: this.session,
+                    parentView: this,
+                    dataset,
+                    yOffset: this.datasetInfovizPositionOffset,
+                    xOffset: -0.5 * this.datasetInfovizPositionOffset
+                });
+                this.datasetInfovizMap.set(datasetId, infovizWidget);
+                this.datasetInfovizPositionOffset = this.datasetInfovizPositionOffset < 150 ? this.datasetInfovizPositionOffset + 30 : 0;
+                infovizWidget
+                    .once('removed', () => {
+                        this.datasetInfovizMap.delete(datasetId);
+                        if (!this.datasetInfovizMap.size) {
+                            this.datasetInfovizPositionOffset = 0;
+                        }
+                    })
+                    .render()
+                    .moveToTop();
+            });
+        });
     },
 
     toggleBoundsLabel() {
@@ -647,6 +704,21 @@ export default Panel.extend({
                 datasetsId: this.selectedDatasetsId
             }).render();
         }
+    },
+
+    persistInMemoryDataset(event) {
+        var datasetId = $(event.currentTarget).attr('m-dataset-id'),
+            dataset = this.collection.get(datasetId);
+        var minervaMeta = dataset.getMinervaMetadata();
+        var geometry = minervaMeta.geojson.data;
+        this._createDatasetfromGeometry(dataset.get('name'), geometry)
+            .then((newDataset) => {
+                this.collection.add(newDataset);
+                if (dataset.get('displayed')) {
+                    dataset.removeFromSession();
+                }
+                this.collection.remove(dataset);
+            });
     },
 
     render() {

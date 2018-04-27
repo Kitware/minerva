@@ -109,17 +109,18 @@ describe('Session view', function () {
         runs(function () {
             $('.add-dataset-to-session').click();
             $('.add-dataset-to-session').click();
+            $('.add-dataset-to-session').click();
         });
 
         waitsFor(function () {
-            return layerPanelView.$('.layersList ul.datasets').children().length === 2;
+            return layerPanelView.$('.layersList ul.datasets').children().length === 3;
         }, 'layers to be created');
 
         waitsFor(function () {
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
-            return dataset;
-        }, 'dataset to populate');
+            return dataset && dataset.geoJsLayer;
+        }, 'datasets be visualized');
     });
 
     it('Change animation frames', function () {
@@ -195,7 +196,7 @@ describe('Datapanel', function () {
         $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
         expect($('#m-data-panel .dataset input:checked').length).toEqual(1);
         $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
-        expect($('#m-data-panel .dataset input:checked').length).toEqual(4);
+        expect($('#m-data-panel .dataset input:checked').length).toEqual(5);
         // unselect checked categories
         $('.source-title#Tiff').next('.m-sub-category').find('.category-title#Other input').trigger('change');
         $('.source-title#GeoJSON').next('.m-sub-category').find('.category-title#Other input').trigger('change');
@@ -206,6 +207,19 @@ describe('Datapanel', function () {
         expect($('#m-data-panel .dataset input:checked').length).toEqual(1);
         $('.source-title#GeoJSON').next('.m-sub-category').find('.dataset input').first().prop('checked', false).trigger('change');
         expect($('#m-data-panel .dataset input:checked').length).toEqual(0);
+    });
+
+    it('Infoviz widget', function () {
+        $($('.dataset').filter(function () { return $(this).children('.m-name:contains("four_states.geojson")').length; })[0]).find('input').first().prop('checked', true).trigger('change');
+        $('.show-infoviz').click();
+        waitsFor(function () {
+            return $('.ui-dialog.m-infoviz-widget-dialog').length;
+        }, 'infoviz widget to be rendered');
+        runs(function () {
+            expect($('.m-infoviz-widget .chart-container .mark-rect path').length).toBe(4);
+            $('.m-infoviz-widget .xlabel-selector ul.dropdown-menu li:eq(1) input').trigger('click');
+            expect($('.m-infoviz-widget .chart-container .role-axis-title text').first().text()).toEqual('name, population');
+        });
     });
 
     it('Show dataset boundaries', function () {
@@ -223,7 +237,7 @@ describe('Datapanel', function () {
 
         runs(function () {
             expect(mapPanel.boundariesAnnotationLayer).not.toBeFalsy();
-            expect(mapPanel.boundariesAnnotationLayer.annotations().length).toEqual(4);
+            expect(mapPanel.boundariesAnnotationLayer.annotations().length).toEqual(5);
         });
     });
 
@@ -250,21 +264,21 @@ describe('Datapanel', function () {
             $('.bootbox-prompt .modal-footer .btn-primary').trigger('click');
         });
         waitsFor(function () {
-            return $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').length &&
+            return $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary)').length &&
                 !$('.modal-backdrop').length;
         }, 'Boundary dataset to be created');
     });
 
     it('Filter datasets by intersecting', function () {
-        $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary.geojson)').first().parent().find('input').trigger('click');
+        $('.m-datasets[data-category=Boundary] .dataset .m-name:contains(Boundary)').first().parent().find('input').trigger('click');
         $('.icon-button.intersect-filter').trigger('click');
         waitsFor(function () {
             return $('.icon-button.clear-filters').length;
         }, 'dataset to be filtered');
         runs(function () {
-            expect($('.m-datasets .dataset').length).toBe(4);
+            expect($('.m-datasets .dataset').length).toBe(5);
             $('.icon-button.clear-filters').trigger('click');
-            expect($('.m-datasets .dataset').length).not.toBe(3);
+            expect($('.m-datasets .dataset').length).not.toBe(4);
         });
     });
 
@@ -309,6 +323,18 @@ describe('Datapanel', function () {
                 return $('.dataset .m-name:contains("Three states")').length;
             }, 'dataset name change on dataset panel');
         });
+    });
+
+    it('Persist in memory dataset', function () {
+        minerva.events.trigger('m:addExternalGeoJSON', {
+            name: 'In memory dataset',
+            data: { 'type': 'FeatureCollection', 'features': [{ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'Point', 'coordinates': [-91.7578125, 41.244772343082076] } }] }
+        });
+        $($('.dataset').filter(function () { return $(this).children('.m-name:contains("In memory dataset")').length; })[0]).find('.persist-dataset').click();
+        waitsFor(function () {
+            var datasetElement = $($('.dataset').filter(function () { return $(this).children('.m-name:contains("In memory dataset")').length; })[0]);
+            return datasetElement.length === 1 && datasetElement.find('.persist-dataset').length === 0;
+        }, 'In memory dataset be persisted');
     });
 });
 

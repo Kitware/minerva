@@ -15,6 +15,11 @@ users:
                 - name: three_states.geojson
                   path: ../data/states.geojson
                   mimeType: application/json
+              - name: four_states.geojson
+                files:
+                - name: four_states.geojson
+                  path: ../data/four_states.geojson
+                  mimeType: application/json
               - name: raster.tiff
                 files:
                 - name: raster.tiff
