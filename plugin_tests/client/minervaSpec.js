@@ -119,8 +119,8 @@ describe('Session view', function () {
         waitsFor(function () {
             var datasetId = layerPanelView.$('.m-anim-frame').closest('[m-dataset-id]').attr('m-dataset-id');
             var dataset = layerPanelView.collection.get(datasetId);
-            return dataset;
-        }, 'dataset to populate');
+            return dataset && dataset.geoJsLayer;
+        }, 'datasets be visualized');
     });
 
     it('Change animation frames', function () {
