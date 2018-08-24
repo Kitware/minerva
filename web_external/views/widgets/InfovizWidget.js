@@ -184,7 +184,7 @@ const InfovizWidget = View.extend({
         vegaTooltip.vegaLite(view, spec, {
             showAllFields: false,
             fields: [{
-                field: this.propertyForY
+                field: scaledPropertyForY || this.propertyForY
             }, {
                 field: x
             }]
